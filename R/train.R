@@ -57,6 +57,8 @@ NULL
 #' then combined for estimation and weighted respectively, thus giving for example
 #' presence-only records less weight than survey records. **Note** that this parameter
 #' is ignored for engines that support joint likelihood estimation.
+#' @param keep_models [`logical`] if true and `method_integration = "predictor"`,
+#' all models are stored in the `.internal` list of the model object.
 #' @param aggregate_observations [`logical`] on whether observations covering the
 #' same grid cell should be aggregated (Default: \code{TRUE}).
 #' @param clamp [`logical`] whether predictions should be clamped to the range
@@ -149,7 +151,7 @@ methods::setGeneric(
   "train",
   signature = methods::signature("x"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
-           only_linear = TRUE, method_integration = "predictor",
+           only_linear = TRUE, method_integration = "predictor", keep_models = TRUE,
            aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) standardGeneric("train"))
 
 #' @rdname train
@@ -157,7 +159,7 @@ methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
-           only_linear = TRUE, method_integration = "predictor",
+           only_linear = TRUE, method_integration = "predictor", keep_models = TRUE,
            aggregate_observations = TRUE, clamp = TRUE, verbose = getOption('ibis.setupmessages', default = TRUE),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
@@ -173,15 +175,29 @@ methods::setMethod(
       is.logical(clamp),
       is.logical(verbose)
     )
+
     # Now make checks on completeness of the object
-    assertthat::assert_that(!is.Waiver(x$engine),
-                            !is.null(x$engine),
+    assertthat::assert_that(!is.Waiver(x$engine), !is.null(x$engine),
                             msg = 'No engine set for training the distribution model.')
-    assertthat::assert_that( x$show_biodiversity_length() > 0,
-                             msg = 'No biodiversity data specified.')
-    assertthat::assert_that('observed' %notin% x$get_predictor_names(), msg = 'observed is not an allowed predictor name.' )
+    assertthat::assert_that(x$show_biodiversity_length() > 0,
+                            msg = 'No biodiversity data specified.')
+    assertthat::assert_that('observed' %notin% x$get_predictor_names(),
+                            msg = 'observed is not an allowed predictor name.' )
+
+    # check names of biodiv data
+    if (x$show_biodiversity_length() > 1) {
+      if (getOption('ibis.setupmessages', default = TRUE) && length(unique(unlist(x$biodiversity$get_names()))) == 1) {
+        myLog('[Setup]','yellow','It is advised to supply unique biodiversity dataset names.')
+      }
+      if (getOption('ibis.setupmessages', default = TRUE) && x$show_biodiversity_length() > 2) {
+        myLog('[Setup]','yellow','Using more than two biodiversity datasets is experimental.')
+      }
+
+    }
+
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
+
     # --- #
     # filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
@@ -209,8 +225,9 @@ methods::setMethod(
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
 
-    # --- #
-    #### Defining model objects ----
+    #### Defining model objects ####
+    # ----------------------------------------------------------- #
+
     # Set model object for fitting
     model <- list()
 
@@ -822,15 +839,25 @@ methods::setMethod(
                             all(c("predictors","background","biodiversity") %in% names(model) ),
                             length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$predictors)
     )
+    #### Engine specific code starts below ####
     # --------------------------------------------------------------------- #
-    #### Engine specific code starts below                               ####
-    # --------------------------------------------------------------------- #
+
     # Number of dataset types, families and ids
     types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
     fams <- as.character( sapply( model$biodiversity, function(z) z$family ) )
     ids <- names(model$biodiversity)
-    # Engine specific preparations
+
+    # create list to store old models
+    if (length(ids) > 1 && method_integration == "predictor" && keep_models) {
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Storing all models in object')
+      .internals <- vector(mode = "list", length = length(ids) -1)
+      names(.internals) <- ids[-length(ids)]
+    } else {
+      .internals <- new_waiver()
+    }
+
     #### INLA Engine ####
+    # ----------------------------------------------------------- #
     if( x$engine$get_class() == 'INLA-Engine' ){
 
       # Create the mesh if not already present
@@ -850,8 +877,7 @@ methods::setMethod(
 
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_inla(model = model,
-                                                                id = id,
-                                                                x = x,
+                                                                id = id, x = x,
                                                                 settings = settings)
 
         # For each type include expected data
@@ -859,14 +885,26 @@ methods::setMethod(
         if(model$biodiversity[[id]]$family == 'poisson') model$biodiversity[[id]][['expect']] <- rep(0, nrow(model$biodiversity[[id]]$predictors) )
         if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
+
       # Run the engine setup script
       model <- x$engine$setup(model, settings)
+
+      # remove not used predictors
+      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+      pred_prs <- model$predictors_object$get_names()
+      model$predictors_names <- pred_tmp
+      model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
+      model$predictors <- model$predictors[, c("x", "y", pred_tmp)]
+      model$predictors_object <- model$predictors_object$clone(deep = TRUE)
+      if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+        model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+      }
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
 
-      # ----------------------------------------------------------- #
-      #### INLABRU Engine ####
+    #### INLABRU Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == 'INLABRU-Engine' ){
 
       # Create the mesh if not already present
@@ -886,19 +924,29 @@ methods::setMethod(
 
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_inla(model = model,
-                                                                id = id,
-                                                                x = x,
+                                                                id = id, x = x,
                                                                 settings = settings)
       }
 
       # Run the engine setup script
       x$engine$setup(model, settings)
 
+      # remove not used predictors
+      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+      pred_prs <- model$predictors_object$get_names()
+      model$predictors_names <- pred_tmp
+      model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
+      model$predictors <- model$predictors[, c("x", "y", pred_tmp)]
+      model$predictors_object <- model$predictors_object$clone(deep = TRUE)
+      if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+        model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+      }
+
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
 
-      # ----------------------------------------------------------- #
-      #### GDB Engine ####
+    #### GDB Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "GDB-Engine" ){
 
       # For each formula, process in sequence
@@ -916,6 +964,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -927,51 +986,49 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        rm(model2)
+        rm(model2, settings2)
+
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
-            new <- out$get_data("prediction")
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
+            new <- out$get_data("prediction")[["mean"]]
             names(new) <- pred_name
 
-            # Add the object to the overall prediction object
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
 
+            # store result in internals
+            if (!is.Waiver(.internals) && keep_models) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1004,8 +1061,9 @@ methods::setMethod(
           }
         } # End of multiple ids
       }
-      # ----------------------------------------------------------- #
-      #### XGBoost Engine ####
+
+    #### XGBoost Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "XGBOOST-Engine" ){
       # Create XGBboost regression and classification
 
@@ -1026,6 +1084,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1037,51 +1106,49 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
-        rm(model2)
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
-          # Adding the prediction to the model object
           if(method_integration == "predictor"){
-            # Add to predictors frame
-            new <- out$get_data("prediction")
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
+            new <- out$get_data("prediction")[["mean"]]
             names(new) <- pred_name
-            # Add the object to the overall prediction object
-            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
-            model$predictors_names <- c(model$predictors_names, names(new))
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
             model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
+            model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
+
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
 
+            # store result in internals
+            if (!is.Waiver(.internals) && keep_models) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1115,8 +1182,8 @@ methods::setMethod(
         }
       }
 
-      # ----------------------------------------------------------- #
-      #### BART Engine ####
+    #### BART Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "BART-Engine" ){
 
       # TODO: Combine biodiversity datasets and add factor variable
@@ -1136,6 +1203,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1147,52 +1225,48 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
         out <- x$engine$train(model2, settings2)
-        rm(model2)
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
-            new <- out$get_data("prediction")[[1]] # Only take the mean!
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
+            new <- out$get_data("prediction")[["mean"]]
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE) )
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
-
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
 
+            # store result in internals
+            if (!is.Waiver(.internals) && keep_models) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")[["mean"]]
@@ -1229,9 +1303,11 @@ methods::setMethod(
         } # End of multiple likelihood function
 
       } # End of id loop
+
+    #### STAN Engine ####
+    # ----------------------------------------------------------- #
     } else if( x$engine$get_class() == "STAN-Engine" ){
-      # ----------------------------------------------------------- #
-      #### STAN Engine ####
+
       # Process per supplied dataset
       for(id in ids) {
         # TODO
@@ -1250,10 +1326,10 @@ methods::setMethod(
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
 
-
+    #### BREG Engine ####
+    # ----------------------------------------------------------- #
     } else if ( x$engine$get_class() == "BREG-Engine" ){
-      # ----------------------------------------------------------- #
-      #### BREG Engine ####
+
       assertthat::assert_that(
         !(method_integration == "offset" && any(types == "poipa")),
         msg = "Due to engine limitations BREG models do not support offsets for presence-absence models!"
@@ -1270,6 +1346,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1281,50 +1368,49 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
             new <- out$get_data("prediction")[["mean"]]
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords = guess_sf(model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              # Rename to current id dataset
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
 
+            # store result in internals
+            if (!is.Waiver(.internals) && keep_models) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1358,9 +1444,11 @@ methods::setMethod(
 
         } # End of multiple ides
       }
+
+    #### GLMNET Engine ####
+    # ----------------------------------------------------------- #
     } else if (x$engine$get_class() == "GLMNET-Engine" ){
-      # ----------------------------------------------------------- #
-      #### GLMNET Engine ####
+
       # For each formula, process in sequence
       for(id in ids){
 
@@ -1373,6 +1461,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1384,49 +1483,49 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
             new <- out$get_data("prediction")[["mean"]]
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
 
+            # store result in internals
+            if (!is.Waiver(.internals) && keep_models) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1459,10 +1558,13 @@ methods::setMethod(
           }
         } # End of multiple ides
       } # End of GLMNET engine
+
+    #### GLM Engine ####
+    # ----------------------------------------------------------- #
     } else if (x$engine$get_class() == "GLM-Engine" ){
-      # ----------------------------------------------------------- #
+
       if(method_integration == "prior") warning("Priors not supported for GLM!")
-      #### GLM Engine ####
+
       # For each formula, process in sequence
       for(id in ids){
 
@@ -1476,6 +1578,17 @@ methods::setMethod(
         # Run the engine setup script
         model2 <- x$engine$setup(model2, settings)
 
+        # include only predictors actually used
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)]){
@@ -1484,49 +1597,49 @@ methods::setMethod(
         } else {
           settings2$set('inference_only', inference_only)
         }
+
+        # train model and save outputs
         out <- x$engine$train(model2, settings2)
+        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
           if(method_integration == "predictor"){
-            # Add to predictors frame
+
+            # get next ID and construct name
+            next_id <- ids[which(ids == id) + 1]
+            pred_name <- paste0(model$biodiversity[[id]]$type, "_",
+                                make.names(model$biodiversity[[id]]$name),"_mean")
+
+            # extract projection
             new <- out$get_data("prediction")[["mean"]]
-            pred_name <- paste0(model$biodiversity[[id]]$type, "_", make.names(model$biodiversity[[id]]$name),"_mean")
             names(new) <- pred_name
-            # Add the object to the overall prediction object
+
+            # add to overall model object
+            model$predictors_names <- c(model$predictors_names, pred_name)
+            model$predictors_types <- rbind(model$predictors_types,
+                                            data.frame(predictors = pred_name, type = c('numeric')))
+            model$predictors <- cbind(model$predictors, terra::as.data.frame(new, na.rm = FALSE))
             model$predictors_object$data <- c(model$predictors_object$get_data(), new)
 
-            # Now for each biodiversity dataset and the overall predictors
-            # extract and add as variable
-            for(k in names(model$biodiversity)){
-              env <- get_rastervalue(coords =  guess_sf( model$biodiversity[[k]]$observations[,c('x','y')]),
-                                     env = new)
-              env <- env[names(new)]
-              # Add
-              model$biodiversity[[k]]$predictors <- cbind(model$biodiversity[[k]]$predictors, env)
-              model$biodiversity[[k]]$predictors_names <- c(model$biodiversity[[k]]$predictors_names,
-                                                            names(env) )
-              model$biodiversity[[k]]$predictors_types <- rbind(
-                model$biodiversity[[k]]$predictors_types,
-                data.frame(predictors = names(env), type = c('numeric'))
-              )
-            }
-            # Add to overall predictors
-            model$predictors <- cbind(model$predictors, as.data.frame(new, na.rm = FALSE))
-            model$predictors_names <- c(model$predictors_names, names(new))
-            model$predictors_types <- rbind(model$predictors_types,
-                                            data.frame(predictors = names(new), type = c('numeric')))
+            # get values at occurrence for next biodiv dataset
+            env <- get_rastervalue(coords = guess_sf(model$biodiversity[[next_id]]$observations[, c('x','y')]),
+                                   env = new)[pred_name]
+            model$biodiversity[[next_id]]$predictors_names <- c(model$biodiversity[[next_id]]$predictors_names, names(env) )
+            model$biodiversity[[next_id]]$predictors_types <- rbind(model$biodiversity[[next_id]]$predictors_types, data.frame(predictors = names(env), type = c('numeric')))
+            model$biodiversity[[next_id]]$predictors <- cbind(model$biodiversity[[next_id]]$predictors, env)
 
-            # Finally if custom formula found, add the variable there.
-            for(other_id in names(model$biodiversity)){
-              if(other_id == id) next() # Skip if current id
-              ff <- model$biodiversity[[other_id]]$equation
-              if(is.formula(ff)){
-                ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
-                model$biodiversity[[other_id]]$equation <- ff
-              } # Else skip
+            # update formula
+            ff <- model$biodiversity[[next_id]]$equation
+            if(is.formula(ff)){
+              ff <- stats::update.formula(ff, paste0("~ . + ", pred_name))
+              model$biodiversity[[next_id]]$equation <- ff
             }
 
+            # store result in internals
+            if (!is.Waiver(.internals) && keep_models) {
+              .internals[[id]] <- list(model = out, name = pred_name)
+            }
           } else if(method_integration == "offset"){
             # Adding the prediction as offset
             new <- out$get_data("prediction")
@@ -1555,32 +1668,37 @@ methods::setMethod(
           }
         } # End of multiple ides
       }
-    } # End of GLM engine
-      # ----------------------------------------------------------- #
-      #### SCAMPR Engine ####
-      else if(x$engine$get_class() == "SCAMPR-Engine"){
-        if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
-        if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
-        if(length(model$biodiversity)==2){
-          if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
-            stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
-          }
+
+    #### SCAMPR Engine ####
+    # ----------------------------------------------------------- #
+    } else if(x$engine$get_class() == "SCAMPR-Engine"){
+
+      if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
+      if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
+      if(length(model$biodiversity)==2){
+        if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
+          stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
         }
+      }
 
-        # Process per supplied dataset
-        for(id in ids) {
-          # Update model formula in the model container
-          model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
-        }
+      # Process per supplied dataset
+      for(id in ids) {
+        # Update model formula in the model container
+        model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
+      }
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model, settings)
+      # Run the engine setup script
+      model2 <- x$engine$setup(model, settings)
 
-        # Now train the model and create a predicted distribution model
-        out <- x$engine$train(model2, settings)
+      # Now train the model and create a predicted distribution model
+      out <- x$engine$train(model2, settings)
 
-      } # End of SCAMPR engine
-    else { stop('Specified Engine not implemented yet.') }
+    # wrong engine selected
+    } else { stop('Specified Engine not implemented yet.')}
+
+
+    #### Wrap up ####
+    # ----------------------------------------------------------- #
 
     if(is.null(out)) return(NULL)
 
@@ -1597,6 +1715,9 @@ methods::setMethod(
     } else {
       out$settings$set("has_limits", FALSE)
     }
+
+    # adding integrated model steps
+    if (!is.Waiver(.internals) && keep_models) out$.internals <- .internals
 
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()

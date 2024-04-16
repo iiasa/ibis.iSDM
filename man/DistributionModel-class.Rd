@@ -24,6 +24,8 @@ Could be further pretified and commands outsourced.
 \item{\code{settings}}{A \code{\linkS4class{Settings}} object with information on inference.}
 
 \item{\code{fits}}{A \code{\link{list}} containing the prediction and fitted model.}
+
+\item{\code{.internals}}{A \code{\link{list}} containing previous fitted models.}
 }
 \if{html}{\out{</div>}}
 }

@@ -3,6 +3,7 @@
 #### New features
 * Add functions that creates HTML file base on `DistributionModel`.
 * Added new engine `engine_scampr()` for model-based integration.
+* Allow projection of models using `method_integration = "predictor"`
 
 #### Minor improvements and bug fixes
 * Small fixes to ensure `boruta` filtering works (again)?

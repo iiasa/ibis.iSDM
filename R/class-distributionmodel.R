@@ -21,11 +21,13 @@ DistributionModel <- R6::R6Class(
     #' @field model A [`list`] containing all input datasets and parameters to the model.
     #' @field settings A [`Settings-class`] object with information on inference.
     #' @field fits A [`list`] containing the prediction and fitted model.
+    #' @field .internals A [`list`] containing previous fitted models.
     id = character(),
     name = character(),
     model = list(),
     settings = new_waiver(),
     fits = list(),
+    .internals = new_waiver(),
 
     #' @description
     #' Initializes the object and creates an empty list

@@ -759,12 +759,28 @@ methods::setMethod(
     model <- obj$model
 
     # Subset to target predictors only
-    if(length(model$predictors_names) != length(names(env))){
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Found less variables in fitted model than supplied. Subsetting...')
-      env <- env |> dplyr::select(dplyr::any_of(model$predictors_names))
-      assertthat::assert_that(length(env)>0,
-                              msg = "No matching variables found!")
+    # no internals present, all predictors in model object
+    if (is.Waiver(obj$.internals)) {
+      if(length(names(env)) > length(model$predictors_names)) {
+        if(getOption('ibis.setupmessages', default = TRUE)){
+          myLog('[Scenario]','yellow','Found less variables in fitted model than in scenarios object. Subsetting...')
+        }
+        env <- dplyr::select(env, dplyr::any_of(model$predictors_names))
+      }
+    # some predictors also in .interals object
+    } else {
+      pred_tmp <- c(model$predictors_names, unlist(sapply(obj$.internals, function(i) i$model$model$predictors_names),
+                                                   use.names = FALSE))
+      if(length(names(env)) > length(pred_tmp) - 1) {
+        if(getOption('ibis.setupmessages', default = TRUE)){
+          myLog('[Scenario]','yellow','Found less variables in fitted model than in scenarios object. Subsetting...')
+        }
+        env <- dplyr::select(env, dplyr::any_of(pred_tmp))
+      }
     }
+
+    # checl env object
+    assertthat::assert_that(length(env)>0, msg = "No matching variables found!")
 
     # Get state if not set
     if(transform != 'none' && is.null(state)){

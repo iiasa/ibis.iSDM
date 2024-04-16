@@ -128,6 +128,7 @@ methods::setMethod(
     # Get predictors
     new_preds <- mod$get_predictors()
     if(is.Waiver(new_preds)) stop('No scenario predictors found.')
+
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
@@ -172,8 +173,20 @@ methods::setMethod(
     # Check that predictor names are all present.
     mod_pred_names <- fit$model$predictors_names
     pred_names <- mod$get_predictor_names()
-    assertthat::assert_that( all(mod_pred_names %in% pred_names),
-                             msg = paste0('Model predictors are missing from the scenario predictor!') )
+    # get predictor names of integrated model
+    if (!is.Waiver(fit$.internals)) {
+      int_pred_names <- lapply(fit$.internals, function(i) i$model$model$predictors_names)
+    } else (int_pred_names <- NULL)
+
+    if (is.Waiver(fit$.internals)) {
+      assertthat::assert_that(all(mod_pred_names %in% pred_names),
+                              msg = paste0('Model predictors are missing from the scenario predictor!'))
+    } else {
+      # check if missing preds are in .internals list
+      assertthat::assert_that(sum(!mod_pred_names %in% pred_names) == 1 ||
+                                any(!unlist(int_pred_names, use.names = FALSE) %in% pred_names),
+                              msg = "Model predictors are missing from the scenario predictor!")
+    }
 
     # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
@@ -235,8 +248,9 @@ methods::setMethod(
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
 
-    df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
-    df$time <- to_POSIXct( df$time )
+    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "time", unlist(int_pred_names, use.names = FALSE),
+                                            mod_pred_names)))
+    df$time <- to_POSIXct(df$time)
     # Convert all units classes to numeric or character to avoid problems
     df <- units::drop_units(df)
 
@@ -252,13 +266,17 @@ methods::setMethod(
       pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
                                        total = length(unique(df$time)))
     }
+
     # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
-    for(step in times){ # step = times[1]
+
+    for(step in times){
+
       # Get data
       nd <- subset(df, time == step)
-      assertthat::assert_that(nrow(nd)>0,
-                              !all(is.na(nd[, mod_pred_names])) )
+
+      # check that timestep has data
+      assertthat::assert_that(nrow(nd)>0, !all(is.na(dplyr::select(nd, dplyr::any_of(mod_pred_names)))))
 
       # Apply adaptability constrain
       if("adaptability" %in% names(scenario_constraints)){
@@ -271,8 +289,29 @@ methods::setMethod(
         }
       }
 
+      # loop through integrated models
+      if (!is.Waiver(fit$.internals)) {
+
+        int_proj <- vector(mode = "list", length = length(fit$.internals))
+
+        # loop through all internals
+        for (i in 1:length(fit$.internals)) {
+
+          pred_tmp <- c("x", "y", fit$.internals[[i]]$model$model$predictors_names)
+          proj_tmp <- fit$.internals[[i]]$model$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)),
+                                                        layer = layer)
+          names(proj_tmp) <- fit$.internals[[i]]$name
+
+          # add to next nd
+          nd <- dplyr::left_join(x = nd, y = terra::as.data.frame(proj_tmp, xy = TRUE),
+                                 by = c("x", "y"))
+
+        }
+      }
+
       # Project suitability
-      out <- fit$project(newdata = nd, layer = layer)
+      pred_tmp <- c("x", "y", fit$model$predictors_names)
+      out <- fit$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)), layer = layer)
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
       if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
 
