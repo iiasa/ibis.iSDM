@@ -57,6 +57,8 @@ NULL
 #' then combined for estimation and weighted respectively, thus giving for example
 #' presence-only records less weight than survey records. **Note** that this parameter
 #' is ignored for engines that support joint likelihood estimation.
+#' @param keep_models [`logical`] if true and `method_integration = "predictor"`,
+#' all models are stored in the `.internal` list of the model object.
 #' @param aggregate_observations [`logical`] on whether observations covering the
 #' same grid cell should be aggregated (Default: \code{TRUE}).
 #' @param clamp [`logical`] whether predictions should be clamped to the range
@@ -149,7 +151,7 @@ methods::setGeneric(
   "train",
   signature = methods::signature("x"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
-           only_linear = TRUE, method_integration = "predictor",
+           only_linear = TRUE, method_integration = "predictor", keep_models = TRUE,
            aggregate_observations = TRUE, clamp = FALSE, verbose = getOption('ibis.setupmessages', default = TRUE),...) standardGeneric("train"))
 
 #' @rdname train
@@ -157,7 +159,7 @@ methods::setMethod(
   "train",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, runname, filter_predictors = "none", optim_hyperparam = FALSE, inference_only = FALSE,
-           only_linear = TRUE, method_integration = "predictor",
+           only_linear = TRUE, method_integration = "predictor", keep_models = TRUE,
            aggregate_observations = TRUE, clamp = TRUE, verbose = getOption('ibis.setupmessages', default = TRUE),...) {
     if(missing(runname)) runname <- "Unnamed run"
 
@@ -846,7 +848,8 @@ methods::setMethod(
     ids <- names(model$biodiversity)
 
     # create list to store old models
-    if (length(ids) > 1 && method_integration == "predictor") {
+    if (length(ids) > 1 && method_integration == "predictor" && keep_models) {
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Storing all models in object')
       .internals <- vector(mode = "list", length = length(ids) -1)
       names(.internals) <- ids[-length(ids)]
     } else {
@@ -1023,7 +1026,7 @@ methods::setMethod(
             }
 
             # store result in internals
-            if (!is.Waiver(.internals)) {
+            if (!is.Waiver(.internals) && keep_models) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1143,7 +1146,7 @@ methods::setMethod(
             }
 
             # store result in internals
-            if (!is.Waiver(.internals)) {
+            if (!is.Waiver(.internals) && keep_models) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1261,7 +1264,7 @@ methods::setMethod(
             }
 
             # store result in internals
-            if (!is.Waiver(.internals)) {
+            if (!is.Waiver(.internals) && keep_models) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1405,7 +1408,7 @@ methods::setMethod(
             }
 
             # store result in internals
-            if (!is.Waiver(.internals)) {
+            if (!is.Waiver(.internals) && keep_models) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1520,7 +1523,7 @@ methods::setMethod(
             }
 
             # store result in internals
-            if (!is.Waiver(.internals)) {
+            if (!is.Waiver(.internals) && keep_models) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1634,7 +1637,7 @@ methods::setMethod(
             }
 
             # store result in internals
-            if (!is.Waiver(.internals)) {
+            if (!is.Waiver(.internals) && keep_models) {
               .internals[[id]] <- list(model = out, name = pred_name)
             }
           } else if(method_integration == "offset"){
@@ -1714,7 +1717,7 @@ methods::setMethod(
     }
 
     # adding integrated model steps
-    if (!is.Waiver(.internals)) out$.internals <- .internals
+    if (!is.Waiver(.internals) && keep_models) out$.internals <- .internals
 
     # Stop logging if specified
     if(!is.Waiver(x$log)) x$log$close()
