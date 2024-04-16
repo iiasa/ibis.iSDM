@@ -681,7 +681,8 @@ methods::setMethod(
       if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
         vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
-        spec_priors$rm( spec_priors$exists(vv) )
+        rm_id <- spec_priors$exists(vv)
+        for (i in 1:length(rm_id)) spec_priors$rm(rm_id[[i]])
       }
     } else { spec_priors <- new_waiver() }
     model[['priors']] <- spec_priors
@@ -975,6 +976,17 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
+        # include only present priors
+        if(!is.Waiver(model$priors)) {
+          model2$priors <- model$priors$clone(deep = TRUE)
+          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          if (length(ids_rm) == model2$priors$length()) {
+            model2$priors <- new_waiver()
+          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          }
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1095,6 +1107,17 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
+        # include only present priors
+        if(!is.Waiver(model$priors)) {
+          model2$priors <- model$priors$clone(deep = TRUE)
+          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          if (length(ids_rm) == model2$priors$length()) {
+            model2$priors <- new_waiver()
+          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          }
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1212,6 +1235,17 @@ methods::setMethod(
         model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
+        # include only present priors
+        if(!is.Waiver(model$priors)) {
+          model2$priors <- model$priors$clone(deep = TRUE)
+          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          if (length(ids_rm) == model2$priors$length()) {
+            model2$priors <- new_waiver()
+          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          }
         }
 
         # Now train the model and create a predicted distribution model
@@ -1357,6 +1391,17 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
+        # include only present priors
+        if(!is.Waiver(model$priors)) {
+          model2$priors <- model$priors$clone(deep = TRUE)
+          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          if (length(ids_rm) == model2$priors$length()) {
+            model2$priors <- new_waiver()
+          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          }
+        }
+
         # Now train the model and create a predicted distribution model
         settings2 <- settings
         if(id != ids[length(ids)] && method_integration == "prior") {
@@ -1470,6 +1515,17 @@ methods::setMethod(
         model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
+        # include only present priors
+        if(!is.Waiver(model$priors)) {
+          model2$priors <- model$priors$clone(deep = TRUE)
+          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          if (length(ids_rm) == model2$priors$length()) {
+            model2$priors <- new_waiver()
+          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          }
         }
 
         # Now train the model and create a predicted distribution model
@@ -1587,6 +1643,17 @@ methods::setMethod(
         model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+
+        # include only present priors
+        if(!is.Waiver(model$priors)) {
+          model2$priors <- model$priors$clone(deep = TRUE)
+          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          if (length(ids_rm) == model2$priors$length()) {
+            model2$priors <- new_waiver()
+          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          }
         }
 
         # Now train the model and create a predicted distribution model
