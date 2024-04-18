@@ -243,13 +243,22 @@ methods::setMethod(
 
     # Now convert to data.frame and subset
     df <- new_preds$get_data(df = TRUE)
+
+    # cell ids are need to match integrated prediction to future pred
+    if (!is.Waiver(fit$.internals)) {
+      id_tmp <- terra::extract(x = fit$get_data(), y = df[,1:2], cells = TRUE, layer = 1)
+      df$cell <- id_tmp$cell # this should work because order stays the same
+    }
+
     names(df)[1:3] <- tolower(names(df)[1:3]) # Assuming the first three attributes are x,y,t
     assertthat::assert_that(nrow(df)>0,
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
 
-    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "time", unlist(int_pred_names, use.names = FALSE),
+    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "cell", "time",
+                                            unlist(int_pred_names, use.names = FALSE),
                                             mod_pred_names)))
+
     df$time <- to_POSIXct(df$time)
     # Convert all units classes to numeric or character to avoid problems
     df <- units::drop_units(df)
@@ -292,19 +301,20 @@ methods::setMethod(
       # loop through integrated models
       if (!is.Waiver(fit$.internals)) {
 
-        int_proj <- vector(mode = "list", length = length(fit$.internals))
-
         # loop through all internals
         for (i in 1:length(fit$.internals)) {
 
+          # get current predictors and project
           pred_tmp <- c("x", "y", fit$.internals[[i]]$model$model$predictors_names)
           proj_tmp <- fit$.internals[[i]]$model$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)),
                                                         layer = layer)
+
+          # make sure names match
           names(proj_tmp) <- fit$.internals[[i]]$name
 
-          # add to next nd
-          nd <- dplyr::left_join(x = nd, y = terra::as.data.frame(proj_tmp, xy = TRUE),
-                                 by = c("x", "y"))
+          # add to next nd using cell id (previously issues with xy coords due to numerical diff)
+          nd <- dplyr::left_join(x = nd, y = terra::as.data.frame(proj_tmp, cells = TRUE),
+                                 by = "cell")
 
         }
       }
