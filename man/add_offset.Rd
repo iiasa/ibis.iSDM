@@ -45,7 +45,7 @@ such distance transformations.
 }
 \note{
 Since offsets only make sense for linear regressions (and not for
-instance regression tree based methods such as \link{engine_bart}), they do not
+instance regression tree based methods such as \code{\link[=engine_bart]{engine_bart()}}), they do not
 work for all engines. Offsets specified for non-supported engines are ignored
 during the estimation
 }

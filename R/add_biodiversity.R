@@ -13,7 +13,7 @@ NULL
 #' @param formula A [`character`] or [`formula`] object to be passed. Default is
 #' to use all covariates (if specified).
 #' @param family A [`character`] stating the family to be used (Default: \code{'Poisson'}).
-#' @param link A [`character`] to overwrite the default link function (Default: code{NULL}).
+#' @param link A [`character`] to overwrite the default link function (Default: \code{NULL}).
 #' @param weight A [`numeric`] value acting as a multiplier with regards to any
 #' weights used in the modelling. Larger weights indicate higher weighting
 #' relative to any other datasets. By default set to \code{1} if only one
@@ -232,6 +232,11 @@ methods::setMethod(
                             is.numeric(weight) && all(weight > 0),
                             is.logical(docheck)
     )
+    # Raise a warning if there NA data
+    assertthat::assert_that(!anyNA(poipa[[field_occurrence]]) || !is.null(poipa[[field_occurrence]]),
+                            msg = "NA observations or NULL occurrence field?")
+
+    # Check for that presence and absence are there.
     assertthat::assert_that(length(unique(poipa[[field_occurrence]])) == 2,
                             msg = "Presence-Absence requires at exactly 2 unique values.")
 

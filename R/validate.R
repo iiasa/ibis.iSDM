@@ -20,30 +20,33 @@
 #' metrics depending on the output type.
 #'
 #' The output metrics for each type are defined as follows:
+#' (where TP stands for true positive, TN for true negative,
+#'  FP the false positive and FN the false negative)
 #' **Continuous:**
 #' * \code{'n'} = Number of observations.
 #' * \code{'rmse'} = Root Mean Square Error, \deqn{ \sqrt {\frac{1}{N} \sum_{i=1}^{N} (\hat{y_{i}} - y_{i})^2} }
 #' * \code{'mae'} = Mean Absolute Error, \deqn{ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} }
 #' * \code{'logloss'} = Log loss, TBD
 #' * \code{'normgini'} = Normalized Gini index, TBD
-#' * \code{'cont.boyce'} = Continuous Boyce index, TBD
+#' * \code{'cont.boyce'} = Continuous Boyce index, Ratio of predicted against expected frequency calculated over
+#' a moving window: \deqn{\frac{P_{i}{E_{i}} }}, where \deqn{ P_{i} = \frac{p_{i}}{\sum{j=1}^{b} p_{j} }} and \deqn{ E_{i} = \frac{a_{i}}{\sum{j=1}^{b} a_{j} }}
 #'
 #' **Discrete:**
 #' * \code{'n'} = Number of observations.
-#' * \code{'auc'} = Area under the curve, TBD
-#' * \code{'overall.accuracy'} = Overall Accuracy, TBD
-#' * \code{'true.presence.ratio'} = True presence ratio or Jaccard index, TBD
-#' * \code{'precision'} = Precision, TBD
-#' * \code{'sensitivity'} = Sensitivity, TBD
-#' * \code{'specificity'} = Specifivity, TBD
-#' * \code{'tss'} = True Skill Statistics, TBD
+#' * \code{'auc'} = Area under the curve, e.g. the integral of a function relating the True positive rate
+#' against the false positive rate.
+#' * \code{'overall.accuracy'} = Overall Accuracy, Average of all positives,\deqn{ \frac{TP + TN}{n} }
+#' * \code{'true.presence.ratio'} = True presence ratio or Jaccard index, \deqn{ \frac{TP}{TP+TN+FP+FN} }
+#' * \code{'precision'} = Precision, positive detection rate \deqn{ \frac{TP}{TP+FP} }
+#' * \code{'sensitivity'} = Sensitivity, Ratio of True positives against all positives, \deqn{ \frac{TP}{TP+FP} }
+#' * \code{'specificity'} = Specifivity, Ratio of True negatives against all negatives, \deqn{ \frac{TN}{TN+FN} }
+#' * \code{'tss'} = True Skill Statistics, \code{sensitivity + specificity – 1}
 #' * \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
 #' * \code{'logloss'} = Log loss, TBD
 #' * \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
 #' * \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
 #' * \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} },
-#' where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed. where TP
-#' is true positive, TN a true negative, FP the false positive and FN the false negative.
+#' where \deqn{y_{i}} is predicted presence or absence and \deqn{x_{i}} an observed.
 #'
 #' @note If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
 #'
@@ -52,6 +55,8 @@
 #' @keywords train
 #'
 #' @references
+#' * Allouche O., Tsoar A., Kadmon R., (2006). Assessing the accuracy of species distribution models:
+#' prevalence, kappa and the true skill statistic (TSS). Journal of Applied Ecology, 43(6), 1223–1232.
 #' * Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction
 #' of species occurrence with presence-only data. J. Biogeogr. 40, 778–789.
 #' https://doi.org/10.1111/jbi.12058
@@ -312,14 +317,16 @@ methods::setMethod(
                             utils::hasName(df2, point_column)
     )
     #### Calculating Boyce index as in Hirzel et al. 2006
-    # fit: A vector or SpatRaster containing the predicted suitability values
-    # obs: A vector containing the predicted suitability values or xy-coordinates
-    # (if fit is a SpatRaster) of the validation points (presence records)
-    # nclass : number of classes or vector with classes threshold. If nclass=0,
-    # Boyce index is calculated with a moving window (see next parameters)
-    # windows.w : width of the moving window (by default 1/10 of the suitability range)
-    # res : resolution of the moving window (by default 101 focals)
-    # PEplot : if True, plot the predicted to expected ratio along the suitability class
+    #' @description
+    #' Small function to calculate the Boyce Index as used in ecospat package.
+    #' @param fit A vector or SpatRaster containing the predicted suitability values
+    #' @param obs A vector containing the predicted suitability values or xy-coordinates
+    #' (if fit is a SpatRaster) of the validation points (presence records)
+    #' @param nclass number of classes or vector with classes threshold. If \code{nclass=0},
+    #' Boyce index is calculated with a moving window (see next parameters).
+    #' @param window.w width of the moving window (by default 1/10 of the suitability range).
+    #' @param res resolution of the moving window (by default 101 focals).
+    #' @param PEplot if \code{"True"}, plot the predicted to expected ratio along the suitability class
     ecospat.boyce <-
       function(fit,
                obs,

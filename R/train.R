@@ -199,7 +199,7 @@ methods::setMethod(
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
 
     # --- #
-    # filter_predictors = "none"; optim_hyperparam = FALSE; runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
+    # filter_predictors = "none"; optim_hyperparam = FALSE; keep_models=TRUE;runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE
     # Match variable selection
     filter_predictors <- match.arg(filter_predictors, c("none", "pearson", "spearman", "kendall", "abess", "RF", "randomForest", "boruta"), several.ok = FALSE)
     method_integration <- match.arg(method_integration, c("predictor", "offset", "interaction", "prior", "weight"), several.ok = FALSE)
@@ -895,7 +895,7 @@ methods::setMethod(
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
       model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
-      model$predictors <- model$predictors[, c("x", "y", pred_tmp)]
+      model$predictors <- model$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
       model$predictors_object <- model$predictors_object$clone(deep = TRUE)
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
@@ -937,7 +937,7 @@ methods::setMethod(
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
       model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
-      model$predictors <- model$predictors[, c("x", "y", pred_tmp)]
+      model$predictors <- model$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
       model$predictors_object <- model$predictors_object$clone(deep = TRUE)
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
@@ -971,7 +971,7 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1102,7 +1102,7 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1232,7 +1232,7 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1386,7 +1386,7 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1512,7 +1512,7 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1640,7 +1640,7 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors[, c("x", "y", pred_tmp)]
+        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }

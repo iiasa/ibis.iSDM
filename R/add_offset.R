@@ -24,7 +24,7 @@
 #' such distance transformations.
 #'
 #' @note Since offsets only make sense for linear regressions (and not for
-#' instance regression tree based methods such as [engine_bart]), they do not
+#' instance regression tree based methods such as [`engine_bart()`]), they do not
 #' work for all engines. Offsets specified for non-supported engines are ignored
 #' during the estimation
 #'
@@ -365,7 +365,7 @@ methods::setMethod(
 #' after the maximum distance (Default: \code{FALSE}).
 #' @param distance_function A [`character`] specifying the distance function to
 #' be used. Available are linear (\code{"linear"}), negative exponential kernels (\code{"negexp"},
-#' default) and a five parameters logistic curve (code{"logcurve"}) as
+#' default) and a five parameters logistic curve (\code{"logcurve"}) as
 #' proposed by Merow et al. 2017.
 #' @param point An optional [`sf`] layer with points or [`logical`] argument. In
 #' the case of the latter the point data is ignored (Default: \code{FALSE}).
