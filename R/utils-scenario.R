@@ -678,7 +678,7 @@ st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
       new <- terra::mask(new, ori.obj)
     } else {
       # Now first label
-      labs <- terra::patches(obj)
+      labs <- terra::patches(obj,zeroAsNA = TRUE)
 
       # Then calculate area in km2
       ar <- terra::mask(terra::cellSize(labs, unit = "km"), labs)

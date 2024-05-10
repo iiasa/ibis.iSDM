@@ -176,7 +176,7 @@ methods::setMethod(
     # get predictor names of integrated model
     if (!is.Waiver(fit$.internals)) {
       int_pred_names <- lapply(fit$.internals, function(i) i$model$model$predictors_names)
-    } else (int_pred_names <- NULL)
+    } else { int_pred_names <- NULL }
 
     if (is.Waiver(fit$.internals)) {
       assertthat::assert_that(all(mod_pred_names %in% pred_names),
@@ -232,6 +232,10 @@ methods::setMethod(
       } else {
         assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
+    }
+
+    if(("threshold" %in% names(scenario_constraints)) && is.Waiver(baseline_threshold)){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Threshold constraint found but not threshold set? Apply threshold()!')
     }
 
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){

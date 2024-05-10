@@ -207,17 +207,20 @@ capitalize_text <- function(x) {
 #' @keywords utils
 #'
 #' @examples
-#' capitalize_text('presence')
-#' capitalize_text('ducks are the best birds')
+#' factor_to_numeric(factor("5"))
+#' factor_to_numeric(factor("test"))
 #'
 #' @noRd
 #'
 #' @keywords internal
 factor_to_numeric <- function(x) {
+  if(is.numeric(x)) return(x)
   assertthat::assert_that(is.factor(x) || is.character(x))
-  as.numeric(
-    as.character(
-      x
+  suppressWarnings(
+    as.numeric(
+      as.character(
+        x
+      )
     )
   )
 }

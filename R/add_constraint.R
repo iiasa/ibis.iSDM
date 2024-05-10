@@ -98,6 +98,8 @@ methods::setMethod(
   "add_constraint",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, method, ...) {
+    assertthat::assert_that(!missing(method),
+                            msg = "Set a method for the constraint!")
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
@@ -725,7 +727,7 @@ methods::setMethod(
 #' @param value A [`numeric`] value describing the minimum amount of area of a
 #' given patch
 #' @param unit A [`character`] of the unit of area. Options available are
-#' \code{km2} (Default) and \code{ha}.
+#' \code{km2} (Default), \code{ha} and \code{pixel}.
 #' @param establishment_step A [`logical`] flag indicating whether a given patch
 #' is only to be removed if wasn't small in a previous time step (not yet
 #' implemented!)
