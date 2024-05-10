@@ -17,8 +17,9 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Train a basic model">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Train a basic model">
 <meta property="og:description" content="ibis.iSDM">
+<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@Martin_Ecology">
 <meta name="twitter:site" content="@IIASAVienna">
@@ -31,11 +32,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary" data-bs-theme="dark"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,11 +93,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Train a basic model</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Train a basic model</h1>
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-02-29</h4>
+            <h4 data-toc-skip class="date">2024-05-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -167,9 +168,9 @@ predictors available for modelling. So first lets load the data:</p>
 <span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># Make use only of a few of them</span></span>
 <span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
-<span>                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
-<span>                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
-<span>                                            <span class="st">"elevation_mean_50km"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>                                   <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
+<span>                                   <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
+<span>                                   <span class="st">"elevation_mean_50km"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>For our example model we are going to use ‘Integrated Nested Laplace
 approximation (INLA)’ modelling framework as available through the
 <code>INLA</code> and <code>inlabru</code> packages. Both have been
@@ -307,6 +308,7 @@ data types.</p>
 <span><span class="co"># Finally train</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">mod</span>,</span>
 <span>             runname <span class="op">=</span>  <span class="st">"Test INLA run"</span>,</span>
+<span>             aggregate_observations <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># Don't aggregate point counts per grid cell</span></span>
 <span>             verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># Don't be chatty</span></span>
 <span>             <span class="op">)</span></span></code></pre></div>
 </div>
@@ -340,15 +342,15 @@ plot through the package used to fit the model.</li>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 8</span></span></span>
 <span><span class="co">#&gt;   variable               mean     sd     q05     q50    q95    mode   kld</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Intercept           -<span style="color: #BB0000;">2.46</span>   0.126  -<span style="color: #BB0000;">2.66</span>   -<span style="color: #BB0000;">2.46</span>   -<span style="color: #BB0000;">2.25</span>  -<span style="color: #BB0000;">2.46</span>       0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> bio01_mean_50km     -<span style="color: #BB0000;">0.014</span><span style="color: #BB0000; text-decoration: underline;">9</span> 0.178  -<span style="color: #BB0000;">0.307</span>  -<span style="color: #BB0000;">0.014</span><span style="color: #BB0000; text-decoration: underline;">9</span>  0.277 -<span style="color: #BB0000;">0.014</span><span style="color: #BB0000; text-decoration: underline;">9</span>     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> bio03_mean_50km     -<span style="color: #BB0000;">0.492</span>  0.162  -<span style="color: #BB0000;">0.759</span>  -<span style="color: #BB0000;">0.492</span>  -<span style="color: #BB0000;">0.225</span> -<span style="color: #BB0000;">0.492</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> bio19_mean_50km      0.511  0.120   0.313   0.511   0.709  0.511      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> CLC3_112_mean_50km   0.444  0.070<span style="text-decoration: underline;">2</span>  0.329   0.444   0.560  0.444      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> CLC3_132_mean_50km   0.021<span style="text-decoration: underline;">6</span> 0.059<span style="text-decoration: underline;">8</span> -<span style="color: #BB0000;">0.076</span><span style="color: #BB0000; text-decoration: underline;">8</span>  0.021<span style="text-decoration: underline;">6</span>  0.120  0.021<span style="text-decoration: underline;">6</span>     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> CLC3_211_mean_50km   0.946  0.107   0.771   0.946   1.12   0.946      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> CLC3_312_mean_50km   1.09   0.091<span style="text-decoration: underline;">2</span>  0.944   1.09    1.24   1.09       0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> elevation_mean_50km  0.056<span style="text-decoration: underline;">7</span> 0.113  -<span style="color: #BB0000;">0.130</span>   0.056<span style="text-decoration: underline;">7</span>  0.243  0.056<span style="text-decoration: underline;">7</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Intercept           -<span style="color: #BB0000;">2.46</span>   0.127  -<span style="color: #BB0000;">2.67</span>   -<span style="color: #BB0000;">2.46</span>   -<span style="color: #BB0000;">2.25</span>  -<span style="color: #BB0000;">2.46</span>       0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> bio01_mean_50km     -<span style="color: #BB0000;">0.038</span><span style="color: #BB0000; text-decoration: underline;">4</span> 0.178  -<span style="color: #BB0000;">0.331</span>  -<span style="color: #BB0000;">0.038</span><span style="color: #BB0000; text-decoration: underline;">4</span>  0.254 -<span style="color: #BB0000;">0.038</span><span style="color: #BB0000; text-decoration: underline;">4</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> bio03_mean_50km     -<span style="color: #BB0000;">0.478</span>  0.162  -<span style="color: #BB0000;">0.745</span>  -<span style="color: #BB0000;">0.478</span>  -<span style="color: #BB0000;">0.212</span> -<span style="color: #BB0000;">0.478</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> bio19_mean_50km      0.479  0.115   0.291   0.479   0.668  0.479      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> CLC3_112_mean_50km   0.445  0.066<span style="text-decoration: underline;">6</span>  0.335   0.445   0.554  0.445      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> CLC3_132_mean_50km   0.081<span style="text-decoration: underline;">8</span> 0.065<span style="text-decoration: underline;">3</span> -<span style="color: #BB0000;">0.025</span><span style="color: #BB0000; text-decoration: underline;">7</span>  0.081<span style="text-decoration: underline;">8</span>  0.189  0.081<span style="text-decoration: underline;">8</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> CLC3_211_mean_50km   0.921  0.105   0.748   0.921   1.09   0.921      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> CLC3_312_mean_50km   1.07   0.089<span style="text-decoration: underline;">1</span>  0.928   1.07    1.22   1.07       0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> elevation_mean_50km  0.047<span style="text-decoration: underline;">4</span> 0.114  -<span style="color: #BB0000;">0.140</span>   0.047<span style="text-decoration: underline;">4</span>  0.235  0.047<span style="text-decoration: underline;">4</span>     0</span></span>
 <span></span>
 <span><span class="co"># Show the default effect plot from inlabru</span></span>
 <span><span class="fu"><a href="../reference/effects.html">effects</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
@@ -417,51 +419,51 @@ gathered data.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species continuous</span></span>
-<span><span class="co">#&gt;       metric        value</span></span>
-<span><span class="co">#&gt; 1          n 175.00000000</span></span>
-<span><span class="co">#&gt; 2       rmse   0.87756595</span></span>
-<span><span class="co">#&gt; 3        mae   0.67174068</span></span>
-<span><span class="co">#&gt; 4    logloss   1.77343411</span></span>
-<span><span class="co">#&gt; 5   normgini  -0.07768924</span></span>
-<span><span class="co">#&gt; 6 cont.boyce   0.24542238</span></span>
+<span><span class="co">#&gt; 1 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt;       metric       value</span></span>
+<span><span class="co">#&gt; 1          n 208.0000000</span></span>
+<span><span class="co">#&gt; 2       rmse   0.5922986</span></span>
+<span><span class="co">#&gt; 3        mae   0.5167582</span></span>
+<span><span class="co">#&gt; 4    logloss   1.4607368</span></span>
+<span><span class="co">#&gt; 5   normgini         NaN</span></span>
+<span><span class="co">#&gt; 6 cont.boyce          NA</span></span>
 <span></span>
 <span><span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 c4e3ee30-dde5-4c7e-9b29-884f2b72dd83 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 f29b2118-9f41-4480-ba7d-cbb8eb8cfbe2 Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
-<span><span class="co">#&gt; 1                    n 504.0000000</span></span>
-<span><span class="co">#&gt; 2                  auc   0.6951976</span></span>
-<span><span class="co">#&gt; 3     overall.accuracy   0.7539683</span></span>
-<span><span class="co">#&gt; 4  true.presence.ratio   0.4150943</span></span>
-<span><span class="co">#&gt; 5            precision   0.7040000</span></span>
-<span><span class="co">#&gt; 6          sensitivity   0.5028571</span></span>
-<span><span class="co">#&gt; 7          specificity   0.8875380</span></span>
-<span><span class="co">#&gt; 8                  tss   0.3903951</span></span>
-<span><span class="co">#&gt; 9                   f1   0.5866667</span></span>
-<span><span class="co">#&gt; 10             logloss   6.2100666</span></span>
-<span><span class="co">#&gt; 11   expected.accuracy   0.5769951</span></span>
-<span><span class="co">#&gt; 12               kappa   0.4183713</span></span>
-<span><span class="co">#&gt; 13         brier.score   0.2460317</span></span></code></pre></div>
+<span><span class="co">#&gt; 1                    n 591.0000000</span></span>
+<span><span class="co">#&gt; 2                  auc   0.6939161</span></span>
+<span><span class="co">#&gt; 3     overall.accuracy   0.7512690</span></span>
+<span><span class="co">#&gt; 4  true.presence.ratio   0.4143426</span></span>
+<span><span class="co">#&gt; 5            precision   0.7027027</span></span>
+<span><span class="co">#&gt; 6          sensitivity   0.5024155</span></span>
+<span><span class="co">#&gt; 7          specificity   0.8854167</span></span>
+<span><span class="co">#&gt; 8                  tss   0.3878321</span></span>
+<span><span class="co">#&gt; 9                   f1   0.5859155</span></span>
+<span><span class="co">#&gt; 10             logloss   6.2698714</span></span>
+<span><span class="co">#&gt; 11   expected.accuracy   0.5747464</span></span>
+<span><span class="co">#&gt; 12               kappa   0.4150997</span></span>
+<span><span class="co">#&gt; 13         brier.score   0.2487310</span></span></code></pre></div>
 <p>Validating integrated SDMs, particular those fitted with multiple
 likelihoods is challenging and something that has not yet fully been
 explored in the scientific literature. For example strong priors can
@@ -495,38 +497,36 @@ accounts for spatial autocorrelation, some simply add the distance
 between observations as predictor (thus assuming that much of the
 spatial pattern can be explained by commonalities in the sampling
 process).</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Here we are going to use the xgboost algorithm instead and set as engine below.</span></span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co"># We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.</span></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co"># Load the predictors again</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rast</span>(<span class="fu">list.files</span>(<span class="fu">system.file</span>(<span class="st">"extdata/predictors/"</span>, <span class="at">package =</span> <span class="st">"ibis.iSDM"</span>), <span class="st">"*.tif"</span>,<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>predictors <span class="ot">&lt;-</span> <span class="fu">subset</span>(predictors, <span class="fu">c</span>(<span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>                                            <span class="st">"elevation_mean_50km"</span>,</span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>                                   <span class="st">"koeppen_50km"</span>))</span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co"># One of them (Köppen) is a factor, we will now convert this to a true factor variable</span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>predictors<span class="sc">$</span>koeppen_50km <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">as.factor</span>(predictors<span class="sc">$</span>koeppen_50km)</span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co"># Create a distribution modelling pipeline</span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">distribution</span>(background) <span class="sc">|&gt;</span> </span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>  <span class="fu">add_biodiversity_poipo</span>(virtual_species, <span class="at">field_occurrence =</span> <span class="st">'Observed'</span>, <span class="at">name =</span> <span class="st">'Virtual points'</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>  <span class="fu">add_predictors</span>(predictors, <span class="at">transform =</span> <span class="st">'scale'</span>, <span class="at">derivates =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a>  <span class="fu">engine_xgboost</span>(<span class="at">iter =</span> <span class="dv">8000</span>)</span>
-<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co"># Now train 2 models, one without and one with a spatial latent effect</span></span>
-<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a>mod_null <span class="ot">&lt;-</span> <span class="fu">train</span>(x, <span class="at">runname =</span> <span class="st">'Normal PPM projection'</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co"># And with an added constrain</span></span>
-<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span></span>
-<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a>mod_dist <span class="ot">&lt;-</span> <span class="fu">train</span>(x <span class="sc">|&gt;</span> <span class="fu">add_latent_spatial</span>(<span class="at">method =</span> <span class="st">"nnd"</span>),</span>
-<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>                  <span class="at">runname =</span> <span class="st">'PPM with NND constrain'</span>, <span class="at">only_linear =</span> <span class="cn">TRUE</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="sc">|---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span><span class="sc">---------</span><span class="er">|</span></span>
-<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="er">=========================================</span></span>
-<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a>                                          </span>
-<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a></span>
-<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="co"># Compare both</span></span>
-<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="fu">plot</span>(background, <span class="at">main =</span> <span class="st">"Biodiversity data"</span>); <span class="fu">plot</span>(virtual_species[<span class="st">'Observed'</span>], <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Here we are going to use the xgboost algorithm instead and set as engine below.</span></span>
+<span><span class="co"># We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.</span></span>
+<span></span>
+<span><span class="co"># Load the predictors again</span></span>
+<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
+<span>                                            <span class="st">"CLC3_112_mean_50km"</span>,<span class="st">"CLC3_132_mean_50km"</span>,</span>
+<span>                                            <span class="st">"CLC3_211_mean_50km"</span>,<span class="st">"CLC3_312_mean_50km"</span>,</span>
+<span>                                            <span class="st">"elevation_mean_50km"</span>,</span>
+<span>                                   <span class="st">"koeppen_50km"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># One of them (Köppen) is a factor, we will now convert this to a true factor variable</span></span>
+<span><span class="va">predictors</span><span class="op">$</span><span class="va">koeppen_50km</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/is.bool.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">predictors</span><span class="op">$</span><span class="va">koeppen_50km</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create a distribution modelling pipeline</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span>,explode_factors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">8000</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Now train 2 models, one without and one with a spatial latent effect</span></span>
+<span><span class="va">mod_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Normal PPM projection'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># And with an added constrain</span></span>
+<span><span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span></span>
+<span><span class="va">mod_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/add_latent_spatial.html">add_latent_spatial</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nnd"</span><span class="op">)</span>,</span>
+<span>                  runname <span class="op">=</span> <span class="st">'PPM with NND constrain'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; |---------|---------|---------|---------|=========================================                                          </span></span>
+<span></span>
+<span><span class="co"># Compare both</span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">background</span>, main <span class="op">=</span> <span class="st">"Biodiversity data"</span><span class="op">)</span>; <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">virtual_species</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-1.png" width="528" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_null</span><span class="op">)</span></span></code></pre></div>
@@ -553,7 +553,7 @@ effectively also limits the prediction background / output!</strong></p>
 <span><span class="co"># or through an extrapolation control as shown below.</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span>, explode_factors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors</span></span>
 <span>  <span class="fu"><a href="../reference/rm_predictors.html">rm_predictors</a></span><span class="op">(</span><span class="st">"koeppen_50km"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_control_extrapolation.html">add_control_extrapolation</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">predictors</span><span class="op">$</span><span class="va">koeppen_50km</span>, method <span class="op">=</span> <span class="st">"zones"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -573,13 +573,11 @@ effectively also limits the prediction background / output!</strong></p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Martin Jung.</p>
+  <p>Developed by Martin Jung.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer>

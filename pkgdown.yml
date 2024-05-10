@@ -1,8 +1,7 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
-  Get_started: Get_started.html
   01_data_preparationhelpers: 01_data_preparationhelpers.html
   02_train_simple_model: 02_train_simple_model.html
   03_integrate_data: 03_integrate_data.html
@@ -12,7 +11,8 @@ articles:
   07_package_comparison: 07_package_comparison.html
   08_frequently-asked-questions: 08_frequently-asked-questions.html
   contributing: contributing.html
-last_built: 2024-02-29T10:17Z
+  Get_started: Get_started.html
+last_built: 2024-05-10T19:39Z
 urls:
   reference: https://iiasa.github.io/ibis.iSDM/reference
   article: https://iiasa.github.io/ibis.iSDM/articles

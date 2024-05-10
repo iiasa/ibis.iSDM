@@ -157,6 +157,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_minsize.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/add_constraint_threshold.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/add_control_bias.html</loc>
   </url>
   <url>
@@ -217,6 +220,9 @@
     <loc>https://iiasa.github.io/ibis.iSDM/reference/coef.html</loc>
   </url>
   <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/combine_formulas.html</loc>
+  </url>
+  <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/distribution.html</loc>
   </url>
   <url>
@@ -245,6 +251,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_inlabru.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_scampr.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/engine_stan.html</loc>
@@ -362,6 +371,9 @@
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.html</loc>
+  </url>
+  <url>
+    <loc>https://iiasa.github.io/ibis.iSDM/reference/render_html.html</loc>
   </url>
   <url>
     <loc>https://iiasa.github.io/ibis.iSDM/reference/rm_biodiversity.html</loc>
