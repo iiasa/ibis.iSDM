@@ -196,7 +196,7 @@ sc.fit2 <- sc |>
 
 # Also fit one projection a nichelimit has been added
 sc.fit3 <- sc |>   
-   add_constraint(method = "sdd_nex", value = 1e5) |> 
+   add_constraint(method = "sdd_nex", value = 1e5) |>
    add_constraint_adaptability(method = "nichelimit") |> 
    # Directly fit the object
    project(stabilize = F)

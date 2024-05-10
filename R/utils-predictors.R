@@ -5,7 +5,12 @@
 #' standardization (or scaling) of all predictors prior to model fitting. This
 #' function works both with [`SpatRaster`] as well as with [`stars`] objects.
 #'
-#' @param env A [`SpatRaster`] object.
+#' @note
+#' If future covariates are rescaled or normalized, it is highly recommended to use the
+#' statistical moments on which the models were trained for any variable transformations,
+#' also to ensure that variable ranges are consistent among relative values.
+#'
+#' @param env A [`SpatRaster`] or [`stars`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed
 #' in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'}, \code{'windsor'},
 #' \code{'windsor_thresh'}, \code{'percentile'} \code{'pca'}, \code{'revjack'}). See Details.
@@ -15,8 +20,10 @@
 #' minimum amount of variance to be covered (Default: \code{0.8}).
 #' @param method As \code{'option'} for more intuitive method setting. Can be left
 #' empty (in this case option has to be set).
+#' @param state A [`matrix`] with one value per variable (column) providing either a ( `stats::mean()`, `stats::sd()` )
+#' for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
+#' option \code{'norm'}. Effectively applies their value range for rescaling. (Default: \code{NULL}).
 #' @param ... other options (Non specified).
-#'
 #' @details Available options are:
 #' * \code{'none'} The original layer(s) are returned.
 #' * \code{'scale'} This run the [`scale()`] function with default settings
@@ -50,11 +57,13 @@
 #' }
 #'
 #' @export
-predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, method = NULL, ...){
+predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, state = NULL, method = NULL, ...){
+  # option="scale"; windsor_props = c(.05,.95); pca.var = 0.8; method = NULL
   assertthat::assert_that(
     is.Raster(env) || inherits(env, 'stars'),
     # Support multiple options
     is.numeric(windsor_props) & length(windsor_props)==2,
+    (is.matrix(state)||is.data.frame(state)) || is.null(state),
     is.numeric(pca.var)
   )
   # Convenience function
@@ -72,8 +81,23 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Nothing to be done
   if(option == 'none') return(env)
 
+  if(!is.null(state)){
+    assertthat::assert_that(
+      is.matrix(state) || is.data.frame(state),
+      msg = "Supplied state variable needs to be in a matrix with variables being columns and statistical moments being rows!"
+    )
+    # Reruns
+    assertthat::assert_that( all(colnames(state) %in% names(env)),
+                             all(colnames(state) == names(env)),
+                             msg = "Provided state estimates need to be present for all variables and in the same order!")
+  }
+
   # If stars see if we can convert it to a stack
   if(inherits(env, 'stars')){
+    if(is.null(state)){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','When transforming future variables, ensure that unit ranges are comparable (parameter state)!')
+    }
+
     lyrs <- names(env) # Names of predictors
     times <- stars::st_get_dimension_values(env, which = 3) # Assume this being the time attribute
     dims <- stars::st_dimensions(env)
@@ -93,11 +117,28 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Normalization
   if(option == 'norm'){
     if(is.Raster(env)){
-      nx <- terra::minmax(env)
+      if(!is.null(state)){
+        nx1 <- t(state) # For minmax needs to be inverted
+        # Calculate new
+        nx2 <- terra::global(env, "range",na.rm = TRUE)
+        # Get global minimum/maximum
+        nx <- cbind(min = apply(cbind(nx1,nx2), 1, min), max = apply(cbind(nx1,nx2), 1, max))
+      } else {
+        nx <- terra::global(env, "range",na.rm = TRUE) |> t()
+      }
       out <- (env - nx[1,]) / (nx[2,] - nx[1,])
+      attr(out, "transform_params") <- nx
     } else {
       out <- lapply(env_list, function(x) {
-        nx <- terra::minmax(x)
+        if(!is.null(state)){
+          nx1 <- t(state[,names(x)]) # For minmax needs to be inverted
+          nx2 <- terra::global(x, "range",na.rm = TRUE)
+          # Get global minimum/maximum
+          nx <- cbind(min = apply(cbind(nx1,nx2), 1, function(z) min(z, na.rm = TRUE)),
+                      max = apply(cbind(nx1,nx2), 1, function(z) max(z, na.rm = TRUE)) ) |> t()
+        } else {
+          nx <- terra::minmax(x)
+        }
         (x - nx[1,]) / (nx[2,] - nx[1,])
       })
     }
@@ -105,38 +146,61 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Scaling
   if(option == 'scale'){
     if(is.Raster(env)){
-      out <- terra::scale(env, center = TRUE, scale = TRUE)
+      if(!is.null(state)){
+        out <- terra::scale(env, center = state['mean',], scale = state['sd',])
+      } else {
+        out <- terra::scale(env, center = TRUE, scale = TRUE)
+        attr(out, "transform_params") <- cbind(
+          terra::global(env, "mean", na.rm = TRUE),
+          terra::global(env, "sd", na.rm = TRUE)
+        ) |> t()
+      }
     } else {
-      out <- lapply(env_list, function(x) terra::scale(x, center = TRUE, scale = TRUE))
+      out <- lapply(env_list, function(x){
+        if(!is.null(state)){
+          terra::scale(x, center = state['mean',names(x)[1]], scale = state['sd',names(x)[1]])
+        } else {
+          terra::scale(x, center = TRUE, scale = TRUE)
+        }
+      })
     }
   }
 
   # Percentile cutting
   if(option == 'percentile'){
     if(is.Raster(env)){
-      perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+      if(!is.null(state)){
+        perc <- state |> t()
+      } else {
+        perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+      }
       perc <- unique(perc)
-      out <- terra::classify(env, t(perc))
+      out <- terra::classify(env, t(perc)) |> terra::as.int()
+      attr(out, "transform_params") <- perc
     } else {
       out <- lapply(env_list, function(x) {
-        perc <- terra::global(x, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+        if(!is.null(state)){
+          perc <- state |> t()
+        } else {
+          perc <- terra::global(x, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
+        }
         perc <- unique(perc)
         # For terra need to loop here as classify does not support multiple columns
         o <- terra::rast()
-        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) ))
+        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) |> terra::as.int() ))
         return(o)
       })
-      assertthat::assert_that( all( sapply(out, function(z) all(is.factor(z))) ))
     }
   }
 
   # Windsorization
   if(option == 'windsor'){
+    if(!is.null(state)) stop("Passing on state parameter not yet implemented for this case!")
     win <- function(x, windsor_props){
       xq <- stats::quantile(x = x[], probs = windsor_props, na.rm = TRUE)
       min.value <- xq[1]
       max.value <- xq[2]
-      if(is.vector(env)) out <- units::drop_units(env) else out <- env
+      if(is.vector(x)) out <- units::drop_units(x) else out <- x
       out[out < min.value] <- min.value
       out[out > max.value] <- max.value
       out
@@ -147,8 +211,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       out <- lapply(env_list, function(x) win(x, windsor_props))
     }
   } else if(option == 'windsor_thresh'){
+    if(!is.null(state)) stop("Passing on state parameter not yet implemented for this case!")
     win_tr <- function(x, windsor_thresh){
-      if(is.vector(env)) out <- units::drop_units(env) else out <- env
+      if(is.vector(x)) out <- units::drop_units(x) else out <- x
       out[out < windsor_thresh[1]] <- windsor_thresh[1]
       out[out > windsor_thresh[2]] <- windsor_thresh[2]
       out
@@ -180,6 +245,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
   # Principle component separation of variables
   # Inspiration taken from RSToolbox package
   if(option == 'pca'){
+    if(!is.null(state)) stop("Passing on state parameter not yet implemented for this case!")
     if(is.Raster(env)){
       assertthat::assert_that(terra::nlyr(env)>=2,msg = 'Need at least two predictors to calculate PCA.')
 
@@ -196,10 +262,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 
       # Sample covariance from stack and fit PCA
       covMat <- terra::layerCor(env, fun = "cov", na.rm = TRUE)
-      pca <- stats::princomp(covmat = covMat[[1]], cor = FALSE)
-      # Add means and grid cells
-      pca$center <- covMat$mean
-      pca$n.obs <- terra::ncell(env)
+      pca <- terra::princomp(env) # Use Terra directly
 
       # Check how many components are requested:
       if(pca.var<1){
@@ -208,7 +271,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         nComp <- length( which(props <= pca.var) )
       }
       # Predict principle components
-      out <- terra::predict(env, pca,na.rm = TRUE, index = 1:nComp)
+      out <- terra::predict(env, pca, index = 1:nComp)
       names(out) <- paste0("PC", 1:nComp)
 
       return(out)
@@ -324,18 +387,23 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
                       several.ok = FALSE)
 
   # None, return as is
-  if(option == 'none') return(env)
+  if(option == 'none' || 'none' %in% option) return(env)
+
+  # If deriv is not set, assume all variables should be derivated and set
+  if(is.null(deriv)){
+    deriv <- paste0(option, "_", names(env))
+  }
 
   # If stars see if we can convert it to a stack
   if(inherits(env, 'stars')){
     assertthat::assert_that(!is.null(deriv),msg = "Derivate names could not be found!")
     # Decompose derivate variable names if set
-    deriv <- grep(paste0(option, "__"), deriv, value = TRUE)
+    deriv <- grep(paste0(option, "_"), deriv, value = TRUE)
     if(length(deriv)==0){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red','Predictors with derivates not found!')
       return(NULL)
     }
-    cutoffs <- do.call(rbind,strsplit(deriv, "__")) |> as.data.frame()
+    cutoffs <- do.call(rbind,strsplit(deriv, "_")) |> as.data.frame()
     cutoffs$deriv <- deriv
 
     lyrs <- names(env) # Names of predictors
@@ -343,10 +411,16 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     # Create a list to house the results
     env_list <- list()
     for(name in cutoffs$deriv){
-      env_list[[name]] <- terra::rast(env[cutoffs[which(cutoffs$deriv==name),2]]) # Specify original raster
+      # Specify original raster
+      o <- stars_to_raster( env[cutoffs[which(cutoffs$deriv==name),2]] )
+      env_list[[name]] <- Reduce(c, o)
+      rm(o)
     }
     assertthat::assert_that(length(env_list) > 0)
   } else {cutoffs <- NULL}
+
+  # Output list
+  new_env <- list()
 
   # Simple quadratic transformation
   if(option == 'quadratic'){
@@ -356,12 +430,14 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       } else {
         new_env <- terra::app(env, function(x) I(x^2))
       }
-      names(new_env) <- paste0('quad__', names(env))
+      names(new_env) <- paste0('quadratic_', names(env))
     } else {
-      # Stars processing
-      new_env <- lapply(env_list, function(x) {
-        terra::app(x, function(z) I(z^2))
-      })
+      # Convert to quadratic transform (without terra::app as this uses the time dimension)
+      new_env <- lapply(env_list, function(z){
+        o <- (z^2)
+        names(o) <- paste0('quadratic_', names(o))
+        return(o)
+      } )
     }
   }
 
@@ -387,17 +463,40 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         if(any(substr(cu,1, 1)==".")){
           cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
         }
-        cu <- as.numeric(cu)
-        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:terra::nlyr(env_list[[val]])){
-          o <- emptyraster(env_list[[val]][[k]])
-          o[] <- hingeval(env_list[[val]][[k]][], cu[1], cu[2])
-          env_list[[val]][[k]] <- o
-          rm(o)
+        suppressWarnings( cu <- as.numeric(cu) )
+        # If derivate variables are supplied, use them as cutoffs
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeHinge(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu,ncol=2,byrow = FALSE) # Convert to pmin and pmax
         }
-      }
-      invisible(gc())
+
+        # Assume specific cutoffs provided via deriv parameter
+        nn <- terra::rast()
+        for(k in 1:terra::nlyr(env_list[[val]]) ){
+          # For each cutoff
+          for(i in seq(1, length(cu),2)){
+            o <- emptyraster(env_list[[val]][[k]])
+            first <- cu[i]
+            last <- cu[i+1]
+
+            o[] <- hingeval(env_list[[val]][[k]][], first, last)
+            terra::time(o) <- terra::time( env_list[[val]][[k]] )
+            names(o) <- paste0(val, "_",first,"_",last)
+            suppressWarnings( nn <- append(nn, o) )
+            rm(o)
+          }
+        }
+        # Add to new environment
+        new_env[[val]] <- nn
+        rm(nn)
+        }
     }
+      invisible(gc())
   }
 
   # For thresholds
@@ -421,14 +520,30 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         if(any(substr(cu,1, 1)==".")){
           cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
         }
-        cu <- as.numeric(cu)
-        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:terra::nlyr(env_list[[val]])){
-          o <- emptyraster(env_list[[val]][[k]])
-          o[] <- thresholdval(env_list[[val]][[k]][], cu)
-          env_list[[val]][[k]] <- o
-          rm(o)
+        suppressWarnings(cu <- as.numeric(cu) )
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeThresh(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu, byrow = FALSE) # Convert to pmin and pmax
         }
+        nn <- terra::rast()
+        for(k in 1:terra::nlyr(env_list[[val]])){
+          # For each cutoff
+          for(i in seq(1, length(cu))){
+            o <- emptyraster(env_list[[val]][[k]])
+            o[] <- thresholdval(env_list[[val]][[k]][], cu[i])
+            terra::time(o) <- terra::time( env_list[[val]][[k]] )
+            names(o) <- paste0(val, "_",cu[i])
+            suppressWarnings( nn <- append(nn, o) )
+            rm(o)
+          }
+        }
+        new_env[[val]] <- nn
+        rm(nn)
       }
       invisible(gc())
     }
@@ -454,16 +569,32 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
         if(any(substr(cu,1, 1)==".")){
           cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
         }
-        cu <- as.numeric(cu)
-        assertthat::assert_that(!anyNA(cu), is.numeric(cu))
-        for(k in 1:terra::nlyr(env_list[[val]])){
-          o <- emptyraster(env_list[[val]][[k]])
-          o <- terra::classify(env_list[[val]][[k]], cu)
-          o[is.na(o)] <- 0
-          o <- terra::mask(o, env_list[[val]][[k]] )
-          env_list[[val]][[k]] <- o
-          rm(o)
+        suppressWarnings( cu <- as.numeric(cu) )
+        nn <- terra::rast()
+        # If NA, set
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeBin(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu,ncol=2,byrow = TRUE) # Convert to pmin and pmax
+          cu <- cbind(cu, 1:nrow(cu))
         }
+        for(k in 1:terra::nlyr(env_list[[val]])){
+          newcu <- cu
+          # Set smallest and largest value to global minimum/maximum to account for rounding issues
+          newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
+          newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
+
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE)
+          terra::time(o) <- terra::time( env_list[[val]][[k]] )
+          names(o) <- paste0(val, "_",nrow(newcu))
+          suppressWarnings( nn <- append(nn, o) )
+          rm(o, newcu)
+        }
+        new_env[[val]] <- nn
       }
       invisible(gc())
     }
@@ -475,43 +606,85 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     if(is.null(int_variables)){
       int_variables <- attr(env, "int_variables")
     }
-    assertthat::assert_that(is.vector(int_variables))
+    # If interaction check that vector is not null and exactly 2
+    assertthat::assert_that(!is.null(int_variables),
+                            is.vector(int_variables),
+                            msg = "Provide a vector of 2 variables for an interaction!")
+
+    # Make unique combinations
+    ind <- utils::combn(int_variables, 2)
 
     if(is.Raster(env)){
-      # Make unique combinations
-      ind <- utils::combn(int_variables, 2)
-
       # Now for each combination build new variable
       new_env <- terra::rast()
 
       for(i in 1:ncol(ind)){
         # Multiply first with second entry
         o <- env[[ind[1,i]]] * env[[ind[2,i]]]
-        names(o) <- paste0('inter__', ind[1, i],".", ind[2, i])
+        names(o) <- paste0('interaction_', ind[1, i],".", ind[2, i])
         suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {
       # Stars processing
-      stop("Not yet implemented!")
+      cu <- subset(cutoffs, V2 %in% ind) # Get only relevant variables
+
+      for(i in 1:ncol(ind)){
+        # For each layer
+        first <- cu$deriv[cu[,2]==ind[1,i]]
+        last <- cu$deriv[cu[,2]==ind[2,i]]
+        # Multiply first with second entry
+        o <- env_list[[first]] * env_list[[last]]
+        val <- paste0('interaction_', ind[1, i],".", ind[2, i]) # Interaction term
+        names(o) <- rep(paste0(val),terra::nlyr(o))
+        new_env[[val]] <- o
+        rm(o)
+      }
     }
   }
 
-  # If stars convert back to stars object
+  # If stars convert results back to stars object
   if(inherits(env, 'stars')){
     # Add the original layers back
-    for(name in names(env)){
-      env_list[[name]] <- terra::rast(env[name]) # Specify original raster
+    if(option %in% c("quadratic")){
+      o <- lapply(new_env, function(z) {
+        stars::st_as_stars(z, crs = sf::st_crs(env))
+      })
+      o <- Reduce("c", o)
+    } else if(option == "interaction"){
+      o <- list()
+      for(val in names(new_env)){
+        o[[val]] <- stars::st_as_stars(new_env[[val]])
+      }
+      o <- Reduce("c", o)
+    } else {
+      o <- list()
+      # Get all names
+      n <- lapply(new_env, function(z) names(z) |> unique() )
+      # Hacky...
+      for(i in 1:length(n) ){
+        for(val in n[[i]]){
+          o[[val]] <- stars::st_as_stars(new_env[[i]][val])
+        }
+      }
+      o <- Reduce("c", o)
     }
 
-    # Convert list back to stars
-    new_env <- do.call(
-      stars:::c.stars,
-      lapply(env_list, function(x) stars::st_as_stars(x))
+    # Correct band if different
+    suppressWarnings(
+      test <- all(!stars::st_get_dimension_values(env, 3) != stars::st_get_dimension_values(o, 3 ))
     )
-    # Reset names of attributes
-    names(new_env) <- c( cutoffs$deriv, names(env))
-    new_env <- stars::st_set_dimensions(new_env, which = 3, values = times, names = "time")
+    if(test){
+      o <- stars::st_set_dimensions(o, 3, values = stars::st_get_dimension_values(env, 3))
+    }
+
+    # Try again with transform
+    new <- try({ c(env, o) },silent = TRUE)
+    if(inherits(new, "try-error")){
+      # Replace dimensions and check again.
+      stars::st_dimensions(o) <- stars::st_dimensions(env)
+    }
+    new_env <- c(env, o)
   }
   return(new_env)
 }
@@ -640,8 +813,8 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
   lh <- outer(v[] |> as.vector(), utils::head(k, -1), function(w, h) hingeval(w,h, v.max))
   # Hinge starting from min
   rh <- outer(v[] |> as.vector(), k[-1], function(w, h) hingeval(w, v.min, h))
-  colnames(lh) <- paste0("hinge__",n,'__', round( utils::head(k, -1), 2),'_', round(v.max, 2))
-  colnames(rh) <- paste0("hinge__",n,'__', round( v.min, 2),'_', round(k[-1], 2))
+  colnames(lh) <- paste0("hinge_",n,'_', round( utils::head(k, -1), 2),'_', round(v.max, 2))
+  colnames(rh) <- paste0("hinge_",n,'_', round( v.min, 2),'_', round(k[-1], 2))
   o <- as.data.frame(
     cbind(lh, rh)
   )
@@ -688,7 +861,7 @@ makeThresh <- function(v, n, nknots = 4, cutoffs = NULL){
   }
   if(length(k)<=1) return(NULL)
   f <- outer(v[] |> as.vector(), k, function(w, t) ifelse(w >= t, 1, 0))
-  colnames(f) <- paste0("thresh__", n, "__",  round(k, 2))
+  colnames(f) <- paste0("thresh_", n, "_",  round(k, 2))
   f <- as.data.frame(f)
   attr(f, "deriv.thresh") <- k
   return(f)
@@ -743,7 +916,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   cu.brk <- gsub(",","_",cu.brk)
   cu.brk <- gsub("\\(|\\]", "", cu.brk)
   # names(out) <- paste0("bin__",n, "__", gsub(x = names(cu)[-1], pattern = "\\D", replacement = ""),"__", cu.brk )
-  names(out) <- paste0("bin__",n, "__", cu.brk )
+  names(out) <- paste0("bin_",n, "_", cu.brk )
   for(i in 1:terra::nlyr(out)){
     attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
   }
@@ -1025,7 +1198,7 @@ predictors_filter_abess <- function( env, observed, method, family, tune.type = 
 #' @noRd
 #'
 #' @keywords internal
-predictors_filter_boruta <- function( env, obs, method, keep = NULL,
+predictors_filter_boruta <- function( env, observed, method, keep = NULL,
                                       iter = 100, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
   # Security checks
   assertthat::assert_that(is.data.frame(env) || is.matrix(env),

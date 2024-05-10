@@ -49,7 +49,7 @@ to use all covariates (if specified).}
 
 \item{family}{A \code{\link{character}} stating the family to be used (Default: \code{'Poisson'}).}
 
-\item{link}{A \code{\link{character}} to overwrite the default link function (Default: code{NULL}).}
+\item{link}{A \code{\link{character}} to overwrite the default link function (Default: \code{NULL}).}
 
 \item{weight}{A \code{\link{numeric}} value acting as a multiplier with regards to any
 weights used in the modelling. Larger weights indicate higher weighting

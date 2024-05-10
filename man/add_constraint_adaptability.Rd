@@ -67,6 +67,7 @@ Other constraint:
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_dispersal}()},
 \code{\link{add_constraint_minsize}()},
+\code{\link{add_constraint_threshold}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

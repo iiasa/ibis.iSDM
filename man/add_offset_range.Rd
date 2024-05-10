@@ -63,7 +63,7 @@ after the maximum distance (Default: \code{FALSE}).}
 
 \item{distance_function}{A \code{\link{character}} specifying the distance function to
 be used. Available are linear (\code{"linear"}), negative exponential kernels (\code{"negexp"},
-default) and a five parameters logistic curve (code{"logcurve"}) as
+default) and a five parameters logistic curve (\code{"logcurve"}) as
 proposed by Merow et al. 2017.}
 
 \item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of

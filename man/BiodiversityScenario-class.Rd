@@ -54,6 +54,7 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-get_predictor_names}{\code{BiodiversityScenario$get_predictor_names()}}
 \item \href{#method-BiodiversityScenario-get_timeperiod}{\code{BiodiversityScenario$get_timeperiod()}}
 \item \href{#method-BiodiversityScenario-get_constraints}{\code{BiodiversityScenario$get_constraints()}}
+\item \href{#method-BiodiversityScenario-rm_constraints}{\code{BiodiversityScenario$rm_constraints()}}
 \item \href{#method-BiodiversityScenario-get_threshold}{\code{BiodiversityScenario$get_threshold()}}
 \item \href{#method-BiodiversityScenario-get_thresholdvalue}{\code{BiodiversityScenario$get_thresholdvalue()}}
 \item \href{#method-BiodiversityScenario-apply_threshold}{\code{BiodiversityScenario$apply_threshold()}}
@@ -72,6 +73,7 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-plot_relative_change}{\code{BiodiversityScenario$plot_relative_change()}}
 \item \href{#method-BiodiversityScenario-summary}{\code{BiodiversityScenario$summary()}}
 \item \href{#method-BiodiversityScenario-summary_beforeafter}{\code{BiodiversityScenario$summary_beforeafter()}}
+\item \href{#method-BiodiversityScenario-plot_scenarios_slope}{\code{BiodiversityScenario$plot_scenarios_slope()}}
 \item \href{#method-BiodiversityScenario-calc_scenarios_slope}{\code{BiodiversityScenario$calc_scenarios_slope()}}
 \item \href{#method-BiodiversityScenario-mask}{\code{BiodiversityScenario$mask()}}
 \item \href{#method-BiodiversityScenario-get_centroid}{\code{BiodiversityScenario$get_centroid()}}
@@ -163,9 +165,16 @@ A \code{\link{numeric}} indication of the resolution.
 \subsection{Method \code{get_model()}}{
 Get the actual model used for projection
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$get_model()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$get_model(copy = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{copy}}{A \code{\link{logical}} flag on whether a deep copy should be created.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 A DistributionModel object.
 }
@@ -227,6 +236,19 @@ Get constrains for model
 
 \subsection{Returns}{
 A \code{\link{list}} with the constraints within the scenario.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-rm_constraints"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-rm_constraints}{}}}
+\subsection{Method \code{rm_constraints()}}{
+Remove contraints from model
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$rm_constraints()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible
 }
 }
 \if{html}{\out{<hr>}}
@@ -307,7 +329,7 @@ Set new constrains
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A \code{\link{SpatRaster}} object to be added as as constraint.}
+\item{\code{x}}{A \code{\link{list}} object with constraint settings.}
 }
 \if{html}{\out{</div>}}
 }
@@ -567,6 +589,31 @@ Summarize before-after change of first and last layer.
 
 \subsection{Returns}{
 Summarized coefficients as \code{\link{data.frame}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-plot_scenarios_slope"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-plot_scenarios_slope}{}}}
+\subsection{Method \code{plot_scenarios_slope()}}{
+Calculate slopes across the projection
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$plot_scenarios_slope(
+  what = "suitability",
+  oftype = "stars"
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{what}}{A \code{\link{character}} with layer to be plotted (default: \code{"suitability"}).}
+
+\item{\code{oftype}}{\code{\link{character}} of the output type.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A plot of the scenario slopes
 }
 }
 \if{html}{\out{<hr>}}

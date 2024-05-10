@@ -153,6 +153,72 @@ ilink <- function(x, link = "log"){
   )
 }
 
+#' Combine or concatenate multiple formula objects
+#'
+#' @description
+#' This small helper function allows to combine multiple `formula()` objects
+#' into one. In the case of duplicate variable entries, only the unique ones
+#' are used.
+#'
+#' @details
+#' Use "y ~ 0" to specify a stand alone LHS.
+#'
+#' @note
+#' This likely won't work for interaction terms (such as \code{*} or \code{:}).
+#' @param ... Any number [`formula`] objects in "LHS ~ RHS" format, also supporting
+#' [`character`] strings.
+#' @param combine [`character`] on whether LHS and RHS duplicates are to be removed. Can
+#' be set to either \code{"lhs"}, \code{"rhs"} or \code{"both"} (Default).
+#' @param env A new environment of the formula \code{(def=parent.frame())}.
+#' @returns A formula as \code{cbind(lhs_1, lhs_2, ...) ~ rhs_1 + rhs_2 + ...} or
+#' \code{lhs ~ rhs_1 + rhs_2} in case of identical LHS (see examples).
+#'
+#' @keywords utils
+#'
+#' @examples
+#' # Combine everything (default)
+#' combine_formulas(observed ~ rainfall + temp, observed ~ rainfall + forest.cover)
+#' # Combine only LHS
+#' combine_formulas(observed ~ rainfall + temp, observed ~ rainfall + forest.cover, combine = "lhs")
+
+#' @export
+combine_formulas <- function(..., combine = "both", env=parent.frame()) {
+  assertthat::assert_that(
+    is.character(combine)
+  )
+  combine <- match.arg(combine, choices = c("rhs", "lhs", "both"),several.ok = FALSE)
+  # drop "~" and extract left/right hand sides (LHS/RHS)
+  obj <- lapply(list(...), function(.) as.character(stats::as.formula(.))[-1])
+  rhs <- mapply(`[`, obj, lengths(obj) - 0, SIMPLIFY=FALSE)
+  lhs <- mapply(`[`, obj, lengths(obj) - 1, SIMPLIFY=FALSE)
+
+  # Handle the RHS
+  rhs <- rhs[sapply(rhs, `!=`, "0")] # drop "0"
+  # Check for interaction terms
+  chki <- lapply(rhs, function(z) length(grep("*", z, fixed = TRUE))>0)
+  if(any(unlist(chki))) stop("Interaction terms found. Formula combination does not work for these cases!")
+
+  if(any(c("rhs", "both") %in% combine)){
+    un <- unlist(rhs)
+    rhs <- Map(`[`, rhs, utils::relist(!duplicated(un), skeleton = rhs))
+  }  else {
+    rhs <- do.call(paste, c(rhs, sep=" + "))
+  }
+  # use "0" if rhs is empty
+  if(length(rhs) < 1) rhs <- "0"
+
+  # Handle LHS
+  lhs <- lhs[lengths(lhs) > 0] # drop empty(s)
+  if(any(c("lhs", "both") %in% combine)) lhs <- unique(lhs)
+  if(length(lhs) > 1) lhs <- sprintf("cbind(%s)", do.call(paste, c(lhs, sep=", ")))
+
+  # Return "lhs ~ rhs" as a formula in the calling environment.
+  suppressWarnings(
+    f <- stats::as.formula(paste0(lhs, " ~ ", rhs), env)
+  )
+  return( f )
+}
+
 #' Create formula matrix
 #'
 #' @description

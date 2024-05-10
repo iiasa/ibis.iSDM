@@ -367,6 +367,7 @@ engine_glmnet <- function(x,
     }
 
     if(!is.Waiver(model$priors)){
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Reset those contained in the prior object
       for(v in model$priors$varnames()){
         if(!(v %in% names(p.fac))) next()
@@ -561,7 +562,7 @@ engine_glmnet <- function(x,
       }
 
       # Calculate range of predictors
-      rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+      rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                    function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
       if(is.null(newdata)){
@@ -792,7 +793,12 @@ engine_glmnet <- function(x,
       }
 
       df <- newdata
-      df$w <- model$exposure # Also get exposure variable
+      if(nrow(df)!=length(model$exposure)){
+        # Assume the maximum (usually 1e6)
+        df$w <- model$exposure[which.max(model$exposure)]
+      } else {
+        df$w <- model$exposure # Also get exposure variable
+      }
       # Make a subset of non-na values
       df$rowid <- 1:nrow(df)
       df_sub <- base::subset(df, stats::complete.cases(df))
@@ -827,8 +833,20 @@ engine_glmnet <- function(x,
       assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
 
       # Now create spatial prediction
-      prediction <- model_to_background(model)
-      prediction[df_sub$rowid] <- pred_gn[, layer]
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+        prediction[df_sub$rowid] <- pred_gn[, layer]
+      } else {
+        assertthat::assert_that(utils::hasName(df_sub,"x")&&utils::hasName(df_sub,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(df_sub[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+        prediction[] <- pred_gn[, layer]
+      }
 
       return(prediction)
     },overwrite = TRUE)

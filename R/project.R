@@ -114,7 +114,13 @@ methods::setMethod(
     if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
     # Get the model object
-    fit <- mod$get_model()
+    fit <- mod$get_model(copy = TRUE)
+    # Get background
+    background <- fit$model$background
+
+    assertthat::assert_that(!is.na(terra::crs( background )),
+                            msg = "Model background has no CRS which will only cause problems. Rerun and set!")
+
     # Check that coefficients and model exist
     assertthat::assert_that(!is.Waiver(fit),
                             nrow(fit$get_coefficients())>0,
@@ -122,6 +128,7 @@ methods::setMethod(
     # Get predictors
     new_preds <- mod$get_predictors()
     if(is.Waiver(new_preds)) stop('No scenario predictors found.')
+
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
@@ -135,54 +142,81 @@ methods::setMethod(
       new_preds$set_data(new)
     }
 
-    # Get limits if present
+    # Get limits if flagged as present in scenario object
     if(!is.null( mod$get_limits() )){
-      # FIXME: Scenarios need to be checked that the right layer is taken!!
-      # Get prediction
-      n <- fit$show_rasters()[grep("threshold",fit$show_rasters())]
-      tr <- fit$get_data(n)[[1]]
-      tr <- cbind( terra::crds(tr), data.frame(thresh = values(tr)))
-      tr[['thresh']] <- ifelse(tr[['thresh']]==0, NA, tr[['thresh']])
-      tr <- tr |> (\(.) subset(., stats::complete.cases(thresh)))()
+      # Get Limit and settings from model
+      limit <- mod$get_limits()
 
-      # Get zones from the limiting area, e.g. those intersecting with input
-      suppressMessages(
-        suppressWarnings(
-          zones <- sf::st_intersection(sf::st_as_sf(tr, coords = c('x','y'), crs = sf::st_crs(fit$model$background)),
-                                   mod$get_limits()$layer
-          )
-        )
-      )
-      # Limit zones
-      zones <- subset(mod$get_limits()$layer, limit %in% unique(zones$limit) )
-      # Now clip all provided new predictors and background to this
-      new_preds$crop_data(zones)
+      # Clip new predictors
+      new_preds$crop_data(limit)
+
+      # Also adjust the model container
+      fit$model$background <- limit
+      # Clip the predictor object
+      fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
+      fit$model$predictors_object$crop_data(limit)
+      fit$model$predictors_object$mask(limit)
+      fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+      # And offset if found
+      if(!is.null(fit$model$offset_object)){
+        fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
+        fit$model$offset_object <- terra::crop(fit$model$offset_object, limit)
+        fit$model$offset_object <- terra::mask(fit$model$offset_object, limit)
+        fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
+      }
     }
 
-    # Check that predictor names are all present
+    # Check that model has any (?) coefficients
+    assertthat::assert_that( nrow(fit$get_coefficients())>0,
+                             msg = paste0('No coefficients found in model.') )
+
+    # Check that predictor names are all present.
     mod_pred_names <- fit$model$predictors_names
     pred_names <- mod$get_predictor_names()
-    assertthat::assert_that( all(mod_pred_names %in% pred_names),
-                             msg = paste0('Model predictors are missing from the scenario predictor!') )
+    # get predictor names of integrated model
+    if (!is.Waiver(fit$.internals)) {
+      int_pred_names <- lapply(fit$.internals, function(i) i$model$model$predictors_names)
+    } else { int_pred_names <- NULL }
+
+    if (is.Waiver(fit$.internals)) {
+      assertthat::assert_that(all(mod_pred_names %in% pred_names),
+                              msg = paste0('Model predictors are missing from the scenario predictor!'))
+    } else {
+      # check if missing preds are in .internals list
+      assertthat::assert_that(sum(!mod_pred_names %in% pred_names) == 1 ||
+                                any(!unlist(int_pred_names, use.names = FALSE) %in% pred_names),
+                              msg = "Model predictors are missing from the scenario predictor!")
+    }
 
     # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
-    # Not get the baseline raster
-    thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
-    baseline_threshold <- mod$get_model()$get_data(thresh_reference)
     if(!is.Waiver(scenario_threshold)){
-      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( fit$model$background )
+      # Not get the baseline raster
+      thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
+      assertthat::assert_that(!is.na(thresh_reference))
+      baseline_threshold <- mod$get_model()$get_data(thresh_reference)
+
+      if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( background )
+      # Furthermore apply new limits also to existing predictions (again)
+      if(!is.null( mod$get_limits() )) baseline_threshold <- terra::crop(baseline_threshold, mod$get_limits())
+
+      if(inherits(baseline_threshold, 'SpatRaster')){
+        baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
+      }
+
+      # Set all NA values to 0 (and then mask by background?)
+      baseline_threshold[is.na(baseline_threshold)]<-0
+
+    } else {
+      baseline_threshold <- new_waiver()
     }
 
-    if(inherits(baseline_threshold, 'SpatRaster')){
-      baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
-    }
     # Optional constraints or simulations if specified
     scenario_constraints <- mod$get_constraints()
     scenario_simulations <- mod$get_simulation()
 
     # Create a template for use
-    template <- emptyraster( mod$get_predictors()$get_data() )
+    template <- emptyraster( new_preds$get_data() )
 
     #  --- Check that everything is there ---
     # Check that thresholds are set for constrains
@@ -199,28 +233,43 @@ methods::setMethod(
         assertthat::assert_that(!is.Waiver(scenario_threshold),msg = "Other constrains require threshold option!")
       }
     }
+
+    if(("threshold" %in% names(scenario_constraints)) && is.Waiver(baseline_threshold)){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Threshold constraint found but not threshold set? Apply threshold()!')
+    }
+
     if("connectivity" %in% names(scenario_constraints) && "dispersal" %notin% names(scenario_constraints)){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Connectivity contraints make most sense with a dispersal constraint.')
     }
     # ----------------------------- #
-    #   Start of projection         #
+    ####   Start of projection   ####
     # ----------------------------- #
 
     # Now convert to data.frame and subset
     df <- new_preds$get_data(df = TRUE)
+
+    # cell ids are need to match integrated prediction to future pred
+    if (!is.Waiver(fit$.internals)) {
+      id_tmp <- terra::extract(x = fit$get_data(), y = df[,1:2], cells = TRUE, layer = 1)
+      df$cell <- id_tmp$cell # this should work because order stays the same
+    }
+
     names(df)[1:3] <- tolower(names(df)[1:3]) # Assuming the first three attributes are x,y,t
     assertthat::assert_that(nrow(df)>0,
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
 
-    df <- subset(df, select = c("x", "y", "time", mod_pred_names) )
-    df$time <- to_POSIXct( df$time )
+    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "cell", "time",
+                                            unlist(int_pred_names, use.names = FALSE),
+                                            mod_pred_names)))
+
+    df$time <- to_POSIXct(df$time)
     # Convert all units classes to numeric or character to avoid problems
     df <- units::drop_units(df)
 
     # ------------------ #
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green','Starting suitability projections for ',
-                                              length(unique(df$time)), ' timesteps.')
+                                              length(unique(df$time)), ' timesteps from ', paste(range(df$time), collapse = " <> "))
 
     # Now for each unique element, loop and project in order
     proj <- terra::rast()
@@ -230,12 +279,17 @@ methods::setMethod(
       pb <- progress::progress_bar$new(format = "Creating projections (:spin) [:bar] :percent",
                                        total = length(unique(df$time)))
     }
+
     # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
-    for(step in times){ # step = times[1]
+
+    for(step in times){
+
       # Get data
       nd <- subset(df, time == step)
-      assertthat::assert_that( !all(is.na(nd[, mod_pred_names])) )
+
+      # check that timestep has data
+      assertthat::assert_that(nrow(nd)>0, !all(is.na(dplyr::select(nd, dplyr::any_of(mod_pred_names)))))
 
       # Apply adaptability constrain
       if("adaptability" %in% names(scenario_constraints)){
@@ -248,10 +302,32 @@ methods::setMethod(
         }
       }
 
+      # loop through integrated models
+      if (!is.Waiver(fit$.internals)) {
+
+        # loop through all internals
+        for (i in 1:length(fit$.internals)) {
+
+          # get current predictors and project
+          pred_tmp <- c("x", "y", fit$.internals[[i]]$model$model$predictors_names)
+          proj_tmp <- fit$.internals[[i]]$model$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)),
+                                                        layer = layer)
+
+          # make sure names match
+          names(proj_tmp) <- fit$.internals[[i]]$name
+
+          # add to next nd using cell id (previously issues with xy coords due to numerical diff)
+          nd <- dplyr::left_join(x = nd, y = terra::as.data.frame(proj_tmp, cells = TRUE),
+                                 by = "cell")
+
+        }
+      }
+
       # Project suitability
-      out <- fit$project(newdata = nd, layer = layer)
+      pred_tmp <- c("x", "y", fit$model$predictors_names)
+      out <- fit$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)), layer = layer)
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
-      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( fit$model$background )
+      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
 
       # If other constrains are set, apply them posthoc
       if(!is.Waiver(scenario_constraints)){
@@ -277,10 +353,12 @@ methods::setMethod(
           # MigClim simulations are run posthoc
           if(scenario_constraints$dispersal$method %in% c("sdd_fixed", "sdd_nexpkernel")){
             out <- switch (scenario_constraints$dispersal$method,
-                           "sdd_fixed" = .sdd_fixed(baseline_threshold, out,
+                           "sdd_fixed" = .sdd_fixed(baseline_threshold,
+                                                    new_suit = out,
                                                     value = scenario_constraints$dispersal$params[1],
                                                     resistance = resistance ),
-                           "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold, out,
+                           "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold,
+                                                              new_suit = out,
                                                               value = scenario_constraints$dispersal$params[1],
                                                               resistance = resistance)
             )
@@ -332,8 +410,21 @@ methods::setMethod(
             )
           }
         }
-        # If threshold is found, check if it has values or is extinct?
+
+        # Apply threshold to suitability projections if added as constraint
+        if("threshold" %in% names(scenario_constraints)){
+          if(scenario_constraints$threshold$method=="threshold"){
+            out <- terra::mask(out, baseline_threshold, maskvalues = 0,
+                               updatevalue = scenario_constraints$threshold$params["updatevalue"])
+          }
+        }
+
+        # If threshold is found, check if it has values, so if projected suitability falls below the threshold
         names(out_thresh) <-  paste0('threshold_', step)
+        if( is.na( terra::global(out_thresh, 'max', na.rm = TRUE) )[1] ){
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Threshold not found. Using last years threshold.')
+          out_thresh <- baseline_threshold
+        }
         if( terra::global(out_thresh, 'max', na.rm = TRUE)[,1] == 0){
           if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Thresholding removed all grid cells. Using last years threshold.')
           out_thresh <- baseline_threshold
@@ -450,12 +541,12 @@ methods::setMethod(
       proj <- terra::mask(proj, scenario_constraints$boundary$params$layer)
       # Get background and ensure that all values outside are set to 0
       proj[is.na(proj)] <- 0
-      proj <- terra::mask(proj, fit$model$background )
+      proj <- terra::mask(proj, background )
       # Also for thresholds if existing
       if(terra::nlyr(proj_thresh)>0 && terra::hasValues(proj_thresh) ){
         proj_thresh <- terra::mask(proj_thresh, scenario_constraints$boundary$params$layer)
         proj_thresh[is.na(proj_thresh)] <- 0
-        proj_thresh <- terra::mask(proj_thresh, fit$model$background )
+        proj_thresh <- terra::mask(proj_thresh, background )
       }
     }
 
@@ -520,15 +611,32 @@ methods::setMethod(
     # --------------------------------- #
     # # # # # # # # # # # # # # # # # # #
     # Finally convert to stars and rename
-    proj <- stars::st_as_stars(proj,
-                               crs = sf::st_crs(new_crs)
-    ); names(proj) <- 'suitability'
+    if(terra::nlyr(proj)==1){
+      # For layers with a single time step, use conversion function
+      proj <- raster_to_stars(proj)
+      names(proj) <- 'suitability'
+    } else {
+      proj <- stars::st_as_stars(proj,
+                                 crs = sf::st_crs(new_crs)
+      ); names(proj) <- 'suitability'
+    }
 
     if(terra::hasValues(proj_thresh)){
-      # Add the thresholded maps as well
-      proj_thresh <- stars::st_as_stars(proj_thresh,
-                                       crs = sf::st_crs(new_crs)
-      ); names(proj_thresh) <- 'threshold'
+      if(terra::nlyr(proj_thresh)==1){
+        if(is.na(terra::time(proj_thresh))) terra::time(proj_thresh) <- terra::time(proj)
+        proj_thresh <- raster_to_stars(proj_thresh)
+        names(proj_thresh) <- 'threshold'
+      } else {
+        # Small check as there are bugs with categorical data
+        if(terra::is.factor(proj_thresh[[1]])) {
+          proj_thresh <- terra::as.int(proj_thresh)
+          proj_thresh[proj_thresh<0] <- 0 # Negative values (sometimes occur from factor conversion) should be 0
+        }
+        # Add the thresholded maps as well
+        proj_thresh <- stars::st_as_stars(proj_thresh,
+                                          crs = sf::st_crs(new_crs)
+        ); names(proj_thresh) <- 'threshold'
+      }
       # Correct band if different
       if(all(!stars::st_get_dimension_values(proj, 3) != stars::st_get_dimension_values(proj_thresh, 3 ))){
         proj_thresh <- stars::st_set_dimensions(proj_thresh, 3, values = stars::st_get_dimension_values(proj, 3))

@@ -53,7 +53,7 @@ methods::setMethod(
       modelobject <- deparse(substitute(fit))
     } else {
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow', "Saving model directly in scenario object!")
-      modelobject <- fit
+      modelobject <- fit$clone(deep = TRUE)
     }
     modelid <- fit$id
 
@@ -61,7 +61,6 @@ methods::setMethod(
     if(!is.null(limits)){
       # Convert to polygon if raster
       if(inherits(limits,'SpatRaster')){
-        if(terra::is.factor(limits)) stop('Provided limit raster needs to be ratified (categorical)!')
         # Remove 0 from ratified raster assuming this is no-data
         limits[limits == 0] <- NA
         limits <- sf::st_as_sf( terra::as.polygons(limits, trunc = TRUE, dissolve = TRUE) )
@@ -91,7 +90,6 @@ methods::setMethod(
     }
     # Create BiodiversityScenario object
     sc <- BiodiversityScenario$new()
-    sc$t <- modelobject
     sc$modelobject <- modelobject
     sc$modelid <- modelid
     sc$limits <- limits

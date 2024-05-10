@@ -1,5 +1,5 @@
 # Test scenario creation and constraints
-test_that('Testing functions for spatial-temporal data in stars', {
+test_that('Testing data prep functions for spatial-temporal data in stars', {
 
   skip_if_not_installed('geosphere')
   skip_if_not_installed('cubelyr')
@@ -61,7 +61,47 @@ test_that('Testing functions for spatial-temporal data in stars', {
     new <- interpolate_gaps(pred_future, date_interpolation = "annual")
   )
   expect_length(new, 9)
-  expect_length(stars::st_get_dimension_values(new, 3), 81)
+  expect_length(stars::st_get_dimension_values(new, "time"), 81)
+
+  # --- #
+  # Make transformations
+  test <- pred_future[1]
+  expect_no_error(tt <- predictor_transform(test, option = 'scale'))
+  expect_length(tt, 1)
+  expect_no_error(tt <- predictor_transform(test, option = 'norm'))
+  expect_length(tt, 1)
+  expect_lte(max(tt[[1]], na.rm = TRUE), 1)
+  expect_no_error(tt <- predictor_transform(test, option = 'windsor'))
+  expect_length(tt, 1)
+  expect_no_error(tt <- predictor_transform(test, option = 'percentile'))
+  expect_length(tt, 1)
+
+  # --- #
+  # Create derivates of stars data for testing
+  test <- pred_future[1]
+  expect_length(test, 1)
+  # Nothing
+  expect_no_error(new <- predictor_derivate(test, option = "none"))
+  expect_length(new, 1); expect_true(utils::hasName(new,"bio01"))
+  # Quadratic transform
+  expect_no_error(new <- predictor_derivate(test, option = "quad"))
+  expect_length(new, 2); expect_true(utils::hasName(new,"bio01"))
+  # Hinge transform
+  expect_no_error(new <- predictor_derivate(test, option = "hinge", nknots = 4))
+  expect_length(new, 5); expect_true(utils::hasName(new,"bio01"))
+  # Threshold transform
+  expect_no_error(new <- predictor_derivate(test, option = "thresh",nknots = 4))
+  expect_length(new, 4);expect_true(utils::hasName(new,"bio01"))
+  # Binning
+  expect_no_error(new <- predictor_derivate(test, option = "bin",nknots = 4))
+  expect_length(new, 2);expect_true(utils::hasName(new,"bio01"))
+  # Interaction
+  test <- pred_future[1:2]
+  expect_length(test, 2)
+  expect_error(new <- predictor_derivate(test, option = "interaction"))
+  expect_no_error(new <- predictor_derivate(test, option = "interaction", int_variables = names(test)))
+  expect_length(new, 3)
+  expect_true(utils::hasName(new,"bio01"));expect_true(utils::hasName(new,"bio12"))
 
   # --- #
   # Create threshold
@@ -138,7 +178,7 @@ test_that('Scenarios and constraints', {
   # Fit a model and add a threshold to it
   fit <- distribution(background) |>
     add_biodiversity_poipa(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
-    add_predictors(pred_current) |>
+    add_predictors(pred_current,transform = 'scale') |>
     engine_glm() |>
     train("test", inference_only = FALSE, verbose = FALSE) |>
     threshold(method = "perc", value = .3)
@@ -160,7 +200,7 @@ test_that('Scenarios and constraints', {
   sc <- scenario(fit)
   expect_s3_class(sc$get_data(), "Waiver")
   expect_type(sc$modelobject, "character")
-  sc <- scenario(fit, copy_model = TRUE)
+  suppressMessages( sc <- scenario(fit, copy_model = TRUE) )
   expect_s3_class(sc$get_model(),"DistributionModel")# Model correctly inherited?
   expect_equal(sc$modelid, fit$model$id)
 
@@ -169,10 +209,8 @@ test_that('Scenarios and constraints', {
   expect_length(x$get_predictor_names(), 9)
   x <- sc |> add_predictors(pred_future, transform = "scale")
   expect_length(x$get_predictor_names(), 9)
-  x <- sc |> add_predictors(pred_future, transform = "norm")
-  expect_length(x$get_predictor_names(), 9)
-  # x <- sc |> add_predictors(pred_future, transform = "pca")
-  # expect_length(x$get_predictor_names(), 9)
+  # Error as we used a different transform earlier
+  expect_error( x <- sc |> add_predictors(pred_future, transform = "norm") )
 
   expect_equal(x$get_predictor_names(), names(pred_current))
   expect_length(x$get_timeperiod(), 2)
@@ -222,7 +260,9 @@ test_that('Scenarios and constraints', {
   expect_error( mod <- x |> project() )
 
   # Apply some transformations
-  x <- sc |> add_predictors(obj, transform = "norm")
+  expect_error( x <- sc |> add_predictors(obj, transform = "norm") )
+  # This uses the correct transformation
+  expect_no_error( x <- sc |> add_predictors(obj, transform = "scale") )
   expect_length(x$get_predictor_names(), 9)
 
   # Predict
@@ -297,6 +337,12 @@ test_that('Scenarios and constraints', {
     add_constraint_minsize(value = 4, unit = "pixel") |> project()
   expect_equal(names(mod3$get_constraints()), "min_size")
   expect_s3_class( mod3$get_data()['threshold'], "stars")
+
+  # Threshold constraint
+  expect_no_error(
+    mod4 <- mod |> threshold(value = .2) |> add_constraint_threshold() |> project()
+  )
+  expect_equal(names(mod4$get_constraints()), "threshold")
 
   # --- #
   # Check that stabilization works

@@ -116,6 +116,28 @@ built_formula_gdb <- function(model, id, x, settings){
       }
     }
 
+    # update priors
+    if(!is.Waiver(priors)){
+      supplied_priors <- as.vector(priors$varnames())
+      for(v in supplied_priors){
+        if(v %notin% all.vars(form)) next() # In case the variable has been removed
+
+        # remove prior from predictors
+        form <- stats::formula(stats::drop.terms(stats::terms(form), grep(v, attr(stats::terms(form),
+                                                                                  "term.labels")),
+                                   keep.response = TRUE))
+
+        # construct prior predcitor
+        v_temp <- paste0('bmono(', v, ', constraint = \'', priors$get(v) ,'\'', ')',
+                         collapse = ' + ' )
+
+        # adding updated predictor
+        form <- stats::update.formula(old = form, new = paste(". ~ . + ", v_temp))
+
+      }
+    }
+
+
     assertthat::assert_that(
       is.formula(form),
       attr(stats::terms(form), "response")==1, # Has Response

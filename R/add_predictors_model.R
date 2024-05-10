@@ -1,7 +1,7 @@
 #' @include class-biodiversitydistribution.R class-predictors.R
 NULL
 
-#' Add predictors from a fitted model to a Biodiversity distribution object
+#' Add predictions from a fitted model to a Biodiversity distribution object
 #'
 #' @description This function is a convenience wrapper to add the output from a
 #' previous fitted [`DistributionModel`] to another [`BiodiversityDistribution-class`]

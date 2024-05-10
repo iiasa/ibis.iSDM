@@ -578,6 +578,7 @@ engine_inlabru <- function(x,
 
         # Specify priors if set
         if(!is.Waiver(model$priors)){
+          assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
           # If a prior has been specified
           if(any(model$priors$varnames() == model$predictors_types$predictors[i])){
             vn <- model$priors$varnames()[which(model$priors$varnames() == model$predictors_types$predictors[i])]
@@ -957,10 +958,11 @@ engine_inlabru <- function(x,
     obj <- DistributionModel # Make a copy to set new functions
 
     # Projection function
-    obj$set("public", "project", function(newdata, form = NULL,
+    obj$set("public", "project", function(newdata, type = NULL, form = NULL,
                                           n.samples = 1000, layer = "mean"){
       assertthat::assert_that('fit_best' %in% names(self$fits),
                               is.data.frame(newdata) || is.matrix(newdata) || inherits(newdata,'SpatialPixelsDataFrame'),
+                              is.character(type) || is.null(type),
                               is.null(form) || is.character(form) || is.formula(form)
       )
       # Get model
@@ -968,6 +970,10 @@ engine_inlabru <- function(x,
       model <- self$model
       # Also get settings for bias values
       settings <- self$settings
+      # Set type
+      if(is.null(type)) type <- self$settings$get("type")
+      type <- match.arg(type, c("link", "response"), several.ok = FALSE)
+      settings$set("type", type)
 
       # Clamp?
       if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
@@ -984,17 +990,22 @@ engine_inlabru <- function(x,
       }
 
       # If newdata is not yet a SpatialPixel object, transform
+      # FIXME: This ultimately needs to be removed as we can do perfectly without sp
       if(!inherits(newdata,'SpatialPixelsDataFrame')){
         assertthat::assert_that(
           assertthat::has_name(newdata,c('x','y'))
         )
         # Convert predictors to SpatialPixelsDataFrame as required for inlabru
-        newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
-                                              data = newdata[, names(newdata) %notin% c('x','y')],
-                                              proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
+        suppressWarnings(
+          newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
+                                                data = newdata[, names(newdata) %notin% c('x','y')],
+                                                proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
+          )
         )
         newdata <- subset(newdata, stats::complete.cases(newdata@data)) # Remove missing data
-        newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
+        suppressWarnings(
+          newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
+        )
       }
       # Check that model variables are in prediction dataset
       assertthat::assert_that(
@@ -1003,7 +1014,9 @@ engine_inlabru <- function(x,
 
       if(is.null(form)){
         # Try and guess backtransformation
-        backtransf <- ifelse(mod$bru_info$lhoods[[1]]$family == 'poisson','exp','logistic')
+        if(type=="response"){
+          backtransf <- ifelse(mod$bru_info$lhoods[[1]]$family == 'poisson','exp','logistic')
+        } else { backtransf <- "" }
 
         # Build the formula
         if(length(model$biodiversity)>1){
@@ -1054,6 +1067,9 @@ engine_inlabru <- function(x,
         )
         names(out) <- c("mean", "sd", "q05", "q50", "q95", "cv")
       }
+      # Get only the respective layer for projection (consistency)
+      out <- out[layer]
+
       # Return result
       return(out)
     },overwrite = TRUE)
@@ -1066,8 +1082,18 @@ engine_inlabru <- function(x,
       # Check that provided model exists and variable exist in model
       mod <- self$get_data('fit_best')
       model <- self$model
+
+      # FIXME: Added all predictor datasets if multiple are present, but something
+      # is not really working. Output looks strange
+
       df <- model$biodiversity[[1]]$predictors
-      df <- subset(df, select = mod$names.fixed[mod$names.fixed != "Intercept"])
+      if (length(model$biodiversity) > 1) {
+        for(i in 2:length(model$biodiversity)) {
+          df <- cbind(df,  model$biodiversity[[i]]$predictors[, !names(model$biodiversity[[i]]$predictors) %in% names(df)])
+        }
+      }
+
+      df <- subset(df, select = mod$names.fixed[grep("Intercept", mod$names.fixed, invert = TRUE)])
 
       assertthat::assert_that(inherits(mod,'bru'),
                               'model' %in% names(self),
@@ -1090,7 +1116,7 @@ engine_inlabru <- function(x,
 
       if(is.null(newdata)){
         # Calculate range of predictors
-        rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+        rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                      function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
         assertthat::assert_that(nrow(rr)>1, ncol(rr)>=1)

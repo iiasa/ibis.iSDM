@@ -92,6 +92,14 @@ those created from an a-priori cross-validation procedure.
 
 For \code{\link{BiodiversityScenario}} objects, adding this function to the processing
 pipeline stores a threshold attribute in the created \link{scenario} object.
+
+For \link{BiodiversityScenario} objects a set \code{threshold()} simply indicates that
+the projection should create and use thresholds as part of the results.
+The threshold values for this are either taken from the provided model or
+through an optional provide parameter \code{value}.
+
+If instead the aim is to apply thresholds to each step of the suitability
+projection, see \code{\link[=add_constraint_threshold]{add_constraint_threshold()}}.
 }
 \details{
 The following options are currently implemented:

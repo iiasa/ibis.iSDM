@@ -1,4 +1,22 @@
-# ibis.iSDM 0.1.2 (current dev branch)
+# ibis.iSDM 0.1.3 (current dev branch)
+
+#### New features
+* Add functions that creates HTML file base on `DistributionModel`.
+* Added new engine `engine_scampr()` for model-based integration.
+* Allow projection of models using `method_integration = "predictor"`
+
+#### Minor improvements and bug fixes
+* Small fixes to ensure `boruta` filtering works (again)?
+* Small fix to parameter in `train()` #102 @jeffreyhanson
+* Small helper function for combining 2 different formula objects `combine_formulas()`
+* Small bug fixes dealing with `scenario()` projections and limits, plus unit tests #104
+* Bug fixes with adding `predictor_derivate()` to scenario predictors and added unit tests #106
+* Several fixes related to different engines and priors.
+* Changed default output for netcdf files to multidimensional arrays #109
+* :fire: hot fixes for scenario scaling and normalization issue #113
+* :bug: fix so that projection works with different extents than used for inference.
+
+# ibis.iSDM 0.1.2
 
 #### New features
 * Switched object structure to `R6` throughout for improved data and memory handling #44

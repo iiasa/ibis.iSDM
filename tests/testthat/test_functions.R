@@ -33,12 +33,11 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
 
   # PCA
   expect_error( predictor_transform(r1, option = "pca") )
-  # MJ: Some weird terra downstream fixes broke this at the moment?
-  # t3 <- predictor_transform(c(r1, r2), option = "pca")
-  # expect_s4_class(t3, "SpatRaster")
-  # t3b <- predictor_transform(c(r1, r2, r3), option = "pca",pca.var = 1)
-  # expect_s4_class(t3b, "SpatRaster")
-  # expect_equal(terra::nlyr(t3b), 3)
+  t3 <- predictor_transform(c(r1, r2), option = "pca")
+  expect_s4_class(t3, "SpatRaster")
+  t3b <- predictor_transform(c(r1, r2, r3), option = "pca",pca.var = 1)
+  expect_s4_class(t3b, "SpatRaster")
+  expect_equal(terra::nlyr(t3b), 3)
 
   # windsorization
   t4 <- predictor_transform(r1, option = "windsor")
@@ -47,7 +46,7 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
 
   # Percentile
   t5 <- predictor_transform(r1, option = "percentile")
-  expect_length( terra::levels(t5)[[1]][,1] , 10)
+  expect_length( unique(t5)[,1] , 10)
 
   # Reverse jackknife
   t6 <- predictor_transform(r1, option = "revjack")

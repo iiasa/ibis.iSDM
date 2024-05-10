@@ -127,18 +127,21 @@ BiodiversityScenario <- R6::R6Class(
 
     #' @description
     #' Get the actual model used for projection
+    #' @param copy A [`logical`] flag on whether a deep copy should be created.
     #' @return A DistributionModel object.
-    get_model = function(){
+    get_model = function(copy = FALSE){
       if(is.Waiver(self$modelobject)) return( new_waiver() )
       else {
         if(inherits(self$modelobject, "DistributionModel")){
-          return( self$modelobject )
+          obj <- self$modelobject
         } else {
           if(!exists(self$modelobject)) return( FALSE ) else {
-            return( get(self$modelobject) )
+            obj <- get(self$modelobject)
           }
         }
       }
+      if(copy) obj <- obj$clone(deep = TRUE)
+      return( obj )
     },
 
     #' @description
@@ -185,6 +188,14 @@ BiodiversityScenario <- R6::R6Class(
     #' @return A [`list`] with the constraints within the scenario.
     get_constraints = function(){
       return( self$constraints )
+    },
+
+    #' @description
+    #' Remove contraints from model
+    #' @return Invisible
+    rm_constraints = function(){
+      self$constraints <- new_waiver()
+      invisible()
     },
 
     #' @description
@@ -253,13 +264,19 @@ BiodiversityScenario <- R6::R6Class(
 
     #' @description
     #' Set new constrains
-    #' @param x A [`SpatRaster`] object to be added as as constraint.
+    #' @param x A [`list`] object with constraint settings.
     #' @return This object.
     set_constraints = function(x){
+      assertthat::assert_that(is.list(x))
       if(!is.Waiver(self$get_constraints())){
         cr <- self$get_constraints()
-        # FIXME: Remove duplicates
-        self$constraints <- c(cr, x)
+        if(names(x) %in% names(cr)){
+          cr[[names(x)]] <- NULL
+          self$constraints <- c(cr, x)
+        } else {
+          # Combine lists
+          self$constraints <- c(cr, x)
+        }
       } else {
         self$constraints <- x
       }
@@ -476,6 +493,11 @@ BiodiversityScenario <- R6::R6Class(
 
       # Not get the baseline raster
       baseline <- self$get_model()$get_data(thresh_reference)
+      # Set all NA values to 0 (in case projected was limited)
+      if(obj$has_limits()){
+        baseline[is.na(baseline)] <- 0
+        baseline <- terra::mask(baseline, obj$model$background) # Mask with background
+      }
       # Get only the variable
       if(terra::nlyr(baseline)>1) baseline <- terra::subset(baseline, grep(variable, names(baseline)))
       # And the last scenario prediction
@@ -651,6 +673,16 @@ BiodiversityScenario <- R6::R6Class(
       return(
         tibble::add_column( summarise_change(scenario), runname = runname, .before = 1)
       )
+    },
+
+    #' @description
+    #' Calculate slopes across the projection
+    #' @param what A [`character`] with layer to be plotted (default: \code{"suitability"}).
+    #' @param oftype [`character`] of the output type.
+    #' @return A plot of the scenario slopes
+    plot_scenarios_slope = function(what = 'suitability', oftype = "stars"){
+      self$calc_scenarios_slope(what = what, plot = TRUE, oftype = oftype)
+      invisible()
     },
 
     #' @description
@@ -843,19 +875,15 @@ BiodiversityScenario <- R6::R6Class(
           writeGeoTiff(ras_migclim, fname = fname, dt = dt)
         }
       } else if(type %in% c('nc','ncdf')) {
-        # Save as netcdf, for now in individual files
-        for(i in 1:length(ras)){
-          # Band specific output
-          fname2 <- paste0( tools::file_path_sans_ext(fname), "__", names(ras)[i], tools::file_ext(fname))
-          stars::write_stars(
-            obj = ras,
-            layer = 1:length(ras),
-            dsn = fname2,
-            type = ifelse(is.factor(ras[[1]]), "Byte", dtstars),
-            NA_value = NA_real_,
-            update = ifelse(file.exists(fname2), TRUE, FALSE),
-            normalize_path = TRUE,
-            progress = TRUE
+        # Save as netcdf. In this case we check if it is a single
+        # or multi-dimensional array
+        if(length(ras)>1){
+          rasm <- ras |> merge() # Merge variables into a dimension
+          # Write as multi-dimensional netcdf
+          suppressWarnings(
+            stars::write_mdim(x = rasm,
+                              filename = fname,
+                              as_float = ifelse(dt %in% c("Float32","Float64"),TRUE,FALSE))
           )
         }
         if(!is.Waiver(self$scenarios_migclim)){

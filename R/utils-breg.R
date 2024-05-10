@@ -1,6 +1,7 @@
 #' Built formula for BREG model
 #'
 #' @description This function built a formula for a `engine_breg()` model.
+#' @param model A [`list()`] object containing the full prepared model data.
 #' @param obj A [`list()`] object containing the prepared model data for a given
 #' biodiversity dataset.
 #'
@@ -11,8 +12,9 @@
 #' @noRd
 #'
 #' @keywords internal
-built_formula_breg <- function(obj){
+built_formula_breg <- function(model, obj){
   assertthat::assert_that(
+    is.list(model),
     is.list(obj),
     length(obj) > 0,
     assertthat::has_name(obj, "observations"),
@@ -44,6 +46,10 @@ built_formula_breg <- function(obj){
     )
   }
 
+  # Add offset here if found. Generally breg does not support offsets, but
+  # This helper function is used by other engines as well as generic
+  if(!is.Waiver(model$offset) ){ form <- stats::update.formula(form, paste0('~ . + offset(spatial_offset)') ) }
+
   return(form)
 }
 
@@ -68,6 +74,7 @@ built_formula_breg <- function(obj){
 #'
 #' @keywords internal
 setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
+
   assertthat::assert_that(
     is.formula(form),
     is.data.frame(data),
@@ -75,11 +82,15 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
     is.null(exposure) || is.numeric(exposure),
     is.character(family)
   )
+
   family <- match.arg(family, c("poisson", "binomial"), several.ok = FALSE)
+
+  # get term labels
+  term_lab <- attr(stats::terms.formula(form),"term.labels")
 
   # Check that all terms are in the data.frame
   assertthat::assert_that(
-    all( attr(stats::terms.formula(form),"term.labels") %in% names(data) ),
+    all(term_lab %in% names(data)),
     "observed" %in% names(data)
   )
   # Create model matrix
@@ -94,11 +105,12 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 
   # Optional coefficient estimates
   # If any are set, define optional coefficient estimates
+  # MH: This adds prior even if not present in form
   co <- vector(length = ncol(mm));co[] <- 0;names(co) <- colnames(mm)
   co["(Intercept)"] <- mean( mean(data[["observed"]]) )
   for(val in vars){
     z <- priors$get(val, what = "value")
-    if(is.null(z)) next()
+    if(is.null(z) || !val %in% term_lab) next()
     co[val] <- z
   }
 
@@ -114,7 +126,7 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
   # Now set priors for those where set
   for(val in vars){
     z <- priors$get(val, what = "prob")
-    if(is.null(z)) next()
+    if(is.null(z) || !val %in% term_lab) next()
     co.ip[val] <- z
   }
 

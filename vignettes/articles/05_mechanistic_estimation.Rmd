@@ -86,7 +86,6 @@ op <- try({
                         quiet = TRUE,
                         build_vignettes = FALSE) # For steps
 },silent = TRUE)
-if(inherits(op, "try-error")) stop("steps could not be installed for this vignette!")
 ```
 
 ### Adding dispersal to scenarios with `KISSMig`
@@ -263,42 +262,45 @@ assumptions have been questioned before and should be interpreted with caution (
 __Users should always clearly understand the rationale behind parameter choices!__
 
 ```{r steps}
-require("steps")
+if("steps" %in% installed.packages()[,1]){
+  require("steps")
+  
+  # Define some arbitrary vital rates for the transition for this purpose
+  # Define vital rates
+  vt <- matrix(c(0.0,0.52,0.75,
+                0.52,0.28,0.0,
+                0.0,0.52,0.75),
+                nrow = 3, ncol = 3, byrow = TRUE)
+  colnames(vt) <- rownames(vt) <- c('juvenile','subadult','adult')
+  
+  # We again specify a scenario as before using the fitted model
+  prj <- scenario(fit) |> 
+    # Apply the same variable transformations as above. 
+    add_predictors(pred_future, transform = 'scale') |> 
+    # Calculate thresholds at each time step. The threshold estimate is taken from 
+    # the fitted model object.
+    threshold() |> 
+    # We then specify that we we 
+    simulate_population_steps(vital_rates = vt)
+  
+  # Notice how we have added steps as additional simulation outcome
+  prj
+  # Now project
+  scenario1 <- project(prj)
+  plot(scenario1, "population")
+  
+  # Also see a different one where we add a dispersal constraint and density dependence
+  dispersal <- steps::fast_dispersal(dispersal_kernel = steps::exponential_dispersal_kernel(distance_decay = 1))
+  scenario2 <- project(prj |>
+                         simulate_population_steps(vt,
+                                                   dispersal = dispersal,
+                                                   density_dependence = steps::ceiling_density(3) ) )
+  
+  # We can see that the dispersal constraint and higher density dependence cleary
+  # results in a population abundance that tends to be concentrated in central Europe.
+  plot(scenario2, "population")
 
-# Define some arbitrary vital rates for the transition for this purpose
-# Define vital rates
-vt <- matrix(c(0.0,0.52,0.75,
-              0.52,0.28,0.0,
-              0.0,0.52,0.75),
-              nrow = 3, ncol = 3, byrow = TRUE)
-colnames(vt) <- rownames(vt) <- c('juvenile','subadult','adult')
-
-# We again specify a scenario as before using the fitted model
-prj <- scenario(fit) |> 
-  # Apply the same variable transformations as above. 
-  add_predictors(pred_future, transform = 'scale') |> 
-  # Calculate thresholds at each time step. The threshold estimate is taken from 
-  # the fitted model object.
-  threshold() |> 
-  # We then specify that we we 
-  simulate_population_steps(vital_rates = vt)
-
-# Notice how we have added steps as additional simulation outcome
-prj
-# Now project
-scenario1 <- project(prj)
-plot(scenario1, "population")
-
-# Also see a different one where we add a dispersal constraint and density dependence
-dispersal <- steps::fast_dispersal(dispersal_kernel = steps::exponential_dispersal_kernel(distance_decay = 1))
-scenario2 <- project(prj |>
-                       simulate_population_steps(vt,
-                                                 dispersal = dispersal,
-                                                 density_dependence = steps::ceiling_density(3) ) )
-
-# We can see that the dispersal constraint and higher density dependence cleary
-# results in a population abundance that tends to be concentrated in central Europe.
-plot(scenario2, "population")
+}
 
 ```
 

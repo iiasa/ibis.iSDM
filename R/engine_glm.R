@@ -438,7 +438,7 @@ engine_glm <- function(x,
               }
 
               # Calculate range of predictors
-              rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+              rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                            function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
               if(is.null(newdata)){
@@ -677,10 +677,19 @@ engine_glm <- function(x,
       assertthat::assert_that(nrow(pred_glm)>0, nrow(pred_glm) == nrow(df))
 
       # Now create spatial prediction
-      prediction <- fill_rasters(pred_glm,
-                                 model_to_background(model)
-      )
-
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+      } else {
+        assertthat::assert_that(utils::hasName(df,"x")&&utils::hasName(df,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(df[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+      }
+      prediction <- fill_rasters(pred_glm, prediction)
       return(prediction)
     }, overwrite = TRUE)
 

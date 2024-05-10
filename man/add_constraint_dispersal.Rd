@@ -32,6 +32,21 @@ constraints.}
 Add dispersal constraint to an existing \code{scenario}
 }
 \details{
+\strong{Dispersal}:
+Parameters for \code{'method'}:
+\itemize{
+\item \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
+\item \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+#' The negative exponential kernel is defined as:
+\deqn{f(x) = \frac{1}{2 \pi a^2} e^{-\frac{x}{a}}}{fx = 1 / (2 * pi * a^2) * exp(-x / a)}
+where \eqn{a} is the mean dispersal distance (in m) divided by 2.
+\item \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
+\item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
+}
+
+A comprehensive overview of the benefits of including dispersal constrains in
+species distribution models can be found in Bateman et al. (2013).
+
 The following additional parameters can bet set:
 \itemize{
 \item \code{pext}: \code{\link{numeric}} indicator for \code{`kissmig`} of the probability a
@@ -39,6 +54,17 @@ colonized cell becomes uncolonised, i.e., the species gets locally extinct
 (Default: \code{0.1}).
 \item \code{pcor}: \code{\link{numeric}} probability that corner cells are considered in the
 3x3 neighbourhood (Default: \code{0.2}).
+}
+}
+\note{
+Unless otherwise stated, the default unit of supplied distance values (e.g. average dispersal
+distance) should be in \code{"m"}.
+}
+\references{
+\itemize{
+\item Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013).
+Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact
+modelling. Diversity and Distributions, 19(10), 1224-1234.
 }
 }
 \seealso{
@@ -49,6 +75,7 @@ Other constraint:
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_connectivity}()},
 \code{\link{add_constraint_minsize}()},
+\code{\link{add_constraint_threshold}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

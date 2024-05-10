@@ -141,6 +141,8 @@ methods::setMethod(
 
     # data.frames will be written by default as csv files for consistency
     fname <- paste0( tools::file_path_sans_ext(fname), ".csv")
+    if(file.exists(fname)) warning('Overwritting existing file...')
+
     utils::write.csv(x = mod, file = fname, ...)
     invisible()
   }
@@ -162,14 +164,27 @@ methods::setMethod(
       inherits(mod, "stars"), msg = "Supplied list object needs to be a stars object."
     )
 
+    if(file.exists(fname)) warning('Overwritting existing file...')
+
     # Define filename
     fname <- paste0( tools::file_path_sans_ext(fname), ".nc")
-    # TODO: Align with write NetCDF function further below
-    stars::write_stars(
-      obj = mod,
-      dsn = fname,
-      layer = names(mod),
-      ...)
+
+    # If there are multiple bands, merge first use mdim
+    if(length(mod)>1){
+      # Converge variable names into attributes
+      modm <- merge(mod)
+      suppressWarnings(
+        stars::write_mdim(x = modm,
+                          filename = fname,
+                          ...)
+      )
+    } else {
+      stars::write_stars(
+        obj = mod,
+        dsn = fname,
+        layer = names(mod),
+        ...)
+    }
     invisible()
   }
 )
@@ -201,6 +216,8 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   if(any(is.factor(file))){
     file <- terra::droplevels(file)
   }
+
+  if(file.exists(fname)) warning('Overwritting existing file...')
 
   # Save output
   terra::writeRaster(
@@ -242,6 +259,8 @@ writeNetCDF <- function(file, fname,
   check_package('ncdf4')
   if(!isNamespaceLoaded("ncdf4")) { attachNamespace("ncdf4");requireNamespace('ncdf4') }
   if(!assertthat::has_extension(fname,"nc")) fname <- paste0(fname,".nc")
+
+  if(file.exists(fname)) warning('Overwritting existing file...')
 
   # Output NetCDF file
   terra::writeCDF(x = file,
@@ -512,25 +531,45 @@ methods::setMethod(
     )
     # Check that provided model is correct
     assertthat::assert_that(inherits(mod, "DistributionModel"),
-                            !is.Waiver(mod$get_data("fit_best")) )
+                            !is.Waiver(mod$get_data("fit_best")))
     # And model format
-    assertthat::assert_that( assertthat::has_extension(fname, "rds"))
+    assertthat::assert_that(assertthat::has_extension(fname, "rds"))
 
     x <- mod$clone()
 
     # Don't save the predictors object as it has distinct memory points
     if(inherits(x$model$predictors_object, "PredictorDataset")){
-      ats <- attributes( x$model$predictors_object$get_data() )
+      ats <- attributes(x$model$predictors_object$get_data())
+      ats$cpp <- NULL
+      ats$id <- x$model$predictors_object$get_id()
       x$model$predictors_object <- ats
     }
 
     # If slim, remove some ballast
     if(slim){
       if(!is.Waiver(x$get_data("prediction"))) x$fits$prediction <- NULL
+      if (!is.Waiver(x$.internals)) x$.internals <- NULL
+    # Save the prediction as data.frame if set
     } else {
-      # Save the prediction as data.frame if set
-      if(!is.Waiver(x$get_data("prediction"))){
-        x$fits$prediction <- terra::as.data.frame(x$get_data(), xy = TRUE, na.rm = NA)
+      if(!is.Waiver(x$get_data("prediction"))) {
+        x$fits$prediction <- terra::as.data.frame(x$get_data("prediction"), xy = TRUE, na.rm = FALSE)
+      }
+
+      # Also save .internals as data.frame
+      if (!is.Waiver(x$.internals)) {
+        for (i in 1:length(x$.internals)) {
+          if (inherits(x$.internals[[i]]$model$model$predictors_object, "PredictorDataset")) {
+            ats <- attributes(x$.internals[[i]]$model$model$predictors_object$get_data())
+            ats$cpp <- NULL
+            ats$id <- x$.internals[[i]]$model$model$predictors_object$get_id()
+            x$.internals[[i]]$model$model$predictors_object <- ats
+          }
+
+          if (!is.Waiver(x$.internals[[i]]$model$get_data("prediction"))) {
+            x$.internals[[i]]$model$fits$prediction <- terra::as.data.frame(x$.internals[[i]]$model$get_data("prediction"),
+                                                                            xy = TRUE, na.rm = FALSE)
+          }
+        }
       }
     }
 
@@ -593,17 +632,11 @@ methods::setMethod(
 
     # wrap predictors
     if(inherits(x$model$predictors_object, "PredictorDataset")){
-
-      # get raster
       pred_ras <- x$model$predictors_object$get_data()
-
-      # get attributes
       ats <- attributes(pred_ras)
-
-      # wrap raster to ship
+      ats$cpp <- NULL
+      ats$id <- x$model$predictors_object$get_id()
       ats$ras <- terra::wrap(pred_ras)
-
-      # replace object
       x$model$predictors_object <- ats
     }
 
@@ -611,11 +644,29 @@ methods::setMethod(
     if(!is.Waiver(x$get_data("prediction"))){
       x$fits$prediction <- terra::wrap(x$get_data("prediction"))
     }
+
+    # wrap internal predictions
+    if (!is.Waiver(x$.internals)) {
+      for (i in 1:length(x$.internals)) {
+        if(inherits(x$.internals[[i]]$model$model$predictors_object, "PredictorDataset")) {
+          pred_ras <- x$.internals[[i]]$model$model$predictors_object$get_data()
+          ats <- attributes(pred_ras)
+          ats$cpp <- NULL
+          ats$id <- x$.internals[[i]]$model$model$predictors_object$get_id()
+          ats$ras <- terra::wrap(pred_ras)
+          x$.internals[[i]]$model$model$predictors_object <- ats
+        }
+
+        if(!is.Waiver(x$.internals[[i]]$model$get_data("prediction"))){
+          x$.internals[[i]]$model$fits$prediction <- terra::wrap(x$.internals[[i]]$model$get_data("prediction"))
+        }
+      }
+    }
+
     # Save output
     if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Wrapping raster layers...'))
 
     return(x)
-
   }
 )
 
@@ -678,9 +729,8 @@ methods::setMethod(
 
     # Convert predictions back to terra if data.frame
     model <- mod$model
-    if(is.list( model$predictors_object ) ){
-      ras <- terra::rast(model$predictors, type = "xyz",
-                         crs = terra::crs(model$background))
+    if (is.list(model$predictors_object)) {
+      ras <- terra::rast(model$predictors, type = "xyz", crs = terra::crs(model$background))
       assertthat::assert_that(all(names(ras) %in% model$predictors_names))
       # Get any previously set attributes
       ats <- model$predictors_object
@@ -689,10 +739,8 @@ methods::setMethod(
       attr(ras,'transform') <- ats[['transform']]
 
       # Make a new predictors object
-      o <- PredictorDataset$new(
-        id = new_id(),
-        data = ras
-      )
+      o <- PredictorDataset$new(id = ats$id, data = ras)
+
       assertthat::assert_that(all( o$get_names() %in% model$predictors_names ))
       if(is.Raster(ras)) mod$model$predictors_object <- o
       rm(o)
@@ -701,8 +749,7 @@ methods::setMethod(
     # Reload prediction if data.frame found
     if(is.data.frame(mod$fits$prediction)){
       if(nrow(mod$fits$prediction)>0){
-        ras <- terra::rast(mod$fits$prediction,
-                           type = "xyz",
+        ras <- terra::rast(mod$fits$prediction, type = "xyz",
                            crs = terra::crs(model$background))
         mod$fits$prediction <- ras
         rm(ras)
@@ -710,6 +757,41 @@ methods::setMethod(
         mod$fits$prediction <- NULL
       }
     }
+
+    # load data for .internals
+    if (!is.Waiver(mod$.internals)) {
+      for (i in 1:length(mod$.internals)) {
+        model <- mod$.internals[[i]]$model$model
+        if (is.list(model$predictors_object)) {
+          ras <- terra::rast(model$predictors, type = "xyz", crs = terra::crs(model$background))
+          assertthat::assert_that(all(names(ras) %in% model$predictors_names))
+          # Get any previously set attributes
+          ats <- model$predictors_object
+          attr(ras, "int_variables") <- ats[['int_variables']]
+          attr(ras, 'has_factors') <- ats[['has_factors']]
+          attr(ras,'transform') <- ats[['transform']]
+
+          # Make a new predictors object
+          o <- PredictorDataset$new(id = ats$id, data = ras)
+
+          assertthat::assert_that(all(o$get_names() %in% mod$.internals[[i]]$model$model$predictors_names))
+          if(is.Raster(ras)) mod$.internals[[i]]$model$model$predictors_object <- o
+          rm(o)
+        }
+
+        # Reload prediction if data.frame found
+        if(is.data.frame(mod$.internals[[i]]$model$fits$prediction)) {
+          if(nrow(mod$.internals[[i]]$model$fits$prediction)>0){
+            ras <- terra::rast(mod$.internals[[i]]$model$fits$prediction, type = "xyz",
+                               crs = terra::crs(model$background))
+            mod$.internals[[i]]$model$fits$prediction <- ras
+            rm(ras)
+          } else {
+            mod$.internals[[i]]$model$fits$prediction <- NULL
+          }
+        }
+      } # end of internals loop
+    } # end of internals present check
 
     # --- #
     # Make some checks #
@@ -801,36 +883,46 @@ methods::setMethod(
 
     # unwrap predictors
     if (is.list(x$model$predictors_object)) {
-
-      # Get any previously set attributes
       ats <- x$model$predictors_object
-
-      # unwrap raster
       ras <- terra::unwrap(ats[['ras']])
-
-      assertthat::assert_that(all(names(ras) %in% x$model$predictors_names))
-
       attr(ras, "int_variables") <- ats[['int_variables']]
       attr(ras, 'has_factors') <- ats[['has_factors']]
       attr(ras,'transform') <- ats[['transform']]
-
-      # Make a new predictors object
-      o <- PredictorDataset$new(
-        id = new_id(),
-        data = ras
-      )
+      o <- PredictorDataset$new(id = ats$id, data = ras)
       assertthat::assert_that(all(o$get_names() %in% x$model$predictors_names))
-
       if (is.Raster(ras)) x$model$predictors_object <- o
+      rm(o)
     }
 
     # unwrap prediction if data.frame found
     if (inherits(x = x$fits$prediction, what = "PackedSpatRaster")) {
-      ras <- terra::unwrap(x$fits$prediction)
-      x$fits$prediction <- ras
+      x$fits$prediction <- terra::unwrap(x$fits$prediction)
     } else {
       x$fits$prediction <- NULL
     }
+
+    # load data for .internals
+    if (!is.Waiver(x$.internals)) {
+      for (i in 1:length(x$.internals)) {
+        if (is.list(x$.internals[[i]]$model$model$predictors_object)) {
+          ats <- x$.internals[[i]]$model$model$predictors_object
+          ras <- terra::unwrap(ats[['ras']])
+          attr(ras, "int_variables") <- ats[['int_variables']]
+          attr(ras, 'has_factors') <- ats[['has_factors']]
+          attr(ras,'transform') <- ats[['transform']]
+          o <- PredictorDataset$new(id = ats$id, data = ras)
+          assertthat::assert_that(all(o$get_names() %in% x$.internals[[i]]$model$model$predictors_names))
+          if (is.Raster(ras)) x$.internals[[i]]$model$model$predictors_object <- o
+          rm(o)
+        }
+
+        if (inherits(x = x$.internals[[1]]$model$fits$prediction, what = "PackedSpatRaster")) {
+          x$.internals[[1]]$model$fits$prediction <- terra::unwrap(x$.internals[[1]]$model$fits$prediction)
+        } else {
+          x$.internals[[1]]$model$fits$prediction <- NULL
+        }
+      } # end if internals loop
+    } # end of internals check
 
     # Save output
     if(verbose && getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','green',paste0('Unwrapping raster layers...'))

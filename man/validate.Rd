@@ -64,6 +64,8 @@ The \code{'validate'} function calculates different validation
 metrics depending on the output type.
 
 The output metrics for each type are defined as follows:
+(where TP stands for true positive, TN for true negative,
+FP the false positive and FN the false negative)
 \strong{Continuous:}
 \itemize{
 \item \code{'n'} = Number of observations.
@@ -71,26 +73,27 @@ The output metrics for each type are defined as follows:
 \item \code{'mae'} = Mean Absolute Error, \deqn{ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} }
 \item \code{'logloss'} = Log loss, TBD
 \item \code{'normgini'} = Normalized Gini index, TBD
-\item \code{'cont.boyce'} = Continuous Boyce index, TBD
+\item \code{'cont.boyce'} = Continuous Boyce index, Ratio of predicted against expected frequency calculated over
+a moving window: \deqn{\frac{P_{i}{E_{i}} }}, where \deqn{ P_{i} = \frac{p_{i}}{\sum{j=1}^{b} p_{j} }} and \deqn{ E_{i} = \frac{a_{i}}{\sum{j=1}^{b} a_{j} }}
 }
 
 \strong{Discrete:}
 \itemize{
 \item \code{'n'} = Number of observations.
-\item \code{'auc'} = Area under the curve, TBD
-\item \code{'overall.accuracy'} = Overall Accuracy, TBD
-\item \code{'true.presence.ratio'} = True presence ratio or Jaccard index, TBD
-\item \code{'precision'} = Precision, TBD
-\item \code{'sensitivity'} = Sensitivity, TBD
-\item \code{'specificity'} = Specifivity, TBD
-\item \code{'tss'} = True Skill Statistics, TBD
-\item \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
+\item \code{'auc'} = Area under the curve, e.g. the integral of a function relating the True positive rate
+against the false positive rate.
+\item \code{'overall.accuracy'} = Overall Accuracy, Average of all positives,\deqn{ \frac{TP + TN}{n} }
+\item \code{'true.presence.ratio'} = True presence ratio or Jaccard index, \deqn{ \frac{TP}{TP+TN+FP+FN} }
+\item \code{'precision'} = Precision, positive detection rate \deqn{ \frac{TP}{TP+FP} }
+\item \code{'sensitivity'} = Sensitivity, Ratio of True positives against all positives, \deqn{ \frac{TP}{TP+FP} }
+\item \code{'specificity'} = Specifivity, Ratio of True negatives against all negatives, \deqn{ \frac{TN}{TN+FN} }
+\item \code{'tss'} = True Skill Statistics, \code{sensitivity + specificity – 1}
+* \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
 \item \code{'logloss'} = Log loss, TBD
 \item \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
 \item \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
 \item \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} },
-where $y_{i}$ is predicted presence or absence and $x_{i}$ an observed. where TP
-is true positive, TN a true negative, FP the false positive and FN the false negative.
+where \deqn{y_{i}} is predicted presence or absence and \deqn{x_{i}} an observed.
 }
 }
 \note{
@@ -106,6 +109,8 @@ If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
 }
 \references{
 \itemize{
+\item Allouche O., Tsoar A., Kadmon R., (2006). Assessing the accuracy of species distribution models:
+prevalence, kappa and the true skill statistic (TSS). Journal of Applied Ecology, 43(6), 1223–1232.
 \item Liu, C., White, M., Newell, G., 2013. Selecting thresholds for the prediction
 of species occurrence with presence-only data. J. Biogeogr. 40, 778–789.
 https://doi.org/10.1111/jbi.12058

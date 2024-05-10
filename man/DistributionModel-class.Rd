@@ -24,6 +24,8 @@ Could be further pretified and commands outsourced.
 \item{\code{settings}}{A \code{\linkS4class{Settings}} object with information on inference.}
 
 \item{\code{fits}}{A \code{\link{list}} containing the prediction and fitted model.}
+
+\item{\code{.internals}}{A \code{\link{list}} containing previous fitted models.}
 }
 \if{html}{\out{</div>}}
 }
@@ -41,6 +43,7 @@ Could be further pretified and commands outsourced.
 \item \href{#method-DistributionModel-effects}{\code{DistributionModel$effects()}}
 \item \href{#method-DistributionModel-get_equation}{\code{DistributionModel$get_equation()}}
 \item \href{#method-DistributionModel-get_data}{\code{DistributionModel$get_data()}}
+\item \href{#method-DistributionModel-get_model}{\code{DistributionModel$get_model()}}
 \item \href{#method-DistributionModel-set_data}{\code{DistributionModel$set_data()}}
 \item \href{#method-DistributionModel-get_thresholdvalue}{\code{DistributionModel$get_thresholdvalue()}}
 \item \href{#method-DistributionModel-get_thresholdtype}{\code{DistributionModel$get_thresholdtype()}}
@@ -244,6 +247,19 @@ Get specific fit from this Model
 }
 \subsection{Returns}{
 A \code{\link{SpatRaster}} object with the prediction.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DistributionModel-get_model"></a>}}
+\if{latex}{\out{\hypertarget{method-DistributionModel-get_model}{}}}
+\subsection{Method \code{get_model()}}{
+Small internal helper function to directly get the model object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$get_model()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A fitted model if existing.
 }
 }
 \if{html}{\out{<hr>}}

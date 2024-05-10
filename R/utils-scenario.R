@@ -27,7 +27,9 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
   check_package("dplyr")
 
   date_interpolation <- match.arg(date_interpolation,
-                                  c("none", "yearly", "annual", "monthly", "daily"),
+                                  c("none", "yearly", "year", "annual",
+                                    "month","monthly",
+                                    "day","daily"),
                                   several.ok = FALSE)
   if(date_interpolation=="none") return(env)
 
@@ -39,16 +41,19 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
   assertthat::assert_that(tzone != "", length(times)>=2)
   # Interpolate time steps
   inc <- switch (date_interpolation,
-                 "yearly" = "year",
+                 "yearly" = "year", "year" = "year",
                  "annual" = "year",
-                 "monthly" = "month",
-                 "daily" = "day"
+                 "monthly" = "month", "month" = "month",
+                 "daily" = "day", "day" = "day"
   )
   # Create new time layer
   new_times <- seq.Date(from = as.Date(times[1],tz = tzone),
                         to = as.Date(times[length(times)],tz = tzone),
                         by = inc)
-  new_times <- to_POSIXct(new_times)
+  # Check time zone and convert if POSIXct
+  if(inherits( terra::time(stars_to_raster(env[1])[[1]]), "POSIXct")){
+    new_times <- to_POSIXct(new_times)
+  }
   ori.dims <- names(stars::st_dimensions(env))
 
   # Now for each variable, interpolate
@@ -61,7 +66,7 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
     o <- Reduce(c, stars_to_raster(env[v]) )
 
     # Create empty copies per times
-    nt <- new_times[new_times %notin% terra::time(o)]
+    nt <- new_times[new_times %notin% terra::time(o)] # Ignore existing values
     oo <- rep(emptyraster(o, vals = NA), length(nt))
     terra::time(oo) <- nt
     oo <- c(o,oo)
@@ -82,7 +87,8 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
   # Checks
   assertthat::assert_that(
     is.stars(out),
-    all( names(out) %in% names(env) )
+    all( names(out) %in% names(env) ),
+    length( stars::st_get_dimension_values(out, 3) ) == length(new_times)
   )
   return(out)
 }
@@ -672,7 +678,7 @@ st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
       new <- terra::mask(new, ori.obj)
     } else {
       # Now first label
-      labs <- terra::patches(obj)
+      labs <- terra::patches(obj,zeroAsNA = TRUE)
 
       # Then calculate area in km2
       ar <- terra::mask(terra::cellSize(labs, unit = "km"), labs)

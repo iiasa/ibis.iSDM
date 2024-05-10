@@ -31,6 +31,20 @@ constraints.}
 \description{
 Adds a connectivity constraint to a scenario object.
 }
+\details{
+\itemize{
+\item \code{hardbarrier} - Defines a hard barrier to any dispersal events. By
+definition this sets all values larger
+than \code{0} in the barrier layer to \code{0} in the projection. Barrier has
+to be provided through the \code{"resistance"} parameter.
+\item \code{resistance} - Allows the provision of a static or dynamic layer that is
+multiplied with the projection at each time step. Can for example be used to
+reduce the suitability of any given area (using pressures not included in the model).
+The respective layer(s) have to be provided through the \code{"resistance"} parameter.
+Provided layers are incorporated as \code{abs(resistance - 1)} and multiplied with
+the prediction.
+}
+}
 \seealso{
 Other constraint: 
 \code{\link{add_constraint}()},
@@ -39,6 +53,7 @@ Other constraint:
 \code{\link{add_constraint_boundary}()},
 \code{\link{add_constraint_dispersal}()},
 \code{\link{add_constraint_minsize}()},
+\code{\link{add_constraint_threshold}()},
 \code{\link{simulate_population_steps}()}
 }
 \concept{constraint}

@@ -13,6 +13,7 @@ train(
   inference_only = FALSE,
   only_linear = TRUE,
   method_integration = "predictor",
+  keep_models = TRUE,
   aggregate_observations = TRUE,
   clamp = FALSE,
   verbose = getOption("ibis.setupmessages", default = TRUE),
@@ -27,8 +28,9 @@ train(
   inference_only = FALSE,
   only_linear = TRUE,
   method_integration = "predictor",
+  keep_models = TRUE,
   aggregate_observations = TRUE,
-  clamp = FALSE,
+  clamp = TRUE,
   verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
@@ -91,6 +93,9 @@ then combined for estimation and weighted respectively, thus giving for example
 presence-only records less weight than survey records. \strong{Note} that this parameter
 is ignored for engines that support joint likelihood estimation.
 }}
+
+\item{keep_models}{\code{\link{logical}} if true and \code{method_integration = "predictor"},
+all models are stored in the \code{.internal} list of the model object.}
 
 \item{aggregate_observations}{\code{\link{logical}} on whether observations covering the
 same grid cell should be aggregated (Default: \code{TRUE}).}

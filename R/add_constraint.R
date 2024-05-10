@@ -57,6 +57,8 @@ NULL
 #' * \code{minsize} - Allows to specify a certain size that must be satisfied in
 #' order for a thresholded patch to be occupied. Can be thought of as a minimum
 #' size requirement. See `add_constraint_minsize()` for the required parameters.
+#' * \code{threshold} - Applies the set threshold as a constrain directly on the
+#' suitability projections. Requires a threshold to be set.
 #'
 #' @returns Adds constraints data to a [`BiodiversityScenario`] object.
 #'
@@ -96,6 +98,8 @@ methods::setMethod(
   "add_constraint",
   methods::signature(mod = "BiodiversityScenario"),
   function(mod, method, ...) {
+    assertthat::assert_that(!missing(method),
+                            msg = "Set a method for the constraint!")
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
@@ -105,7 +109,7 @@ methods::setMethod(
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
                                     "hardbarrier","resistance",
-                                    "boundary", "minsize",
+                                    "boundary", "minsize", "threshold",
                                     "nichelimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
@@ -126,6 +130,8 @@ methods::setMethod(
                   "nichelimit" = add_constraint_adaptability(mod, method = "nichelimit", ...),
                   # --- #
                   "boundary" = add_constraint_boundary(mod, ...),
+                  # --- #
+                  "threshold" = add_constraint_threshold(mod, ...),
                   # --- #
                   "minsize" = add_constraint_minsize(mod, ...)
     )
@@ -149,6 +155,19 @@ methods::setMethod(
 #' instance \code{`kissmig`}.
 #'
 #' @details
+#' **Dispersal**:
+#' Parameters for \code{'method'}:
+#' * \code{sdd_fixed} - Applies a fixed uniform dispersal distance per modelling timestep.
+#' * \code{sdd_nexpkernel} - Applies a dispersal distance using a negative exponential kernel from its origin.
+#' #' The negative exponential kernel is defined as:
+#' \deqn{f(x) = \frac{1}{2 \pi a^2} e^{-\frac{x}{a}}}{fx = 1 / (2 * pi * a^2) * exp(-x / a)}
+#' where \eqn{a} is the mean dispersal distance (in m) divided by 2.
+#' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
+#' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
+#'
+#' A comprehensive overview of the benefits of including dispersal constrains in
+#' species distribution models can be found in Bateman et al. (2013).
+#'
 #' The following additional parameters can bet set:
 #' * \code{pext}: [`numeric`] indicator for \code{`kissmig`} of the probability a
 #' colonized cell becomes uncolonised, i.e., the species gets locally extinct
@@ -156,6 +175,13 @@ methods::setMethod(
 #' * \code{pcor}: [`numeric`] probability that corner cells are considered in the
 #' 3x3 neighbourhood (Default: \code{0.2}).
 #'
+#' @note
+#' Unless otherwise stated, the default unit of supplied distance values (e.g. average dispersal
+#' distance) should be in \code{"m"}.
+#' @references
+#' * Bateman, B. L., Murphy, H. T., Reside, A. E., Mokany, K., & VanDerWal, J. (2013).
+#' Appropriateness of full‐, partial‐and no‐dispersal scenarios in climate change impact
+#'  modelling. Diversity and Distributions, 19(10), 1224-1234.
 #' @family constraint
 #' @keywords scenario
 #'
@@ -269,14 +295,23 @@ methods::setMethod(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
-    is.null(resistance) || is.Raster(resistance),
-    # Check that baseline threshold raster is binomial
-    length(unique(baseline_threshold))==2
+    is.null(resistance) || is.Raster(resistance)
   )
 
-  # Get original baseline threshold
-  ori.tr <- baseline_threshold
-  ori.tr[ori.tr>0] <- 0
+  # Check for small lon-lat values
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1){
+      message('Very small average dispersal vlaue provided. Check that they are in unit m!')
+    }
+  }
+
+  # Check that baseline threshold raster is binomial
+  if(length(unique(baseline_threshold)[,1])==1){
+    # Try and add no-data and see if that helps
+    baseline_threshold[is.na(baseline_threshold)] <- 0
+    assertthat::assert_that( length(unique(baseline_threshold)[,1])==2,
+                             msg = "Baseline map for fixed kernel has less than 2 values?")
+  }
 
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
@@ -295,8 +330,6 @@ methods::setMethod(
   # Now multiply the net suitability projection with this mask
   # Thus removing any grid cells outside
   out <- new_suit * ras_dis
-  # Mask with original so as to retain non-zero values
-  out <- terra::mask(out, ori.tr)
   return(out)
 }
 
@@ -314,19 +347,29 @@ methods::setMethod(
 #' @noRd
 #'
 #' @keywords internal
-.sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = FALSE, resistance = NULL){
+.sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = TRUE, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
     is.numeric(value),
-    is.null(resistance) || is.Raster(resistance),
-    # Check that baseline threshold raster is binomial
-    length(unique(baseline_threshold)[,1])==2
+    is.logical(normalize),
+    is.null(resistance) || is.Raster(resistance)
   )
 
-  # Get original baseline threshold
-  ori.tr <- baseline_threshold
-  ori.tr[ori.tr>0] <- 0
+  # Check that baseline threshold raster is binomial
+  if(length(unique(baseline_threshold)[,1])==1){
+    # Try and add no-data and see if that helps
+    baseline_threshold[is.na(baseline_threshold)] <- 0
+    assertthat::assert_that( length(unique(baseline_threshold)[,1])==2,
+                             msg = "Baseline map for nexp kernel has less than 2 values?")
+  }
+
+  # Check for small lon-lat values
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1){
+      message('Very small average dispersal vlaue provided. Check that they are in unit m!')
+    }
+  }
 
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
@@ -336,23 +379,22 @@ methods::setMethod(
     baseline_threshold <- terra::mask(baseline_threshold, resistance)
   }
 
-  # Inverse of mean dispersal distance
-  alpha <- 1/value
+  # Divide alpha values by 2
+  alpha <- value/2
 
   # Grow baseline raster by using an exponentially weighted kernel
   ras_dis <- terra::gridDist(baseline_threshold, target = 1)
+  # Normalized (with a constant) negative exponential kernel
+  ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
+  # Equivalent to alpha = 1/value and
+  # ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
   if(normalize){
-    # Normalized (with a constant) negative exponential kernel
-    ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
-  } else {
-    ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
+    ras_dis <- predictor_transform(ras_dis, option = 'norm')
   }
 
   # Now multiply the net suitability projection with this mask Thus removing any
   # non-suitable grid cells (0) and changing the value of those within reach
   out <- new_suit * ras_dis
-  # Mask with original so as to retain non-zero values
-  out <- terra::mask(out, ori.tr)
   return(out)
 }
 
@@ -423,6 +465,19 @@ methods::setMethod(
 #' deviation) to which extrapolations should be performed.
 #' @param resistance A [`SpatRaster`] object describing a resistance surface or
 #' barrier for use in connectivity constrains (Default: \code{NULL}).
+#'
+#' @details
+#' * \code{hardbarrier} - Defines a hard barrier to any dispersal events. By
+#' definition this sets all values larger
+#' than \code{0} in the barrier layer to \code{0} in the projection. Barrier has
+#' to be provided through the \code{"resistance"} parameter.
+#' * \code{resistance} - Allows the provision of a static or dynamic layer that is
+#' multiplied with the projection at each time step. Can for example be used to
+#' reduce the suitability of any given area (using pressures not included in the model).
+#' The respective layer(s) have to be provided through the \code{"resistance"} parameter.
+#' Provided layers are incorporated as \code{abs(resistance - 1)} and multiplied with
+#' the prediction.
+#'
 #'
 #' @family constraint
 #' @keywords scenario
@@ -577,7 +632,7 @@ methods::setMethod(
         value > 0, msg = "Specify a value threshold (SD) and names of predictors, for which
         we do not expect the species to persist."
       )
-      if(is.null(names)) names <- character()
+      if(is.null(names)) names <- NA
       co[['adaptability']] <- list(method = method,
                                    params = c("names" = names, "value" = value,
                                               "increment" = increment))
@@ -627,9 +682,9 @@ methods::setMethod(
   for(id in names(model$biodiversity)){
     sub <- model$biodiversity[[id]]
     # Which are presence data
-    is_presence <- which(sub$observations[['observed']] > 0)
+    is_presence <- which(factor_to_numeric(sub$observations[['observed']]) > 0)
     df <- rbind(df,
-                sub$predictors[is_presence, names])
+                sub$predictors[is_presence, sub$predictors_names])
   }
   rr <- sapply(df, function(x) range(x, na.rm = TRUE))   # Calculate ranges
   rsd <- sapply(df, function(x) stats::sd(x, na.rm = TRUE))   # Calculate standard deviation
@@ -641,6 +696,7 @@ methods::setMethod(
   # Now 'clamp' all predictor values beyond these names to 0, e.g. partial out
   nd <- newdata
   for(n in names){
+    if(!(n %in% names(rr))) next() # If variable not present in model frame, skip
     # Calc min
     min_ex <- which(nd[,n] < rr[1,n])
     max_ex <- which(nd[,n] > rr[2,n])
@@ -671,7 +727,7 @@ methods::setMethod(
 #' @param value A [`numeric`] value describing the minimum amount of area of a
 #' given patch
 #' @param unit A [`character`] of the unit of area. Options available are
-#' \code{km2} (Default) and \code{ha}.
+#' \code{km2} (Default), \code{ha} and \code{pixel}.
 #' @param establishment_step A [`logical`] flag indicating whether a given patch
 #' is only to be removed if wasn't small in a previous time step (not yet
 #' implemented!)
@@ -843,6 +899,69 @@ methods::setMethod(
       co[['boundary']] <- list(method = method,
                                    params = c("layer" = layer))
     }
+    # --- #
+    new <- mod$clone(deep = TRUE)
+    new <- new$set_constraints(co)
+    return( new )
+  }
+)
+
+#' Adds a threshold constraint to a scenario object
+#'
+#' @description
+#' This option adds a [`threshold()`] constraint to a scenario projection,
+#' thus effectively applying the threshold as mask to each projection step made
+#' during the scenario projection.
+#'
+#' Applying this constraint thus means that the \code{"suitability"} projection is
+#' clipped to the threshold. This method requires
+#' the `threshold()` set for a scenario object.
+#'
+#' It could be in theory possible to re calculate the threshold for each time step
+#' based on supplied parameters or even observation records. So far this option has
+#' not been necessary to implement.
+#'
+#' @note
+#' Threshold values are taken from the original fitted model.
+#'
+#' @inheritParams add_constraint
+#' @param updatevalue A [`numeric`] indicating to what the masked out values (those outside)
+#' the threshold should become (Default: \code{NA}).
+#'
+#' @family constraint
+#' @keywords scenario
+#'
+#' @examples
+#' \dontrun{
+#' # Add scenario constraint
+#' scenario(fit) |> threshold() |>
+#' add_constraint_threshold()
+#' }
+#'
+#' @name add_constraint_threshold
+NULL
+
+#' @rdname add_constraint_threshold
+#' @export
+methods::setGeneric("add_constraint_threshold",
+                    signature = methods::signature("mod"),
+                    function(mod, updatevalue = NA, ...) standardGeneric("add_constraint_threshold"))
+
+#' @rdname add_constraint_threshold
+methods::setMethod(
+  "add_constraint_threshold",
+  methods::signature(mod = "BiodiversityScenario"),
+  function(mod, updatevalue = NA, ...){
+    assertthat::assert_that(
+      inherits(mod, "BiodiversityScenario"),
+      is.na(updatevalue) || is.numeric(updatevalue)
+    )
+
+    # Add processing method #
+    # --- #
+    co <- list()
+    co[['threshold']] <- list(method = "threshold",
+                             params = c("updatevalue" = updatevalue))
     # --- #
     new <- mod$clone(deep = TRUE)
     new <- new$set_constraints(co)

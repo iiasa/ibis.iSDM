@@ -195,6 +195,36 @@ capitalize_text <- function(x) {
         sep="", collapse=" ")
 }
 
+#' Factor to numeric transform
+#'
+#' @param x [`factor`] value.
+#'
+#' @description
+#' By default `as.numeric()` transforms factor levels to initials starting from
+#' 1, which might be undesirable.
+#' This small helper function converts factors to characters first.
+#'
+#' @keywords utils
+#'
+#' @examples
+#' factor_to_numeric(factor("5"))
+#' factor_to_numeric(factor("test"))
+#'
+#' @noRd
+#'
+#' @keywords internal
+factor_to_numeric <- function(x) {
+  if(is.numeric(x)) return(x)
+  assertthat::assert_that(is.factor(x) || is.character(x))
+  suppressWarnings(
+    as.numeric(
+      as.character(
+        x
+      )
+    )
+  )
+}
+
 #' Guess time to Posix
 #'
 #' @description This little wrapper converts and ensures that a vector of time
@@ -218,10 +248,17 @@ to_POSIXct <- function(vec){
     out <- as.POSIXct(vec)
     assertthat::assert_that(any(!is.na.POSIXlt(out)))
   } else if(inherits(vec, "numeric")){
-    if(all(nchar(vec)==4)){
+    if(nchar(vec[1])==4){
       # Assume that the numeric is a year
-      vec <- paste0(vec, "-01-01")
-      out <- as.POSIXct(vec)
+      out <- paste0(vec, "-01-01")
+      if('lubridate' %in% utils::installed.packages()[,1]){
+        check_package("lubridate")
+        out <- lubridate::as_date(out)
+      }
+      out <- as.POSIXct(out)
+    } else {
+      # Something else weird, assume it is days since 1970-01-01
+      out <- as.Date(vec) |> as.POSIXct()
     }
   } else if(inherits(vec, "character")){
     # Try and convert to posix directly
@@ -452,13 +489,14 @@ clamp_predictions <- function(model, pred){
     vars_clamp <- rbind(vars_clamp, rr)
     rm(rr)
   }
+
   # Aggregate if multiple variables
-  if(anyDuplicated(vars_clamp$variable)){
-    o1 <- aggregate(variable ~ min, data = vars_clamp,
-              FUN = function(x) min(x) )
-    o2 <- aggregate(variable ~ max, data = vars_clamp,
-                    FUN = function(x) max(x) )
-    vars_clamp <- merge(o1,o2)
+  if(anyDuplicated(vars_clamp$variable) > 0){
+    o1 <- aggregate(vars_clamp$min, by = list(vars_clamp$variable), FUN = min)
+    o2 <- aggregate(vars_clamp$max, by = list(vars_clamp$variable), FUN = max)
+    names(o1) <- c("variable", "min")
+    names(o2) <- c("variable", "max")
+    vars_clamp <- merge(o1, o2)
   }
   # --- #
   # Now clamp either predictors
@@ -467,8 +505,8 @@ clamp_predictions <- function(model, pred){
   # Now clamp the prediction matrix with the clamped variables
   for (v in intersect(vars_clamp$variable, names(pred))) {
     pred[, v] <- pmin(
-      pmax(pred[, v], vars_clamp$min[vars_clamp==v] ),
-      vars_clamp$max[vars_clamp==v])
+      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
+      vars_clamp$max[vars_clamp$variable==v])
   }
 
   assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),

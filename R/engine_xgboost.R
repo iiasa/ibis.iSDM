@@ -382,9 +382,7 @@ engine_xgboost <- function(x,
 
     # Process and add priors if set
     if(!is.Waiver(model$priors)){
-      assertthat::assert_that(
-        all( model$priors$varnames() %in% model$biodiversity[[1]]$predictors_names )
-      )
+      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
       # Match position of variables with monotonic constrains
       mc <- rep(0, ncol(train_cov))
       names(mc) <- colnames(train_cov)
@@ -509,6 +507,11 @@ engine_xgboost <- function(x,
 
     # Get number of rounds from parameters
     nrounds <- params$nrounds;params$nrounds <- NULL
+
+    # make sure to only include priors of current model
+    if (!is.null(params$monotone_constraints)) {
+      params$monotone_constraints <- params$monotone_constraints[model$biodiversity[[1]]$predictors_names]
+    }
 
     # --- #
     # Pass this parameter possibly on from upper level
@@ -673,7 +676,7 @@ engine_xgboost <- function(x,
       }
 
       # Calculate range of predictors
-      rr <- sapply(df[model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
+      rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
                    function(x) range(x, na.rm = TRUE)) |> as.data.frame()
 
       if(is.null(newdata)){
@@ -817,6 +820,8 @@ engine_xgboost <- function(x,
       mod <- self$get_data('fit_best')
       # Get model object
       model <- self$model
+      # Internal newdata copy
+      newdata_copy <- newdata
 
       # Also get settings for bias values
       settings <- self$settings
@@ -851,13 +856,22 @@ engine_xgboost <- function(x,
       )
 
       # Fill output with summaries of the posterior
-      prediction <- try({emptyraster( model$predictors_object$get_data()[[1]] )},silent = TRUE) # Background
-      if(inherits(prediction, "try-error")){
-        prediction <- terra::rast(model$predictors[,c("x", "y")], crs = terra::crs(model$background),type = "xyz") |>
-          emptyraster()
+      if(nrow(newdata)==nrow(model$predictors)){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
+        prediction[] <- pred_xgb
+        prediction <- terra::mask(prediction, model$background)
+      } else {
+        assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),
+                                msg = "Projection data.frame has no valid coordinates or differs in grain!")
+        prediction <- try({
+          terra::rast(newdata_copy[,c("x", "y")],
+                      crs = terra::crs(model$background),
+                      type = "xyz") |>
+            emptyraster()
+        }, silent = TRUE)
+        prediction[] <- pred_xgb
       }
-      prediction[] <- pred_xgb
-      prediction <- terra::mask(prediction, model$background)
+
       return(prediction)
     },overwrite = TRUE)
 
