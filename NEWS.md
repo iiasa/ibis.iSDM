@@ -15,6 +15,7 @@
 * Changed default output for netcdf files to multidimensional arrays #109
 * :fire: hot fixes for scenario scaling and normalization issue #113
 * :bug: fix so that projection works with different extents than used for inference.
+* :bug: fix that prevented `BART` models to be saved/loaded from disk #127.
 
 # ibis.iSDM 0.1.2
 
