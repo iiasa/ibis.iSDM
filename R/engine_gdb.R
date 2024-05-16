@@ -207,7 +207,8 @@ engine_gdb <- function(x,
 
       # Check that factors have been correctly set if any
       if(any(model$predictors_types$type=="factor")){
-        df[,model$predictors_types$predictors[model$predictors_types$type=="factor"]] <- factor(df[,model$predictors_types$predictors[model$predictors_types$type=="factor"]])
+        df[,model$predictors_types$predictors[model$predictors_types$type=="factor"]] <-
+          lapply(df[,model$predictors_types$predictors[model$predictors_types$type=="factor"]], as.factor)
       }
 
       # Overwrite observation data

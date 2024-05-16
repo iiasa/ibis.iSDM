@@ -335,8 +335,7 @@ engine_glmnet <- function(x,
 
     # Subset the predictor types to only those present
     te <- formula_terms(form)
-    model$biodiversity[[1]]$predictors_types <-
-      model$biodiversity[[1]]$predictors_types |> dplyr::filter(predictors %in% te)
+    model$biodiversity[[1]]$predictors_types <- dplyr::filter(model$biodiversity[[1]]$predictors_types, predictors %in% te)
     model$biodiversity[[1]]$predictors_names <-  intersect(model$biodiversity[[1]]$predictors_names, te)
 
     # Get offset and add it to exposure
@@ -353,7 +352,11 @@ engine_glmnet <- function(x,
     if(any(model$predictors_types$type=="factor")){
       fac <- model$biodiversity[[1]]$predictors_names[which(model$biodiversity[[1]]$predictors_types$type=="factor")]
       # return penalty factor for each level of each factor (even if level values are identical across factors)
-      p.fac <- c(p.fac, rep(1, sum(apply(df[, fac, drop = FALSE], 2, function(x) length(unique(x))))))
+      p.fac.fac <- rep(1, sum(apply(df[, fac, drop = FALSE], 2, function(x) length(unique(x)))))
+      # use name and levels as name
+      names(p.fac.fac) <- c(sapply(fac, function(x) paste(x, levels(model$predictors[, x]), sep = "."),
+                                   USE.NAMES = FALSE))
+      p.fac <- c(p.fac, p.fac.fac)
     }
     # Duplicate p.fac container for lower and upper limits
     lowlim <- rep(-Inf, length(p.fac)) |> stats::setNames(names(p.fac))
@@ -361,7 +364,14 @@ engine_glmnet <- function(x,
 
     # Trick for creation for some default lambda values for the regularization multiplier
     if(is.null(params$lambda)){
-      reg <- default.regularization(p = df$observed, m = stats::model.matrix(form, df)) * c(1, p.fac) # add 1 for the intercept
+      # helper fun for naming
+      cc <- function(x) {colnames(x) <- paste0(".", colnames(x)); x}
+      # helper fun for contrasts
+      cont_arg <- lapply(df[, sapply(df, is.factor), drop = FALSE], function(x) cc(contrasts(x, contrasts = FALSE)))
+      m_mat <- stats::model.matrix(form, df, contrasts.arg = cont_arg)
+      reg <- default.regularization(p = df$observed, m = m_mat)
+      # make sure same order
+      reg <- reg[sort(names(reg))] * c("(Intercept)" = 1, p.fac[sort(names(p.fac))]) # add 1 for the intercept
       params$lambda <- 10^(seq(4, 0, length.out = 200)) * sum(p.fac)/length(p.fac) * sum(p.fac)/sum(w)
       if(anyNA(params$lambda)) params$lambda <- NULL
     }
