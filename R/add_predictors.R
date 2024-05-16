@@ -78,6 +78,8 @@ NULL
 #' Certain names such \code{"offset"} are forbidden as predictor variable names.
 #' The function will return an error message if these are used.
 #'
+#' Some engines use binary variables regardless of the parameter \code{explode_factors}
+#' set here.
 #'
 #' @examples
 #' \dontrun{
