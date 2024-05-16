@@ -306,6 +306,8 @@ engine_xgboost <- function(x,
       z <- explode_factor(train_cov[[vf]], name = vf)
       # Remove variables from train_cov and append
       train_cov[[vf]] <- NULL
+      model$biodiversity[[1]]$predictors_types <- dplyr::filter(model$biodiversity[[1]]$predictors_types,
+                                                                !predictors %in% vf)
       train_cov <- cbind(train_cov, z)
       model$biodiversity[[1]]$predictors <- train_cov # Save new in model object
       model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
@@ -340,6 +342,7 @@ engine_xgboost <- function(x,
       z <- explode_factor(pred_cov[[vf]], name = vf)
       # Remove variables from train_cov and append
       pred_cov[[vf]] <- NULL
+      model$predictors_types <- dplyr::filter(model$predictors_types, !predictors %in% vf)
       pred_cov <- cbind(pred_cov, z)
       model$predictors <- pred_cov # Save new in model object
       model$predictors_types <- rbind(model$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
