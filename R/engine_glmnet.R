@@ -367,7 +367,7 @@ engine_glmnet <- function(x,
       # helper fun for naming
       cc <- function(x) {colnames(x) <- paste0(".", colnames(x)); x}
       # helper fun for contrasts
-      cont_arg <- lapply(df[, sapply(df, is.factor), drop = FALSE], function(x) cc(contrasts(x, contrasts = FALSE)))
+      cont_arg <- lapply(df[, sapply(df, is.factor), drop = FALSE], function(x) cc(stats::contrasts(x, contrasts = FALSE)))
       m_mat <- stats::model.matrix(form, df, contrasts.arg = cont_arg)
       reg <- default.regularization(p = df$observed, m = m_mat)
       # make sure same order

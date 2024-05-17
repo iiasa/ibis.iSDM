@@ -267,7 +267,7 @@ predictors$koeppen_50km <- terra::as.factor(predictors$koeppen_50km)
 # Create a distribution modelling pipeline
 x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
-  add_predictors(predictors, transform = 'scale', derivates = "none",explode_factors = TRUE) |>
+  add_predictors(predictors, transform = 'scale', derivates = "none") |>
   engine_xgboost(iter = 8000)
 
 # Now train 2 models, one without and one with a spatial latent effect
@@ -296,7 +296,7 @@ This approach can be particular suitable for current and future projections at l
 # or through an extrapolation control as shown below.
 x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
-  add_predictors(predictors, transform = 'scale', derivates = "none", explode_factors = FALSE) |>
+  add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
   rm_predictors("koeppen_50km") |> 
   add_control_extrapolation(layer = predictors$koeppen_50km, method = "zones") |> 
