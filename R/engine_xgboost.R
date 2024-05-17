@@ -302,13 +302,20 @@ engine_xgboost <- function(x,
     # Check if there any factors, if yes split up
     if(any(model$biodiversity[[1]]$predictors_types$type=='factor')){
       vf <- model$biodiversity[[1]]$predictors_types$predictors[which(model$biodiversity[[1]]$predictors_types$type == "factor")]
-      # Get factors
-      z <- explode_factor(train_cov[[vf]], name = vf)
-      # Remove variables from train_cov and append
-      train_cov[[vf]] <- NULL
-      train_cov <- cbind(train_cov, z)
+      # explode all present factors
+      for (i in 1:length(vf)) {
+        z <- explode_factor(train_cov[[vf[i]]], name = vf[i])
+        # Remove variables from train_cov
+        train_cov[[vf[i]]] <- NULL
+        train_cov <- cbind(train_cov, z)
+        # append to types data.frame
+        model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types,
+                                                          data.frame(predictors = colnames(z), type = "numeric"))
+      }
+      # update containers
       model$biodiversity[[1]]$predictors <- train_cov # Save new in model object
-      model$biodiversity[[1]]$predictors_types <- rbind(model$biodiversity[[1]]$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
+      model$biodiversity[[1]]$predictors_types <- dplyr::filter(model$biodiversity[[1]]$predictors_types,
+                                                                !predictors %in% vf)
     }
     train_cov <- as.matrix( train_cov )
     labels <- model$biodiversity[[1]]$observations$observed
@@ -337,14 +344,20 @@ engine_xgboost <- function(x,
     if(any(model$predictors_types$type=='factor')){
       vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
       # Get factors
-      z <- explode_factor(pred_cov[[vf]], name = vf)
-      # Remove variables from train_cov and append
-      pred_cov[[vf]] <- NULL
-      pred_cov <- cbind(pred_cov, z)
+      for (i in 1:length(vf)) {
+        z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
+        # Remove variables from train_cov and append
+        pred_cov[[vf[i]]] <- NULL
+        pred_cov <- cbind(pred_cov, z)
+        model$predictors_types <- rbind(model$predictors_types,
+                                        data.frame(predictors = colnames(z), type = "numeric"))
+      }
+
       model$predictors <- pred_cov # Save new in model object
-      model$predictors_types <- rbind(model$predictors_types, data.frame(predictors = colnames(z), type = "numeric"))
-      model$biodiversity[[1]]$predictors_names <- colnames(pred_cov)
+
+      model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
       model$predictors_names <- colnames(pred_cov)
+      assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
     }
     pred_cov <- as.matrix( pred_cov )
     # Ensure that the column names are identical for both

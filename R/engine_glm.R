@@ -296,8 +296,7 @@ engine_glm <- function(x,
 
     # Subset the predictor types to only those present
     te <- formula_terms(form)
-    model$biodiversity[[1]]$predictors_types <-
-      model$biodiversity[[1]]$predictors_types |> dplyr::filter(predictors %in% te)
+    model$biodiversity[[1]]$predictors_types <- dplyr::filter(model$biodiversity[[1]]$predictors_types, predictors %in% te)
     model$biodiversity[[1]]$predictors_names <-  intersect(model$biodiversity[[1]]$predictors_names, te)
 
     # Get offset and add it to exposure

@@ -887,10 +887,7 @@ methods::setMethod(
         if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
 
-      # Run the engine setup script
-      model <- x$engine$setup(model, settings)
-
-      # remove not used predictors
+      # remove unused predictors
       pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
@@ -900,6 +897,9 @@ methods::setMethod(
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
       }
+
+      # Run the engine setup script
+      model <- x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -929,10 +929,7 @@ methods::setMethod(
                                                                 settings = settings)
       }
 
-      # Run the engine setup script
-      x$engine$setup(model, settings)
-
-      # remove not used predictors
+      # remove unused predictors
       pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
@@ -942,6 +939,9 @@ methods::setMethod(
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
       }
+
+      # Run the engine setup script
+      x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -962,10 +962,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -976,7 +973,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -986,6 +983,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1093,10 +1093,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1107,7 +1104,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1117,6 +1114,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1223,10 +1223,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1237,7 +1234,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1247,6 +1244,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1377,10 +1377,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1391,7 +1388,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1401,6 +1398,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1503,10 +1503,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1517,7 +1514,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1527,6 +1524,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1631,10 +1631,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1645,7 +1642,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1655,6 +1652,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
