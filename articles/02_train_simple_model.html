@@ -97,7 +97,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-05-15</h4>
+            <h4 data-toc-skip class="date">2024-05-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -163,8 +163,9 @@ predictors available for modelling. So first lets load the data:</p>
 <span><span class="co">#&gt; Geometry type: POINT</span></span>
 <span><span class="co">#&gt; Dimension:     XY</span></span>
 <span><span class="co">#&gt; Bounding box:  xmin: 4.109162 ymin: 48.7885 xmax: 24.47594 ymax: 64.69323</span></span>
-<span><span class="co">#&gt; Geodetic CRS:  WGS 84</span></span>
-<span><span class="co"># Predictors</span></span>
+<span><span class="co">#&gt; Geodetic CRS:  WGS 84</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Predictors</span></span>
 <span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co"># Make use only of a few of them</span></span>
 <span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>,<span class="st">"bio03_mean_50km"</span>,<span class="st">"bio19_mean_50km"</span>,</span>
@@ -197,7 +198,7 @@ indication of a biased sampling and thus sampling bias has to be taken
 somehow into account, either through careful data preparation, apriori
 thinning or model-based control by including covariates <span class="math inline">\(\sigma_i\)</span> that might explain this sampling
 bias.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># First we define a distribution object using the background layer</span></span>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span>
@@ -245,10 +246,11 @@ added and statistics on the predictors, eventual priors and which engine
 is being used.</p>
 <p>Of course all of these steps can also be done in “pipe” using the
 <code>|&gt;</code> syntax.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/print.html">print</a></span><span class="op">(</span><span class="st">"Create model"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Create model"</span></span>
-<span></span>
+<span><span class="co">#&gt; [1] "Create model"</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>       <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>,</span>
 <span>                              name <span class="op">=</span> <span class="st">"Virtual test species"</span>,</span>
@@ -259,11 +261,11 @@ is being used.</p>
 helper functions that allow easy summary or visualization of the
 contained data. For example, it is possible to plot and obtain any of
 the data added to this object.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Make visualization of the contained biodiversity data</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">biodiversity</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/unnamed-chunk-3-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Other options to explore</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mod</span><span class="op">)</span></span>
@@ -301,10 +303,11 @@ the data added to this object.</p>
 how the model is being fitted. Unless not possible, the default way is
 fitting a linear model based on the provided engine and biodiversity
 data types.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/print.html">print</a></span><span class="op">(</span><span class="st">"Fit model"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Fit model"</span></span>
-<span></span>
+<span><span class="co">#&gt; [1] "Fit model"</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Finally train</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">mod</span>,</span>
 <span>             runname <span class="op">=</span>  <span class="st">"Test INLA run"</span>,</span>
@@ -331,11 +334,11 @@ background</li>
 <code><a href="../reference/effects.html">effects()</a></code> visualizes the effects, usually the default
 plot through the package used to fit the model.</li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot the mean of the posterior predictions</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Plot%20the%20model%20output-1.png" width="960" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Print out some summary statistics</span></span>
 <span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -350,19 +353,20 @@ plot through the package used to fit the model.</li>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> CLC3_132_mean_50km   0.081<span style="text-decoration: underline;">8</span> 0.065<span style="text-decoration: underline;">3</span> -<span style="color: #BB0000;">0.025</span><span style="color: #BB0000; text-decoration: underline;">7</span>  0.081<span style="text-decoration: underline;">8</span>  0.189  0.081<span style="text-decoration: underline;">8</span>     0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> CLC3_211_mean_50km   0.921  0.105   0.748   0.921   1.09   0.921      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> CLC3_312_mean_50km   1.07   0.089<span style="text-decoration: underline;">1</span>  0.928   1.07    1.22   1.07       0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> elevation_mean_50km  0.047<span style="text-decoration: underline;">4</span> 0.114  -<span style="color: #BB0000;">0.140</span>   0.047<span style="text-decoration: underline;">4</span>  0.235  0.047<span style="text-decoration: underline;">4</span>     0</span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> elevation_mean_50km  0.047<span style="text-decoration: underline;">4</span> 0.114  -<span style="color: #BB0000;">0.140</span>   0.047<span style="text-decoration: underline;">4</span>  0.235  0.047<span style="text-decoration: underline;">4</span>     0</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Show the default effect plot from inlabru</span></span>
 <span><span class="fu"><a href="../reference/effects.html">effects</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Plot%20the%20model%20output-2.png" width="960" style="display: block; margin: auto;"></p>
 <p>See the reference and help pages for further options including
 calculating a <code><a href="../reference/threshold.html">threshold()</a></code>, <code><a href="../reference/partial.html">partial()</a></code> or
 <code><a href="../reference/similarity.html">similarity()</a></code> estimate of the used data.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># To calculate a partial effect for a given variable</span></span>
 <span><span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial.html">partial</a></span><span class="op">(</span><span class="va">fit</span>, x.var <span class="op">=</span> <span class="st">"CLC3_312_mean_50km"</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/partial%20effect-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The object o contains the data underlying this figure</span></span>
 <span></span>
 <span><span class="co"># Similarly the partial effect can be visualized spatially as 'spartial'</span></span>
@@ -376,7 +380,7 @@ into areas where the environment supporting a species is presumably
 suitable or non-suitable. Threshold can be used in ibis.iSDM via the
 <code><a href="../reference/threshold.html">threshold()</a></code> functions suppling either a fitted model, a
 RasterLayer or a Scenario object.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Calculate a threshold based on a 50% percentile criterion</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
@@ -388,12 +392,13 @@ RasterLayer or a Scenario object.</p>
 <span><span class="co">#&gt;      <span style="color: #0000BB;">Positive:</span> CLC3_312_mean_50km, CLC3_211_mean_50km, bio19_mean_50km, ... (6)</span></span>
 <span><span class="co">#&gt;      <span style="color: #BB0000;">Negative:</span> bio01_mean_50km, bio03_mean_50km, Intercept (3)</span></span>
 <span><span class="co">#&gt;   Prediction fitted: <span style="color: #00BB00;">yes</span></span></span>
-<span><span class="co">#&gt;   Threshold created: <span style="color: #00BB00;">yes</span></span></span>
-<span></span>
+<span><span class="co">#&gt;   Threshold created: <span style="color: #00BB00;">yes</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># There is also a convenient plotting function</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">plot_threshold</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Example%20for%20model-based%20thresholding-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># It is also possible to use truncated thresholds, which removes non-suitable areas</span></span>
 <span><span class="co"># while retaining those that are suitable. These are then normalized to a range of [0-1]</span></span>
@@ -414,42 +419,43 @@ computed threshold fits (see above).</p>
 model fitting. For any scientific paper we recommend to implement a
 cross-validation scheme to obtain withheld data or use independently
 gathered data.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># By Default validation statistics are continuous and evaluate the predicted estimates against the number of records per grid cell.</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 1 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species continuous</span></span>
 <span><span class="co">#&gt;       metric       value</span></span>
 <span><span class="co">#&gt; 1          n 208.0000000</span></span>
-<span><span class="co">#&gt; 2       rmse   0.5923885</span></span>
-<span><span class="co">#&gt; 3        mae   0.5175941</span></span>
-<span><span class="co">#&gt; 4    logloss   1.4613791</span></span>
+<span><span class="co">#&gt; 2       rmse   0.5923389</span></span>
+<span><span class="co">#&gt; 3        mae   0.5170094</span></span>
+<span><span class="co">#&gt; 4    logloss   1.4636041</span></span>
 <span><span class="co">#&gt; 5   normgini         NaN</span></span>
-<span><span class="co">#&gt; 6 cont.boyce          NA</span></span>
-<span></span>
+<span><span class="co">#&gt; 6 cont.boyce          NA</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># If the prediction is first thresholded, we can calculate discrete validation estimates (binary being default)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 2468074a-cf26-4373-9ceb-0a104d41b944 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 e2fe771b-ce90-43d6-a143-679ffc276357 Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
 <span><span class="co">#&gt; 1                    n 591.0000000</span></span>
 <span><span class="co">#&gt; 2                  auc   0.6939161</span></span>
@@ -497,7 +503,7 @@ accounts for spatial autocorrelation, some simply add the distance
 between observations as predictor (thus assuming that much of the
 spatial pattern can be explained by commonalities in the sampling
 process).</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Here we are going to use the xgboost algorithm instead and set as engine below.</span></span>
 <span><span class="co"># We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.</span></span>
 <span></span>
@@ -514,7 +520,7 @@ process).</p>
 <span><span class="co"># Create a distribution modelling pipeline</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span>,explode_factors <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">8000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Now train 2 models, one without and one with a spatial latent effect</span></span>
@@ -523,15 +529,16 @@ process).</p>
 <span><span class="co"># Calculated as nearest neighbour distance (NND) between all input points</span></span>
 <span><span class="va">mod_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/add_latent_spatial.html">add_latent_spatial</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"nnd"</span><span class="op">)</span>,</span>
 <span>                  runname <span class="op">=</span> <span class="st">'PPM with NND constrain'</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; |---------|---------|---------|---------|=========================================                                          </span></span>
-<span></span>
+<span><span class="co">#&gt; |---------|---------|---------|---------|=========================================                                          </span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># Compare both</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">background</span>, main <span class="op">=</span> <span class="st">"Biodiversity data"</span><span class="op">)</span>; <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">virtual_species</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_null</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-2.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_dist</span><span class="op">)</span></span></code></pre></div>
 <p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-3.png" width="528" style="display: block; margin: auto;">
 Another option for constraining a prediction is to place concrete limits
@@ -545,7 +552,7 @@ assumes that it is rather unlikely that species distributions shift to
 different biomes entirely, for instance because of dispersal or
 eco-evolutionary constraints. <strong>Note that this approach
 effectively also limits the prediction background / output!</strong></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create again a distribution object, but this time with limits (use the Köppen-geiger layer from above)</span></span>
 <span><span class="co"># The zones layer must be a factor layer (e.g. is.factor(layer) )</span></span>
 <span></span>
@@ -553,7 +560,7 @@ effectively also limits the prediction background / output!</strong></p>
 <span><span class="co"># or through an extrapolation control as shown below.</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span>, explode_factors <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="co"># Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors</span></span>
 <span>  <span class="fu"><a href="../reference/rm_predictors.html">rm_predictors</a></span><span class="op">(</span><span class="st">"koeppen_50km"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_control_extrapolation.html">add_control_extrapolation</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">predictors</span><span class="op">$</span><span class="va">koeppen_50km</span>, method <span class="op">=</span> <span class="st">"zones"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>

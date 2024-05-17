@@ -97,7 +97,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-05-15</h4>
+            <h4 data-toc-skip class="date">2024-05-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -257,11 +257,12 @@ discards data!</strong></p>
 <span>                  <span class="op">)</span></span>
 <span><span class="co">#&gt; (random) thinning completed! </span></span>
 <span><span class="co">#&gt; Original number of records: 208</span></span>
-<span><span class="co">#&gt; Number of retained records: 175</span></span>
-<span></span>
+<span><span class="co">#&gt; Number of retained records: 175</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point1</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Random thinning"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Thinning-2.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Another way: Use environmental thinning to retain enough points</span></span>
 <span><span class="co"># across the niche defined by a set of covariates</span></span>
@@ -275,8 +276,9 @@ discards data!</strong></p>
 <span>                  <span class="op">)</span></span>
 <span><span class="co">#&gt; (environmental) thinning completed! </span></span>
 <span><span class="co">#&gt; Original number of records: 208</span></span>
-<span><span class="co">#&gt; Number of retained records: 26</span></span>
-<span></span>
+<span><span class="co">#&gt; Number of retained records: 26</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point2</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Environmentally stratified data"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Thinning-3.png" width="700" style="display: block; margin: auto;"></p>
 <hr>
@@ -297,7 +299,7 @@ functions to modify input predictors. These functions rather provide
 nuance(s) and variation to the modelling process, rather than preparing
 the input data (which needs to be undertaken using the
 <code>terra</code> package).</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load some test covariates</span></span>
 <span><span class="va">predictors</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/"</span>, package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"*.tif"</span>,full.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -309,7 +311,7 @@ The <code>ibis.iSDM</code> package has a convenience function that can
 be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
 <p><strong>NOTE: This functionality are also available directly in
 <code><a href="../reference/add_predictors.html">add_predictors()</a></code> as parameter!</strong></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Let's take a simple layer for an example</span></span>
 <span><span class="va">layer</span> <span class="op">&lt;-</span> <span class="va">predictors</span><span class="op">$</span><span class="va">bio19_mean_50km</span></span>
 <span></span>
@@ -321,7 +323,7 @@ be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"normalized"</span>, <span class="st">"scaled"</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Another common use case is to windsorize a layer, for example by removing</span></span>
 <span><span class="co"># top outliers form a prediction.</span></span>
@@ -354,7 +356,7 @@ Note that this creates (in some cases substantial) additional
 predictors.</p>
 <p><strong>NOTE: This functionality are also available directly in
 <code><a href="../reference/add_predictors.html">add_predictors()</a></code> as parameter!</strong></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Let's take a simple layer for an example</span></span>
 <span><span class="va">layer</span> <span class="op">&lt;-</span> <span class="va">predictors</span><span class="op">$</span><span class="va">ndvi_mean_50km</span></span>
 <span></span>
@@ -365,7 +367,7 @@ predictors.</p>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"quadratic"</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Create some hinge transformations</span></span>
 <span><span class="va">new2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_derivate.html">predictor_derivate</a></span><span class="op">(</span><span class="va">layer</span>, option <span class="op">=</span> <span class="st">"hinge"</span>,</span>
@@ -374,7 +376,7 @@ predictors.</p>
 <span>                           <span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new2</span> <span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-2.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># What does this do precisely?</span></span>
 <span><span class="co"># Lets check</span></span>
@@ -383,19 +385,19 @@ predictors.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"First hinge of ndvi"</span>, xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-3.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"Second hinge of ndvi"</span>,xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-4.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">4</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"Third hinge of ndvi"</span>, xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-5.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">5</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"Fourth hinge of ndvi"</span>,xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-6.png" width="700" style="display: block; margin: auto;"></p>
 <p>More fine-tuned control can also be achieved by creating specific
 interactions among variables, for example if one expects climate to
 interact with forest cover.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create interacting variables</span></span>
 <span></span>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_derivate.html">predictor_derivate</a></span><span class="op">(</span><span class="va">predictors</span>,option <span class="op">=</span> <span class="st">"interaction"</span>,</span>
@@ -416,7 +418,7 @@ considered missing among all other predictors as well. The
 harmonize and check the extent of missing data in a set of predictors
 which can be convenient for assessing errors during data
 preparation.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Make a subset of all predictors to show the concept</span></span>
 <span><span class="va">layers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>,  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aspect_mean_50km"</span>,</span>
 <span>                                        <span class="st">"CLC3_312_mean_50km"</span>,</span>
@@ -432,7 +434,7 @@ preparation.</p>
 <span><span class="co"># Now all the predictors have identical coverage of NA values</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-1-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Or assess like this</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="op">!</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summarize-generics.html" class="external-link">noNA</a></span><span class="op">(</span><span class="va">new</span><span class="op">$</span><span class="va">aspect_mean_50km</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Missing observations"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-1-2.png" width="700" style="display: block; margin: auto;"></p>
@@ -453,7 +455,7 @@ finer temporal grain.</p>
 <p>For this purpose the <em>ibis.iSDM</em> contains a dedicated function
 (<code><a href="../reference/interpolate_gaps.html">interpolate_gaps()</a></code>), that can also be directly called
 within <code><a href="../reference/project.html">project()</a></code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Load some stars rasters</span></span>
 <span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/predictors_presfuture/'</span>,</span>
@@ -469,8 +471,9 @@ within <code><a href="../reference/project.html">project()</a></code>.</p>
 <span><span class="co"># The predictors are here only available every 10 years</span></span>
 <span><span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_dimensions.html" class="external-link">st_get_dimension_values</a></span><span class="op">(</span><span class="va">pred_future</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Units: [(days since 1970-1-1)]</span></span>
-<span><span class="co">#&gt; [1] 16436 20089 23741 27394 31046 34699 38351 42004 45656</span></span>
-<span></span>
+<span><span class="co">#&gt; [1] 16436 20089 23741 27394 31046 34699 38351 42004 45656</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="co"># --- #</span></span>
 <span><span class="co"># The ibis.iSDM contains here a function to make interpolation among timesteps,</span></span>
 <span><span class="co"># thus filling gaps in between.</span></span>
@@ -503,7 +506,7 @@ within <code><a href="../reference/project.html">project()</a></code>.</p>
 <p>As with <code>SpatRaster</code> covariates, it is also possible to
 create transformed or derivate versions of scenario predictors through
 the same helper function.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load some stars rasters</span></span>
 <span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/predictors_presfuture/'</span>,</span>
 <span>                             package <span class="op">=</span> <span class="st">'ibis.iSDM'</span>,</span>
