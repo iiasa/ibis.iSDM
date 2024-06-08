@@ -631,20 +631,22 @@ engine_gdb <- function(x,
                                                       newdata = dummy_temp, which = v,
                                                       type = type, aggregate = 'sum'))
 
-        # Check duplicates. If bbs is present and non-linear, use bbs estimate
-        # MH: As far as I see it the pp will always only store the result of the
-        # current variable due to which = v, so we can just grab the first column
-        out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v], mean = pp[, 1])
-
-        # if(!self$settings$data$only_linear){
-        #   # Combine with
-        #   out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-        #                          mean = pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))])
-        # } else {
-        #   # Combine with
-        #   out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-        #                          mean = pp[,grep(v, colnames(pp))])
-        # }
+        # If bbs is present and non-linear, use bbs estimate. If model is fitted
+        # to non-linear then always the linear (bols, fitted by default) and smooth (bbs)
+        # is stored in bbs. In most cases the linear effect is stable and regularized out
+        # though.
+        # Propose to always take non-linear when found in settings
+        if(!settings$get("only_linear")){
+          # Combine with
+          out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
+                                 mean = pp[, 2] #pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))]
+                                 )
+        } else {
+          # Combine with
+          out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
+                                 mean = pp[, 1] #pp[,grep(v, colnames(pp))]
+                                 )
+        }
       }
 
       # bind to one data.frame
@@ -656,7 +658,8 @@ engine_gdb <- function(x,
           ggplot2::theme_classic() +
           ggplot2::geom_line(ggplot2::aes(y = mean)) +
           ggplot2::facet_wrap(. ~ variable, scales = "free") +
-          ggplot2::labs(x = "Variable", y = "Partial effect")
+          ggplot2::labs(x = "Variable",
+                        y = paste0("Partial effect (",ifelse(settings$get("only_linear"),"linear","smooth"),")"))
         print(g)
       }
       return(out)

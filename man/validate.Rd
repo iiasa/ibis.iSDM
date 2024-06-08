@@ -12,6 +12,7 @@ validate(
   layer = "mean",
   point = NULL,
   point_column = "observed",
+  field_occurrence = NULL,
   ...
 )
 
@@ -21,6 +22,7 @@ validate(
   layer = "mean",
   point = NULL,
   point_column = "observed",
+  field_occurrence = NULL,
   ...
 )
 
@@ -30,6 +32,7 @@ validate(
   layer = NULL,
   point = NULL,
   point_column = "observed",
+  field_occurrence = NULL,
   ...
 )
 }
@@ -48,6 +51,9 @@ depending on the method different metrics can be computed. See Details.}
 
 \item{point_column}{A \code{\link{character}} vector with the name of the column containing
 the independent observations. (Default: \code{'observed'}).}
+
+\item{field_occurrence}{(Deprectated) A \code{\link{character}} field pointing to the name
+of the independent observations. Identical to \code{"point_column"}}
 
 \item{...}{Other parameters that are passed on. Currently unused.}
 }

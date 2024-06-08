@@ -1,4 +1,14 @@
-# ibis.iSDM 0.1.3 (current dev branch)
+# ibis.iSDM 0.1.4 (current dev branch)
+
+#### New features
+
+#### Minor improvements and bug fixes
+* :bug: fix to `engine_gdb` also to support non-linear smooth functions (again).
+* Small fix to support deprecated `field_occurrence` field in `validate` for convenience.
+* :bug: fix that prevented `BART` models to be saved/loaded from disk #127.
+* :bug: fixes related to `factor` handling for all engines.
+
+# ibis.iSDM 0.1.3
 
 #### New features
 * Add functions that creates HTML file base on `DistributionModel`.
@@ -15,8 +25,6 @@
 * Changed default output for netcdf files to multidimensional arrays #109
 * :fire: hot fixes for scenario scaling and normalization issue #113
 * :bug: fix so that projection works with different extents than used for inference.
-* :bug: fix that prevented `BART` models to be saved/loaded from disk #127.
-* :bug: fixes related to `factor` handling for all engines.
 
 # ibis.iSDM 0.1.2
 
