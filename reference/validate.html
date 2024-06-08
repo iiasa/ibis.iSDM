@@ -14,7 +14,7 @@ datasets. For validation of integrated models more work is needed."><meta proper
     
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,6 +81,7 @@ datasets. For validation of integrated models more work is needed.</strong></p>
 <span>  layer <span class="op">=</span> <span class="st">"mean"</span>,</span>
 <span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point_column <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -91,6 +92,7 @@ datasets. For validation of integrated models more work is needed.</strong></p>
 <span>  layer <span class="op">=</span> <span class="st">"mean"</span>,</span>
 <span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point_column <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -101,6 +103,7 @@ datasets. For validation of integrated models more work is needed.</strong></p>
 <span>  layer <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  point_column <span class="op">=</span> <span class="st">"observed"</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -130,6 +133,11 @@ depending on the method different metrics can be computed. See Details.</p></dd>
 <dt>point_column</dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> vector with the name of the column containing
 the independent observations. (Default: <code>'observed'</code>).</p></dd>
+
+
+<dt>field_occurrence</dt>
+<dd><p>(Deprectated) A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> field pointing to the name
+of the independent observations. Identical to <code>"point_column"</code></p></dd>
 
 
 <dt>...</dt>
