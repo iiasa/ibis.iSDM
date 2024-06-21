@@ -155,6 +155,14 @@ methods::setMethod(
       terra::crs(env) <- terra::crs(x$background)
     }
 
+    # Check that background and range align, otherwise raise error
+    if(is.Raster(env)){
+      if(!is_comparable_raster(env, x$background)){
+        warning('Supplied range does not align with background! Aligning them now...')
+        env <- alignRasters(env, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      }
+    }
+
     # Check that all names allowed
     problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
     if( length(problematic_names)>0 ){
@@ -471,7 +479,7 @@ methods::setMethod(
 
     # Check that background and range align, otherwise raise error
     if(is.Raster(layer)){
-      if(is_comparable_raster(layer, x$background)){
+      if(!is_comparable_raster(layer, x$background)){
         warning('Supplied range does not align with background! Aligning them now...')
         layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       }
