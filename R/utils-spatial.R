@@ -15,16 +15,10 @@
 #' @keywords internal
 is_comparable_raster <- function(x, y) {
   if(inherits(y, "sf")){
-    assertthat::assert_that(
-      terra::same.crs(x, y) &&
-        sf::st_crs(x) == sf::st_crs(y)
-    )
+    terra::same.crs(x, y) && terra::ext(x) == terra::ext(y)
   } else {
-    assertthat::assert_that(
-      (is.Raster(x) && is.Raster(y)),
-      terra::same.crs(x, y) &&
-        terra::compareGeom(x, y, stopOnError = FALSE)
-    )
+    assertthat::assert_that((is.Raster(x) && is.Raster(y)))
+    terra::compareGeom(x, y, stopOnError = FALSE)
   }
 }
 
