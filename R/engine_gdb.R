@@ -636,16 +636,16 @@ engine_gdb <- function(x,
         # is stored in bbs. In most cases the linear effect is stable and regularized out
         # though.
         # Propose to always take non-linear when found in settings
+        # MH: Especially the bbs column is named slightly different depending on knots
+        # Thus, only searching for bbs(x) or bols(x)
         if(!settings$get("only_linear")){
           # Combine with
           out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-                                 mean = pp[, 2] #pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))]
-                                 )
+                                 mean = pp[, grep("bbs", colnames(pp))]) #pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))
         } else {
           # Combine with
           out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-                                 mean = pp[, 1] #pp[,grep(v, colnames(pp))]
-                                 )
+                                 mean = pp[, grep("bols", colnames(pp))]) #pp[,grep(v, colnames(pp))]
         }
       }
 
