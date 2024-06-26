@@ -7,7 +7,8 @@
 * Small fix to support deprecated `field_occurrence` field in `validate` for convenience.
 * :bug: fix that prevented `BART` models to be saved/loaded from disk #127.
 * :bug: fixes related to `factor` handling for all engines.
-* :bug: fixes related to `is_comparable_raster` and `add_predictors`/`add_predictors_range`
+* :bug: fixes related to `is_comparable_raster` and `add_predictors`/`add_predictors_range` #130
+* :bug: fix related to `partial` for `engine_gdb` and priors
 
 # ibis.iSDM 0.1.3
 

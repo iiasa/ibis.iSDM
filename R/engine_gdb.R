@@ -637,15 +637,16 @@ engine_gdb <- function(x,
         # though.
         # Propose to always take non-linear when found in settings
         # MH: Especially the bbs column is named slightly different depending on knots
-        # Thus, only searching for bbs(x) or bols(x)
+        # MH: Thus, only searching for bbs(x) or bols(x)
+        # MH: IF prior is present, we need to extract bmono
         if(!settings$get("only_linear")){
           # Combine with
           out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-                                 mean = pp[, grep("bbs", colnames(pp))]) #pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))
+                                 mean = pp[, grep("bbs|bmono", colnames(pp))]) #pp[,grep(paste0("bbs\\(", v,"\\)"), colnames(pp))
         } else {
           # Combine with
           out[[v]] <- data.frame(variable = v, partial_effect = dummy_temp[, v],
-                                 mean = pp[, grep("bols", colnames(pp))]) #pp[,grep(v, colnames(pp))]
+                                 mean = pp[, grep("bols|bmono", colnames(pp))]) #pp[,grep(v, colnames(pp))]
         }
       }
 
