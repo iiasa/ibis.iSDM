@@ -66,10 +66,12 @@
 <h2 class="pkg-version" data-toc-text="0.1.4" id="ibisisdm-014-current-dev-branch">ibis.iSDM 0.1.4 (current dev branch)<a class="anchor" aria-label="anchor" href="#ibisisdm-014-current-dev-branch"></a></h2>
 <div class="section level5">
 <h5 id="new-features-0-1-4">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-4"></a></h5>
-</div>
+<ul><li>Convenience functions to remove limits and controls <code><a href="../reference/rm_limits.html">rm_limits()</a></code>/<code><a href="../reference/rm_control.html">rm_control()</a></code> <a href="https://github.com/iiasa/ibis.iSDM/issues/121" class="external-link">#121</a></li>
+</ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-1-4">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-1-4"></a></h5>
-<ul><li>
+<ul><li>Renamed <code>add_control_extrapolation</code> to <code><a href="../reference/add_limits_extrapolation.html">add_limits_extrapolation()</a></code>.</li>
+<li>
 <span class="emoji" data-emoji="bug">🐛</span> fix to <code>engine_gdb</code> also to support non-linear smooth functions (again).</li>
 <li>Small fix to support deprecated <code>field_occurrence</code> field in <code>validate</code> for convenience.</li>
 <li>
@@ -130,7 +132,7 @@
 <div class="section level5">
 <h5 id="new-features-0-1-1">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-1"></a></h5>
 <ul><li>Added default <code><a href="../reference/engine_glm.html">engine_glm()</a></code> for dependency-free inference and projection.</li>
-<li>Harmonized controls settings and added option to contrain extrapolation <code><a href="../reference/add_control_extrapolation.html">add_control_extrapolation()</a></code>
+<li>Harmonized controls settings and added option to contrain extrapolation <code>add_control_extrapolation()</code>
 </li>
 <li>Adding a function for temporal interpolation of predictors <a href="https://github.com/iiasa/ibis.iSDM/issues/52" class="external-link">#52</a></li>
 </ul></div>
