@@ -759,7 +759,7 @@ methods::setMethod(
               levels(rip[[i]]) <- ca
             }
             rip <- rip == 'Interpolation'
-            rm(nt2)
+            try({ rm(nt2) },silent = TRUE)
           }
         # Convert to polygon
         zones <- terra::as.polygons(rip) |> sf::st_as_sf()

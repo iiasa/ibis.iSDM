@@ -636,6 +636,9 @@ sf_proximity_weight <- function(poi, maxdist = NULL, alpha = 1) {
     maxdist <- maxdist / 4
   }
 
+  # Convert to numeric if units found for convenience
+  if(inherits(maxdist, "units")) maxdist <- units::drop_units(maxdist)
+
   # Now calculate overall distances
   dists <- sf::st_distance(poi)
   diag(dists) <- NA

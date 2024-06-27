@@ -24,29 +24,32 @@ test_that('Test controls and limits', {
     add_predictors(predictors, transform = 'none',derivates = 'none')
 
   # Expect error
-  expect_error(x |> add_control_extrapolation(method = "nomethod"))
+  expect_error(x |> add_limits_extrapolation(method = "nomethod"))
 
   # Add the various controls to see that they are working
   zones <- terra::as.factor( predictors$koeppen_50km )
-  y <- x |> add_control_extrapolation(layer = zones, method = "zones")
+  y <- x |> add_limits_extrapolation(layer = zones, method = "zones")
   expect_false(y$get_limits() |> is.Waiver())
   expect_length(y$get_limits(), 4) # Those are saved in limits in the object
   expect_true(x$get_limits() |> is.Waiver()) # Check that original object remains correct
+  z <- y |> rm_limits()
+  expect_true(z$get_limits() |> is.Waiver()) # Check that altered object remains correct
+  expect_false(y$get_limits() |> is.Waiver()) # Check that original object remains correct
 
   # Add mcp limits
-  y <- x |> add_control_extrapolation(method = "mcp")
+  y <- x |> add_limits_extrapolation(method = "mcp")
   expect_false(y$get_limits() |> is.Waiver())
 
   # Add NT2
-  y <- x |> add_control_extrapolation(method = "nt2")
+  y <- x |> add_limits_extrapolation(method = "nt2")
   expect_false(y$get_limits() |> is.Waiver())
 
   # Add MESS
-  y <- x |> add_control_extrapolation(method = "mess")
+  y <- x |> add_limits_extrapolation(method = "mess")
   expect_false(y$get_limits() |> is.Waiver())
 
   # Train the model with limits set
-  x <-  x |> add_control_extrapolation(layer = zones, method = "zones")
+  x <-  x |> add_limits_extrapolation(layer = zones, method = "zones")
   suppressWarnings(
     mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)
@@ -61,7 +64,7 @@ test_that('Test controls and limits', {
   # --- #
   # Also try mess
   x <- x$rm_limits()
-  x <-  x |> add_control_extrapolation(method = "mess")
+  x <-  x |> add_limits_extrapolation(method = "mess")
   suppressWarnings(
     mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)
@@ -87,5 +90,10 @@ test_that('Test controls and limits', {
   expect_length( x$get_control(), 4 )
   settings <- mod$settings
   expect_equal(settings$get("bias_variable"), "hmi_mean_50km")
+
+  # Remove control
+  y <- x |> rm_control()
+  expect_length(x$get_control(), 4)
+  expect_length(y$get_control(), 0)
 })
 

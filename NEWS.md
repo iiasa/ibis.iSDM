@@ -1,8 +1,10 @@
 # ibis.iSDM 0.1.4 (current dev branch)
 
 #### New features
+* Convenience functions to remove limits and controls `rm_limits()`/`rm_control()` #121
 
 #### Minor improvements and bug fixes
+* Renamed `add_control_extrapolation` to `add_limits_extrapolation()`.
 * :bug: fix to `engine_gdb` also to support non-linear smooth functions (again).
 * Small fix to support deprecated `field_occurrence` field in `validate` for convenience.
 * :bug: fix that prevented `BART` models to be saved/loaded from disk #127.
