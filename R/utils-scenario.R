@@ -334,7 +334,7 @@ raster_to_stars <- function(obj){
     dims$time <- stars:::create_dimension(values = times[i])
     o <- stars::st_redimension(o,new_dims = dims)
 
-    new_env[[names(obj)[i]]] <- o
+    new_env[[paste0(names(obj)[i],"__",i)]] <- o
   }
 
   new_env <- do.call(c, new_env)

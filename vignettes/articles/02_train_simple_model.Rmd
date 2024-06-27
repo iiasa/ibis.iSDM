@@ -299,7 +299,7 @@ x <- distribution(background) |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
   # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
   rm_predictors("koeppen_50km") |> 
-  add_control_extrapolation(layer = predictors$koeppen_50km, method = "zones") |> 
+  add_limits_extrapolation(layer = predictors$koeppen_50km, method = "zones") |> 
   engine_xgboost(iter = 3000, learning_rate = 0.01)
 
 # Spatially limited prediction
