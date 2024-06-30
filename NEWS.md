@@ -2,6 +2,7 @@
 
 #### New features
 * Convenience functions to remove limits and controls `rm_limits()`/`rm_control()` #121
+* :fire: Enable stars and multi-temporal SpatRaster zones for `scenario()` and `distribution()` #121 
 
 #### Minor improvements and bug fixes
 * Renamed `add_control_extrapolation` to `add_limits_extrapolation()`.

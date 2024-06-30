@@ -168,22 +168,71 @@ PredictorDataset <- R6::R6Class(
 
     #' @description
     #' Utility function to clip the predictor dataset by another dataset
+    #' @details
+    #' This code now also
+    #'
     #' @param pol A [`sf`] object used for cropping the data
+    #' @param apply_time A [`logical`] flag indicating if time should be acknowledged in cropping.
     #' @return Invisibile TRUE
-    crop_data = function(pol){
+    crop_data = function(pol, apply_time = FALSE){
       assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),
                               inherits(pol, 'sf'),
+                              is.logical(apply_time),
                               all( unique(sf::st_geometry_type(pol)) %in% c("POLYGON","MULTIPOLYGON") )
       )
-      if(is.Raster(self$data)){
-        self$data <- terra::crop(self$data, pol)
+      # Get closest date to entry
+      if(utils::hasName(pol, "time") && apply_time){
+        # Check depending on type
+        if(is.Raster(self$data) && terra::has.time(self$data)){
+          # Get the closest (single) entry if ther eis only onle
+          if(dplyr::n_distinct(pol$time)==1){
+            self$data <- terra::mask(self$data, pol)
+          } else {
+            # Alternatively get the closest temporal date.
+            times <- terra::time(self$data)
+            new_env <- terra::rast()
+            for(j in 1:length(unique(times))){
+              lyr <- terra::subset(self$data, times == times[j])
+              pols <- pol |> dplyr::filter(time == get_nearest_date(times[j], pol$time,FALSE))
+              suppressWarnings(
+                new_env <- c(new_env, terra::mask(lyr, pols) )
+              )
+              rm(lyr, pols)
+            }
+            self$data <- new_env
+            rm(new_env)
+          }
+          rm(pols)
+        } else {
+          times <- stars::st_get_dimension_values(self$data, "time")
+          new_env <- list()
+          # Hacky way of clipping existing data to temporal polygons
+          for(j in 1:length(unique(times))){
+            lyr <- self$data |> dplyr::filter(time == times[j])
+            pols <- pol |> dplyr::filter(time == get_nearest_date(times[j], pol$time,FALSE))
+            # 30/06/2024 - Need to convert time to posix as this otherwise stars bugs out
+            lyr <- stars::st_set_dimensions(lyr, "time", values = to_POSIXct(times[j]))
+
+            new_env[[paste0(times[j])]] <- suppressWarnings(
+              suppressMessages(sf::st_crop(lyr, pols, crop = FALSE) ) # FALSE to maintain extent of mask
+            )
+            rm(pols,lyr)
+          }
+          new_env <- do.call(c, new_env)
+          self$data <- new_env
+          rm(new_env)
+        }
       } else {
-        # Scenario
-        suppressWarnings(
-          suppressMessages(
-            self$data <- sf::st_crop(self$data, pol)
+        if(is.Raster(self$data)){
+          self$data <- terra::mask(self$data, pol)
+        } else {
+          # Scenario
+          suppressWarnings(
+            suppressMessages(
+              self$data <- sf::st_crop(self$data, pol)
+            )
           )
-        )
+        }
       }
       invisible(self)
     },
@@ -195,6 +244,7 @@ PredictorDataset <- R6::R6Class(
     #' @param ... Any other parameters passed on to masking.
     #' @return Invisible
     mask = function(mask, inverse = FALSE, ...){
+      if(inherits(self$get_data(), "stars")) invisible(self)
       # Check whether prediction has been created
       prediction <- self$get_data(df = FALSE)
       if(!is.Waiver(prediction)){

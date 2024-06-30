@@ -34,12 +34,13 @@ distribution(
 \item{background}{Specification of the modelling background. Must be a
 \code{\link{SpatRaster}} or \code{\link{sf}} object.}
 
-\item{limits}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the prediction
-surface when intersected with input data (Default: \code{NULL}).}
+\item{limits}{A \code{\link{SpatRaster}}, \code{\link{sf}} or \code{\link{stars}} object that limits the prediction
+surface when intersected with input data (Default: \code{NULL}). In case of a
+\code{\link{stars}} object the first factorized time entry is taken.}
 
 \item{limits_method}{A \code{\link{character}} of the method used for hard limiting a
 projection. Available options are \code{"none"} (Default), \code{"zones"}
-or \code{"mcp"}.}
+or \code{"mcp"}. See also \code{\link[=add_limits_extrapolation]{add_limits_extrapolation()}}.}
 
 \item{mcp_buffer}{A \code{\link{numeric}} distance to buffer the mcp (Default \code{0}).
 Only used if \code{"mcp"} is used.}

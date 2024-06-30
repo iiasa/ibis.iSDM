@@ -232,16 +232,22 @@ A \code{\link{numeric}} \code{\link{vector}} with the spatial resolution of the 
 \subsection{Method \code{crop_data()}}{
 Utility function to clip the predictor dataset by another dataset
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$crop_data(pol)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$crop_data(pol, apply_time = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{pol}}{A \code{\link{sf}} object used for cropping the data}
+
+\item{\code{apply_time}}{A \code{\link{logical}} flag indicating if time should be acknowledged in cropping.}
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Details}{
+This code now also
+}
+
 \subsection{Returns}{
 Invisibile TRUE
 }

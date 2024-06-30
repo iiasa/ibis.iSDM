@@ -22,7 +22,7 @@ is_comparable_raster <- function(x, y) {
   }
 }
 
-#' Easy conversion function
+#' Donversion function from SpatRaster to RasterLayer
 #'
 #' @description As a consequence of switching to [terra] from [raster], there
 #' might be situations where it is necessary to convert between them. This
@@ -53,6 +53,56 @@ terra_to_raster <- function(input){
   # If time specified, set those again
   if(!all(is.na(terra::time(input)))){
     out <- raster::setZ(out, terra::time(input))
+  }
+  return(out)
+}
+
+#' Convert a terra object to sf
+#'
+#' @description
+#' This helper function converts a (multi-dimensional) SpatRaster to a [`sf`]
+#' object. This is particular useful for categorical rasters in which case a
+#' different \code{MultiPolygon} is created per class. A warning is raised for
+#' non-categorical layers.
+#'
+#' @param input A [`SpatRaster`] object to convert to [`sf`].
+#' @param dissolve A [`logical`] flag indicating if polygons are to be dissolved (Default: \code{TRUE}).
+#' @param dummy A [`character`] or [`date`] to be added as \code{time} column in cases
+#' where no time dimension can be found (Default: \code{NULL}, not used).
+#'
+#' @keywords utils
+#'
+#' @noRd
+#'
+#' @keywords internal
+terra_to_sf <- function(input, dissolve = TRUE, dummy = NULL){
+  assertthat::assert_that(
+    is.Raster(input), is.logical(dissolve)
+  )
+
+  # Get times
+  times <- terra::time(input)
+  if(!is.null(dummy) && (all(is.na(times)) || all(is.null(times)) )){
+    times <- dummy
+  }
+  if((all(is.na(times)) || all(is.null(times)) )) times <- "No set time"
+
+  # Single factor layer
+  if(terra::nlyr(input)==1){
+    # Convert single layer
+    out <- sf::st_as_sf( terra::as.polygons(input, dissolve = dissolve) ) |>
+      sf::st_cast("MULTIPOLYGON")
+    out$time <- times[1] # Get the first entry. Does not matter anyway
+  } else {
+    # Multi-dimension (time assumed)
+    input <- terra::as.list(input)
+    out <- lapply(input, function(z)
+      sf::st_as_sf( terra::as.polygons(z, dissolve = dissolve) ) |>
+                    sf::st_cast("MULTIPOLYGON") |>
+      dplyr::mutate(time = terra::time(z))
+      )
+    # Combine all
+    out <- do.call("rbind",out)
   }
   return(out)
 }

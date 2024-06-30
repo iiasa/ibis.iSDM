@@ -111,7 +111,8 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, layer, method = "mcp", mcp_buffer = 0, novel = "within", limits_clip = FALSE) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            missing(layer) || (is.Raster(layer) || inherits(layer, "sf")),
+                            missing(layer) || (is.Raster(layer) || inherits(layer, "sf") ||
+                                                 inherits(layer, "stars")),
                             (is.numeric(mcp_buffer) && mcp_buffer >=0),
                             is.logical(limits_clip),
                             is.character(novel),
@@ -124,20 +125,37 @@ methods::setMethod(
     # Make a clone
     y <- x$clone(deep = TRUE)
 
+    # Raise a warning if existing limits are present
+    if(!is.Waiver( y$get_limits() )){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow', 'Existing limits found. Replacing...')
+    }
+
     # Apply method specific settings
     if(method == "zones"){
-      assertthat::assert_that((is.Raster(layer) || inherits(layer, "sf")),
+      assertthat::assert_that((is.Raster(layer) || inherits(layer, "sf") || inherits(layer, "stars")),
                               msg = "No zone layer specified!")
+      # If stars, convert to raster
+      if(inherits(layer, 'stars')){
+        assertthat::assert_that( length(layer)==1,
+                                 msg = "More than 1 attribute found for multi-temporal limits!")
+        # Convert to SpatRaster and take the first entry (first time slot)
+        layer <- stars_to_raster(layer)
+        layer <- Reduce('c', layer) # Combine all
+        # Assume it was categorical (stars does not recognize categorical factors)
+        layer <- terra::as.factor(layer)
+      }
 
       if(inherits(layer,'SpatRaster')){
-        assertthat::assert_that(terra::is.factor(layer),
+        assertthat::assert_that(all(terra::is.factor(layer)),
                                 msg = 'Provided limit raster needs to be ratified (categorical)!')
-        layer <- sf::st_as_sf( terra::as.polygons(layer, dissolve = TRUE) ) |> sf::st_cast("MULTIPOLYGON")
+        layer <- terra_to_sf(layer)
       }
       assertthat::assert_that(inherits(layer, "sf"),
                               unique(sf::st_geometry_type(layer)) %in% c('MULTIPOLYGON','POLYGON'),
                               msg = "Limits need to be of polygon type."
       )
+      # If there is no time dimension, assign a dummy
+      if(!utils::hasName(layer,"time")) layer$time <- "No set time"
 
       # Get background
       background <- x$background
@@ -153,11 +171,16 @@ methods::setMethod(
       }
 
       # Get first column for zone description and rename
-      layer <- layer[,1]; names(layer) <- c('limit','geometry')
+      layer <- rename_geometry(layer, 'geometry')
+      names(layer)[1] <- "limit" # The first entry is the layer name
       limits <- list(layer = layer, "limits_method" = method,
                      "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
       y <- y$set_limits(x = limits)
     } else if(method == "mcp"){
+      # Raise a warning if a layer has been found?
+      if(!missing(layer)){
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Layer found but not used...')
+      }
       # Specify the option to calculate a mcp based on the added data.
       # This is done directly in train.
       limits <- list("layer" = NULL, "limits_method" = method,

@@ -50,6 +50,7 @@ test_that('Test controls and limits', {
 
   # Train the model with limits set
   x <-  x |> add_limits_extrapolation(layer = zones, method = "zones")
+  expect_length(x$get_limits(), 4)
   suppressWarnings(
     mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)
@@ -65,6 +66,7 @@ test_that('Test controls and limits', {
   # Also try mess
   x <- x$rm_limits()
   x <-  x |> add_limits_extrapolation(method = "mess")
+  expect_equal(x$get_limits()$limits_method, "mess")
   suppressWarnings(
     mod <- train(x |> engine_glm(), "test", inference_only = FALSE, only_linear = TRUE,
                  varsel = "none", verbose = FALSE)

@@ -39,10 +39,12 @@ test_that('Testing data prep functions for spatial-temporal data in stars', {
   # Stars to raster check
   expect_type(stars_to_raster(pred_future,which = 1), "list")
   # Also try the inverse
-  o <- stars_to_raster(pred_future,which = 1)[[1]] |>
-    raster_to_stars()
+  o <- stars_to_raster(pred_future,which = 1)[[1]]
+  expect_s4_class(o, "SpatRaster")
+  o <- o |> raster_to_stars()
   expect_s3_class(o, "stars")
   expect_length(o, 9)
+  expect_true(all(names(pred_future) %in% names(o)))
 
   # Add a new raster to stars object
   o <- stars_to_raster(pred_future,which = 1)[[1]]['bio01']

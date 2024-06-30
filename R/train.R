@@ -691,7 +691,7 @@ methods::setMethod(
     # Check if MCP should be calculated
     if(!is.Waiver(x$get_limits())){
       # Build MCP based zones ?
-      if(x$limits$limits_method=="mcp"){
+      if(x$get_limits()$limits_method=="mcp"){
         # Create a polygon using all available information
         # Then overwrite limits
         l <- list("layer" = create_mcp(model, x$limits),
@@ -702,7 +702,7 @@ methods::setMethod(
         zones <- x$limits$layer
         assertthat::assert_that(!is.null(zones),
                                 utils::hasName(zones, "limit"))
-      } else if(x$limits$limits_method=="zones") {
+      } else if(x$get_limits()$limits_method=="zones") {
         # Zones
         # Get biodiversity data
         coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
@@ -712,17 +712,24 @@ methods::setMethod(
           coords <- sf::st_transform(coords, sf::st_crs(model$background))
         }
 
+        # Get the layer
+        layer <- x$get_limits()$layer
+        # If there are multiple time entries, take the first one for parametrization
+        if( dplyr::n_distinct(layer[['time']])>1){
+          layer <- layer |> dplyr::filter(time == sort(layer[['time']])[1])
+        }
         # Get zones from the limiting area, e.g. those intersecting with input
+        # From provided time selection
         suppressMessages(
           suppressWarnings(
             zones <- sf::st_intersection(sf::st_as_sf(coords, coords = c('x','y'),
                                                       crs = sf::st_crs(model$background)),
-                                         x$limits$layer)
+                                         layer)
           )
         )
-        # Limit zones
-        zones <- subset(x$limits$layer, limit %in% unique(zones$limit) )
-      } else if(x$limits$limits_method %in% c("nt2", "mess")){
+        # Limit zones (using the full layer here!)
+        zones <- subset(layer, limit %in% unique(zones$limit) )
+      } else if(x$get_limits()$limits_method %in% c("nt2", "mess")){
           # If there are more than one data source, raise warning
           if(length(model$biodiversity)>1){
             if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow',
@@ -735,7 +742,7 @@ methods::setMethod(
           }
 
           # Multivariate novelty index for the training data
-          if(x$limits$limits_method=="nt2"){
+          if(x$get_limits()$limits_method=="nt2"){
             rip <- .nt12(prodat = model$predictors_object$get_data(),
                          refdat = refs)[["novel"]]
             # Get only within reference to make a mask
@@ -760,7 +767,7 @@ methods::setMethod(
             }
             rip <- rip == 'Interpolation'
             try({ rm(nt2) },silent = TRUE)
-          }
+        }
         # Convert to polygon
         zones <- terra::as.polygons(rip) |> sf::st_as_sf()
         names(zones)[1] <- "limit"
@@ -771,14 +778,15 @@ methods::setMethod(
       if(nrow(zones)==0){
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
                                                   'Occurrence points do not fall into any zones!')
-        zones <- x$limits$layer  # Reset
+        zones <- x$get_limits()$layer  # Reset
       }
 
       # Also clip the predictors if set
-      if(x$limits$limits_clip && nrow(zones)>0){
+      if(x$get_limits()$limits_clip && nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(
-          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background),
+          suppressWarnings( sf::st_union(
+            sf::st_intersection(zones, model$background),
                                           by_feature = TRUE) |>
                               sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
                               sf::st_cast("MULTIPOLYGON")
@@ -819,6 +827,12 @@ methods::setMethod(
         # }
       }
       # Reset the zones, but save the created layer
+      # Note that we are using the original saved layer here again!
+      # This is to retain multi-temporal zones
+      if(x$get_limits()$limits_method=="zones"){
+        zones <- subset(x$get_limits()$layer, limit %in% unique(zones$limit) )
+      }
+
       l <- list("layer" = zones, "limits_method" = x$limits$limits_method,
                 "mcp_buffer" = x$limits$mcp_buffer,
                 "limits_clip" = x$limits$limits_clip)
@@ -1774,9 +1788,15 @@ methods::setMethod(
     # Clip to limits again to be sure
     if(!is.Waiver(x$get_limits())) {
       if(settings$get('inference_only')==FALSE){
+        layer <- settings$get("limits")$layer
+        # First entry for clipping if time found!
+        if(utils::hasName(layer,"time")){
+          layer <- layer |> dplyr::filter(time == sort(layer[['time']])[1])
+        }
         out <- out$set_data("prediction",
                             terra::mask(out$get_data("prediction"),
-                                        settings$get("limits")$layer))
+                                        layer))
+        rm(layer)
       }
       out$settings$set("has_limits", TRUE)
     } else {
