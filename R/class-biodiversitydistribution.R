@@ -465,14 +465,6 @@ BiodiversityDistribution <- R6::R6Class(
     },
 
     #' @description
-    #' Get dimensions of extent from background
-    #' @return Background extent or NULL.
-    get_extent_dimensions = function(){
-      # Calculate the dimensions of the background
-      if(!is.Waiver(self$background)) extent_dimensions(self$background) else NULL
-    },
-
-    #' @description
     #' Get projection from the background in crs format.
     #' @return A [`character`] of the projection
     get_projection = function(){

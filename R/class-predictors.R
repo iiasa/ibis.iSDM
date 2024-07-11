@@ -167,13 +167,25 @@ PredictorDataset <- R6::R6Class(
     },
 
     #' @description
+    #' Get Extent of predictors
+    #' @return A [`numeric`] [`vector`] with the spatial resolution of the data.
+    get_ext = function(){
+      assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
+      if(is.Raster(self$data)){
+        terra::ext(self$get_data()) |> sf::st_bbox()
+      } else {
+        sf::st_bbox(self$data)
+      }
+    },
+
+    #' @description
     #' Utility function to clip the predictor dataset by another dataset
     #' @details
     #' This code now also
     #'
     #' @param pol A [`sf`] object used for cropping the data
     #' @param apply_time A [`logical`] flag indicating if time should be acknowledged in cropping.
-    #' @return Invisibile TRUE
+    #' @return Invisible TRUE
     crop_data = function(pol, apply_time = FALSE){
       assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),
                               inherits(pol, 'sf'),

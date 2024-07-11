@@ -249,7 +249,11 @@ create_mcp <- function(biod, limits){
     sf::st_as_sf()
 
   # Buffer if specified
-  if(limits$mcp_buffer>0) out <- out |> sf::st_buffer(dist = limits$mcp_buffer)
+  if(limits$mcp_buffer>0){
+    suppressWarnings(
+      out <- out |> sf::st_buffer(dist = limits$mcp_buffer)
+    )
+  }
   # Add a limit field
   out$limit <- 1:nrow(out)
   attr(out, "limits_method") <- "mcp"

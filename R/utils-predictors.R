@@ -507,7 +507,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       for(val in names(env)){
         suppressWarnings( o <- makeThresh(env[[val]],n = val,nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
-        new_env <- c(new_env, fill_rasters(o, emptyraster(env)) )
+        suppressWarnings( new_env <- c(new_env, fill_rasters(o, emptyraster(env)) ) )
         rm(o)
       }
     } else {
@@ -612,7 +612,21 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
                             msg = "Provide a vector of 2 variables for an interaction!")
 
     # Make unique combinations
-    ind <- utils::combn(int_variables, 2)
+    if(any(is.factor(env[[int_variables]]))){
+      # Factor to variable interaction
+      i <- which(is.factor(env[[int_variables]]))
+      o <- explode_factorized_raster(env[[int_variables]][[i]])
+      if(length(i)==length(int_variables)){
+        ind <- utils::combn(names(o), 2)
+      } else {
+        # Create two-way interactions as specified
+        ind <- rbind( matrix(names(o),nrow = 1), int_variables[which(!is.factor(env[[int_variables]]))])
+      }
+      suppressWarnings( env <- c(env, o)) # Add to stack.
+    } else {
+      # All possible ones
+      ind <- utils::combn(int_variables, 2)
+    }
 
     if(is.Raster(env)){
       # Now for each combination build new variable

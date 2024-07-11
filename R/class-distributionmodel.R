@@ -485,11 +485,17 @@ DistributionModel <- R6::R6Class(
     #' @description
     #' Set new fit for this Model.
     #' @param x The name of the new fit.
-    #' @param value The [`SpatRaster`] layer to be inserted.
+    #' @param value The [`SpatRaster`] layer (or model) to be inserted.
     #' @return This object.
     set_data = function(x, value) {
+      assertthat::assert_that(
+        is.character(x)
+      )
       # Get projected value
       ff <- self$fits
+      # if Raster, make a deep copy
+      if(is.Raster(value)) value <- terra::deepcopy(value)
+
       # Set the object
       ff[[x]] <- value
       self$fits <- ff

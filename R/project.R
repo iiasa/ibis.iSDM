@@ -674,6 +674,8 @@ methods::setMethod(
         stars::st_dimensions(proj_thresh) <- stars::st_dimensions(proj)
         new <- try({ c(proj, proj_thresh) },silent = TRUE)
       }
+      # Add the threshold as an attribute for later
+      attr(new, "threshold") <- scenario_threshold
       proj <- new; rm(new)
     }
     if(!is.null(pops)){

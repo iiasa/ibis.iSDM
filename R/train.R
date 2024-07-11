@@ -1785,6 +1785,14 @@ methods::setMethod(
 
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
+    # Quick check that the prediction is consistent with background extent
+    if(!is_comparable_raster(out$get_data(), x$background )){
+      o <- out$get_data()
+      o <- terra::extend(o, x$background) |> terra::crop(x$background)
+      out <- out$set_data("prediction", o)
+      try({ rm(o) })
+    }
+
     # Clip to limits again to be sure
     if(!is.Waiver(x$get_limits())) {
       if(settings$get('inference_only')==FALSE){
@@ -1793,10 +1801,14 @@ methods::setMethod(
         if(utils::hasName(layer,"time")){
           layer <- layer |> dplyr::filter(time == sort(layer[['time']])[1])
         }
-        out <- out$set_data("prediction",
-                            terra::mask(out$get_data("prediction"),
-                                        layer))
-        rm(layer)
+        if(settings$get("limits")$limits_clip){
+          o <- terra::mask(out$get_data("prediction"), layer)
+        } else {
+          # Default! Leaves rest of background to 0
+          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = 0)
+        }
+        out <- out$set_data("prediction", o)
+        try({ rm(layer, o) })
       }
       out$settings$set("has_limits", TRUE)
     } else {
