@@ -566,7 +566,20 @@ references:
     given-names: Fabian E.
     email: bachlfab@gmail.com
   year: '2024'
-  version: '>= 2.6.0'
+  version: '>= 2.10.0'
+- type: software
+  title: fmesher
+  abstract: 'fmesher: Triangle Meshes and Related Geometry Tools'
+  notes: Suggests
+  url: https://inlabru-org.github.io/fmesher/
+  repository: https://CRAN.R-project.org/package=fmesher
+  authors:
+  - family-names: Lindgren
+    given-names: Finn
+    email: finn.lindgren@gmail.com
+    orcid: https://orcid.org/0000-0002-5833-2011
+  year: '2024'
+  version: '>= 0.1.7'
 - type: software
   title: igraph
   abstract: 'igraph: Network Analysis and Visualization'
