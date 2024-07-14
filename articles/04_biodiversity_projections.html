@@ -5,7 +5,6 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="ibis.iSDM">
 <title>Creating biodiversity projections • ibis.iSDM</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
@@ -15,76 +14,53 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Creating biodiversity projections">
-<meta property="og:description" content="ibis.iSDM">
-<meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:creator" content="@Martin_Ecology">
-<meta name="twitter:site" content="@IIASAVienna">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Creating biodiversity projections">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary" data-bs-theme="dark"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.4</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/01_data_preparationhelpers.html">1. Helper functions to prepare inputs</a>
-    <a class="dropdown-item" href="../articles/02_train_simple_model.html">2. Train a model</a>
-    <a class="dropdown-item" href="../articles/03_integrate_data.html">3. Integrate data</a>
-    <a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a>
-    <a class="dropdown-item" href="../articles/05_mechanistic_estimation.html">5. Simulating mechanisms</a>
-    <a class="dropdown-item" href="../articles/06_engine_comparison.html">6. Engine comparison</a>
-    <a class="dropdown-item" href="../articles/07_package_comparison.html">7. Other packages</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/01_data_preparationhelpers.html">1. Helper functions to prepare inputs</a></li>
+    <li><a class="dropdown-item" href="../articles/02_train_simple_model.html">2. Train a model</a></li>
+    <li><a class="dropdown-item" href="../articles/03_integrate_data.html">3. Integrate data</a></li>
+    <li><a class="dropdown-item" href="../articles/04_biodiversity_projections.html">4. Biodiversity projections</a></li>
+    <li><a class="dropdown-item" href="../articles/05_mechanistic_estimation.html">5. Simulating mechanisms</a></li>
+    <li><a class="dropdown-item" href="../articles/06_engine_comparison.html">6. Engine comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/07_package_comparison.html">7. Other packages</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../articles/08_frequently-asked-questions.html">FAQ</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../articles/contributing.html">Contributing</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/08_frequently-asked-questions.html">FAQ</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/contributing.html">Contributing</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/iiasa/ibis.iSDM/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/iiasa/ibis.iSDM/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -97,9 +73,9 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-06-30</h4>
+            <h4 data-toc-skip class="date">2024-07-14</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/HEAD/vignettes/articles/04_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/04_biodiversity_projections.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/04_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/04_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>04_biodiversity_projections.Rmd</code></div>
     </div>
 
@@ -110,7 +86,8 @@ contemporary distribution of any species (see <a href="01_train_simple_model.htm
 distribution models (SDMs) are commonly used to make predictions on how
 biodiversity is expected to change under future conditions. Usually this
 is being done by first training a model on present observations and then
-projecting the resulting <span class="math inline">\(\beta\)</span>
+projecting the resulting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
 coefficients to another set of environmental predictors from another
 time period or spatial region.</p>
 <p>The <code>ibis.iSDM</code> R-package provides direct support for
@@ -196,9 +173,8 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span>  <span class="co"># Note that we scale the predictors here</span></span>
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_current</span>, transform <span class="op">=</span> <span class="st">'scale'</span>,derivates <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> </span>
-<span><span class="co">#&gt; Loaded glmnet 4.1-8</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; Loaded glmnet 4.1-8</span></span>
+<span></span>
 <span><span class="co"># Train the model</span></span>
 <span><span class="va">modf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span><span class="va">x</span>, runname <span class="op">=</span> <span class="st">'Simple PPM'</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -223,9 +199,8 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># The object contains its own functions. See the scenarios help file for more information on </span></span>
+<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span>
+<span><span class="co"># The object contains its own functions. See the scenarios help file for more information on </span></span>
 <span><span class="co"># what is possible with them</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sc</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "threshold"            "verify"               "summary_beforeafter" </span></span>
@@ -245,7 +220,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt; [43] "apply_threshold"      ".__enclos_env__"</span></span></code></pre></div>
 <p>The scenario object can finally be trained via
 <code><a href="../reference/project.html">project()</a></code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc.fit1</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co"># Note that an indication of fitted scenarios has been added to the object</span></span>
 <span><span class="va">sc.fit1</span></span>
@@ -285,21 +260,21 @@ will summarize the amount of area at each timestep.</li>
 <code><a href="../reference/get_data.html">get_data()</a></code> gets the created scenarios a
 <code>stars</code> object (plus <em>thresholds</em> if specified).</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot all scenarios. With a large number of predictors this figure will be messy...</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">sc.fit1</span><span class="op">)</span> <span class="co"># or sc.fit1$plot()</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># As an alternative, visualize the linear slope per grid cell and across all time steps</span></span>
 <span><span class="va">o</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">calc_scenarios_slope</span><span class="op">(</span>plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-2.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Another option is to calculate the relative change between start and finish</span></span>
 <span><span class="va">o</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">plot_relative_change</span><span class="op">(</span>plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-3.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># We can also summarize the thresholded data</span></span>
 <span><span class="va">o</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
@@ -307,7 +282,7 @@ will summarize the amount of area at each timestep.</li>
 <span>     main <span class="op">=</span> <span class="st">"Suitable habitat across Time"</span>,</span>
 <span>     ylab <span class="op">=</span> <span class="st">"Amount of area (km2)"</span>, xlab <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-4.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># How does habitat gain and loss change over time?</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">totchange_gain_km2</span><span class="op">~</span><span class="va">band</span>, data <span class="op">=</span> <span class="va">o</span>, type <span class="op">=</span> <span class="st">'n'</span>,</span>
@@ -374,7 +349,7 @@ stabilization here results in the projections being smoothed and
 informed of incremental time steps. This can particularly help for
 projections that use variables known to make sudden, abrupt jumps
 between time steps (e.g. precipitation anomalies).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Adding a simple negative exponential kernel to constrain the predictions</span></span>
 <span><span class="va">sc.fit2</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op">|&gt;</span>   </span>
 <span>   <span class="fu"><a href="../reference/add_constraint.html">add_constraint</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"sdd_nex"</span>, value <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -399,19 +374,18 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co">#&gt;   Constraints:    <span style="color: #00BB00;">dispersal (sdd_nexpkernel), adaptability (nichelimit)</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span>
+<span></span>
 <span><span class="co"># The naive assumption is that there is unlimited dispersal across the whole background</span></span>
 <span><span class="co"># Note how the projection with dispersal constrain results in a considerable smaller amount of suitable habitat.</span></span>
 <span><span class="va">sc.fit1</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>which <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="co"># Baseline</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Add%20constraints%20and%20reproject-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc.fit2</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>which <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="co"># With dispersal constrain</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Add%20constraints%20and%20reproject-2.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sc.fit3</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>which <span class="op">=</span> <span class="fl">40</span><span class="op">)</span> <span class="co"># With dispersal limit and nichelimitation (within a standard deviation)</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Lets compare the difference in projections compared to the naive one defined earlier. </span></span>
 <span><span class="va">o1</span> <span class="op">&lt;-</span> <span class="va">sc.fit1</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">o2</span> <span class="op">&lt;-</span> <span class="va">sc.fit2</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span>
@@ -433,7 +407,7 @@ between time steps (e.g. precipitation anomalies).</p>
 <span>  cex <span class="op">=</span> <span class="fl">1.2</span>,</span>
 <span>  bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="04_biodiversity_projections_files/figure-html/Summarize%20area%20of%20projections-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Lastly it is also possible to directly summarize the state </span></span>
 <span><span class="co"># before (usually first year) and end (last year).</span></span>
@@ -476,7 +450,7 @@ via [<code><a href="../reference/formatGLOBIOM.html">formatGLOBIOM()</a></code>]
 <code>BiodiversityScenario-class</code> object directly via
 <code><a href="../reference/add_predictors_globiom.html">add_predictors_globiom()</a></code> .</p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -487,15 +461,15 @@ via [<code><a href="../reference/formatGLOBIOM.html">formatGLOBIOM()</a></code>]
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
