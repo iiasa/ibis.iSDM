@@ -137,15 +137,13 @@ engine_inlabru <- function(x,
     # Load a provided on
     mesh <- optional_mesh
     # Security check for projection and if not set, use the one from background
-    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( sp::proj4string(region.poly) )
+    if(is.na(mesh$crs) || is.null(mesh$crs)) fmesher::fm_crs(mesh) <- sf::st_crs(x$background)
 
     # Convert the study region
     region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
 
     # Calculate area
-    ar <- suppressWarnings(
-      mesh_area(mesh = mesh, region.poly = region.poly, variant = area)
-    )
+    ar <- inlabru::fm_int(mesh)$weight |> as.vector()
   } else {
     mesh <- new_waiver()
     ar <- new_waiver()
@@ -186,37 +184,31 @@ engine_inlabru <- function(x,
 
     # Convert the study region
     region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
-
-    # Convert to boundary object for later
-    suppressWarnings(
-      bdry <- INLA::inla.sp2segment(
-        sp = region.poly,
-        join = TRUE,
-        crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
-      )
-    )
-    bdry$loc <- INLA::inla.mesh.map(bdry$loc)
+    region.poly$weight <-1
 
     # Get all coordinates of observations
     locs <- collect_occurrencepoints(model, include_absences = FALSE,
-                                     tosf = FALSE)
+                                     tosf = TRUE)
     locs <- locs[,c("x","y")] # Take only the coordinates
 
     # Try and infer mesh parameters if not set
     if(is.null(params$max.edge)){
       # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
-      max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)
+      max.edge <- c(diff(range(locs[["x"]]))/(3*5) , diff(range(locs[["y"]]))/(3*5) * 2)
       params$max.edge <- max.edge
     }
+
+    # Try and infer parameter offset
     if(is.null(params$offset)){
       # Check whether the coordinate system is longlat
-      if( sf::st_is_longlat(bdry$crs) ){
+      if( sf::st_is_longlat(region.poly) ){
         # Specify offset as 1/100 of the boundary distance
-        offset <- c( diff(range(bdry$loc[,1]))*0.01,
-                     diff(range(bdry$loc[,1]))*0.01)
+        offset <- c( diff(range(sp::coordinates(region.poly)))*0.01,
+                     diff(range(sp::coordinates(region.poly)))*0.01)
       } else {
-        offset <- c( diff(range(bdry$loc[,1]))*0.01,
-                     diff(range(bdry$loc[,1]))*0.01)
+        warning("Default offset parameter for mesh likely won't work. Specify!")
+        offset <- c( diff(range(sp::coordinates(region.poly)))*0.01,
+                     diff(range(sp::coordinates(region.poly)))*0.01)
       }
       params$offset <- offset
     }
@@ -225,35 +217,25 @@ engine_inlabru <- function(x,
       # Specify as minimum distance between y coordinates
       # Thus capturing most points on this level
       # otherwise set to default
-      val <- min(abs(diff(locs[,2])))
+      val <- min(abs(diff(locs[["y"]])))
       cutoff <- ifelse(val == 0, 1e-12, val)
       params$cutoff <- cutoff
     }
 
-    suppressWarnings(
-      mesh <- INLA::inla.mesh.2d(
-        # Point localities
-        loc = locs,
-        # Boundary object
-        boundary = bdry,
-        # Mesh Parameters
-        max.edge = params$max.edge,
-        offset = params$offset,
-        cutoff = params$cutoff,
-        # Define the CRS
-        crs = bdry$crs
-      )
-    )
+    # Convert to mesh using fmesher
+    mesh <- fmesher::fm_mesh_2d_inla(loc = locs,
+                                     boundary = region.poly,
+                                     offset = params$offset,
+                                     cutoff = params$cutoff,
+                                     max.edge = params$max.edge,
+                                     crs = sf::st_crs(model$background)
+                                     )
+
+    # If crs is messing, use the one from background
+    if(is.na(mesh$crs) || is.null(mesh$crs)) fmesher::fm_crs(mesh) <- sf::st_crs(x$background)
+
     # Calculate area
-    # ar <- suppressMessages(
-    #         suppressWarnings(
-    #           mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
-    #         )
-    #       )
-    # 06/01/2023: This should work and is identical to inlabru::ipoints
-    ar <- suppressWarnings(
-      inlabru::ipoints(samplers = mesh)$weight |> as.vector()
-    )
+    ar <- inlabru::fm_int(mesh)$weight |> as.vector()
     assertthat::assert_that(length(ar) == mesh$n)
 
     # Now set the output
@@ -274,17 +256,16 @@ engine_inlabru <- function(x,
         alpha = 2,
         dims = c(300, 300)
       )
-      # Convert to raster stack
-      out <- terra::rast(
-        sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
-                                    proj4string = terra::crs(self$get_data('mesh')$crs) )
-      )
 
-      terra::plot(out[[c('sd','sd.dev','edge.len')]],
-                  col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
-      )
+      # Convert to raster stack
+      out <- stars::st_rasterize(out |> sf::st_as_sf()) |> terra::rast()
+      terra::plot(out,col = ibis_colours$ohsu_palette)
     } else {
-      INLA:::plot.inla.mesh( self$get_data('mesh') )
+      if(inherits(self$get_data('mesh'), "fm_mesh_2d")){
+        self$get_data('mesh')
+      } else {
+        INLA:::plot.inla.mesh( self$get_data('mesh') )
+      }
     }
   },overwrite = TRUE)
 
@@ -391,12 +372,10 @@ engine_inlabru <- function(x,
     if(mode == 'cp'){
       # Create integration points by using the mesh as sampler
       suppressWarnings(
-        ips <- inlabru::ipoints(
-          samplers = self$get_data('mesh')
-        )
+        ips <- inlabru::fm_int(self$get_data('mesh'))
       )
       # Extract predictors add to integration point data
-      d <- get_rastervalue(coords = ips@coords,
+      d <- get_rastervalue(coords = sf::st_coordinates(ips),
                            env = model$predictors_object$get_data(df = FALSE),
                            rm.na = FALSE)
       for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
@@ -520,6 +499,8 @@ engine_inlabru <- function(x,
                             # include = include[[i]], # Don't need this as all variables in equation are included
                             options = o
         )
+        # MJ 14/70 addition. Manually conversion of likelihood data to sf
+        lh$data <- lh$data |> sf::st_as_sf()
       }
       # Add to list
       lhl[[j]] <- lh
@@ -827,15 +808,14 @@ engine_inlabru <- function(x,
 
     # --- #
     # Fitting bru model
-    try({
-      fit_bru <- inlabru::bru(components = comp,
+    fit_bru <- try({inlabru::bru(components = comp,
                               likelihoods,
                               options = options)
     }, silent = FALSE)
     # --- #
 
     # Security checks
-    if(!exists("fit_bru")){
+    if(inherits(fit_bru, "try-error")){
       stop('Model did not converge. Try to simplify structure and check priors!')
     }
     if(is.null(fit_bru$names.fixed)) stop('Model did not converge. Try to simplify structure and check priors!')
@@ -844,20 +824,11 @@ engine_inlabru <- function(x,
       # Messenger
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting prediction.')
 
-      covs <- model$predictors_object$get_data(df = FALSE)
-      covs <- covs[[ which(names(covs) %in% fit_bru$names.fixed) ]]
-
-      # Build coordinates
-      suppressWarnings(
-        preds <- inla_predpoints(mesh = self$get_data('mesh'),
-                                 background = model$background,
-                                 cov = covs,
-                                 proj_stepsize = self$get_data('proj_stepsize'),
-                                 spatial = TRUE
-        )
-      )
+      # Get Predictors as data.frame
+      preds <- model$predictors_object$get_data(df = TRUE,na.rm = FALSE)
       # Clamp?
-      if( settings$get("clamp") ) preds@data <- clamp_predictions(model, preds@data)
+      if( settings$get("clamp") ) preds <- clamp_predictions(model, preds)
+      preds <- sf::st_as_sf(preds, coords = c("x","y"),crs = sf::st_crs(model$background))
 
       # Set target variables to bias_value for prediction if specified
       if(!is.Waiver(settings$get('bias_variable'))){
@@ -903,7 +874,10 @@ engine_inlabru <- function(x,
         ii <- "Intercept"
       }
       assertthat::assert_that(all( vn %in% names(preds) ))
+      # Set to NA all variable
+      preds[which(apply(preds[,vn], 1, function(z) any(is.na(z)))),vn] <- NA
       preds <- subset(preds, select = vn )
+
       # Add offset if set
       if(!is.Waiver(model$offset)){
         ovn <- "spatial_offset"
@@ -933,17 +907,20 @@ engine_inlabru <- function(x,
       )
       pred_bru$cv <- pred_bru$sd / pred_bru$mean
       # Convert to raster if not set already
-      if(!is.Raster(pred_bru)) pred_bru <- terra::rast(pred_bru)
-
-      # Get only the predicted variables of interest
-      if(utils::packageVersion("inlabru") <= '2.5.2'){
-        # Older version where probs are ignored
-        prediction <- subset(pred_bru, c("mean","sd","q0.025", "median", "q0.975", "cv"))
-        names(prediction) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
-      } else {
-        prediction <- subset(pred_bru, c("mean","sd","q0.05", "q0.5", "q0.95", "cv") )
-        names(prediction) <- c("mean", "sd", "q05", "q50", "q95", "cv")
+      if(!is.Raster(pred_bru)){
+        prediction <- c(
+          terra::rasterize(pred_bru, model_to_background(model), "mean"),
+          terra::rasterize(pred_bru, model_to_background(model), "sd"),
+          terra::rasterize(pred_bru, model_to_background(model), "q0.05"),
+          terra::rasterize(pred_bru, model_to_background(model), "q0.5"),
+          terra::rasterize(pred_bru, model_to_background(model), "q0.95"),
+          terra::rasterize(pred_bru, model_to_background(model), "cv")
+        )
+        names(prediction) <- c("mean","sd","q0.05", "q0.5", "q0.95", "cv")
       }
+
+      # Clip to remove NA estimates
+      prediction <- terra::mask(prediction, model$background)
 
     } else {
       prediction <- NULL

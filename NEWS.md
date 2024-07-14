@@ -5,7 +5,7 @@
 * :fire: Enable stars and multi-temporal SpatRaster zones for `scenario()` and `distribution()` #121 
 
 #### Minor improvements and bug fixes
-* :bug: fix for support of factor x continious variable interaction #131
+* :bug: fix for support of factor x continuous variable interaction #131
 * Renamed `add_control_extrapolation` to `add_limits_extrapolation()`.
 * :bug: fix to `engine_gdb` also to support non-linear smooth functions (again).
 * Small fix to support deprecated `field_occurrence` field in `validate` for convenience.

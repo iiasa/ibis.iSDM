@@ -518,7 +518,8 @@ test_that('Train a distribution model with INLABRU', {
   x <- distribution(background) |>
     add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
-    engine_inlabru()
+    engine_inlabru() |>
+    add_latent_spatial()
 
   # Train the model
   suppressWarnings(
@@ -621,7 +622,7 @@ test_that('Train a distribution model with SCAMPR', {
 
   # Train the model
   suppressWarnings(
-    mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
+    mod <- train(x |> add_latent_spatial(), "test", inference_only = FALSE, only_linear = TRUE,
                  verbose = FALSE)
   )
 

@@ -84,7 +84,7 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x, method = 'spde', priors = NULL, separate_spde = FALSE, ...) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            is.character(method) && !missing(method),
+                            is.character(method),
                             is.null(priors) || inherits(priors, 'PriorList'),
                             is.logical(separate_spde)
                             )

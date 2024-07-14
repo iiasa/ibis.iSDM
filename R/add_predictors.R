@@ -164,7 +164,7 @@ methods::setMethod(
     }
 
     # Check that all names allowed
-    problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
+    problematic_names <- grep("offset|w|weight|spatial_offset|observed|Intercept|spatial.field", names(env),fixed = TRUE)
     if( length(problematic_names)>0 ){
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }

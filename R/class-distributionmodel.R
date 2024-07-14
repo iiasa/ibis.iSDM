@@ -659,9 +659,9 @@ DistributionModel <- R6::R6Class(
     #' Has a offset been used?
     #' @return A [`logical`] flag.
     has_offset = function(){
-      model <- self$model$offset
-      if(!is.Waiver(model$offset)) return( TRUE )
+      if(!is.Waiver(self$model$offset)) return( TRUE )
       # Also check whether offset is somehow in the equation
+      fit <- self$model$biodiversity[[1]]$equation
       ind <- attr(stats::terms.formula(fit$get_equation()), "offset")
       if(!is.null(ind)) return( TRUE )
     },

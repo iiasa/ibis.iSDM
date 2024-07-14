@@ -611,21 +611,40 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
                             is.vector(int_variables),
                             msg = "Provide a vector of 2 variables for an interaction!")
 
-    # Make unique combinations
-    if(any(is.factor(env[[int_variables]]))){
-      # Factor to variable interaction
-      i <- which(is.factor(env[[int_variables]]))
-      o <- explode_factorized_raster(env[[int_variables]][[i]])
-      if(length(i)==length(int_variables)){
-        ind <- utils::combn(names(o), 2)
+    # For raster or stars
+    if(is.Raster(env)){
+      # Make unique combinations
+      if(any(is.factor(env[[int_variables]]))){
+        # Factor to variable interaction
+        i <- which(is.factor(env[[int_variables]]))
+        o <- explode_factorized_raster(env[[int_variables]][[i]])
+        if(length(i)==length(int_variables)){
+          ind <- utils::combn(names(o), 2)
+        } else {
+          # Create two-way interactions as specified
+          ind <- rbind( matrix(names(o),nrow = 1), int_variables[which(!is.factor(env[[int_variables]]))])
+        }
+        suppressWarnings( env <- c(env, o)) # Add to stack.
       } else {
-        # Create two-way interactions as specified
-        ind <- rbind( matrix(names(o),nrow = 1), int_variables[which(!is.factor(env[[int_variables]]))])
+        # All possible ones
+        ind <- utils::combn(int_variables, 2)
       }
-      suppressWarnings( env <- c(env, o)) # Add to stack.
     } else {
-      # All possible ones
-      ind <- utils::combn(int_variables, 2)
+      if(any(Reduce("c", lapply(env_list, is.factor)))){
+        i <- Reduce("c", lapply(env_list, function(z) which(terra::is.factor(z))) )
+        if(length(i)>0) o <- explode_factorized_raster(env_list[[i]])
+        if(length(i)==length(int_variables)){
+          ind <- utils::combn(int_variables, 2)
+        } else {
+          ind <- expand.grid(matrix(unique(names(o)),nrow = 1),int_variables) |> t()
+          ind <- ind[,-which(apply(ind, 2, anyDuplicated)>0)] # Remove all duplicates
+        }
+        env_list[[i]] <- c(env_list[[i]], o)
+        rm(o)
+      } else {
+        # All possible ones
+        ind <- utils::combn(int_variables, 2)
+      }
     }
 
     if(is.Raster(env)){
