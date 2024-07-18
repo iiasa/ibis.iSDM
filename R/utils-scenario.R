@@ -369,7 +369,7 @@ stars_to_sf <- function(obj){
   # Convert to sf
   out <- obj |> sf::st_as_sf() |> guess_sf()
   # Format to longer
-  out <- out |> tidyr::pivot_longer(cols = grep("geometry", names(o),value = TRUE, invert = TRUE),
+  out <- out |> tidyr::pivot_longer(cols = grep("geometry", names(out), value = TRUE, invert = TRUE),
                                     names_to = "time",values_to = "limit")
 
   # Group by limit to get multipolygon
