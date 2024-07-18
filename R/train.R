@@ -314,7 +314,10 @@ methods::setMethod(
           pred <- model$predictors_object$get_data(df = FALSE)
           new <-  fill_rasters(coords_poly, emptyraster(pred))
           for(val in names(new)){
-            model$predictors_object <- model$predictors_object$set_data(val, new[[val]] )
+            v <- new[[val]]
+            names(v) <- val
+            model$predictors_object <- model$predictors_object$set_data(v)
+            rm(v)
           }
           rm(pred, new)
         } else if(m == "kde") {
@@ -376,7 +379,13 @@ methods::setMethod(
 
         }
       }
-    } else { model[["latent"]] <- new_waiver() }# End of latent factor loop
+
+      # Make a flag to the settings
+      settings$set('has_latent', TRUE)
+    } else {
+      model[["latent"]] <- new_waiver()
+      settings$set('has_latent', FALSE)
+    }# End of latent factor loop
 
     # Set offset if existing
     if(!is.Waiver(x$offset)){
@@ -415,7 +424,7 @@ methods::setMethod(
           settings$set("bias_value", bias$bias_value )
           # Check that variable is already in the predictors object
           if(!(names(bias$layer) %in% model$predictors_names)){
-            model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
+            model$predictors_object <- model$predictors_object$set_data(bias$layer)
             # Also set predictor names
             model[['predictors_names']] <- model$predictors_object$get_names()
             model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
@@ -727,6 +736,8 @@ methods::setMethod(
                                          layer)
           )
         )
+        # Save the zones categories for later too!
+        settings$set("limits_zones_categories", unique(zones$limit))
         # Limit zones (using the full layer here!)
         zones <- subset(layer, limit %in% unique(zones$limit) )
       } else if(x$get_limits()$limits_method %in% c("nt2", "mess")){
@@ -818,13 +829,6 @@ methods::setMethod(
             point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
           )),model$predictors_names] <- NA # Fill with NA
         }
-        # The same with offset if specified, Note this operation below is computationally quite costly
-        # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
-        # if(!is.Waiver(x$offset)){
-        #   model$offset[which( is.na(
-        #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-        #   )), "spatial_offset" ] <- NA # Fill with NA
-        # }
       }
       # Reset the zones, but save the created layer
       # Note that we are using the original saved layer here again!
@@ -837,6 +841,8 @@ methods::setMethod(
                 "mcp_buffer" = x$limits$mcp_buffer,
                 "limits_clip" = x$limits$limits_clip)
       settings$set("limits", l)
+      # Save the zones categories for later too!
+      settings$set("limits_zones_categories", unique(zones$limit))
       x <- x$set_limits(x = l)
       rm(zones)
     }

@@ -3,6 +3,7 @@
 \name{add_latent_spatial}
 \alias{add_latent_spatial}
 \alias{add_latent_spatial,BiodiversityDistribution-method}
+\alias{add_latent_spatial,BiodiversityScenario-method}
 \title{Add latent spatial effect to the model equation}
 \usage{
 add_latent_spatial(
@@ -20,6 +21,8 @@ add_latent_spatial(
   separate_spde = FALSE,
   ...
 )
+
+\S4method{add_latent_spatial}{BiodiversityScenario}(x, layer = NULL, reuse_latent = TRUE, ...)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
@@ -35,6 +38,12 @@ of SPDE effects, separate effects for each likelihood are being fitted.
 Default (\code{FALSE}) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
+
+\item{layer}{A \code{\link{SpatRaster}} layer describing alternative latent effects to be used instead
+if \code{"reuse_latent"} is set to \code{FALSE}.}
+
+\item{reuse_latent}{A \code{\link{logical}} flag on whether any latent effects found
+in the fitted model should be reused (Default \code{TRUE}).}
 }
 \value{
 Adds latent spatial effect to a \code{\link{distribution}} object.

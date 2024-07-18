@@ -11,6 +11,9 @@ container that supplies data and functions to other \code{\link{R6}} classes and
 \note{
 This sets the threshold method internally to \code{'fixed'}.
 
+The latent factor is usually obtained from the fitted model object, unless
+re-specified and added here to the list.
+
 This requires the \code{"gganimate"} package.
 
 This requires a set \code{\link[=threshold]{threshold()}} to the scenario object.
@@ -21,6 +24,8 @@ This requires set \code{\link{threshold}} prior to projection.
 \code{\link[=threshold]{threshold()}}
 
 \code{\link[=threshold]{threshold()}}
+
+\code{\link[=add_latent_spatial]{add_latent_spatial()}}
 }
 \keyword{classes}
 \section{Public fields}{
@@ -35,6 +40,8 @@ This requires set \code{\link{threshold}} prior to projection.
 \item{\code{predictors}}{A predictor object for projection.}
 
 \item{\code{constraints}}{Any constraints set for projection.}
+
+\item{\code{latentfactors}}{A \code{\link{list}} on whether latentfactors are used.}
 
 \item{\code{scenarios}}{The resulting \code{\link{stars}} objects.}
 }
@@ -66,6 +73,9 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-rm_predictors}{\code{BiodiversityScenario$rm_predictors()}}
 \item \href{#method-BiodiversityScenario-get_data}{\code{BiodiversityScenario$get_data()}}
 \item \href{#method-BiodiversityScenario-set_data}{\code{BiodiversityScenario$set_data()}}
+\item \href{#method-BiodiversityScenario-set_latent}{\code{BiodiversityScenario$set_latent()}}
+\item \href{#method-BiodiversityScenario-get_latent}{\code{BiodiversityScenario$get_latent()}}
+\item \href{#method-BiodiversityScenario-rm_latent}{\code{BiodiversityScenario$rm_latent()}}
 \item \href{#method-BiodiversityScenario-plot}{\code{BiodiversityScenario$plot()}}
 \item \href{#method-BiodiversityScenario-plot_threshold}{\code{BiodiversityScenario$plot_threshold()}}
 \item \href{#method-BiodiversityScenario-plot_migclim}{\code{BiodiversityScenario$plot_migclim()}}
@@ -439,6 +449,52 @@ Set new data in object.
 }
 \if{html}{\out{</div>}}
 }
+\subsection{Returns}{
+This object.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-set_latent"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-set_latent}{}}}
+\subsection{Method \code{set_latent()}}{
+Adding latent factors to the object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$set_latent(latent)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{latent}}{A \code{\link{list}} containing the data object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-get_latent"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-get_latent}{}}}
+\subsection{Method \code{get_latent()}}{
+Get latent factors if found in object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$get_latent()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{list}} with the latent settings
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-rm_latent"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-rm_latent}{}}}
+\subsection{Method \code{rm_latent()}}{
+Remove latent factors if found in object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$rm_latent()}\if{html}{\out{</div>}}
+}
+
 \subsection{Returns}{
 This object.
 }

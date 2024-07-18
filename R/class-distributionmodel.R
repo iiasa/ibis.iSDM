@@ -656,6 +656,19 @@ DistributionModel <- R6::R6Class(
     },
 
     #' @description
+    #' Logical indication if the prediction has added latent factors.
+    #' @return A [`logical`] flag.
+    has_latent = function(){
+      # Check for settings here
+      settings <- self$settings
+      if(!is.Waiver(settings)){
+        return(
+          settings$get('has_latent')
+        )
+      }
+    },
+
+    #' @description
     #' Has a offset been used?
     #' @return A [`logical`] flag.
     has_offset = function(){

@@ -7,6 +7,8 @@
 #' @param env A [`stars`] object.
 #' @param date_interpolation [`character`] on how missing dates between events
 #' should be interpolated. See [`project()`].
+#' @param method A [`character`] on the used method for approximation, either
+#' \code{"linear"} (Default) or \code{"constant"} through a step function.
 #'
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
 #'
@@ -19,12 +21,16 @@
 #' }
 #'
 #' @export
-interpolate_gaps <- function(env, date_interpolation = "annual"){
+interpolate_gaps <- function(env, date_interpolation = "annual", method = "linear"){
   assertthat::assert_that(
     inherits(env, "stars"),
-    is.character(date_interpolation)
+    is.character(date_interpolation),
+    is.character(method)
   )
   check_package("dplyr")
+
+  # Check method, linear or step function
+  method <- match.arg(method, c("linear", "constant"),several.ok = FALSE)
 
   date_interpolation <- match.arg(date_interpolation,
                                   c("none", "yearly", "year", "annual",
@@ -73,10 +79,14 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
     names(oo) <- paste0(v,'_',as.numeric(terra::time(oo)))
 
     # Linearly approximate gaps and save in list
-    out[[v]] <- terra::approximate(x = oo,
-                            method = "linear",
+    new <- terra::approximate(x = oo,
+                            method = method,
                             yleft = NA,
-                            yright = NA) |> stars::st_as_stars()
+                            yright = NA)
+    # Order time and convert
+    new <- new[[order(terra::time(new))]]
+    out[[v]] <- new |> stars::st_as_stars()
+    rm(new)
   }
 
   # Combine

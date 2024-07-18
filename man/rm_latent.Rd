@@ -3,11 +3,14 @@
 \name{rm_latent}
 \alias{rm_latent}
 \alias{rm_latent,BiodiversityDistribution-method}
+\alias{rm_latent,BiodiversityScenario-method}
 \title{Function to remove a latent effect}
 \usage{
 rm_latent(x)
 
 \S4method{rm_latent}{BiodiversityDistribution}(x)
+
+\S4method{rm_latent}{BiodiversityScenario}(x)
 }
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}

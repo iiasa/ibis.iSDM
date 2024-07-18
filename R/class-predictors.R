@@ -279,14 +279,20 @@ PredictorDataset <- R6::R6Class(
 
     #' @description
     #' Add a new Predictor dataset to this collection
-    #' @param x [`character`] of the new name to be stored.
-    #' @param value A new [`SpatRaster`] object.
+    #' @param value A new [`SpatRaster`] or [`stars`] object.
     #' @return This object
-    set_data = function(x, value){
-      assertthat::assert_that(assertthat::is.string(x),
-                              is.Raster(value),
-                              is_comparable_raster(self$get_data(), value))
-      self$data <- suppressWarnings( c(self$get_data(), value) )
+    set_data = function(value){
+      assertthat::assert_that(is.Raster(value) || inherits(value, "stars"))
+      if(is.Raster(self$get_data()) && is.Raster(value)){
+        assertthat::assert_that(is_comparable_raster(self$get_data(), value))
+        self$data <- suppressWarnings( c(self$get_data(), value) )
+      } else if(inherits(self$get_data(), "stars") && is.Raster(value)) {
+        # Stars assumed
+        self$data <- st_add_raster(self$get_data(), value)
+      } else {
+        # Simply try combining them
+        self$data <- suppressWarnings( c(self$get_data(), value) )
+      }
       return(self)
     },
 

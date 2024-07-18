@@ -54,6 +54,7 @@ Could be further pretified and commands outsourced.
 \item \href{#method-DistributionModel-calc_suitabilityindex}{\code{DistributionModel$calc_suitabilityindex()}}
 \item \href{#method-DistributionModel-get_centroid}{\code{DistributionModel$get_centroid()}}
 \item \href{#method-DistributionModel-has_limits}{\code{DistributionModel$has_limits()}}
+\item \href{#method-DistributionModel-has_latent}{\code{DistributionModel$has_latent()}}
 \item \href{#method-DistributionModel-has_offset}{\code{DistributionModel$has_offset()}}
 \item \href{#method-DistributionModel-mask}{\code{DistributionModel$mask()}}
 \item \href{#method-DistributionModel-save}{\code{DistributionModel$save()}}
@@ -276,7 +277,7 @@ Set new fit for this Model.
 \describe{
 \item{\code{x}}{The name of the new fit.}
 
-\item{\code{value}}{The \code{\link{SpatRaster}} layer to be inserted.}
+\item{\code{value}}{The \code{\link{SpatRaster}} layer (or model) to be inserted.}
 }
 \if{html}{\out{</div>}}
 }
@@ -416,6 +417,19 @@ Returns a \code{\link{sf}} object.
 Logical indication if the prediction was limited.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DistributionModel$has_limits()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{logical}} flag.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DistributionModel-has_latent"></a>}}
+\if{latex}{\out{\hypertarget{method-DistributionModel-has_latent}{}}}
+\subsection{Method \code{has_latent()}}{
+Logical indication if the prediction has added latent factors.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$has_latent()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

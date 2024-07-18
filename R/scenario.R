@@ -61,7 +61,7 @@ methods::setMethod(
     # Convert limits if provided
     if(!is.null(limits)){
       # Convert to polygon if raster
-      if(inherits(limits,'SpatRaster')){
+      if(is.Raster(limits)){
         # Remove 0 from ratified raster assuming this is no-data
         limits[limits == 0] <- NA
         limits <- terra_to_sf(limits)
@@ -69,11 +69,15 @@ methods::setMethod(
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(fit$model$background)) limits <- sf::st_transform(limits, fit$model$background)
       # Ensure that limits is intersecting the background
-      if(suppressMessages(length( sf::st_intersects(limits, fit$model$background)))==0) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      if(suppressWarnings( suppressMessages(length( sf::st_intersects(limits, fit$model$background)))==0)) {
+        limits <- NULL; warning('Provided limits do not intersect the background!')
+      }
 
       # Rename geometry just to be sure
-      limits <- rename_geometry(limits, "geometry")
-      names(limits)[1] <- "limit" # The first entry is the layer name
+      if(inherits(limits, 'sf')){
+        limits <- rename_geometry(limits, "geometry")
+        names(limits)[1] <- "limit" # The first entry is the layer name
+      }
     }
 
     # Also check if limits are to be reused if found

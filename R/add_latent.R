@@ -110,6 +110,49 @@ methods::setMethod(
   }
 )
 
+#### Latent for scenarios ####
+#' Add latent spatial effect to the model equation
+#' @param layer A [`SpatRaster`] layer describing alternative latent effects to be used instead
+#' if \code{"reuse_latent"} is set to \code{FALSE}.
+#' @param reuse_latent A [`logical`] flag on whether any latent effects found
+#' in the fitted model should be reused (Default \code{TRUE}).
+#' @rdname add_latent_spatial
+methods::setMethod(
+  "add_latent_spatial",
+  methods::signature(x = "BiodiversityScenario"),
+    function(x, layer = NULL, reuse_latent = TRUE, ...) {
+      assertthat::assert_that(
+        inherits(x, "BiodiversityScenario"),
+        is.Raster(layer) || is.null(layer),
+        is.logical(reuse_latent)
+      )
+
+      # Check existing model if latent factors are set there
+      if(reuse_latent){
+        # Try and see if model has been defined?
+        fit <- x$get_model()
+        if(!is.Waiver(fit)){
+          # Latent-factors specified?
+          check <- fit$has_latent()
+          assertthat::assert_that(
+            check,
+            msg = "Latent factors are to be reused, but could not be found in fitted model?"
+          )
+        }
+      }
+
+      # Build latent object
+      lat <- list("layer" = layer, "reuse_latent" = reuse_latent)
+
+      # Make a clone copy of the object
+      y <- x$clone(deep = TRUE)
+
+      # Add to data to the BiodiversityDistribution object
+      y$set_latent(lat)
+    }
+)
+
+
 #' Function to remove a latent effect
 #'
 #' @description This is just a wrapper function for removing specified offsets
@@ -143,6 +186,26 @@ methods::setMethod(
   methods::signature(x = "BiodiversityDistribution"),
   function(x) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution") )
+    # If no offset can be found, just return proto object
+    if(is.Waiver(x$latentfactors)){ return(x) }
+
+    # Messenger
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Removing latent effects.')
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
+    # Now remove the offset
+    y$rm_latent()
+  }
+)
+
+#' @rdname rm_latent
+methods::setMethod(
+  "rm_latent",
+  methods::signature(x = "BiodiversityScenario"),
+  function(x) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario") )
     # If no offset can be found, just return proto object
     if(is.Waiver(x$latentfactors)){ return(x) }
 

@@ -43,6 +43,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \item \href{#method-PredictorDataset-get_time}{\code{PredictorDataset$get_time()}}
 \item \href{#method-PredictorDataset-get_projection}{\code{PredictorDataset$get_projection()}}
 \item \href{#method-PredictorDataset-get_resolution}{\code{PredictorDataset$get_resolution()}}
+\item \href{#method-PredictorDataset-get_ext}{\code{PredictorDataset$get_ext()}}
 \item \href{#method-PredictorDataset-crop_data}{\code{PredictorDataset$crop_data()}}
 \item \href{#method-PredictorDataset-mask}{\code{PredictorDataset$mask()}}
 \item \href{#method-PredictorDataset-set_data}{\code{PredictorDataset$set_data()}}
@@ -227,6 +228,19 @@ A \code{\link{numeric}} \code{\link{vector}} with the spatial resolution of the 
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PredictorDataset-get_ext"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-get_ext}{}}}
+\subsection{Method \code{get_ext()}}{
+Get Extent of predictors
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$get_ext()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{numeric}} \code{\link{vector}} with the spatial resolution of the data.
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PredictorDataset-crop_data"></a>}}
 \if{latex}{\out{\hypertarget{method-PredictorDataset-crop_data}{}}}
 \subsection{Method \code{crop_data()}}{
@@ -249,7 +263,7 @@ This code now also
 }
 
 \subsection{Returns}{
-Invisibile TRUE
+Invisible TRUE
 }
 }
 \if{html}{\out{<hr>}}
@@ -282,15 +296,13 @@ Invisible
 \subsection{Method \code{set_data()}}{
 Add a new Predictor dataset to this collection
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$set_data(x, value)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$set_data(value)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{\code{\link{character}} of the new name to be stored.}
-
-\item{\code{value}}{A new \code{\link{SpatRaster}} object.}
+\item{\code{value}}{A new \code{\link{SpatRaster}} or \code{\link{stars}} object.}
 }
 \if{html}{\out{</div>}}
 }

@@ -395,7 +395,7 @@ methods::setMethod(
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        y$predictors <- y$predictors$set_data(n, r)
+        y$predictors <- y$predictors$set_data(r)
         rm(r)
       }
     }
@@ -504,7 +504,8 @@ methods::setMethod(
     if(is.Waiver(x$predictors)){
       y <- add_predictors(y, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      y$predictors <- y$predictors$set_data('range_distance', layer)
+      names(layer) <- "range_distance"
+      y$predictors <- y$predictors$set_data(layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
@@ -608,7 +609,8 @@ methods::setMethod(
     if(is.Waiver(x$predictors)){
       y <- add_predictors(y, env = dis, transform = 'none',derivates = 'none')
     } else {
-      y$predictors <- y$predictors$set_data('range_distance', dis)
+      names(dis) <- "range_distance"
+      y$predictors <- y$predictors$set_data(dis)
     }
     return(y)
   }

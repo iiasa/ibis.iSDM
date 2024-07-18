@@ -139,7 +139,34 @@ methods::setMethod(
       new <- interpolate_gaps(new_preds$get_data(),
                               date_interpolation = date_interpolation)
       # Set new data
-      new_preds$set_data(new)
+      new_preds <- new_preds$set_data(new)
+    }
+
+    # Check latent factors and add them to future if found
+    if(!is.Waiver(mod$latentfactors) || fit$has_latent()){
+      # Get predictor names
+      pn <- fit$model$predictors_names
+      ind <- grep("nearestpoint_|spatialtrend_|kde__coordinates", pn,value = TRUE)
+      if(length(mod$latentfactors)==2){
+        # Get the layer if found
+        if(!is.null(mod$latentfactors$layer) && length(ind)>0){
+          layer <- mod$latentfactors$layer
+          new_preds <- new_preds$set_data(layer)
+        } else if(length(ind)>0){
+          # Get the predictors
+          sps <- fit$model$predictors_object$get_data() |> terra::subset(ind)
+          new_preds <- new_preds$set_data(sps)
+        }
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Found latent factors and added them to future predictors stack.")
+      } else {
+        if(length(ind)>0){
+          # Get the predictors
+          sps <- fit$model$predictors_object$get_data() |> terra::subset(ind)
+          new_preds <- new_preds$set_data(sps)
+        }
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Found latent factors and added them to future predictors stack.")
+      }
+      try({rm(pn,ind,sps)},silent = TRUE)
     }
 
     # Get limits if flagged as present in scenario object
@@ -149,7 +176,8 @@ methods::setMethod(
 
       # Clip new predictors
       # This also takes account of nearest time zones
-      new_preds$crop_data(limits, apply_time = TRUE)
+      new_preds$crop_data(limits,
+                          apply_time = ifelse(any(limits$time == "No set time"), FALSE, TRUE))
 
       # Filter to first time slot if present for remaining clipping
       if(utils::hasName(limits,"time")){

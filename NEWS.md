@@ -1,6 +1,7 @@
 # ibis.iSDM 0.1.4 (current dev branch)
 
 #### New features
+* Support for carnying over latent spatial effects (`add_latent_spatial()`) to `scenario()` projections.
 * Convenience functions to remove limits and controls `rm_limits()`/`rm_control()` #121
 * :fire: Enable stars and multi-temporal SpatRaster zones for `scenario()` and `distribution()` #121 
 
