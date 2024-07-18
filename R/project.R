@@ -174,6 +174,14 @@ methods::setMethod(
       # Get Limit and settings from model
       limits <- mod$get_limits()
 
+      # Get Settings object from model to obtain
+      settings <- fit$settings
+      # Get zone limits form the model
+      nrs <- settings$get("limits_zones_categories") |> as.numeric()
+      if(length(nrs)>0 && utils::hasName(limits, "limit")){
+        limits <- limits |> dplyr::filter(limit %in% nrs)
+      }
+
       # Clip new predictors
       # This also takes account of nearest time zones
       new_preds$crop_data(limits,

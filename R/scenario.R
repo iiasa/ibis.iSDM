@@ -65,6 +65,8 @@ methods::setMethod(
         # Remove 0 from ratified raster assuming this is no-data
         limits[limits == 0] <- NA
         limits <- terra_to_sf(limits)
+      } else if(inherits(limits, "stars")){
+        limits <- stars_to_sf(limits)
       }
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(fit$model$background)) limits <- sf::st_transform(limits, fit$model$background)
@@ -76,7 +78,6 @@ methods::setMethod(
       # Rename geometry just to be sure
       if(inherits(limits, 'sf')){
         limits <- rename_geometry(limits, "geometry")
-        names(limits)[1] <- "limit" # The first entry is the layer name
       }
     }
 

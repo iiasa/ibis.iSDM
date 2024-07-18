@@ -336,6 +336,51 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   return( out )
 }
 
+#' Converts a stars object to sf
+#'
+#' @description This is a small helper function to convert a [`stars`] object to
+#' a temporal [`sf`] object. The time dimension is added as a filed 'time' here
+#' together with any other attributes.
+#' @note
+#' This function has been specifically created for categorical stars layers.
+#' @param obj A [`stars`] object with a \code{"time"} dimension at least.
+#'
+#' @returns A [`sf`] object with \code{"MULTIPOLYGON"} types per time step.
+#'
+#' @keywords scenario
+#' @examples
+#' \dontrun{
+#'  stars_to_sf(future_stars)
+#' }
+#' @noRd
+#'
+#' @keywords internal
+stars_to_sf <- function(obj){
+  assertthat::assert_that(
+    inherits(obj, 'stars')
+  )
+  check_package("tidyr")
+
+  # Take name of third band, assuming it to be time
+  time_band <- names(dim(obj))[3]
+  # Get time dimension and correct if specific entries are requested
+  times <- stars::st_get_dimension_values(obj, time_band, center = TRUE)
+
+  # Convert to sf
+  out <- obj |> sf::st_as_sf() |> guess_sf()
+  # Format to longer
+  out <- out |> tidyr::pivot_longer(cols = grep("geometry", names(o),value = TRUE, invert = TRUE),
+                                    names_to = "time",values_to = "limit")
+
+  # Group by limit to get multipolygon
+  out <- out |> dplyr::group_by(time,limit) |> dplyr::summarise() |> dplyr::ungroup()
+
+  assertthat::assert_that(inherits(out, "sf"),
+                          nrow(out)>0,
+                          utils::hasName(out, "time"), utils::hasName(out, "limit"))
+  return( out )
+}
+
 #' Converts a raster object to stars
 #'
 #' @description This is a small helper function to convert a to a [`SpatRaster`]
