@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-07-14</h4>
+            <h4 data-toc-skip class="date">2024-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/03_integrate_data.Rmd" class="external-link"><code>vignettes/articles/03_integrate_data.Rmd</code></a></small>
       <div class="d-none name"><code>03_integrate_data.Rmd</code></div>
@@ -178,7 +178,7 @@ scenarios.</p>
 <span><span class="va">mod1</span><span class="op">$</span><span class="fu">get_predictor_names</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "bio01_mean_50km"     "bio03_mean_50km"     "bio19_mean_50km"    </span></span>
 <span><span class="co">#&gt; [4] "CLC3_112_mean_50km"  "CLC3_132_mean_50km"  "CLC3_211_mean_50km" </span></span>
-<span><span class="co">#&gt; [7] "CLC3_312_mean_50km"  "elevation_mean_50km" "distance_range"</span></span></code></pre></div>
+<span><span class="co">#&gt; [7] "CLC3_312_mean_50km"  "elevation_mean_50km" "range_distance"</span></span></code></pre></div>
 <p>Expert-ranges can currently be added as simple <code>binary</code> or
 <code>distance</code> transform. For the latter more options are
 available in the <code>bossMaps</code> R-package as described in <a href="http://doi.wiley.com/10.1111/geb.12539" class="external-link">Merow et al. 2017</a>.</p>
@@ -309,7 +309,7 @@ function.</p>
 <span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priors.html">priors</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
 <span><span class="co"># The variables and values in this object can be queried as well</span></span>
 <span><span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 03560f3d-1548-48c7-b452-cd2a2f337d2e </span></span>
+<span><span class="co">#&gt; e2d7702b-498d-4c78-be34-785a11a89c53 </span></span>
 <span><span class="co">#&gt;                 "CLC3_211_mean_50km"</span></span>
 <span></span>
 <span><span class="co"># Priors can then be added via </span></span>
@@ -546,8 +546,8 @@ an overview on which engines support which level of integration.</p>
 <span><span class="co">#&gt;    variable                   mean      sd      q05     q50    q95    mode   kld</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept               -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_efdb1f58_poi… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_X94371517_po… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_X667e0ed8_po… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_d72b3cc2_poi… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km         -<span style="color: #BB0000;">0.109</span>   0.134   -<span style="color: #BB0000;">0.330</span>  -<span style="color: #BB0000;">0.109</span>   0.112 -<span style="color: #BB0000;">0.109</span>      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km         -<span style="color: #BB0000;">0.482</span>   0.121   -<span style="color: #BB0000;">0.681</span>  -<span style="color: #BB0000;">0.482</span>  -<span style="color: #BB0000;">0.282</span> -<span style="color: #BB0000;">0.482</span>      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km          0.470   0.087<span style="text-decoration: underline;">0</span>   0.327   0.470   0.613  0.470      0</span></span>

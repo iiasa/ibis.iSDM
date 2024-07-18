@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-07-14</h4>
+            <h4 data-toc-skip class="date">2024-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -456,23 +456,23 @@ within <code><a href="../reference/project.html">project()</a></code>.</p>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/interpolate_gaps.html">interpolate_gaps</a></span><span class="op">(</span><span class="va">pred_future</span>, date_interpolation <span class="op">=</span> <span class="st">"annual"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_dimensions.html" class="external-link">st_get_dimension_values</a></span><span class="op">(</span><span class="va">new</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "2015-07-02" "2025-07-02" "2035-07-02" "2045-07-02" "2055-07-02"</span></span>
-<span><span class="co">#&gt;  [6] "2065-07-02" "2075-07-02" "2085-07-02" "2095-07-02" "2016-07-02"</span></span>
-<span><span class="co">#&gt; [11] "2017-07-02" "2018-07-02" "2019-07-02" "2020-07-02" "2021-07-02"</span></span>
-<span><span class="co">#&gt; [16] "2022-07-02" "2023-07-02" "2024-07-02" "2026-07-02" "2027-07-02"</span></span>
-<span><span class="co">#&gt; [21] "2028-07-02" "2029-07-02" "2030-07-02" "2031-07-02" "2032-07-02"</span></span>
-<span><span class="co">#&gt; [26] "2033-07-02" "2034-07-02" "2036-07-02" "2037-07-02" "2038-07-02"</span></span>
-<span><span class="co">#&gt; [31] "2039-07-02" "2040-07-02" "2041-07-02" "2042-07-02" "2043-07-02"</span></span>
-<span><span class="co">#&gt; [36] "2044-07-02" "2046-07-02" "2047-07-02" "2048-07-02" "2049-07-02"</span></span>
-<span><span class="co">#&gt; [41] "2050-07-02" "2051-07-02" "2052-07-02" "2053-07-02" "2054-07-02"</span></span>
-<span><span class="co">#&gt; [46] "2056-07-02" "2057-07-02" "2058-07-02" "2059-07-02" "2060-07-02"</span></span>
-<span><span class="co">#&gt; [51] "2061-07-02" "2062-07-02" "2063-07-02" "2064-07-02" "2066-07-02"</span></span>
-<span><span class="co">#&gt; [56] "2067-07-02" "2068-07-02" "2069-07-02" "2070-07-02" "2071-07-02"</span></span>
-<span><span class="co">#&gt; [61] "2072-07-02" "2073-07-02" "2074-07-02" "2076-07-02" "2077-07-02"</span></span>
-<span><span class="co">#&gt; [66] "2078-07-02" "2079-07-02" "2080-07-02" "2081-07-02" "2082-07-02"</span></span>
-<span><span class="co">#&gt; [71] "2083-07-02" "2084-07-02" "2086-07-02" "2087-07-02" "2088-07-02"</span></span>
-<span><span class="co">#&gt; [76] "2089-07-02" "2090-07-02" "2091-07-02" "2092-07-02" "2093-07-02"</span></span>
-<span><span class="co">#&gt; [81] "2094-07-02"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "2015-07-02" "2016-07-02" "2017-07-02" "2018-07-02" "2019-07-02"</span></span>
+<span><span class="co">#&gt;  [6] "2020-07-02" "2021-07-02" "2022-07-02" "2023-07-02" "2024-07-02"</span></span>
+<span><span class="co">#&gt; [11] "2025-07-02" "2026-07-02" "2027-07-02" "2028-07-02" "2029-07-02"</span></span>
+<span><span class="co">#&gt; [16] "2030-07-02" "2031-07-02" "2032-07-02" "2033-07-02" "2034-07-02"</span></span>
+<span><span class="co">#&gt; [21] "2035-07-02" "2036-07-02" "2037-07-02" "2038-07-02" "2039-07-02"</span></span>
+<span><span class="co">#&gt; [26] "2040-07-02" "2041-07-02" "2042-07-02" "2043-07-02" "2044-07-02"</span></span>
+<span><span class="co">#&gt; [31] "2045-07-02" "2046-07-02" "2047-07-02" "2048-07-02" "2049-07-02"</span></span>
+<span><span class="co">#&gt; [36] "2050-07-02" "2051-07-02" "2052-07-02" "2053-07-02" "2054-07-02"</span></span>
+<span><span class="co">#&gt; [41] "2055-07-02" "2056-07-02" "2057-07-02" "2058-07-02" "2059-07-02"</span></span>
+<span><span class="co">#&gt; [46] "2060-07-02" "2061-07-02" "2062-07-02" "2063-07-02" "2064-07-02"</span></span>
+<span><span class="co">#&gt; [51] "2065-07-02" "2066-07-02" "2067-07-02" "2068-07-02" "2069-07-02"</span></span>
+<span><span class="co">#&gt; [56] "2070-07-02" "2071-07-02" "2072-07-02" "2073-07-02" "2074-07-02"</span></span>
+<span><span class="co">#&gt; [61] "2075-07-02" "2076-07-02" "2077-07-02" "2078-07-02" "2079-07-02"</span></span>
+<span><span class="co">#&gt; [66] "2080-07-02" "2081-07-02" "2082-07-02" "2083-07-02" "2084-07-02"</span></span>
+<span><span class="co">#&gt; [71] "2085-07-02" "2086-07-02" "2087-07-02" "2088-07-02" "2089-07-02"</span></span>
+<span><span class="co">#&gt; [76] "2090-07-02" "2091-07-02" "2092-07-02" "2093-07-02" "2094-07-02"</span></span>
+<span><span class="co">#&gt; [81] "2095-07-02"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="derivates-of-scenario-predictors">Derivates of scenario predictors<a class="anchor" aria-label="anchor" href="#derivates-of-scenario-predictors"></a>
 </h3>

@@ -156,7 +156,6 @@ functions.</p>
 <li><p><a href="#method-BiodiversityDistribution-get_log"><code>BiodiversityDistribution$get_log()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-set_log"><code>BiodiversityDistribution$set_log()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-get_extent"><code>BiodiversityDistribution$get_extent()</code></a></p></li>
-<li><p><a href="#method-BiodiversityDistribution-get_extent_dimensions"><code>BiodiversityDistribution$get_extent_dimensions()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-get_projection"><code>BiodiversityDistribution$get_projection()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-get_resolution"><code>BiodiversityDistribution$get_resolution()</code></a></p></li>
 <li><p><a href="#method-BiodiversityDistribution-rm_predictors"><code>BiodiversityDistribution$rm_predictors()</code></a></p></li>
@@ -686,46 +685,34 @@ functions.</p>
 <p>Background extent or NULL.</p>
 </div>
 
-</div><p></p><hr><a id="method-BiodiversityDistribution-get_extent_dimensions"></a><div class="section">
-<h3 id="method-get-extent-dimensions-">Method <code>get_extent_dimensions()</code><a class="anchor" aria-label="anchor" href="#method-get-extent-dimensions-"></a></h3>
-<p>Get dimensions of extent from background</p><div class="section">
-<h4 id="usage-32">Usage<a class="anchor" aria-label="anchor" href="#usage-32"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_extent_dimensions</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
-<h4 id="returns-32">Returns<a class="anchor" aria-label="anchor" href="#returns-32"></a></h4>
-<p>Background extent or NULL.</p>
-</div>
-
 </div><p></p><hr><a id="method-BiodiversityDistribution-get_projection"></a><div class="section">
 <h3 id="method-get-projection-">Method <code>get_projection()</code><a class="anchor" aria-label="anchor" href="#method-get-projection-"></a></h3>
 <p>Get projection from the background in crs format.</p><div class="section">
-<h4 id="usage-33">Usage<a class="anchor" aria-label="anchor" href="#usage-33"></a></h4>
+<h4 id="usage-32">Usage<a class="anchor" aria-label="anchor" href="#usage-32"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_projection</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-33">Returns<a class="anchor" aria-label="anchor" href="#returns-33"></a></h4>
+<h4 id="returns-32">Returns<a class="anchor" aria-label="anchor" href="#returns-32"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the projection</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-get_resolution"></a><div class="section">
 <h3 id="method-get-resolution-">Method <code>get_resolution()</code><a class="anchor" aria-label="anchor" href="#method-get-resolution-"></a></h3>
 <p>Return resolution of the background object.</p><div class="section">
-<h4 id="usage-34">Usage<a class="anchor" aria-label="anchor" href="#usage-34"></a></h4>
+<h4 id="usage-33">Usage<a class="anchor" aria-label="anchor" href="#usage-33"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_resolution</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-34">Returns<a class="anchor" aria-label="anchor" href="#returns-34"></a></h4>
+<h4 id="returns-33">Returns<a class="anchor" aria-label="anchor" href="#returns-33"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with the resolution.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-rm_predictors"></a><div class="section">
 <h3 id="method-rm-predictors-">Method <code><a href="rm_predictors.html">rm_predictors()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-predictors-"></a></h3>
 <p>Remove predictiors. Either all of them or specific ones.</p><div class="section">
-<h4 id="usage-35">Usage<a class="anchor" aria-label="anchor" href="#usage-35"></a></h4>
+<h4 id="usage-34">Usage<a class="anchor" aria-label="anchor" href="#usage-34"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">rm_predictors</span><span class="op">(</span><span class="va">names</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -738,14 +725,14 @@ functions.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-35">Returns<a class="anchor" aria-label="anchor" href="#returns-35"></a></h4>
+<h4 id="returns-34">Returns<a class="anchor" aria-label="anchor" href="#returns-34"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-rm_priors"></a><div class="section">
 <h3 id="method-rm-priors-">Method <code><a href="rm_priors.html">rm_priors()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-priors-"></a></h3>
 <p>Remove priors. Either all of them or specific ones.</p><div class="section">
-<h4 id="usage-36">Usage<a class="anchor" aria-label="anchor" href="#usage-36"></a></h4>
+<h4 id="usage-35">Usage<a class="anchor" aria-label="anchor" href="#usage-35"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">rm_priors</span><span class="op">(</span>names <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -758,87 +745,99 @@ functions.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-36">Returns<a class="anchor" aria-label="anchor" href="#returns-36"></a></h4>
+<h4 id="returns-35">Returns<a class="anchor" aria-label="anchor" href="#returns-35"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-show_biodiversity_length"></a><div class="section">
 <h3 id="method-show-biodiversity-length-">Method <code>show_biodiversity_length()</code><a class="anchor" aria-label="anchor" href="#method-show-biodiversity-length-"></a></h3>
 <p>Show number of biodiversity records</p><div class="section">
-<h4 id="usage-37">Usage<a class="anchor" aria-label="anchor" href="#usage-37"></a></h4>
+<h4 id="usage-36">Usage<a class="anchor" aria-label="anchor" href="#usage-36"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">show_biodiversity_length</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-37">Returns<a class="anchor" aria-label="anchor" href="#returns-37"></a></h4>
+<h4 id="returns-36">Returns<a class="anchor" aria-label="anchor" href="#returns-36"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> with sum of biodiversity records</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-show_biodiversity_equations"></a><div class="section">
 <h3 id="method-show-biodiversity-equations-">Method <code>show_biodiversity_equations()</code><a class="anchor" aria-label="anchor" href="#method-show-biodiversity-equations-"></a></h3>
 <p>Show Equations of biodiversity records</p><div class="section">
-<h4 id="usage-38">Usage<a class="anchor" aria-label="anchor" href="#usage-38"></a></h4>
+<h4 id="usage-37">Usage<a class="anchor" aria-label="anchor" href="#usage-37"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">show_biodiversity_equations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-38">Returns<a class="anchor" aria-label="anchor" href="#returns-38"></a></h4>
+<h4 id="returns-37">Returns<a class="anchor" aria-label="anchor" href="#returns-37"></a></h4>
 <p>A message on screen.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-get_biodiversity_equations"></a><div class="section">
 <h3 id="method-get-biodiversity-equations-">Method <code>get_biodiversity_equations()</code><a class="anchor" aria-label="anchor" href="#method-get-biodiversity-equations-"></a></h3>
 <p>Get equations of biodiversity records</p><div class="section">
-<h4 id="usage-39">Usage<a class="anchor" aria-label="anchor" href="#usage-39"></a></h4>
+<h4 id="usage-38">Usage<a class="anchor" aria-label="anchor" href="#usage-38"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_biodiversity_equations</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-39">Returns<a class="anchor" aria-label="anchor" href="#returns-39"></a></h4>
+<h4 id="returns-38">Returns<a class="anchor" aria-label="anchor" href="#returns-38"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> vector.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-get_biodiversity_types"></a><div class="section">
 <h3 id="method-get-biodiversity-types-">Method <code>get_biodiversity_types()</code><a class="anchor" aria-label="anchor" href="#method-get-biodiversity-types-"></a></h3>
 <p>Query all biodiversity types in this object</p><div class="section">
-<h4 id="usage-40">Usage<a class="anchor" aria-label="anchor" href="#usage-40"></a></h4>
+<h4 id="usage-39">Usage<a class="anchor" aria-label="anchor" href="#usage-39"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_biodiversity_types</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-40">Returns<a class="anchor" aria-label="anchor" href="#returns-40"></a></h4>
+<h4 id="returns-39">Returns<a class="anchor" aria-label="anchor" href="#returns-39"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> vector.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-get_biodiversity_ids"></a><div class="section">
 <h3 id="method-get-biodiversity-ids-">Method <code>get_biodiversity_ids()</code><a class="anchor" aria-label="anchor" href="#method-get-biodiversity-ids-"></a></h3>
 <p>Return all biodiversity dataset ids in the object</p><div class="section">
-<h4 id="usage-41">Usage<a class="anchor" aria-label="anchor" href="#usage-41"></a></h4>
+<h4 id="usage-40">Usage<a class="anchor" aria-label="anchor" href="#usage-40"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_biodiversity_ids</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-41">Returns<a class="anchor" aria-label="anchor" href="#returns-41"></a></h4>
+<h4 id="returns-40">Returns<a class="anchor" aria-label="anchor" href="#returns-40"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> for the ids in the biodiversity datasets</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-get_biodiversity_names"></a><div class="section">
 <h3 id="method-get-biodiversity-names-">Method <code>get_biodiversity_names()</code><a class="anchor" aria-label="anchor" href="#method-get-biodiversity-names-"></a></h3>
 <p>Return all the <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> names of all biodiversity datasets</p><div class="section">
-<h4 id="usage-42">Usage<a class="anchor" aria-label="anchor" href="#usage-42"></a></h4>
+<h4 id="usage-41">Usage<a class="anchor" aria-label="anchor" href="#usage-41"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">get_biodiversity_names</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-42">Returns<a class="anchor" aria-label="anchor" href="#returns-42"></a></h4>
+<h4 id="returns-41">Returns<a class="anchor" aria-label="anchor" href="#returns-41"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the names in the biodiversity datasets</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-plot"></a><div class="section">
 <h3 id="method-plot-">Method <code><a href="plot.html">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
 <p>Plots the content of this class.</p><div class="section">
-<h4 id="usage-43">Usage<a class="anchor" aria-label="anchor" href="#usage-43"></a></h4>
+<h4 id="usage-42">Usage<a class="anchor" aria-label="anchor" href="#usage-42"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-42">Returns<a class="anchor" aria-label="anchor" href="#returns-42"></a></h4>
+<p>A message.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityDistribution-summary"></a><div class="section">
+<h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
+<p>Summary function for this object.</p><div class="section">
+<h4 id="usage-43">Usage<a class="anchor" aria-label="anchor" href="#usage-43"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -846,22 +845,10 @@ functions.</p>
 <p>A message.</p>
 </div>
 
-</div><p></p><hr><a id="method-BiodiversityDistribution-summary"></a><div class="section">
-<h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
-<p>Summary function for this object.</p><div class="section">
-<h4 id="usage-44">Usage<a class="anchor" aria-label="anchor" href="#usage-44"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
-<h4 id="returns-44">Returns<a class="anchor" aria-label="anchor" href="#returns-44"></a></h4>
-<p>A message.</p>
-</div>
-
 </div><p></p><hr><a id="method-BiodiversityDistribution-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-45">Usage<a class="anchor" aria-label="anchor" href="#usage-45"></a></h4>
+<h4 id="usage-44">Usage<a class="anchor" aria-label="anchor" href="#usage-44"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -885,7 +872,7 @@ functions.</p>
 <span class="r-in"><span>package<span class="op">=</span><span class="st">'ibis.iSDM'</span>,mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Define model</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-07-14 20:23:19.364292 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-07-18 10:06:26.963482 | Creating distribution object...</span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] ".__enclos_env__"             "engine"                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "log"                         "offset"                     </span>

@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-07-14</h4>
+            <h4 data-toc-skip class="date">2024-07-18</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/04_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/04_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>04_biodiversity_projections.Rmd</code></div>
@@ -197,6 +197,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Latent factors:    <span style="color: #00BB00;">&lt;Found&gt;</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span>
@@ -205,19 +206,20 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">sc</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "threshold"            "verify"               "summary_beforeafter" </span></span>
 <span><span class="co">#&gt;  [4] "summary"              "show"                 "set_simulation"      </span></span>
-<span><span class="co">#&gt;  [7] "set_predictors"       "set_data"             "set_constraints"     </span></span>
-<span><span class="co">#&gt; [10] "scenarios"            "save"                 "rm_predictors"       </span></span>
-<span><span class="co">#&gt; [13] "rm_constraints"       "print"                "predictors"          </span></span>
-<span><span class="co">#&gt; [16] "plot_threshold"       "plot_scenarios_slope" "plot_relative_change"</span></span>
-<span><span class="co">#&gt; [19] "plot_migclim"         "plot_animation"       "plot"                </span></span>
-<span><span class="co">#&gt; [22] "modelobject"          "modelid"              "mask"                </span></span>
-<span><span class="co">#&gt; [25] "limits"               "initialize"           "get_timeperiod"      </span></span>
-<span><span class="co">#&gt; [28] "get_thresholdvalue"   "get_threshold"        "get_simulation"      </span></span>
-<span><span class="co">#&gt; [31] "get_resolution"       "get_projection"       "get_predictors"      </span></span>
-<span><span class="co">#&gt; [34] "get_predictor_names"  "get_model"            "get_limits"          </span></span>
-<span><span class="co">#&gt; [37] "get_data"             "get_constraints"      "get_centroid"        </span></span>
-<span><span class="co">#&gt; [40] "constraints"          "clone"                "calc_scenarios_slope"</span></span>
-<span><span class="co">#&gt; [43] "apply_threshold"      ".__enclos_env__"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [7] "set_predictors"       "set_latent"           "set_data"            </span></span>
+<span><span class="co">#&gt; [10] "set_constraints"      "scenarios"            "save"                </span></span>
+<span><span class="co">#&gt; [13] "rm_predictors"        "rm_latent"            "rm_constraints"      </span></span>
+<span><span class="co">#&gt; [16] "print"                "predictors"           "plot_threshold"      </span></span>
+<span><span class="co">#&gt; [19] "plot_scenarios_slope" "plot_relative_change" "plot_migclim"        </span></span>
+<span><span class="co">#&gt; [22] "plot_animation"       "plot"                 "modelobject"         </span></span>
+<span><span class="co">#&gt; [25] "modelid"              "mask"                 "limits"              </span></span>
+<span><span class="co">#&gt; [28] "latentfactors"        "initialize"           "get_timeperiod"      </span></span>
+<span><span class="co">#&gt; [31] "get_thresholdvalue"   "get_threshold"        "get_simulation"      </span></span>
+<span><span class="co">#&gt; [34] "get_resolution"       "get_projection"       "get_predictors"      </span></span>
+<span><span class="co">#&gt; [37] "get_predictor_names"  "get_model"            "get_limits"          </span></span>
+<span><span class="co">#&gt; [40] "get_latent"           "get_data"             "get_constraints"     </span></span>
+<span><span class="co">#&gt; [43] "get_centroid"         "constraints"          "clone"               </span></span>
+<span><span class="co">#&gt; [46] "calc_scenarios_slope" "apply_threshold"      ".__enclos_env__"</span></span></code></pre></div>
 <p>The scenario object can finally be trained via
 <code><a href="../reference/project.html">project()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -230,6 +232,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
+<span><span class="co">#&gt;   Latent factors:    <span style="color: #00BB00;">&lt;Found&gt;</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span></code></pre></div>
@@ -372,6 +375,7 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Constraints:    <span style="color: #00BB00;">dispersal (sdd_nexpkernel), adaptability (nichelimit)</span></span></span>
+<span><span class="co">#&gt;   Latent factors:    <span style="color: #00BB00;">&lt;Found&gt;</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span>
