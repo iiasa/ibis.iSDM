@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-07-18</h4>
+            <h4 data-toc-skip class="date">2024-07-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/05_mechanistic_estimation.Rmd" class="external-link"><code>vignettes/articles/05_mechanistic_estimation.Rmd</code></a></small>
       <div class="d-none name"><code>05_mechanistic_estimation.Rmd</code></div>
@@ -210,6 +210,8 @@ for further help and explanations of parameters.</p>
 <span>  <span class="co"># Calculate thresholds at each time step. The threshold estimate is taken from </span></span>
 <span>  <span class="co"># the fitted model object.</span></span>
 <span>  <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span><span class="co">#&gt; Warning in add_predictors(scenario(fit), pred_future, transform = "scale"):</span></span>
+<span><span class="co">#&gt; State variable of transformation not found?</span></span>
 <span>  </span>
 <span><span class="co"># Add KISSMig constraint</span></span>
 <span><span class="va">sc1</span> <span class="op">&lt;-</span> <span class="va">sc</span> <span class="op">|&gt;</span> </span>
@@ -350,7 +352,9 @@ parameter choices!</strong></p>
 <span>  <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">scenario2</span>, <span class="st">"population"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; Loading required package: steps</span></span></code></pre></div>
+<span><span class="co">#&gt; Loading required package: steps</span></span>
+<span><span class="co">#&gt; Warning in add_predictors(scenario(fit), pred_future, transform = "scale"):</span></span>
+<span><span class="co">#&gt; State variable of transformation not found?</span></span></code></pre></div>
 <p><img src="05_mechanistic_estimation_files/figure-html/steps-1.png" width="700" style="display: block; margin: auto;"><img src="05_mechanistic_estimation_files/figure-html/steps-2.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 </div>
