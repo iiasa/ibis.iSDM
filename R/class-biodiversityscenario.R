@@ -64,7 +64,6 @@ BiodiversityScenario <- R6::R6Class(
 
       # Latent factors if set
       lat <- self$get_latent()
-      if(!is.Waiver(lat))
 
       # Any other simulation outputs modules
       simmods <- self$get_simulation()
