@@ -1,4 +1,4 @@
-#' Add a control to a BiodiversityModel object to control extrapolation
+#' Add a control to a BiodiversityModel object to limit extrapolation
 #'
 #' @description One of the main aims of species distribution models (SDMs) is to project
 #' in space and time. For projections a common issue is extrapolation as - unconstrained -
@@ -7,7 +7,7 @@
 #' be related to an insufficient quantification of the niche (e.g. niche truncation
 #' by considering only a subset of observations within the actual distribution),
 #' in other cases there can also be general barriers or constraints that limit
-#' any projections (e.g. islands). This control method adds some of those options
+#' any projections (e.g. islands). This limit method adds some of those options
 #' to a model distribution object. Currently supported methods are:
 #'
 #' [*] \code{"zones"} - This is a wrapper to allow the addition of zones to a
@@ -23,10 +23,14 @@
 #' following Mesgaran et al. (2014). This method is also available in the [similarity()]
 #' function.
 #'
+#' [*] \code{"mess"} - Constraints the predictions using the
+#' Multivariate Environmental Similarity Surfaces (MESS) following Mesgaran et al. (2014).
+#' This method is also available in the [similarity()] function.
+#'
 #' [*] \code{"shape"} - This is an implementation of the 'shape' method introduced
 #' by Velazco et al. (2023). Through a user defined threshold it effectively limits
 #' model extrapolation so that no projections are made beyond the extent judged as
-#' defensible and informed by the training observations.
+#' defensible and informed by the training observations. **Not yet implemented!**
 #'
 #' See also details for further explanations.
 #'
@@ -35,7 +39,7 @@
 #' surface when intersected with input data (Default: \code{NULL}).
 #' @param method A [`character`] vector describing the method used for controlling
 #' extrapolation. Available options are \code{"zones"}, \code{"mcp"} (Default),
-#' or \code{"nt2"} or \code{"shape"}.
+#' or \code{"nt2"}, \code{"mess"} or \code{"shape"}.
 #' @param mcp_buffer A [`numeric`] distance to buffer the mcp (Default \code{0}).
 #' Only used if \code{"mcp"} is used.
 #' @param novel Which conditions are to be masked out respectively, either the
@@ -64,7 +68,7 @@
 #' @note
 #' The method \code{"zones"} is also possible directly within [distribution()].
 #'
-#' @returns Adds extrapolation control option to a [`distribution`] object.
+#' @returns Adds extrapolation limit option to a [`distribution`] object.
 #'
 #' @references
 #' * Randin, C. F., Dirnböck, T., Dullinger, S., Zimmermann, N. E., Zappa, M., & Guisan, A. (2006).
@@ -87,27 +91,28 @@
 #'  # To add a zone layer for extrapolation constraints.
 #'  x <- distribution(background) |>
 #'    add_predictors(covariates) |>
-#'    add_control_extrapolation(method = "zones", layer = zones)
+#'    add_limits_extrapolation(method = "zones", layer = zones)
 #' }
 #'
-#' @name add_control_extrapolation
+#' @name add_limits_extrapolation
 NULL
 
-#' @rdname add_control_extrapolation
+#' @rdname add_limits_extrapolation
 #' @export
 methods::setGeneric(
-  "add_control_extrapolation",
+  "add_limits_extrapolation",
   signature = methods::signature("x"),
   function(x, layer, method = "mcp", mcp_buffer = 0,
-           novel = "within", limits_clip = FALSE) standardGeneric("add_control_extrapolation"))
+           novel = "within", limits_clip = FALSE) standardGeneric("add_limits_extrapolation"))
 
-#' @rdname add_control_extrapolation
+#' @rdname add_limits_extrapolation
 methods::setMethod(
-  "add_control_extrapolation",
+  "add_limits_extrapolation",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, layer, method = "mcp", mcp_buffer = 0, novel = "within", limits_clip = FALSE) {
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
-                            missing(layer) || (is.Raster(layer) || inherits(layer, "sf")),
+                            missing(layer) || (is.Raster(layer) || inherits(layer, "sf") ||
+                                                 inherits(layer, "stars")),
                             (is.numeric(mcp_buffer) && mcp_buffer >=0),
                             is.logical(limits_clip),
                             is.character(novel),
@@ -120,20 +125,37 @@ methods::setMethod(
     # Make a clone
     y <- x$clone(deep = TRUE)
 
+    # Raise a warning if existing limits are present
+    if(!is.Waiver( y$get_limits() )){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow', 'Existing limits found. Replacing...')
+    }
+
     # Apply method specific settings
     if(method == "zones"){
-      assertthat::assert_that((is.Raster(layer) || inherits(layer, "sf")),
+      assertthat::assert_that((is.Raster(layer) || inherits(layer, "sf") || inherits(layer, "stars")),
                               msg = "No zone layer specified!")
+      # If stars, convert to raster
+      if(inherits(layer, 'stars')){
+        assertthat::assert_that( length(layer)==1,
+                                 msg = "More than 1 attribute found for multi-temporal limits!")
+        # Convert to SpatRaster and take the first entry (first time slot)
+        layer <- stars_to_raster(layer)
+        layer <- Reduce('c', layer) # Combine all
+        # Assume it was categorical (stars does not recognize categorical factors)
+        layer <- terra::as.factor(layer)
+      }
 
       if(inherits(layer,'SpatRaster')){
-        assertthat::assert_that(terra::is.factor(layer),
+        assertthat::assert_that(all(terra::is.factor(layer)),
                                 msg = 'Provided limit raster needs to be ratified (categorical)!')
-        layer <- sf::st_as_sf( terra::as.polygons(layer, dissolve = TRUE) ) |> sf::st_cast("MULTIPOLYGON")
+        layer <- terra_to_sf(layer)
       }
       assertthat::assert_that(inherits(layer, "sf"),
                               unique(sf::st_geometry_type(layer)) %in% c('MULTIPOLYGON','POLYGON'),
                               msg = "Limits need to be of polygon type."
       )
+      # If there is no time dimension, assign a dummy
+      if(!utils::hasName(layer,"time")) layer$time <- "No set time"
 
       # Get background
       background <- x$background
@@ -149,11 +171,16 @@ methods::setMethod(
       }
 
       # Get first column for zone description and rename
-      layer <- layer[,1]; names(layer) <- c('limit','geometry')
+      layer <- rename_geometry(layer, 'geometry')
+      names(layer)[1] <- "limit" # The first entry is the layer name
       limits <- list(layer = layer, "limits_method" = method,
                      "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
       y <- y$set_limits(x = limits)
     } else if(method == "mcp"){
+      # Raise a warning if a layer has been found?
+      if(!missing(layer)){
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Layer found but not used...')
+      }
       # Specify the option to calculate a mcp based on the added data.
       # This is done directly in train.
       limits <- list("layer" = NULL, "limits_method" = method,
@@ -178,6 +205,50 @@ methods::setMethod(
     }
 
     # Return the altered object
+    return(y)
+  }
+)
+
+#' Remove limits from an existing distribution object
+#'
+#' @description This function allows to remove set limits from an existing [distribution]
+#' object.
+#'
+#' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
+#'
+#' @family control
+#' @seealso [add_limits_extrapolation()]
+#'
+#' @examples
+#' \dontrun{
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
+#'    add_limits_extrapolation(method = "zones", layer = zones)
+#'  x <- x |> rm_limits()
+#'  x
+#' }
+#'
+#' @name rm_limits
+NULL
+
+#' @rdname rm_limits
+#' @export
+methods::setGeneric(
+  "rm_limits",
+  signature = methods::signature("x"),
+  function(x) standardGeneric("rm_limits"))
+
+#' @rdname rm_limits
+methods::setMethod(
+  "rm_limits",
+  methods::signature(x = "BiodiversityDistribution"),
+  function(x) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution") )
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
+    y <- y$rm_limits()
+    # Return x without limits
     return(y)
   }
 )

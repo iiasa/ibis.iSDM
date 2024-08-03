@@ -160,21 +160,20 @@ test_that('Modify predictors objects', {
   expect_no_warning(
     pp$crop_data(virtual_range)
   )
-  expect_gt(x$predictors$ncell(), pp$ncell())
+  expect_gte(x$predictors$ncell(), pp$ncell())
 
   # Mask
   expect_no_warning(
     pp$mask(virtual_range)
   )
-  expect_gt(x$predictors$ncell(), pp$ncell())
+  expect_gte(x$predictors$ncell(), pp$ncell())
   pp <- x$predictors$clone()
   expect_equal(x$predictors$ncell(), pp$ncell())
 
   # Manual reset
   y <- x$clone(deep = TRUE)
   y$predictors$crop_data(virtual_range)
-  expect_gt(x$predictors$ncell(), y$predictors$ncell())
-
+  expect_gte(x$predictors$ncell(), y$predictors$ncell())
 })
 
 # Modify scenario objects

@@ -152,6 +152,7 @@ engine_inla <- function(x,
     mesh <- optional_mesh
     # Convert the study region
     region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
+    region.poly$weight <-1
 
     # Security check for projection and if not set, use the one from background
     if(is.null(mesh$crs))  mesh$crs <- sp::CRS( sp::proj4string(region.poly) )
@@ -207,6 +208,7 @@ engine_inla <- function(x,
 
     # Convert the study region
     region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
+    region.poly$weight <-1
 
     # Convert to boundary object for later
     suppressWarnings(
@@ -219,16 +221,6 @@ engine_inla <- function(x,
     bdry$loc <- INLA::inla.mesh.map(bdry$loc)
 
     # Try and infer mesh parameters if not set
-
-    # Get all coordinates of observations
-    locs <- collect_occurrencepoints(model, include_absences = FALSE,
-                                     tosf = FALSE)
-    locs <- locs[,c("x","y")]# Get only the coordinates
-
-    assertthat::assert_that(
-      nrow(locs)>0, ncol(locs)==2
-    )
-
     if(is.null(params$max.edge)){
       # A good guess here is usally a max.edge of between 1/3 to 1/5 of the spatial range.
       max.edge <- c(diff(range(locs[,1]))/(3*5) , diff(range(locs[,1]))/(3*5) * 2)
@@ -255,30 +247,42 @@ engine_inla <- function(x,
       params$cutoff <- cutoff
     }
 
-    suppressWarnings(
-      mesh <- INLA::inla.mesh.2d(
-        # Point localities
-        loc = locs,
-        # Boundary object
-        boundary = bdry,
-        # Mesh Parameters
-        max.edge = params$max.edge,
-        offset = params$offset,
-        cutoff = params$cutoff,
-        # Define the CRS
-        crs = bdry$crs
-      )
+    # Get all coordinates of observations
+    locs <- collect_occurrencepoints(model, include_absences = FALSE,
+                                     tosf = FALSE)
+    locs <- locs[,c("x","y")]# Get only the coordinates
+
+    assertthat::assert_that(
+      nrow(locs)>0, ncol(locs)==2
     )
-    # Calculate area
-    # ar <- suppressMessages(
-    #     suppressWarnings(
-    #       mesh_area(mesh = mesh, region.poly = region.poly, variant = params$area)
-    #     )
+
+    # suppressWarnings(
+    #   mesh <- INLA::inla.mesh.2d(
+    #     # Point localities
+    #     loc = locs,
+    #     # Boundary object
+    #     boundary = bdry,
+    #     # Mesh Parameters
+    #     max.edge = params$max.edge,
+    #     offset = params$offset,
+    #     cutoff = params$cutoff,
+    #     # Define the CRS
+    #     crs = bdry$crs
+    #   )
     # )
-    # 06/01/2023: This should work and is identical to inlabru::ipoints
-    ar <- suppressWarnings(
-      Matrix::diag( INLA::inla.mesh.fem(mesh = mesh)[[1]] )
+    # Convert to mesh using fmesher
+    mesh <- fmesher::fm_mesh_2d_inla(loc = locs,
+                                     boundary = region.poly,
+                                     offset = params$offset,
+                                     cutoff = params$cutoff,
+                                     max.edge = params$max.edge,
+                                     crs = sf::st_crs(model$background)
     )
+    if(is.na(mesh$crs) || is.null(mesh$crs)) fmesher::fm_crs(mesh) <- sf::st_crs(x$background)
+
+    # Calculate area weight
+    ar <- inlabru::fm_int(mesh)$weight |> as.vector()
+
     assertthat::assert_that(length(ar) == mesh$n)
 
     # Now set the output

@@ -159,3 +159,47 @@ methods::setMethod(
     return(y)
   }
 )
+
+#' Remove control from an existing distribution object
+#'
+#' @description This function allows to remove set control obtions from an existing [distribution]
+#' object.
+#'
+#' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
+#'
+#' @family control
+#' @seealso [add_control_bias()]
+#'
+#' @examples
+#' \dontrun{
+#'  x <- distribution(background) |>
+#'    add_predictors(covariates) |>
+#'    add_control_bias(method = "proximity")
+#'  x <- x |> rm_control()
+#'  x
+#' }
+#'
+#' @name rm_control
+NULL
+
+#' @rdname rm_control
+#' @export
+methods::setGeneric(
+  "rm_control",
+  signature = methods::signature("x"),
+  function(x) standardGeneric("rm_control"))
+
+#' @rdname rm_control
+methods::setMethod(
+  "rm_control",
+  methods::signature(x = "BiodiversityDistribution"),
+  function(x) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution") )
+    # Make a deep copy
+    y <- x$clone(deep = TRUE)
+
+    y <- y$rm_control()
+    # Return x without control
+    return(y)
+  }
+)

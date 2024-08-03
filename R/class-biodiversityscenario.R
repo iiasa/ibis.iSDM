@@ -21,12 +21,14 @@ BiodiversityScenario <- R6::R6Class(
     #' @field limits A [`sf`] object used to constraint the prediction.
     #' @field predictors A predictor object for projection.
     #' @field constraints Any constraints set for projection.
+    #' @field latentfactors A [`list`] on whether latentfactors are used.
     #' @field scenarios The resulting [`stars`] objects.
     modelobject = new_waiver(),
     modelid = new_waiver(),
     limits = new_waiver(),
     predictors = new_waiver(),
     constraints = new_waiver(),
+    latentfactors = new_waiver(),
     scenarios = new_waiver(),
 
     #' @description
@@ -60,6 +62,9 @@ BiodiversityScenario <- R6::R6Class(
       # Thresholds
       tr <- self$get_threshold()
 
+      # Latent factors if set
+      lat <- self$get_latent()
+
       # Any other simulation outputs modules
       simmods <- self$get_simulation()
 
@@ -71,6 +76,7 @@ BiodiversityScenario <- R6::R6Class(
         "\n  Time period:    ", tp,
         ifelse(!is.Waiver(cs)||!is.Waiver(tr), "\n --------- ", ""),
         ifelse(is.Waiver(cs),"", paste0("\n  Constraints:    ", text_green(paste(paste0(names(cs),' (',cs,')'),collapse = ', ')) ) ),
+        ifelse(is.Waiver(lat),"", paste0("\n  Latent factors:    ", text_green("<Found>")) ),
         ifelse(is.Waiver(tr),"", paste0("\n  Threshold:      ", round(tr[1], 3),' (',names(tr[1]),')') ),
         ifelse(is.Waiver(simmods),"", paste0("\n  Simulations:    ", text_green(paste(paste0(names(simmods),' (',simmods[[1]][[1]],')'),collapse = ', ')) ) ),
         "\n --------- ",
@@ -150,6 +156,14 @@ BiodiversityScenario <- R6::R6Class(
     get_limits = function(){
       if(is.Waiver(self$limits)) return(NULL)
       return(self$limits)
+    },
+
+    #' @description
+    #' Remove current limits.
+    #' @return Invisible
+    rm_limits = function(){
+      self$limits <- new_waiver()
+      invisible()
     },
 
     #' @description
@@ -348,6 +362,36 @@ BiodiversityScenario <- R6::R6Class(
       ff[["scenarios"]] <- x
       self$scenarios <- ff
       return( self )
+    },
+
+    #' @description
+    #' Adding latent factors to the object.
+    #' @note
+    #' The latent factor is usually obtained from the fitted model object, unless
+    #' re-specified and added here to the list.
+    #' @param latent A [`list`] containing the data object.
+    #' @seealso [add_latent_spatial()]
+    #' @return This object.
+    set_latent = function(latent){
+      assertthat::assert_that(is.list(latent))
+      self$latentfactors <- latent
+      return(self)
+    },
+
+    #' @description
+    #' Get latent factors if found in object.
+    #' @return A [`list`] with the latent settings
+    get_latent = function(){
+      if(is.Waiver(self$latentfactors)) return('None')
+      self$latentfactors
+    },
+
+    #' @description
+    #' Remove latent factors if found in object.
+    #' @return This object.
+    rm_latent = function(){
+      self$latentfactors <- new_waiver()
+      return(self)
     },
 
     #' @description

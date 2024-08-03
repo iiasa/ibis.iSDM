@@ -96,6 +96,15 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   suppressWarnings( t5 <- predictor_derivate(s, option = "int",int_variables = c("lyra", "lyrc")) )
   expect_s4_class(t5, "SpatRaster")
 
+  # Make factor layer and check factor levels
+  ff <- terra::classify(r3, c(terra::global(r3,"min")[,1],
+                              terra::global(r3,"mean")[,1],
+                              terra::global(r3,"max")[,1]) )
+  names(ff) <- "fact"
+  suppressWarnings( tff <- predictor_derivate(c(s,ff), option = "int",
+                                              int_variables = c("lyra", "fact")) )
+  expect_s4_class(tff, "SpatRaster")
+
   # --- #
   # Finally do some ensemble calculations
   ex <- ensemble(r1, r2, r3, layer = "lyr.1")

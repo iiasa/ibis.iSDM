@@ -314,7 +314,10 @@ methods::setMethod(
           pred <- model$predictors_object$get_data(df = FALSE)
           new <-  fill_rasters(coords_poly, emptyraster(pred))
           for(val in names(new)){
-            model$predictors_object <- model$predictors_object$set_data(val, new[[val]] )
+            v <- new[[val]]
+            names(v) <- val
+            model$predictors_object <- model$predictors_object$set_data(v)
+            rm(v)
           }
           rm(pred, new)
         } else if(m == "kde") {
@@ -376,7 +379,13 @@ methods::setMethod(
 
         }
       }
-    } else { model[["latent"]] <- new_waiver() }# End of latent factor loop
+
+      # Make a flag to the settings
+      settings$set('has_latent', TRUE)
+    } else {
+      model[["latent"]] <- new_waiver()
+      settings$set('has_latent', FALSE)
+    }# End of latent factor loop
 
     # Set offset if existing
     if(!is.Waiver(x$offset)){
@@ -415,7 +424,7 @@ methods::setMethod(
           settings$set("bias_value", bias$bias_value )
           # Check that variable is already in the predictors object
           if(!(names(bias$layer) %in% model$predictors_names)){
-            model$predictors_object <- model$predictors_object$set_data(names(bias$layer), bias$layer)
+            model$predictors_object <- model$predictors_object$set_data(bias$layer)
             # Also set predictor names
             model[['predictors_names']] <- model$predictors_object$get_names()
             model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
@@ -691,7 +700,7 @@ methods::setMethod(
     # Check if MCP should be calculated
     if(!is.Waiver(x$get_limits())){
       # Build MCP based zones ?
-      if(x$limits$limits_method=="mcp"){
+      if(x$get_limits()$limits_method=="mcp"){
         # Create a polygon using all available information
         # Then overwrite limits
         l <- list("layer" = create_mcp(model, x$limits),
@@ -702,7 +711,7 @@ methods::setMethod(
         zones <- x$limits$layer
         assertthat::assert_that(!is.null(zones),
                                 utils::hasName(zones, "limit"))
-      } else if(x$limits$limits_method=="zones") {
+      } else if(x$get_limits()$limits_method=="zones") {
         # Zones
         # Get biodiversity data
         coords <- collect_occurrencepoints(model = model,include_absences = FALSE,
@@ -712,17 +721,26 @@ methods::setMethod(
           coords <- sf::st_transform(coords, sf::st_crs(model$background))
         }
 
+        # Get the layer
+        layer <- x$get_limits()$layer
+        # If there are multiple time entries, take the first one for parametrization
+        if( dplyr::n_distinct(layer[['time']])>1){
+          layer <- layer |> dplyr::filter(time == sort(layer[['time']])[1])
+        }
         # Get zones from the limiting area, e.g. those intersecting with input
+        # From provided time selection
         suppressMessages(
           suppressWarnings(
             zones <- sf::st_intersection(sf::st_as_sf(coords, coords = c('x','y'),
                                                       crs = sf::st_crs(model$background)),
-                                         x$limits$layer)
+                                         layer)
           )
         )
-        # Limit zones
-        zones <- subset(x$limits$layer, limit %in% unique(zones$limit) )
-      } else if(x$limits$limits_method %in% c("nt2", "mess")){
+        # Save the zones categories for later too!
+        settings$set("limits_zones_categories", unique(zones$limit))
+        # Limit zones (using the full layer here!)
+        zones <- subset(layer, limit %in% unique(zones$limit) )
+      } else if(x$get_limits()$limits_method %in% c("nt2", "mess")){
           # If there are more than one data source, raise warning
           if(length(model$biodiversity)>1){
             if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow',
@@ -735,7 +753,7 @@ methods::setMethod(
           }
 
           # Multivariate novelty index for the training data
-          if(x$limits$limits_method=="nt2"){
+          if(x$get_limits()$limits_method=="nt2"){
             rip <- .nt12(prodat = model$predictors_object$get_data(),
                          refdat = refs)[["novel"]]
             # Get only within reference to make a mask
@@ -759,8 +777,8 @@ methods::setMethod(
               levels(rip[[i]]) <- ca
             }
             rip <- rip == 'Interpolation'
-            rm(nt2)
-          }
+            try({ rm(nt2) },silent = TRUE)
+        }
         # Convert to polygon
         zones <- terra::as.polygons(rip) |> sf::st_as_sf()
         names(zones)[1] <- "limit"
@@ -771,14 +789,15 @@ methods::setMethod(
       if(nrow(zones)==0){
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
                                                   'Occurrence points do not fall into any zones!')
-        zones <- x$limits$layer  # Reset
+        zones <- x$get_limits()$layer  # Reset
       }
 
       # Also clip the predictors if set
-      if(x$limits$limits_clip && nrow(zones)>0){
+      if(x$get_limits()$limits_clip && nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(
-          suppressWarnings( sf::st_union( sf::st_intersection(zones, model$background),
+          suppressWarnings( sf::st_union(
+            sf::st_intersection(zones, model$background),
                                           by_feature = TRUE) |>
                               sf::st_buffer(dist = 0)  |> # 0 distance buffer trick
                               sf::st_cast("MULTIPOLYGON")
@@ -810,19 +829,20 @@ methods::setMethod(
             point_in_polygon(poly = model$background, points = model$predictors[,c('x','y')] )[['limit']]
           )),model$predictors_names] <- NA # Fill with NA
         }
-        # The same with offset if specified, Note this operation below is computationally quite costly
-        # MJ: 18/10/22 Removed below as (re)-extraction further in the pipeline makes this step irrelevant
-        # if(!is.Waiver(x$offset)){
-        #   model$offset[which( is.na(
-        #     point_in_polygon(poly = zones, points = model$offset[,c('x','y')] )[['limit']]
-        #   )), "spatial_offset" ] <- NA # Fill with NA
-        # }
       }
       # Reset the zones, but save the created layer
+      # Note that we are using the original saved layer here again!
+      # This is to retain multi-temporal zones
+      if(x$get_limits()$limits_method=="zones"){
+        zones <- subset(x$get_limits()$layer, limit %in% unique(zones$limit) )
+      }
+
       l <- list("layer" = zones, "limits_method" = x$limits$limits_method,
                 "mcp_buffer" = x$limits$mcp_buffer,
                 "limits_clip" = x$limits$limits_clip)
       settings$set("limits", l)
+      # Save the zones categories for later too!
+      settings$set("limits_zones_categories", unique(zones$limit))
       x <- x$set_limits(x = l)
       rm(zones)
     }
@@ -887,10 +907,7 @@ methods::setMethod(
         if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
 
-      # Run the engine setup script
-      model <- x$engine$setup(model, settings)
-
-      # remove not used predictors
+      # remove unused predictors
       pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
@@ -900,6 +917,9 @@ methods::setMethod(
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
       }
+
+      # Run the engine setup script
+      model <- x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -929,10 +949,7 @@ methods::setMethod(
                                                                 settings = settings)
       }
 
-      # Run the engine setup script
-      x$engine$setup(model, settings)
-
-      # remove not used predictors
+      # remove unused predictors
       pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
@@ -942,6 +959,9 @@ methods::setMethod(
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
       }
+
+      # Run the engine setup script
+      x$engine$setup(model, settings)
 
       # Now train the model and create a predicted distribution model
       out <- x$engine$train(model, settings)
@@ -962,10 +982,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -976,7 +993,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -986,6 +1003,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1093,10 +1113,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1107,7 +1124,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1117,6 +1134,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1223,10 +1243,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1237,7 +1254,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1247,6 +1264,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1377,10 +1397,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1391,7 +1408,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1401,6 +1418,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1503,10 +1523,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1517,7 +1534,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1527,6 +1544,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1631,10 +1651,7 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # include only predictors actually used
+        # remove unused predictors
         pred_tmp <- model2$biodiversity[[1]]$predictors_names
         pred_prs <- model$predictors_object$get_names()
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
@@ -1645,7 +1662,7 @@ methods::setMethod(
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
 
-        # include only present priors
+        # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
           ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
@@ -1655,6 +1672,9 @@ methods::setMethod(
             for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
           }
         }
+
+        # Run the engine setup script
+        model2 <- x$engine$setup(model2, settings)
 
         # Now train the model and create a predicted distribution model
         settings2 <- settings
@@ -1771,12 +1791,32 @@ methods::setMethod(
 
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Done]','green',paste0('Completed after ', round( as.numeric(out$settings$duration()), 2),' ',attr(out$settings$duration(),'units') ))
 
+    # Quick check that the prediction is consistent with background extent
+    if(settings$get('inference_only')==FALSE){
+      if(!is_comparable_raster(out$get_data(), x$background )){
+      o <- out$get_data()
+      o <- terra::extend(o, x$background) |> terra::crop(x$background)
+      out <- out$set_data("prediction", o)
+      try({ rm(o) })
+      }
+    }
+
     # Clip to limits again to be sure
     if(!is.Waiver(x$get_limits())) {
       if(settings$get('inference_only')==FALSE){
-        out <- out$set_data("prediction",
-                            terra::mask(out$get_data("prediction"),
-                                        settings$get("limits")$layer))
+        layer <- settings$get("limits")$layer
+        # First entry for clipping if time found!
+        if(utils::hasName(layer,"time")){
+          layer <- layer |> dplyr::filter(time == sort(layer[['time']])[1])
+        }
+        if(settings$get("limits")$limits_clip){
+          o <- terra::mask(out$get_data("prediction"), layer)
+        } else {
+          # Default! Leaves rest of background to 0
+          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = 0)
+        }
+        out <- out$set_data("prediction", o)
+        try({ rm(layer, o) })
       }
       out$settings$set("has_limits", TRUE)
     } else {

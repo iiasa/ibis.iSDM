@@ -14,6 +14,8 @@
 #' @param point A [`sf`] object with type `POINT` or `MULTIPOINT`.
 #' @param point_column A [`character`] vector with the name of the column containing
 #' the independent observations. (Default: \code{'observed'}).
+#' @param field_occurrence (Deprectated) A [`character`] field pointing to the name
+#' of the independent observations. Identical to \code{"point_column"}
 #' @param ... Other parameters that are passed on. Currently unused.
 #'
 #' @details The \code{'validate'} function calculates different validation
@@ -79,14 +81,14 @@ NULL
 methods::setGeneric("validate",
                     signature = methods::signature("mod"),
                     function(mod, method = 'continuous', layer = "mean",
-                             point = NULL, point_column = 'observed', ...) standardGeneric("validate"))
+                             point = NULL, point_column = 'observed', field_occurrence = NULL, ...) standardGeneric("validate"))
 
 #' @rdname validate
 methods::setMethod(
   "validate",
   methods::signature(mod = "ANY"),
   function(mod, method = 'continuous', layer = "mean",
-           point = NULL, point_column = 'observed', ...){
+           point = NULL, point_column = 'observed', field_occurrence = NULL,...){
     assertthat::assert_that(
       inherits(mod, "DistributionModel"),
       inherits(point, 'sf') || is.null(point),
@@ -98,6 +100,11 @@ methods::setMethod(
     assertthat::assert_that( "prediction" %in% mod$show_rasters(),msg = "No prediction of the fitted model found!" )
     # Check that independent data is provided and if so that the used column is there
     if(!is.null(point)){
+      # Use field occurrence if point column is not found or set
+      if(!utils::hasName(point, point_column) && !is.null(field_occurrence)){
+        point_column <- field_occurrence
+      }
+
       assertthat::assert_that(is.character(point_column),
                               utils::hasName(point, point_column),
                               anyNA(point[[point_column]])==FALSE
@@ -250,7 +257,8 @@ methods::setMethod(
 methods::setMethod(
   "validate",
   methods::signature(mod = "SpatRaster"),
-  function(mod, method = 'continuous', layer = NULL, point = NULL, point_column = 'observed', ...){
+  function(mod, method = 'continuous', layer = NULL, point = NULL,
+           point_column = 'observed', field_occurrence = NULL, ...){
     assertthat::assert_that(
       is.Raster(mod),
       inherits(point, 'sf'),
@@ -258,6 +266,14 @@ methods::setMethod(
       is.character(point_column)
     )
     method <- match.arg(method, c("discrete", "continuous"),several.ok = FALSE)
+
+    # Use field occurrence if point column is not found or set
+    # Fallback arguement
+    if(!is.null(point)){
+      if(!utils::hasName(point, point_column) && !is.null(field_occurrence)){
+        point_column <- field_occurrence
+      }
+    }
 
     # If mode truncate was used, also switch to continuous data
     if(method == "discrete"){

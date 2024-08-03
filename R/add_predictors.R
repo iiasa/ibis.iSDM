@@ -78,6 +78,8 @@ NULL
 #' Certain names such \code{"offset"} are forbidden as predictor variable names.
 #' The function will return an error message if these are used.
 #'
+#' Some engines use binary variables regardless of the parameter \code{explode_factors}
+#' set here.
 #'
 #' @examples
 #' \dontrun{
@@ -153,8 +155,16 @@ methods::setMethod(
       terra::crs(env) <- terra::crs(x$background)
     }
 
+    # Check that background and range align, otherwise raise error
+    if(is.Raster(env)){
+      if(!is_comparable_raster(env, x$background)){
+        warning('Supplied range does not align with background! Aligning them now...')
+        env <- alignRasters(env, x$background, method = 'bilinear', func = mean, cl = FALSE)
+      }
+    }
+
     # Check that all names allowed
-    problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
+    problematic_names <- grep("offset|w|weight|spatial_offset|observed|Intercept|spatial.field", names(env),fixed = TRUE)
     if( length(problematic_names)>0 ){
       stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
@@ -385,7 +395,7 @@ methods::setMethod(
         r <- o[[n]]
         # If predictor transformation is specified, apply
         if(transform != "none") r <- predictor_transform(r, option = transform)
-        y$predictors <- y$predictors$set_data(n, r)
+        y$predictors <- y$predictors$set_data(r)
         rm(r)
       }
     }
@@ -469,7 +479,7 @@ methods::setMethod(
 
     # Check that background and range align, otherwise raise error
     if(is.Raster(layer)){
-      if(is_comparable_raster(layer, x$background)){
+      if(!is_comparable_raster(layer, x$background)){
         warning('Supplied range does not align with background! Aligning them now...')
         layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       }
@@ -494,7 +504,8 @@ methods::setMethod(
     if(is.Waiver(x$predictors)){
       y <- add_predictors(y, env = layer, transform = 'none',derivates = 'none', priors)
     } else {
-      y$predictors <- y$predictors$set_data('range_distance', layer)
+      names(layer) <- "range_distance"
+      y$predictors <- y$predictors$set_data(layer)
       if(!is.null(priors)) {
         # FIXME: Ideally attempt to match varnames against supplied predictors vis match.arg or similar
         assertthat::assert_that( all( priors$varnames() %in% names(layer) ) )
@@ -598,7 +609,8 @@ methods::setMethod(
     if(is.Waiver(x$predictors)){
       y <- add_predictors(y, env = dis, transform = 'none',derivates = 'none')
     } else {
-      y$predictors <- y$predictors$set_data('range_distance', dis)
+      names(dis) <- "range_distance"
+      y$predictors <- y$predictors$set_data(dis)
     }
     return(y)
   }
@@ -756,6 +768,8 @@ methods::setMethod(
 
     # Get model object
     obj <- x$get_model()
+    assertthat::assert_that(!(is.null(obj) || is.Waiver(obj)),
+                            msg = "No model object found in scenario?")
     model <- obj$model
 
     # Subset to target predictors only
@@ -791,14 +805,18 @@ methods::setMethod(
             msg = "Model transformation does not match provided option"
           )
           state <- model$predictors_object$get_transformed_params()
-          # Subset again to be sure
-          state <- state[,which(colnames(state) %in% names(env))]
+          if(!all(is.null(state))){
+            warning("State variable of transformation not found?")
+          } else {
+            # Subset again to be sure
+            state <- state[,which(colnames(state) %in% names(env))]
+            assertthat::assert_that(
+              all(names(state) %in% names(env)),
+              all(names(env) %in% colnames(state)),
+              msg = "Missing predictors for some state variables."
+            )
+          }
         }
-        assertthat::assert_that(
-          all(names(state) %in% names(env)),
-          all(names(env) %in% colnames(state)),
-          msg = "Missing predictors for some state variables."
-        )
       }
     }
 

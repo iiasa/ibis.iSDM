@@ -398,9 +398,14 @@ methods::setMethod(
           layer <- names(mods[[1]])[1]
         }
         # Format to table
-        lmat <- do.call("rbind", mods) |> as.data.frame()
+        lmat <- do.call("c", lapply(mods, function(z) z |> dplyr::select({{layer}}) )) |>
+          as.data.frame()
+        # lmat <- do.call("rbind", lapply(mods, function(z) as.data.frame(z) ))
         # Get dimensions
         lmat_dim <- stars::st_dimensions(mods[[1]])
+
+        # If there are more than 1 attribute, subset to dimension and layer
+        # lmat <- subset(lmat, select = c(names(lmat_dim), layer))
 
       } else {
         # Check that layers all have a prediction layer
@@ -458,19 +463,23 @@ methods::setMethod(
         stop("This has not been reasonably implemented in this context.")
       }
       # Add dimensions to output
-      out <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out ) |> as.data.frame()
+      if(inherits(mods[[1]], "stars")){
+        out <- cbind( lmat[,names(lmat_dim)], "ensemble" = out)
+      } else {
+        out <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out ) |> as.data.frame()
+      }
 
       # Convert to stars
       out <- out |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
       # Rename dimension names
-      out <- out |> stars::st_set_dimensions(names = c("x", "y", "band"))
+      out <- out |> stars::st_set_dimensions(names = names(lmat_dim))
       # Rename
       names(out) <- paste0("ensemble_", layer)
       # Add attributes on the method of ensemble
       attr(out, "method") <- method
 
       # Check for threshold values and collate
-      if(apply_threshold){
+      if(apply_threshold && inherits(mods[[1]], "BiodiversityScenario")){
         ll_val <- sapply(mods, function(x) x$get_thresholdvalue())
         # Incase no thresholds are found, ignore entirely
         if(!all(any(sapply(ll_val, is.Waiver)))){
@@ -513,12 +522,16 @@ methods::setMethod(
         )
         if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
         # Add dimensions to output
-        out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
+        if(inherits(mods[[1]], "stars")){
+          out_uncertainty <- cbind( lmat[,names(lmat_dim)], "ensemble" = out_uncertainty)
+        } else {
+          out_uncertainty <- cbind( sf::st_coordinates(mods[[1]]$get_data()[layer]), "ensemble" = out_uncertainty ) |> as.data.frame()
+        }
 
         # Convert to stars
         out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
         # Rename dimension names
-        out_uncertainty <- out_uncertainty |> stars::st_set_dimensions(names = c("x", "y", "band"))
+        out_uncertainty <- out_uncertainty |> stars::st_set_dimensions(names = names(lmat_dim))
         # Rename
         names(out_uncertainty) <- paste0(uncertainty, "_", layer)
         # Add attributes on the method of ensembling
@@ -526,14 +539,19 @@ methods::setMethod(
         # --- #
         # Combine both ensemble and uncertainty
         ex <- stars:::c.stars(out, out_uncertainty)
-        # Correct projection is unset
-        if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
       } else {
         # Only the output
         ex <- out
       }
       # Correct projection is unset
-      if(is.na(sf::st_crs(ex))) ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
+      if(is.na(sf::st_crs(ex))){
+        if(inherits(mods[[1]], "BiodiversityScenario")){
+          ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]$get_data()))
+        } else {
+          # For original stars objects
+          ex <- sf::st_set_crs(ex, sf::st_crs(mods[[1]]) )
+        }
+      }
       assertthat::assert_that(inherits(ex, "stars"))
       return(ex)
     }

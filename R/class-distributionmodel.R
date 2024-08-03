@@ -485,11 +485,17 @@ DistributionModel <- R6::R6Class(
     #' @description
     #' Set new fit for this Model.
     #' @param x The name of the new fit.
-    #' @param value The [`SpatRaster`] layer to be inserted.
+    #' @param value The [`SpatRaster`] layer (or model) to be inserted.
     #' @return This object.
     set_data = function(x, value) {
+      assertthat::assert_that(
+        is.character(x)
+      )
       # Get projected value
       ff <- self$fits
+      # if Raster, make a deep copy
+      if(is.Raster(value)) value <- terra::deepcopy(value)
+
       # Set the object
       ff[[x]] <- value
       self$fits <- ff
@@ -650,12 +656,25 @@ DistributionModel <- R6::R6Class(
     },
 
     #' @description
+    #' Logical indication if the prediction has added latent factors.
+    #' @return A [`logical`] flag.
+    has_latent = function(){
+      # Check for settings here
+      settings <- self$settings
+      if(!is.Waiver(settings)){
+        return(
+          settings$get('has_latent')
+        )
+      }
+    },
+
+    #' @description
     #' Has a offset been used?
     #' @return A [`logical`] flag.
     has_offset = function(){
-      model <- self$model$offset
-      if(!is.Waiver(model$offset)) return( TRUE )
+      if(!is.Waiver(self$model$offset)) return( TRUE )
       # Also check whether offset is somehow in the equation
+      fit <- self$model$biodiversity[[1]]$equation
       ind <- attr(stats::terms.formula(fit$get_equation()), "offset")
       if(!is.null(ind)) return( TRUE )
     },

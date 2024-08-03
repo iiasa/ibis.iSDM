@@ -30,11 +30,12 @@ NULL
 #'
 #' @param background Specification of the modelling background. Must be a
 #' [`SpatRaster`] or [`sf`] object.
-#' @param limits A [`SpatRaster`] or [`sf`] object that limits the prediction
-#' surface when intersected with input data (Default: \code{NULL}).
+#' @param limits A [`SpatRaster`], [`sf`] or [`stars`] object that limits the prediction
+#' surface when intersected with input data (Default: \code{NULL}). In case of a
+#' [`stars`] object the first factorized time entry is taken.
 #' @param limits_method A [`character`] of the method used for hard limiting a
 #' projection. Available options are \code{"none"} (Default), \code{"zones"}
-#' or \code{"mcp"}.
+#' or \code{"mcp"}. See also [`add_limits_extrapolation()`].
 #' @param mcp_buffer A [`numeric`] distance to buffer the mcp (Default \code{0}).
 #' Only used if \code{"mcp"} is used.
 #' @param limits_clip [`logical`] Should the limits clip all predictors before
@@ -115,7 +116,8 @@ methods::setMethod(
   methods::signature(background = "SpatRaster"),
   function(background, limits = NULL, limits_method = "none", mcp_buffer = 0,limits_clip = FALSE) {
     assertthat::assert_that(!missing(background) || !exists('background'),
-                            inherits(limits,'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            inherits(limits,'SpatRaster') || inherits(limits, 'sf') ||
+                              inherits(limits, 'Spatial') || is.null(limits) || inherits(limits, "stars"),
                             is.character(limits_method),
                             is.numeric(mcp_buffer),
                             is.logical(limits_clip),
@@ -139,9 +141,7 @@ methods::setMethod(
     }
 
     # Convert raster to dissolved polygons to get a study boundary
-    newbg <- sf::st_as_sf(
-      terra::as.polygons(background, dissolve = TRUE)
-    )
+    newbg <- terra_to_sf(background)
 
     # Check crs is set to be sure
     if(is.na(sf::st_crs(newbg))){
@@ -159,7 +159,8 @@ methods::setMethod(
   function(background, limits = NULL, limits_method = "none", mcp_buffer = 0, limits_clip = FALSE) {
     # Check that arguments are valid
     assertthat::assert_that(!missing(background) || !exists('background'),
-                            inherits(limits,'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            inherits(limits,'SpatRaster') || inherits(limits, 'sf') ||
+                              inherits(limits, 'Spatial') || is.null(limits) || inherits(limits,"stars"),
                             is.character(limits_method),
                             is.numeric(mcp_buffer),
                             is.logical(limits_clip),
@@ -182,16 +183,29 @@ methods::setMethod(
 
     # Convert limits if provided
     if(!is.null(limits)){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Deprecated]','yellow','Use add_limits_extrapolation() to add limits!')
       # Set methods in case a layer was supplied
       limits_method <- "zones"
+      # If stars, convert to raster
+      if(inherits(limits, 'stars')){
+        assertthat::assert_that( length(limits)==1,
+                                 msg = "More than 1 attribute found for multi-temporal limits!")
+        # Convert to SpatRaster and take the first entry (first time slot)
+        limits <- stars_to_raster(limits)
+        limits <- Reduce('c', limits) # Combine all
+        # Assume it was categorical (stars does not recognize categorical factors)
+        layer <- terra::as.factor(layer)
+      }
       # Convert to polygon if raster
       if(inherits(limits,'SpatRaster')){
-        assertthat::assert_that(terra::is.factor(limits),
+        # If there are more one layer, take the first
+        assertthat::assert_that(all(terra::is.factor(limits)),
                                 msg = 'Provided limit raster needs to be ratified (categorical)!')
-        limits <- sf::st_as_sf( terra::as.polygons(limits, dissolve = TRUE) ) |> sf::st_cast("MULTIPOLYGON")
-
+        limits <- terra_to_sf(limits)
       }
       assertthat::assert_that(inherits(limits, "sf"))
+      # If there is no time dimension, assign a dummy
+      if(!utils::hasName(limits,"time")) limits$time <- "No set time"
 
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(background)) limits <- sf::st_transform(limits, background)
@@ -202,8 +216,9 @@ methods::setMethod(
         if(suppressMessages(length( sf::st_intersects(limits, background |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
       }
 
-      # Get fir column and rename
-      limits <- limits[,1]; names(limits) <- c('limit','geometry')
+      # Rename geometry just to be sure
+      limits <- rename_geometry(limits, "geometry")
+      names(limits)[1] <- "limit" # The first entry is the layer name
       limits <- list(layer = limits, "limits_method" = "zones",
                      "mcp_buffer" = mcp_buffer, "limits_clip" = limits_clip)
     } else if(limits_method == "mcp"){

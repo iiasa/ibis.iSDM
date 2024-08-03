@@ -482,8 +482,9 @@ clamp_predictions <- function(model, pred){
   # For each biodiversity dataset, calculate the range of predictors observed
   vars_clamp <- data.frame()
   for(ds in model$biodiversity){
-    # Calculate range for each variable
-    rr <- apply(ds$predictors[,ds$predictors_names], 2, function(z) range(z, na.rm = TRUE)) |>
+    # Calculate range for each NUMERIC variable
+    rr <- apply(ds$predictors[,ds$predictors_names[ds$predictors_types[, 2] == "numeric"], drop = FALSE],
+                MARGIN = 2, function(z) range(z, na.rm = TRUE)) |>
       t() |> as.data.frame() |> tibble::rownames_to_column("variable")
     names(rr) <- c("variable", "min", "max")
     vars_clamp <- rbind(vars_clamp, rr)

@@ -28,7 +28,7 @@ add_constraint_minsize(
 given patch}
 
 \item{unit}{A \code{\link{character}} of the unit of area. Options available are
-\code{km2} (Default) and \code{ha}.}
+\code{km2} (Default), \code{ha} and \code{pixel}.}
 
 \item{establishment_step}{A \code{\link{logical}} flag indicating whether a given patch
 is only to be removed if wasn't small in a previous time step (not yet

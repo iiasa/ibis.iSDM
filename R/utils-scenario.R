@@ -7,6 +7,8 @@
 #' @param env A [`stars`] object.
 #' @param date_interpolation [`character`] on how missing dates between events
 #' should be interpolated. See [`project()`].
+#' @param method A [`character`] on the used method for approximation, either
+#' \code{"linear"} (Default) or \code{"constant"} through a step function.
 #'
 #' @return [`logical`] indicating if the two [`SpatRaster-class`] objects have the same
 #'
@@ -19,12 +21,16 @@
 #' }
 #'
 #' @export
-interpolate_gaps <- function(env, date_interpolation = "annual"){
+interpolate_gaps <- function(env, date_interpolation = "annual", method = "linear"){
   assertthat::assert_that(
     inherits(env, "stars"),
-    is.character(date_interpolation)
+    is.character(date_interpolation),
+    is.character(method)
   )
   check_package("dplyr")
+
+  # Check method, linear or step function
+  method <- match.arg(method, c("linear", "constant"),several.ok = FALSE)
 
   date_interpolation <- match.arg(date_interpolation,
                                   c("none", "yearly", "year", "annual",
@@ -73,10 +79,14 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
     names(oo) <- paste0(v,'_',as.numeric(terra::time(oo)))
 
     # Linearly approximate gaps and save in list
-    out[[v]] <- terra::approximate(x = oo,
-                            method = "linear",
+    new <- terra::approximate(x = oo,
+                            method = method,
                             yleft = NA,
-                            yright = NA) |> stars::st_as_stars()
+                            yright = NA)
+    # Order time and convert
+    new <- new[[order(terra::time(new))]]
+    out[[v]] <- new |> stars::st_as_stars()
+    rm(new)
   }
 
   # Combine
@@ -93,6 +103,57 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
   return(out)
 }
 
+#' Closest date between time steps
+#'
+#' @description
+#' Small helper function to find the closest temporal entry (date) in a
+#' vector. Can be used to identify closest matching records.
+#'
+#' @param d A [`Date`] or [`POSIXct`] object.
+#' @param timeseries A vector of [`Date`] or [`POSIXct`] object
+#' @param return_index A [`logical`] flag on whether to report an index or the
+#' actual entry of the \code{"timeseries"} (Default: \code{TRUE}).
+#'
+#' @return [`numeric`] index of the closest
+#'
+#' @keywords internal, utils
+#'
+#' @examples
+#' \dontrun{
+#'  # Get closest date to vector
+#'  get_nearest_date(
+#'  "2018-01-01",
+#'  c("2015-01-01", "2019-05-05", "2020-05-01", "2050-01-08")
+#'  )
+#' }
+#'
+#' @noRd
+get_nearest_date <- function(d, timeseries, return_index = TRUE){
+  assertthat::assert_that(
+    length(d)==1,
+    length(timeseries)>1,
+    is.logical(return_index)
+  )
+
+  # Convert all to  Posix type
+  d <- to_POSIXct(d)
+  timeseries <- to_POSIXct(timeseries)
+
+  assertthat::assert_that(!is.na(d),
+                          all(!is.na(timeseries)),
+                          msg = "Internal conversion to Date format failed!")
+
+  # Get the closest entry
+  ind <- which(abs(timeseries- d) == min(abs(timeseries - d)))
+  # If there are multiple, pick the earlier
+  if(length(ind)>1) ind <- ind[1]
+  if(return_index){
+    return(ind)
+  } else {
+    return(timeseries[ind])
+  }
+}
+
 #' Aggregate stars variables across dimensions
 #'
 #' @description Small helper function that acts a wrapper to combine 2 or more
@@ -107,7 +168,7 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
 #'
 #' @note Currently only works via matrix manipulation
 #'
-#' @keywords scenario
+#' @keywords scenario, internal
 #'
 #' @examples
 #' \dontrun{
@@ -116,8 +177,6 @@ interpolate_gaps <- function(env, date_interpolation = "annual"){
 #' }
 #'
 #' @noRd
-#'
-#' @keywords internal
 st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
   assertthat::assert_that(
     is.list(obj) || inherits(obj, 'stars'),
@@ -277,6 +336,51 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   return( out )
 }
 
+#' Converts a stars object to sf
+#'
+#' @description This is a small helper function to convert a [`stars`] object to
+#' a temporal [`sf`] object. The time dimension is added as a filed 'time' here
+#' together with any other attributes.
+#' @note
+#' This function has been specifically created for categorical stars layers.
+#' @param obj A [`stars`] object with a \code{"time"} dimension at least.
+#'
+#' @returns A [`sf`] object with \code{"MULTIPOLYGON"} types per time step.
+#'
+#' @keywords scenario
+#' @examples
+#' \dontrun{
+#'  stars_to_sf(future_stars)
+#' }
+#' @noRd
+#'
+#' @keywords internal
+stars_to_sf <- function(obj){
+  assertthat::assert_that(
+    inherits(obj, 'stars')
+  )
+  check_package("tidyr")
+
+  # Take name of third band, assuming it to be time
+  time_band <- names(dim(obj))[3]
+  # Get time dimension and correct if specific entries are requested
+  times <- stars::st_get_dimension_values(obj, time_band, center = TRUE)
+
+  # Convert to sf
+  out <- obj |> sf::st_as_sf() |> guess_sf()
+  # Format to longer
+  out <- out |> tidyr::pivot_longer(cols = grep("geometry", names(out), value = TRUE, invert = TRUE),
+                                    names_to = "time",values_to = "limit")
+
+  # Group by limit to get multipolygon
+  out <- out |> dplyr::group_by(time,limit) |> dplyr::summarise() |> dplyr::ungroup()
+
+  assertthat::assert_that(inherits(out, "sf"),
+                          nrow(out)>0,
+                          utils::hasName(out, "time"), utils::hasName(out, "limit"))
+  return( out )
+}
+
 #' Converts a raster object to stars
 #'
 #' @description This is a small helper function to convert a to a [`SpatRaster`]
@@ -312,20 +416,27 @@ raster_to_stars <- function(obj){
   # Get time dimension
   times <- terra::time(obj)
   if(all(is.na( as.character(times) ))) stop("Predictor covariates are missing a time dimension! See terra::time() ")
-  if(!all(inherits(times, "Date"))) times <- as.Date(times)
+  if(!all(inherits(times, "Date"))) times <- as.Date(times) # FIXME: Unit conversion could cause problems?
   prj <- sf::st_crs( terra::crs(obj) )
 
-  # Convert to RasterStack and reset time dimension
+  # Reset time dimension
   terra::time(obj) <- times
   # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
 
   # Convert to stars step by step
+  # HACKY: But seems to be the most robust way?
   new_env <- list()
   for(i in 1:terra::nlyr(obj)){
     oo <- subset(obj, i)
     # Check if times are unique
     if(length(unique(times))==1) terra::time(oo) <- NULL
-    suppressWarnings(  o <- stars::st_as_stars(oo) )
+    # Factor conversion is buggy in stars thus convert to integer first
+    if(is.factor(oo)){
+      oo <- terra::as.int(oo) # Convert to numeric first
+      suppressWarnings(  o <- stars::st_as_stars(oo) )
+    } else {
+      suppressWarnings(  o <- stars::st_as_stars(oo) )
+    }
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
 
@@ -334,11 +445,14 @@ raster_to_stars <- function(obj){
     dims$time <- stars:::create_dimension(values = times[i])
     o <- stars::st_redimension(o,new_dims = dims)
 
-    new_env[[names(obj)[i]]] <- o
+    new_env[[ paste0(names(oo),times[i]) ]] <- o
   }
 
   new_env <- do.call(c, new_env)
+  # :fire: Rename just to be sure
+  names(new_env) <- unique( names(obj) )
   assertthat::assert_that(inherits(new_env, "stars"),
+                          length(unique(times)) == length(stars::st_get_dimension_values(new_env,3)),
                           stars::st_dimensions(new_env) |> length() == 3)
 
   return(new_env)

@@ -101,7 +101,6 @@ names(x)
 \item \href{#method-BiodiversityDistribution-get_log}{\code{BiodiversityDistribution$get_log()}}
 \item \href{#method-BiodiversityDistribution-set_log}{\code{BiodiversityDistribution$set_log()}}
 \item \href{#method-BiodiversityDistribution-get_extent}{\code{BiodiversityDistribution$get_extent()}}
-\item \href{#method-BiodiversityDistribution-get_extent_dimensions}{\code{BiodiversityDistribution$get_extent_dimensions()}}
 \item \href{#method-BiodiversityDistribution-get_projection}{\code{BiodiversityDistribution$get_projection()}}
 \item \href{#method-BiodiversityDistribution-get_resolution}{\code{BiodiversityDistribution$get_resolution()}}
 \item \href{#method-BiodiversityDistribution-rm_predictors}{\code{BiodiversityDistribution$rm_predictors()}}
@@ -629,19 +628,6 @@ This object
 Get extent
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_extent()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-Background extent or NULL.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-BiodiversityDistribution-get_extent_dimensions"></a>}}
-\if{latex}{\out{\hypertarget{method-BiodiversityDistribution-get_extent_dimensions}{}}}
-\subsection{Method \code{get_extent_dimensions()}}{
-Get dimensions of extent from background
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$get_extent_dimensions()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

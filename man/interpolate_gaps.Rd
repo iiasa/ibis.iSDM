@@ -4,13 +4,16 @@
 \alias{interpolate_gaps}
 \title{Approximate missing time steps between dates}
 \usage{
-interpolate_gaps(env, date_interpolation = "annual")
+interpolate_gaps(env, date_interpolation = "annual", method = "linear")
 }
 \arguments{
 \item{env}{A \code{\link{stars}} object.}
 
 \item{date_interpolation}{\code{\link{character}} on how missing dates between events
 should be interpolated. See \code{\link[=project]{project()}}.}
+
+\item{method}{A \code{\link{character}} on the used method for approximation, either
+\code{"linear"} (Default) or \code{"constant"} through a step function.}
 }
 \value{
 \code{\link{logical}} indicating if the two \code{\linkS4class{SpatRaster}} objects have the same

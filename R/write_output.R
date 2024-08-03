@@ -537,6 +537,9 @@ methods::setMethod(
 
     x <- mod$clone()
 
+    # see Saving section in ?dbartsSampler
+    if (x$get_name() == "BART-Model") {invisible(x$get_model()$fit$state)}
+
     # Don't save the predictors object as it has distinct memory points
     if(inherits(x$model$predictors_object, "PredictorDataset")){
       ats <- attributes(x$model$predictors_object$get_data())

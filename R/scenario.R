@@ -43,7 +43,8 @@ methods::setMethod(
   function(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE) {
     # Check that arguments are valid
     assertthat::assert_that(!missing(fit) || inherits(fit,'DistributionModel'),
-                            inherits(limits, 'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') || is.null(limits),
+                            inherits(limits, 'SpatRaster') || inherits(limits, 'sf') || inherits(limits, 'Spatial') ||
+                              is.null(limits) || inherits(limits, "stars"),
                             is.logical(reuse_limits),
                             is.logical(copy_model),
                             msg = 'No trained model supplied!')
@@ -60,18 +61,24 @@ methods::setMethod(
     # Convert limits if provided
     if(!is.null(limits)){
       # Convert to polygon if raster
-      if(inherits(limits,'SpatRaster')){
+      if(is.Raster(limits)){
         # Remove 0 from ratified raster assuming this is no-data
         limits[limits == 0] <- NA
-        limits <- sf::st_as_sf( terra::as.polygons(limits, trunc = TRUE, dissolve = TRUE) )
+        limits <- terra_to_sf(limits)
+      } else if(inherits(limits, "stars")){
+        limits <- stars_to_sf(limits)
       }
       # Ensure that limits has the same projection as background
       if(sf::st_crs(limits) != sf::st_crs(fit$model$background)) limits <- sf::st_transform(limits, fit$model$background)
       # Ensure that limits is intersecting the background
-      if(suppressMessages(length( sf::st_intersects(limits, fit$model$background)))==0) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+      if(suppressWarnings( suppressMessages(length( sf::st_intersects(limits, fit$model$background)))==0)) {
+        limits <- NULL; warning('Provided limits do not intersect the background!')
+      }
 
-      # Get fir column and rename
-      limits <- limits[,1]; names(limits) <- c('limit','geometry')
+      # Rename geometry just to be sure
+      if(inherits(limits, 'sf')){
+        limits <- rename_geometry(limits, "geometry")
+      }
     }
 
     # Also check if limits are to be reused if found

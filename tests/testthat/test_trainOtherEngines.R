@@ -621,7 +621,7 @@ test_that('Train a distribution model with SCAMPR', {
 
   # Train the model
   suppressWarnings(
-    mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
+    mod <- train(x |> add_latent_spatial(), "test", inference_only = FALSE, only_linear = TRUE,
                  verbose = FALSE)
   )
 

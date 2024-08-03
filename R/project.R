@@ -139,29 +139,77 @@ methods::setMethod(
       new <- interpolate_gaps(new_preds$get_data(),
                               date_interpolation = date_interpolation)
       # Set new data
-      new_preds$set_data(new)
+      new_preds <- new_preds$set_data(new)
+    }
+
+    # Check latent factors and add them to future if found
+    if(!is.Waiver(mod$latentfactors) || fit$has_latent()){
+      # Get predictor names
+      pn <- fit$model$predictors_names
+      ind <- grep("nearestpoint_|spatialtrend_|kde__coordinates", pn,value = TRUE)
+      if(length(mod$latentfactors)==2){
+        # Get the layer if found
+        if(!is.null(mod$latentfactors$layer) && length(ind)>0){
+          layer <- mod$latentfactors$layer
+          new_preds <- new_preds$set_data(layer)
+        } else if(length(ind)>0){
+          # Get the predictors
+          sps <- fit$model$predictors_object$get_data() |> terra::subset(ind)
+          new_preds <- new_preds$set_data(sps)
+        }
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Found latent factors and added them to future predictors stack.")
+      } else {
+        if(length(ind)>0){
+          # Get the predictors
+          sps <- fit$model$predictors_object$get_data() |> terra::subset(ind)
+          new_preds <- new_preds$set_data(sps)
+        }
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Found latent factors and added them to future predictors stack.")
+      }
+      suppressWarnings( try({rm(pn,ind,sps)},silent = TRUE) )
     }
 
     # Get limits if flagged as present in scenario object
     if(!is.null( mod$get_limits() )){
       # Get Limit and settings from model
-      limit <- mod$get_limits()
+      limits <- mod$get_limits()
+
+      # Get Settings object from model to obtain
+      settings <- fit$settings
+      # Get zone limits form the model
+      nrs <- settings$get("limits_zones_categories") |> as.numeric()
+      if(length(nrs)>0 && utils::hasName(limits, "limit")){
+        limits <- limits |> dplyr::filter(limit %in% nrs)
+      }
 
       # Clip new predictors
-      new_preds$crop_data(limit)
+      # This also takes account of nearest time zones
+      new_preds$crop_data(limits,
+                          apply_time = ifelse(any(limits$time == "No set time"), FALSE, TRUE))
 
+      # Filter to first time slot if present for remaining clipping
+      if(utils::hasName(limits,"time")){
+        if(dplyr::n_distinct(limits$time)>1){
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Using first set temporal slot for zoning!")
+          first <- sort(limits$time)[1]
+          limit <- limits |> dplyr::filter(time == first )
+          rm(first)
+        }
+      }
+      # MJ: This code below is necessary for some engine predictions
+      # However by default is not done unless limits_clip is set to TRUE.
       # Also adjust the model container
-      fit$model$background <- limit
+      fit$model$background <- limits
       # Clip the predictor object
       fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
-      fit$model$predictors_object$crop_data(limit)
-      fit$model$predictors_object$mask(limit)
+      fit$model$predictors_object$crop_data(limits)
+      fit$model$predictors_object$mask(limits)
       fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
       # And offset if found
       if(!is.null(fit$model$offset_object)){
         fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
-        fit$model$offset_object <- terra::crop(fit$model$offset_object, limit)
-        fit$model$offset_object <- terra::mask(fit$model$offset_object, limit)
+        fit$model$offset_object <- terra::crop(fit$model$offset_object, limits)
+        fit$model$offset_object <- terra::mask(fit$model$offset_object, limits)
         fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
       }
     }
@@ -198,8 +246,20 @@ methods::setMethod(
 
       if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( background )
       # Furthermore apply new limits also to existing predictions (again)
-      if(!is.null( mod$get_limits() )) baseline_threshold <- terra::crop(baseline_threshold, mod$get_limits())
-
+      if(!is.null( mod$get_limits() )){
+        # Get Limit and settings from model
+        limits <- mod$get_limits()
+        # Filter to first time slot if present for remaining clipping
+        if(utils::hasName(limits,"time")){
+          if(dplyr::n_distinct(limits$time)>1){
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Using first set temporal slot for zoning!")
+            first <- sort(limits$time)[1]
+            limit <- limits |> dplyr::filter(time == first )
+            rm(first)
+          }
+        }
+        baseline_threshold <- terra::crop(baseline_threshold, limits)
+      }
       if(inherits(baseline_threshold, 'SpatRaster')){
         baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
       }
@@ -650,6 +710,8 @@ methods::setMethod(
         stars::st_dimensions(proj_thresh) <- stars::st_dimensions(proj)
         new <- try({ c(proj, proj_thresh) },silent = TRUE)
       }
+      # Add the threshold as an attribute for later
+      attr(new, "threshold") <- scenario_threshold
       proj <- new; rm(new)
     }
     if(!is.null(pops)){
