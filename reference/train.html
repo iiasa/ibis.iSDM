@@ -48,7 +48,7 @@ on how the estimation is being done."><meta property="og:image" content="https:/
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Train the model from a given engine</h1>
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/R/train.R" class="external-link"><code>R/train.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/master/R/train.R" class="external-link"><code>R/train.R</code></a></small>
       <div class="d-none name"><code>train.Rd</code></div>
     </div>
 
@@ -270,20 +270,20 @@ plant species in Panama. Ecol. Appl. 29, 1–13 (2019).</p></li>
 <span class="r-in"><span>        <span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>        <span class="co"># Use GLM as engine</span></span></span>
 <span class="r-in"><span>        <span class="fu"><a href="engine_glm.html">engine_glm</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:21:24.270825 | Creating distribution object...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:21:24.271614 | Adding poipo dataset...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:21:24.346587 | Adding predictors...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:21:24.455965 | Transforming predictors...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:59:08.981863 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:59:08.982658 | Adding poipo dataset...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:59:09.06159 | Adding predictors...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-03 19:59:09.170745 | Transforming predictors...</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span> <span class="co"># Train the model, Also filter out co-linear predictors using a pearson threshold</span></span></span>
 <span class="r-in"><span> <span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">train</span><span class="op">(</span><span class="va">x</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span>, filter_predictors <span class="op">=</span> <span class="st">'pearson'</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:21:24.600286 | Collecting input parameters.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">[Estimation] 2024-08-03 19:21:24.710392 | Filtering predictors via pearson...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:21:24.717122 | Adding engine-specific parameters.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:21:24.72323 | Engine setup.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:21:24.908677 | Starting fitting: b36e9cd0</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:21:24.959414 | Starting prediction...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Done] 2024-08-03 19:21:25.080615 | Completed after 0.48 secs</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:59:09.316622 | Collecting input parameters.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">[Estimation] 2024-08-03 19:59:09.431239 | Filtering predictors via pearson...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:59:09.437851 | Adding engine-specific parameters.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:59:09.44394 | Engine setup.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:59:09.629046 | Starting fitting: e539073a</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2024-08-03 19:59:09.682482 | Starting prediction...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Done] 2024-08-03 19:59:09.803534 | Completed after 0.48 secs</span></span>
 <span class="r-in"><span> <span class="va">mod</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Trained GLM-Model (Unnamed run)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   <span style="font-weight: bold;">Strongest summary effects:</span></span>
