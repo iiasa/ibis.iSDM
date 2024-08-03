@@ -206,10 +206,19 @@ test_that('Scenarios and constraints', {
   expect_s3_class(sc$get_model(),"DistributionModel")# Model correctly inherited?
   expect_equal(sc$modelid, fit$model$id)
 
+  # Add limits
+  sc <- scenario(fit, limits = classify(pred_current$crops, c(0, 100, 300, 500)))
+  expect_s3_class(sc$get_limits(), "sf")
+  sc$rm_limits()
+  expect_null(sc$get_limits())
+
   # Add covariates in various transformations
+  sc <- scenario(fit)
   x <- sc |> add_predictors(pred_future, transform = "none")
   expect_length(x$get_predictor_names(), 9)
-  x <- sc |> add_predictors(pred_future, transform = "scale")
+  suppressWarnings(
+    x <- sc |> add_predictors(pred_future, transform = "scale")
+  )
   expect_length(x$get_predictor_names(), 9)
   # Error as we used a different transform earlier
   expect_error( x <- sc |> add_predictors(pred_future, transform = "norm") )
@@ -264,7 +273,11 @@ test_that('Scenarios and constraints', {
   # Apply some transformations
   expect_error( x <- sc |> add_predictors(obj, transform = "norm") )
   # This uses the correct transformation
-  expect_no_error( x <- sc |> add_predictors(obj, transform = "scale") )
+  expect_no_error(
+    suppressWarnings(
+      x <- sc |> add_predictors(obj, transform = "scale")
+      )
+  )
   expect_length(x$get_predictor_names(), 9)
 
   # Predict
@@ -277,7 +290,9 @@ test_that('Scenarios and constraints', {
   expect_no_error(
     mod <- sc |> add_predictors(pred_future) |> project()
   )
-  suppressWarnings( expect_s3_class(summary(mod), "data.frame") )
+  suppressPackageStartupMessages(
+    suppressWarnings( expect_s3_class(summary(mod), "data.frame") )
+  )
   invisible(
     suppressWarnings( expect_s3_class(mod$calc_scenarios_slope(plot = FALSE), "stars") )
   )

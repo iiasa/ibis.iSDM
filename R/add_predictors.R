@@ -768,6 +768,8 @@ methods::setMethod(
 
     # Get model object
     obj <- x$get_model()
+    assertthat::assert_that(!(is.null(obj) || is.Waiver(obj)),
+                            msg = "No model object found in scenario?")
     model <- obj$model
 
     # Subset to target predictors only

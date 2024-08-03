@@ -518,8 +518,7 @@ test_that('Train a distribution model with INLABRU', {
   x <- distribution(background) |>
     add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
-    engine_inlabru() |>
-    add_latent_spatial()
+    engine_inlabru()
 
   # Train the model
   suppressWarnings(

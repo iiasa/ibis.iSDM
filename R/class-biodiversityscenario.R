@@ -159,6 +159,14 @@ BiodiversityScenario <- R6::R6Class(
     },
 
     #' @description
+    #' Remove current limits.
+    #' @return Invisible
+    rm_limits = function(){
+      self$limits <- new_waiver()
+      invisible()
+    },
+
+    #' @description
     #' Get names of predictors for scenario object.
     #' @return A [`character`] vector with the names.
     get_predictor_names = function() {

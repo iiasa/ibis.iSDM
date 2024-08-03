@@ -166,7 +166,7 @@ methods::setMethod(
         }
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','green', "Found latent factors and added them to future predictors stack.")
       }
-      try({rm(pn,ind,sps)},silent = TRUE)
+      suppressWarnings( try({rm(pn,ind,sps)},silent = TRUE) )
     }
 
     # Get limits if flagged as present in scenario object
