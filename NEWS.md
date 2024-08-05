@@ -1,4 +1,11 @@
-# ibis.iSDM 0.1.4 (current dev branch)
+# ibis.iSDM 0.1.5 (current dev branch)
+
+#### New features
+
+#### Minor improvements and bug fixes
+* Minor :bug: fix related to misaligned thresholds and negative expontential kernels.
+
+# ibis.iSDM 0.1.4 
 
 #### New features
 * Support for carnying over latent spatial effects (`add_latent_spatial()`) to `scenario()` projections.

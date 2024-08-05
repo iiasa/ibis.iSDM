@@ -236,6 +236,9 @@ methods::setMethod(
                               msg = "Model predictors are missing from the scenario predictor!")
     }
 
+    # Create a template for use
+    template <- emptyraster( new_preds$get_data() )
+
     # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
     if(!is.Waiver(scenario_threshold)){
@@ -264,8 +267,13 @@ methods::setMethod(
         baseline_threshold <- baseline_threshold[[grep(layer, names(baseline_threshold))]]
       }
 
-      # Set all NA values to 0 (and then mask by background?)
-      baseline_threshold[is.na(baseline_threshold)]<-0
+      # Set all NA values to 0
+      baseline_threshold[is.na(baseline_threshold)] <- 0
+      # Align with newpreds extend and
+      if(!terra::compareGeom(baseline_threshold, template, stopOnError = FALSE)){
+        baseline_threshold <- terra::extend(baseline_threshold, template)
+        baseline_threshold <- terra::crop(baseline_threshold, template)
+      }
 
     } else {
       baseline_threshold <- new_waiver()
@@ -274,9 +282,6 @@ methods::setMethod(
     # Optional constraints or simulations if specified
     scenario_constraints <- mod$get_constraints()
     scenario_simulations <- mod$get_simulation()
-
-    # Create a template for use
-    template <- emptyraster( new_preds$get_data() )
 
     #  --- Check that everything is there ---
     # Check that thresholds are set for constrains
@@ -455,6 +460,7 @@ methods::setMethod(
         scenario_threshold <- scenario_threshold[[1]]
         out_thresh <- out
         out_thresh[out_thresh < scenario_threshold] <- 0; out_thresh[out_thresh >= scenario_threshold] <- 1
+        out_thresh[is.na(out_thresh)] <- 0 # Added to avoid unnecessary clipping
         names(out_thresh) <- "threshold"
 
         # Apply minimum size constraint if set

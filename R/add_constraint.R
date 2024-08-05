@@ -382,8 +382,11 @@ methods::setMethod(
   # Divide alpha values by 2
   alpha <- value/2
 
+  # Scale value for different projections
+  value_scale <- ifelse(terra::is.lonlat(baseline_threshold), terra::res(baseline_threshold)[1] * 10000, 1)
+
   # Grow baseline raster by using an exponentially weighted kernel
-  ras_dis <- terra::gridDist(baseline_threshold, target = 1)
+  ras_dis <- terra::gridDist(baseline_threshold, target = 1, scale = value_scale)
   # Normalized (with a constant) negative exponential kernel
   ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
   # Equivalent to alpha = 1/value and
