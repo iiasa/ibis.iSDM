@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.1.4
+version: 0.1.5
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -76,6 +76,7 @@ references:
     given-names: Winston
     email: winston@stdout.org
   year: '2024'
+  doi: 10.32614/CRAN.package.R6
   version: '>= 2.5.0'
 - type: software
   title: assertthat
@@ -87,6 +88,7 @@ references:
     given-names: Hadley
     email: hadley@rstudio.com
   year: '2024'
+  doi: 10.32614/CRAN.package.assertthat
   version: '>= 0.2.0'
 - type: software
   title: doFuture
@@ -100,6 +102,7 @@ references:
     email: henrikb@braju.com
     orcid: https://orcid.org/0000-0002-7579-5165
   year: '2024'
+  doi: 10.32614/CRAN.package.doFuture
   version: '>= 0.12.2'
 - type: software
   title: dplyr
@@ -125,6 +128,7 @@ references:
     email: davis@posit.co
     orcid: https://orcid.org/0000-0003-4777-038X
   year: '2024'
+  doi: 10.32614/CRAN.package.dplyr
 - type: software
   title: foreach
   abstract: 'foreach: Provides Foreach Looping Construct'
@@ -136,6 +140,7 @@ references:
   - family-names: Weston
     given-names: Steve
   year: '2024'
+  doi: 10.32614/CRAN.package.foreach
 - type: software
   title: future
   abstract: 'future: Unified Parallel and Distributed Processing in R for Everyone'
@@ -148,6 +153,7 @@ references:
     email: henrikb@braju.com
     orcid: https://orcid.org/0000-0002-7579-5165
   year: '2024'
+  doi: 10.32614/CRAN.package.future
   version: '>= 1.23.0'
 - type: software
   title: geodist
@@ -162,6 +168,7 @@ references:
   - family-names: Sumner
     given-names: Michael D.
   year: '2024'
+  doi: 10.32614/CRAN.package.geodist
 - type: software
   title: ggplot2
   abstract: 'ggplot2: Create Elegant Data Visualisations Using the Grammar of Graphics'
@@ -201,6 +208,7 @@ references:
     name-particle: van den
     orcid: https://orcid.org/0000-0002-9335-7468
   year: '2024'
+  doi: 10.32614/CRAN.package.ggplot2
 - type: software
   title: graphics
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -211,6 +219,7 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
+  doi: 10.32614/CRAN.package.graphics
 - type: software
   title: methods
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -221,6 +230,7 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
+  doi: 10.32614/CRAN.package.methods
 - type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
@@ -239,6 +249,7 @@ references:
     given-names: Mikael
     orcid: https://orcid.org/0000-0002-3542-2938
   year: '2024'
+  doi: 10.32614/CRAN.package.Matrix
 - type: software
   title: ncdf4
   abstract: 'ncdf4: Interface to Unidata netCDF (Version 4 or Earlier) Format Data
@@ -251,6 +262,7 @@ references:
     given-names: David
     email: dpierce@ucsd.edu
   year: '2024'
+  doi: 10.32614/CRAN.package.ncdf4
 - type: software
   title: parallel
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -261,6 +273,7 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
+  doi: 10.32614/CRAN.package.parallel
 - type: software
   title: posterior
   abstract: 'posterior: Tools for Working with Posterior Distributions'
@@ -281,6 +294,7 @@ references:
     given-names: Aki
     email: Aki.Vehtari@aalto.fi
   year: '2024'
+  doi: 10.32614/CRAN.package.posterior
 - type: software
   title: sf
   abstract: 'sf: Simple Features for R'
@@ -293,6 +307,7 @@ references:
     email: edzer.pebesma@uni-muenster.de
     orcid: https://orcid.org/0000-0001-8049-7069
   year: '2024'
+  doi: 10.32614/CRAN.package.sf
   version: '>= 1.0'
 - type: software
   title: stars
@@ -306,6 +321,7 @@ references:
     email: edzer.pebesma@uni-muenster.de
     orcid: https://orcid.org/0000-0001-8049-7069
   year: '2024'
+  doi: 10.32614/CRAN.package.stars
   version: '>= 0.5'
 - type: software
   title: stats
@@ -317,6 +333,7 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
+  doi: 10.32614/CRAN.package.stats
 - type: software
   title: terra
   abstract: 'terra: Spatial Data Analysis'
@@ -329,6 +346,7 @@ references:
     email: r.hijmans@gmail.com
     orcid: https://orcid.org/0000-0001-5872-2872
   year: '2024'
+  doi: 10.32614/CRAN.package.terra
   version: '>= 1.7-10'
 - type: software
   title: tibble
@@ -345,6 +363,7 @@ references:
     given-names: Hadley
     email: hadley@rstudio.com
   year: '2024'
+  doi: 10.32614/CRAN.package.tibble
   version: '>= 2.0.0'
 - type: software
   title: uuid
@@ -356,10 +375,12 @@ references:
   - family-names: Urbanek
     given-names: Simon
     email: Simon.Urbanek@r-project.org
+    orcid: https://orcid.org/0000-0003-2297-1732
   - family-names: Ts'o
     given-names: Theodore
     email: tytso@thunk.org
   year: '2024'
+  doi: 10.32614/CRAN.package.uuid
 - type: software
   title: utils
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -370,6 +391,7 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
+  doi: 10.32614/CRAN.package.utils
 - type: software
   title: 'R: A Language and Environment for Statistical Computing'
   notes: Depends
@@ -393,6 +415,7 @@ references:
   - family-names: Heiberger
     given-names: Richard
   year: '2024'
+  doi: 10.32614/CRAN.package.abind
 - type: software
   title: BoomSpikeSlab
   abstract: 'BoomSpikeSlab: MCMC for Spike and Slab Regression'
@@ -403,6 +426,7 @@ references:
     given-names: Steven L.
     email: steve.the.bayesian@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.BoomSpikeSlab
   version: '>= 1.2.4'
 - type: software
   title: Boruta
@@ -418,6 +442,7 @@ references:
   - family-names: Rudnicki
     given-names: Witold Remigiusz
   year: '2024'
+  doi: 10.32614/CRAN.package.Boruta
 - type: software
   title: covr
   abstract: 'covr: Test Coverage for Packages'
@@ -429,6 +454,7 @@ references:
     given-names: Jim
     email: james.f.hester@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.covr
 - type: software
   title: cubelyr
   abstract: 'cubelyr: A Data Cube ''dplyr'' Backend'
@@ -440,6 +466,7 @@ references:
     given-names: Hadley
     email: hadley@rstudio.com
   year: '2024'
+  doi: 10.32614/CRAN.package.cubelyr
 - type: software
   title: dbarts
   abstract: 'dbarts: Discrete Bayesian Additive Regression Trees Sampler'
@@ -458,6 +485,7 @@ references:
     given-names: Robert
     email: robert.mcculloch1@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.dbarts
   version: '>= 0.9-22'
 - type: software
   title: deldir
@@ -468,6 +496,7 @@ references:
   - family-names: Turner
     given-names: Rolf
   year: '2024'
+  doi: 10.32614/CRAN.package.deldir
 - type: software
   title: doParallel
   abstract: 'doParallel: Foreach Parallel Adaptor for the ''parallel'' Package'
@@ -480,6 +509,7 @@ references:
   - family-names: Weston
     given-names: Steve
   year: '2024'
+  doi: 10.32614/CRAN.package.doParallel
 - type: software
   title: ellipsis
   abstract: 'ellipsis: Tools for Working with ...'
@@ -491,6 +521,7 @@ references:
     given-names: Hadley
     email: hadley@rstudio.com
   year: '2024'
+  doi: 10.32614/CRAN.package.ellipsis
 - type: software
   title: glmnet
   abstract: 'glmnet: Lasso and Elastic-Net Regularized Generalized Linear Models'
@@ -514,6 +545,7 @@ references:
   - family-names: Yang
     given-names: James
   year: '2024'
+  doi: 10.32614/CRAN.package.glmnet
   version: '>= 4.1'
 - type: software
   title: glmnetUtils
@@ -526,6 +558,7 @@ references:
     given-names: Hong
     email: hongooi73@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.glmnetUtils
 - type: software
   title: gnlm
   abstract: 'gnlm: Generalized Nonlinear Regression Models'
@@ -540,6 +573,7 @@ references:
     given-names: Jim
     email: jlindsey@gen.unimaas.nl
   year: '2024'
+  doi: 10.32614/CRAN.package.gnlm
 - type: software
   title: geosphere
   abstract: 'geosphere: Spherical Trigonometry'
@@ -551,6 +585,7 @@ references:
     given-names: Robert J.
     email: r.hijmans@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.geosphere
 - type: software
   title: inlabru
   abstract: 'inlabru: Bayesian Latent Gaussian Modelling using INLA and Extensions'
@@ -566,6 +601,7 @@ references:
     given-names: Fabian E.
     email: bachlfab@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.inlabru
   version: '>= 2.10.0'
 - type: software
   title: fmesher
@@ -579,6 +615,7 @@ references:
     email: finn.lindgren@gmail.com
     orcid: https://orcid.org/0000-0002-5833-2011
   year: '2024'
+  doi: 10.32614/CRAN.package.fmesher
   version: '>= 0.1.7'
 - type: software
   title: igraph
@@ -613,6 +650,7 @@ references:
     email: kirill@cynkra.com
     orcid: https://orcid.org/0000-0002-1416-3412
   year: '2024'
+  doi: 10.32614/CRAN.package.igraph
 - type: software
   title: knitr
   abstract: 'knitr: A General-Purpose Package for Dynamic Report Generation in R'
@@ -625,6 +663,7 @@ references:
     email: xie@yihui.name
     orcid: https://orcid.org/0000-0003-0645-5666
   year: '2024'
+  doi: 10.32614/CRAN.package.knitr
 - type: software
   title: mboost
   abstract: 'mboost: Model-Based Boosting'
@@ -649,6 +688,7 @@ references:
     given-names: Benjamin
     orcid: https://orcid.org/0000-0003-2810-3186
   year: '2024'
+  doi: 10.32614/CRAN.package.mboost
 - type: software
   title: modEvA
   abstract: 'modEvA: Model Evaluation and Analysis'
@@ -665,6 +705,7 @@ references:
   - family-names: R.
     given-names: Real
   year: '2024'
+  doi: 10.32614/CRAN.package.modEvA
 - type: software
   title: matrixStats
   abstract: 'matrixStats: Functions that Apply to Rows and Columns of Matrices (and
@@ -677,6 +718,7 @@ references:
     given-names: Henrik
     email: henrikb@braju.com
   year: '2024'
+  doi: 10.32614/CRAN.package.matrixStats
 - type: software
   title: ncmeta
   abstract: 'ncmeta: Straightforward ''NetCDF'' Metadata'
@@ -688,6 +730,7 @@ references:
     given-names: Michael
     email: mdsumner@gmail.com
   year: '2024'
+  doi: 10.32614/CRAN.package.ncmeta
 - type: software
   title: progress
   abstract: 'progress: Terminal Progress Bars'
@@ -701,6 +744,7 @@ references:
   - family-names: FitzJohn
     given-names: Rich
   year: '2024'
+  doi: 10.32614/CRAN.package.progress
 - type: software
   title: pdp
   abstract: 'pdp: Partial Dependence Plots'
@@ -713,6 +757,7 @@ references:
     email: greenwell.brandon@gmail.com
     orcid: https://orcid.org/0000-0002-8120-0084
   year: '2024'
+  doi: 10.32614/CRAN.package.pdp
 - type: software
   title: rmarkdown
   abstract: 'rmarkdown: Dynamic Documents for R'
@@ -756,6 +801,7 @@ references:
     email: rich@posit.co
     orcid: https://orcid.org/0000-0003-3925-190X
   year: '2024'
+  doi: 10.32614/CRAN.package.rmarkdown
 - type: software
   title: lubridate
   abstract: 'lubridate: Make Dealing with Dates a Little Easier'
@@ -771,6 +817,7 @@ references:
   - family-names: Wickham
     given-names: Hadley
   year: '2024'
+  doi: 10.32614/CRAN.package.lubridate
   version: '>= 1.9.0'
 - type: software
   title: rstan
@@ -799,6 +846,7 @@ references:
     email: badr@jhu.edu
     orcid: https://orcid.org/0000-0002-9808-2344
   year: '2024'
+  doi: 10.32614/CRAN.package.rstan
   version: '>= 2.21.0'
 - type: software
   title: rstantools
@@ -819,6 +867,7 @@ references:
   - family-names: Johnson
     given-names: Andrew
   year: '2024'
+  doi: 10.32614/CRAN.package.rstantools
   version: '>= 2.1.1'
 - type: software
   title: testthat
@@ -831,6 +880,7 @@ references:
     given-names: Hadley
     email: hadley@posit.co
   year: '2024'
+  doi: 10.32614/CRAN.package.testthat
   version: '>= 3.0.0'
 - type: software
   title: xgboost
@@ -880,4 +930,5 @@ references:
     given-names: Jiaming
     email: jm.yuan@outlook.com
   year: '2024'
+  doi: 10.32614/CRAN.package.xgboost
 
