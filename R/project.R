@@ -129,6 +129,14 @@ methods::setMethod(
     new_preds <- mod$get_predictors()
     if(is.Waiver(new_preds)) stop('No scenario predictors found.')
 
+    # Check extents of models and raise a warning otherwise
+    if(!is.Waiver(fit$model$predictors_object)){
+      if(fit$model$predictors_object$ncell() != new_preds$ncell()){
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow',paste0('Model predictors and scenario predictors have different resolution!'))
+      }
+    }
+
+
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
@@ -348,7 +356,7 @@ methods::setMethod(
     # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
 
-    for(step in times){
+    for(step in times){ # step = times[1]
 
       # Get data
       nd <- subset(df, time == step)

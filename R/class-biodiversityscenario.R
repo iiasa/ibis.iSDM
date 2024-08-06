@@ -103,6 +103,12 @@ BiodiversityScenario <- R6::R6Class(
       assertthat::assert_that(is.Waiver(self$get_predictors()) || inherits(self$get_predictors(), "PredictorDataset"))
       assertthat::assert_that(is.Waiver(self$get_data()) || (inherits(self$get_data(), "stars") || is.Raster(self$get_data())) )
       assertthat::assert_that(is.Waiver(self$get_constraints()) || is.list(self$get_constraints()))
+      # Check predictor mismatch
+      if(!is.Waiver(self$get_predictors())){
+        ori <- x$get_projection()
+        test <- self$get_projection()
+        assertthat::validate_that(sf::st_crs(test) == sf::st_crs(ori),msg = "Predictor and fitted predictor projections mismatch!")
+      }
       invisible(self)
     },
 
@@ -352,6 +358,15 @@ BiodiversityScenario <- R6::R6Class(
     },
 
     #' @description
+    #' Remove scenario predictions
+    #' @param what A [`character`] vector with names of what
+    #' @return Invisible
+    rm_data = function(){
+      self$scenarios <- new_waiver()
+      invisible()
+    },
+
+    #' @description
     #' Set new data in object.
     #' @param x A new data object measuing scenarios.
     #' @return This object.
@@ -382,7 +397,6 @@ BiodiversityScenario <- R6::R6Class(
     #' Get latent factors if found in object.
     #' @return A [`list`] with the latent settings
     get_latent = function(){
-      if(is.Waiver(self$latentfactors)) return('None')
       self$latentfactors
     },
 

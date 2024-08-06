@@ -790,7 +790,7 @@ engine_breg <- function(x,
       mod <- self$get_data('fit_best')
       model <- self$model
       df <- newdata
-      df <- subset(df, select = attr(mod$terms, "term.labels"))
+      df <- subset(df, select = c("x", "y", attr(mod$terms, "term.labels")))
 
       # Clamp?
       if( settings$get("clamp") ) df <- clamp_predictions(model, df)
@@ -857,8 +857,9 @@ engine_breg <- function(x,
                       type = "xyz") |>
             emptyraster()
         }, silent = TRUE)
-        prediction[] <- out[,layer]
+        prediction[df_sub$rowid] <- out[,layer]
       }
+
       names(prediction) <- layer
       return(prediction)
     },overwrite = TRUE)

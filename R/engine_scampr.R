@@ -796,7 +796,7 @@ engine_scampr <- function(x,
                         type = "xyz") |>
               emptyraster()
           }, silent = TRUE)
-          prediction[] <- out
+          prediction[df_sub$rowid] <- out
         }
         names(prediction) <- layer
       } else {

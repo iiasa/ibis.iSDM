@@ -855,7 +855,7 @@ engine_glmnet <- function(x,
                       type = "xyz") |>
             emptyraster()
         }, silent = TRUE)
-        prediction[] <- pred_gn[, layer]
+        prediction[df_sub$rowid] <- pred_gn[, layer]
       }
 
       return(prediction)

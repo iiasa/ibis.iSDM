@@ -3,7 +3,8 @@
 #### New features
 
 #### Minor improvements and bug fixes
-* Minor :bug: fix related to misaligned thresholds and negative expontential kernels.
+* Minor :bug: fix related to misaligned thresholds and negative exponential kernels.
+* :fire: :bug: fix for scenario projections that use different grain sizes than for inference.
 
 # ibis.iSDM 0.1.4 
 

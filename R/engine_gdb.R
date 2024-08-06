@@ -553,7 +553,7 @@ engine_gdb <- function(x,
                       type = "xyz") |>
             emptyraster()
         }, silent = TRUE)
-        prediction[] <- y[,1]
+        prediction[as.numeric(newdata_sub$rowid)] <- y[,1]
       }
       names(prediction) <- "mean" # Rename to mean, layer parameter gets ignored for this engine
       return(prediction)

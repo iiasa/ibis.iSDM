@@ -850,12 +850,15 @@ methods::setMethod(
 
     # Rasterize the layer
     # First try and dig out a layer from a predictor dataset if found
-    if(inherits( mod$get_predictors(), "PredictorDataSet")){
-      ras <- mod$get_predictors()$get_data() |> stars_to_raster()
-      ras <- ras[[1]]
+    if(inherits( mod$get_predictors(), "PredictorDataset")){
+      ras <- mod$get_predictors()$get_data()
+      if(inherits(ras, 'stars')){
+        ras <- stars_to_raster(ras)[[1]]
+      }
     } else {
       # Try and get the underlying model and its predictors
       ras <- mod$get_model()$get_data()
+      if(is.null(ras)) ras <- emptyraster(mod$get_model()$model$predictors_object$get_data())
     }
     assertthat::assert_that(is.Raster(ras))
     bb <- try({ terra::rasterize(layer, ras, 1)}, silent = TRUE)
