@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-08-05</h4>
+            <h4 data-toc-skip class="date">2024-08-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/04_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/04_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>04_biodiversity_projections.Rmd</code></div>
@@ -199,7 +199,6 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Latent factors:    <span style="color: #00BB00;">&lt;Found&gt;</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #BBBB00;">None</span></span></span>
@@ -211,18 +210,18 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;  [7] "set_predictors"       "set_latent"           "set_data"            </span></span>
 <span><span class="co">#&gt; [10] "set_constraints"      "scenarios"            "save"                </span></span>
 <span><span class="co">#&gt; [13] "rm_predictors"        "rm_limits"            "rm_latent"           </span></span>
-<span><span class="co">#&gt; [16] "rm_constraints"       "print"                "predictors"          </span></span>
-<span><span class="co">#&gt; [19] "plot_threshold"       "plot_scenarios_slope" "plot_relative_change"</span></span>
-<span><span class="co">#&gt; [22] "plot_migclim"         "plot_animation"       "plot"                </span></span>
-<span><span class="co">#&gt; [25] "modelobject"          "modelid"              "mask"                </span></span>
-<span><span class="co">#&gt; [28] "limits"               "latentfactors"        "initialize"          </span></span>
-<span><span class="co">#&gt; [31] "get_timeperiod"       "get_thresholdvalue"   "get_threshold"       </span></span>
-<span><span class="co">#&gt; [34] "get_simulation"       "get_resolution"       "get_projection"      </span></span>
-<span><span class="co">#&gt; [37] "get_predictors"       "get_predictor_names"  "get_model"           </span></span>
-<span><span class="co">#&gt; [40] "get_limits"           "get_latent"           "get_data"            </span></span>
-<span><span class="co">#&gt; [43] "get_constraints"      "get_centroid"         "constraints"         </span></span>
-<span><span class="co">#&gt; [46] "clone"                "calc_scenarios_slope" "apply_threshold"     </span></span>
-<span><span class="co">#&gt; [49] ".__enclos_env__"</span></span></code></pre></div>
+<span><span class="co">#&gt; [16] "rm_data"              "rm_constraints"       "print"               </span></span>
+<span><span class="co">#&gt; [19] "predictors"           "plot_threshold"       "plot_scenarios_slope"</span></span>
+<span><span class="co">#&gt; [22] "plot_relative_change" "plot_migclim"         "plot_animation"      </span></span>
+<span><span class="co">#&gt; [25] "plot"                 "modelobject"          "modelid"             </span></span>
+<span><span class="co">#&gt; [28] "mask"                 "limits"               "latentfactors"       </span></span>
+<span><span class="co">#&gt; [31] "initialize"           "get_timeperiod"       "get_thresholdvalue"  </span></span>
+<span><span class="co">#&gt; [34] "get_threshold"        "get_simulation"       "get_resolution"      </span></span>
+<span><span class="co">#&gt; [37] "get_projection"       "get_predictors"       "get_predictor_names" </span></span>
+<span><span class="co">#&gt; [40] "get_model"            "get_limits"           "get_latent"          </span></span>
+<span><span class="co">#&gt; [43] "get_data"             "get_constraints"      "get_centroid"        </span></span>
+<span><span class="co">#&gt; [46] "constraints"          "clone"                "calc_scenarios_slope"</span></span>
+<span><span class="co">#&gt; [49] "apply_threshold"      ".__enclos_env__"</span></span></code></pre></div>
 <p>The scenario object can finally be trained via
 <code><a href="../reference/project.html">project()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -235,7 +234,6 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span><span class="co">#&gt;   Predictors:     bio01, bio12, crops, ... (9 predictors)</span></span>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
-<span><span class="co">#&gt;   Latent factors:    <span style="color: #00BB00;">&lt;Found&gt;</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span></code></pre></div>
@@ -378,7 +376,6 @@ between time steps (e.g. precipitation anomalies).</p>
 <span><span class="co">#&gt;   Time period:    2016-01-01 -- 2100-01-01 (83.9 years)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Constraints:    <span style="color: #00BB00;">dispersal (sdd_nexpkernel), adaptability (nichelimit)</span></span></span>
-<span><span class="co">#&gt;   Latent factors:    <span style="color: #00BB00;">&lt;Found&gt;</span></span></span>
 <span><span class="co">#&gt;   Threshold:      0.031 (percentile)</span></span>
 <span><span class="co">#&gt;  --------- </span></span>
 <span><span class="co">#&gt;   Scenarios fitted: <span style="color: #00BB00;">Yes</span></span></span>
