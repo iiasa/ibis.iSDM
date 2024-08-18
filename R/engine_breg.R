@@ -444,55 +444,87 @@ engine_breg <- function(x,
       w_full_sub <- w_full[full_sub$rowid]
       assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
-      # Tile the problem
-      splits <- cut(1:nrow(full_sub), nrow(full_sub) / (min(100, nrow(full_sub) / 10)) )
-
       # Now depending on parallization setting use foreach
       if(getOption("ibis.runparallel")){
-        # Check that future is registered
-        if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
-                                                       strategy = getOption("ibis.futurestrategy"))
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # doFuture::registerDoFuture()
+        # predict_boom <- predict_boom # Hack to make function globally available
 
-        # Run the outgoing command
-        # out <- foreach::foreach(s = unique(splits),
-        #                         .combine = rbind,
-        #                         .export = c("splits", "fit_breg", "full_sub",
-        #                                     "w_full_sub", "fam", "params"),
-        #                         .packages = c("matrixStats"),
-        #                         .multicombine = TRUE,
-        #                         .inorder = TRUE,
-        #                         verbose = settings$get("verbose") ) %do% {
-        out <- parallel::mclapply(unique(splits), function(s) {
-          i <- which(splits == s)
-          # -> external code in utils-boom
-          pred_breg <- predict_boom(
-            obj = fit_breg,
-            newdata = full_sub[i,],
-            w = w_full_sub[i],
-            fam = fam,
-            params = params
-          )
-          # Summarize the posterior
-          preds <- as.data.frame(
-            cbind(
-              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-              matrixStats::rowSds(pred_breg, na.rm = TRUE),
-              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-              apply(pred_breg, 1, mode)
+        # Prediction function
+        do_run <- function() {
+          # Chunck the data
+          splits <- chunk_data(full_sub, N = getOption("ibis.nthread",default = 10),
+                               index_only = TRUE)
+
+          y <- foreach::foreach(s = splits,
+                                .combine = "rbind",
+                                .inorder = TRUE,
+                                .options.future = list(seed = TRUE,
+                                    packages = c("matrixStats"),
+                                    globals = structure(TRUE, add = "mode"))
+          ) %dofuture% {
+            if(fam == "poisson"){
+              suppressWarnings(
+                pred_breg <- BoomSpikeSlab::predict.poisson.spike(
+                  object = fit_breg,
+                  newdata = full_sub[s,],
+                  exposure = w_full_sub[s],
+                  burn = ceiling(params$iter*0.2),
+                  type = params$type,
+                  mean.only = FALSE # Return full posterior
+                )
+              )
+            } else if(fam == "binomial"){
+              suppressWarnings(
+                pred_breg <- BoomSpikeSlab::predict.logit.spike(
+                  object = fit_breg,
+                  newdata = full_sub[s,],
+                  burn = ceiling(params$iter*0.2),
+                  type = params$type,
+                  mean.only = FALSE # Return full posterior
+                )
+              )
+            } else {
+              suppressWarnings(
+                pred_breg <- BoomSpikeSlab::predict.lm.spike(
+                  object = fit_breg,
+                  newdata = full_sub[s,],
+                  burn = ceiling(params$iter*0.2),
+                  type = params$type,
+                  mean.only = FALSE # Return full posterior
+                )
+              )
+            }
+            # Summarize the posterior
+            preds <- as.data.frame(
+              cbind(
+                matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+                matrixStats::rowSds(pred_breg, na.rm = TRUE),
+                matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE)
+                )
             )
-          )
-          names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-          preds$cv <- preds$sd / preds$mean
-          return(preds)
-        })
-        out <- do.call(rbind, out)
+            names(preds) <- c("mean", "sd", "q05", "q50", "q95")
+            preds$cv <- (preds$sd / preds$mean)
+            # Mode
+            # FIXME: Somehow the mode always returns NaN here (numeric type?)
+            preds$mode <- base::apply(pred_breg, 1, FUN = mode) |> as.numeric()
+            return(preds)
+          }
+          y
+        }
+        out <- do_run()
       } else {
+        # Tile the problem
+        splits <- chunk_data(full_sub,N = (min(100, nrow(full_sub) / 10)), index_only = TRUE)
+
         out <- data.frame()
-        pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
+        pb <- progress::progress_bar$new(total = length(splits),
                                          format = "Creating model prediction (:spin) [:bar] :percent")
-        for(s in unique(splits)){
+        for(i in splits){
           pb$tick()
-          i <- which(splits == s)
           # -> external code in utils-boom
           pred_breg <- predict_boom(
             obj = fit_breg,
@@ -515,7 +547,7 @@ engine_breg <- function(x,
         }
       }
       assertthat::assert_that(is.data.frame(out), nrow(out)>0,
-                              msg = "Something went wrong withe prediction. Output empty!")
+                              msg = "Something went wrong with the prediction. Output empty!")
       # Fill output with summaries of the posterior
       stk <- terra::rast()
       for(v in colnames(out)){

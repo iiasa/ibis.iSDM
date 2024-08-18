@@ -31,7 +31,8 @@
   # Use the future package for any options. Default is FALSE
   options('ibis.nthread' = parallel::detectCores() - 1)
   options('ibis.runparallel' = FALSE)
-  options('ibis.futurestrategy' = "multisession")
+  options('ibis.futurestrategy' = "sequential")
+  options(future.globals.onReference = "ignore") # Raise an error for pointer objects (SpatRaster)
   options(doFuture.foreach.export = ".export-and-automatic-with-warning")
 
   # Other dependencies not directly added in DESCRIPTION (to minimize potential

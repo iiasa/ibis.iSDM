@@ -168,16 +168,15 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 #' model fitting.
 #' @param w A [`numeric`] [`vector`] containing the exposure variables for PPMs.
 #' Can be \code{NULL} if the model is not a PPM.
+#' @param run_future A [`logical`] on whether the model is to be
 #'
 #' @note By Default 20% of the iterations are considered as burnin.
 #'
 #' @returns A [`data.frame`] with the respective prediction.
 #'
-#' @keywords utils
+#' @keywords internal
 #'
 #' @noRd
-#'
-#' @keywords internal
 predict_boom <- function(obj, newdata, fam, params, w = NULL) {
   assertthat::assert_that(
     is.list(obj),
@@ -186,7 +185,6 @@ predict_boom <- function(obj, newdata, fam, params, w = NULL) {
     is.list(params),
     is.null(w) || is.numeric(w)
   )
-  check_package("BoomSpikeSlab")
 
   # Make a prediction
   if(fam == "poisson"){
