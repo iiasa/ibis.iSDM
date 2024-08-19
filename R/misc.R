@@ -306,7 +306,7 @@ ibis_future <- function(plan_exists = FALSE,
 #' @param X A [`data.frame`] or [`matrix`] object to be split.
 #' @param N A [`numeric`] with the number of chunks smaller than \code{`nrow(X)`}.
 #' @param cores A [`numeric`] with the number of processing cores. Used when \code{N} is \code{NULL}.
-#' @param index_only [`logical`] on whether only the indices or split X as list is returned (Default: \code{FALSE}).
+#' @param index_only [`logical`] on whether only the indices or split X as list is returnsed (Default: \code{FALSE}).
 #' @keywords internal
 #' @returns A [`list`] object.
 #' @examples
@@ -439,7 +439,7 @@ run_parallel <- function(X, FUN, cores = 1, approach = "future", export_packages
     } else {
       # Check that future is loaded
       check_package("future")
-      out <- ibis_future(f = FUN)
+      ibis_future()
     }
   }
   # If input data was not a list, combine again

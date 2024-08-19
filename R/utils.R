@@ -63,16 +63,16 @@ text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 #' Calculate the mode of a provided vector
 #'
 #' @param A [`vector`] of values or characters.
-#' @param na.rm [`logical`] whether
+#' @param na.rm [`logical`] whether \code{NA} values are to be removed (Default: \code{TRUE})
 #'
 #' @keywords utils, misc
 #' @examples
 #' # Example
-#' mode(trees$Girth)
+#' modal(trees$Girth)
 #'
 #' @returns The most common (mode) estimate.
 #' @export
-mode <- function(x, na.rm = TRUE) {
+modal <- function(x, na.rm = TRUE) {
   if(na.rm) x <- x[!is.na(x)]
   ux <- unique(x)
   ux[which.max(table(match(x, ux)))]

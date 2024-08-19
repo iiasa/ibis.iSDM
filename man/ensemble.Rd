@@ -87,6 +87,7 @@ Possible options for creating an ensemble includes:
 \item \code{'median'} - Calculates the median of several predictions.
 \item \code{'max'} - The maximum value across predictions.
 \item \code{'min'} - The minimum value across predictions.
+\item \code{'mode'} - The mode/modal values as the most commonly occurring value.
 \item \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.

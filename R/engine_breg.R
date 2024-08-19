@@ -450,72 +450,15 @@ engine_breg <- function(x,
         if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
           try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
         }
-        # doFuture::registerDoFuture()
-        # predict_boom <- predict_boom # Hack to make function globally available
-
         # Prediction function
-        do_run <- function() {
-          # Chunck the data
-          splits <- chunk_data(full_sub, N = getOption("ibis.nthread",default = 10),
-                               index_only = TRUE)
+        out <- predict_boom(obj = fit_breg,
+                            newdata = full_sub,
+                            w = w_full_sub,
+                            fam = fam,
+                            params = params,
+                            run_future = TRUE,
+                            N = NULL)
 
-          y <- foreach::foreach(s = splits,
-                                .combine = "rbind",
-                                .inorder = TRUE,
-                                .options.future = list(seed = TRUE,
-                                    packages = c("matrixStats"),
-                                    globals = structure(TRUE, add = "mode"))
-          ) %dofuture% {
-            if(fam == "poisson"){
-              suppressWarnings(
-                pred_breg <- BoomSpikeSlab::predict.poisson.spike(
-                  object = fit_breg,
-                  newdata = full_sub[s,],
-                  exposure = w_full_sub[s],
-                  burn = ceiling(params$iter*0.2),
-                  type = params$type,
-                  mean.only = FALSE # Return full posterior
-                )
-              )
-            } else if(fam == "binomial"){
-              suppressWarnings(
-                pred_breg <- BoomSpikeSlab::predict.logit.spike(
-                  object = fit_breg,
-                  newdata = full_sub[s,],
-                  burn = ceiling(params$iter*0.2),
-                  type = params$type,
-                  mean.only = FALSE # Return full posterior
-                )
-              )
-            } else {
-              suppressWarnings(
-                pred_breg <- BoomSpikeSlab::predict.lm.spike(
-                  object = fit_breg,
-                  newdata = full_sub[s,],
-                  burn = ceiling(params$iter*0.2),
-                  type = params$type,
-                  mean.only = FALSE # Return full posterior
-                )
-              )
-            }
-            # Summarize the posterior
-            preds <- as.data.frame(
-              cbind(
-                matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-                matrixStats::rowSds(pred_breg, na.rm = TRUE),
-                matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE)
-                )
-            )
-            names(preds) <- c("mean", "sd", "q05", "q50", "q95")
-            preds$cv <- (preds$sd / preds$mean)
-            # Mode
-            # FIXME: Somehow the mode always returns NaN here (numeric type?)
-            preds$mode <- base::apply(pred_breg, 1, FUN = mode) |> as.numeric()
-            return(preds)
-          }
-          y
-        }
-        out <- do_run()
       } else {
         # Tile the problem
         splits <- chunk_data(full_sub,N = (min(100, nrow(full_sub) / 10)), index_only = TRUE)
@@ -538,7 +481,7 @@ engine_breg <- function(x,
             matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
             matrixStats::rowSds(pred_breg, na.rm = TRUE),
             matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-            apply(pred_breg, 1, mode)
+            apply(pred_breg, 1, modal)
           )  |> as.data.frame()
           names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
           preds$cv <- preds$sd / preds$mean
@@ -656,7 +599,7 @@ engine_breg <- function(x,
           matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
           matrixStats::rowSds(pred_breg, na.rm = TRUE),
           matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-          apply(pred_breg, 1, mode)
+          apply(pred_breg, 1, modal)
         ) |> as.data.frame()
 
         names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
@@ -757,7 +700,7 @@ engine_breg <- function(x,
         matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
         matrixStats::rowSds(pred_breg, na.rm = TRUE),
         matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-        apply(pred_breg, 1, mode)
+        apply(pred_breg, 1, modal)
       ) |> as.data.frame()
       names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
       pred_part$cv <- pred_part$sd / pred_part$mean
@@ -844,36 +787,52 @@ engine_breg <- function(x,
       # For Integrated model, take the last one
       fam <- model$biodiversity[[length(model$biodiversity)]]$family
 
-      # Rather predict in steps than for the whole thing
-      out <- data.frame()
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Prediction function
+        out <- predict_boom(obj = mod,
+                            newdata = df_sub,
+                            w = unique(w)[2],
+                            fam = fam,
+                            params = settings$data,
+                            run_future = TRUE,
+                            N = NULL)
+      } else {
+        # Sequential prediction
+        # Rather predict in steps than for the whole thing
+        out <- data.frame()
 
-      # Tile the problem
-      splits <- cut(1:nrow(df_sub), nrow(df_sub) / (min(100, nrow(df_sub) / 10)) )
+        # Tile the problem
+        splits <- cut(1:nrow(df_sub), nrow(df_sub) / (min(100, nrow(df_sub) / 10)) )
 
-      pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
-                                       format = "Projecting on new data (:spin) [:bar] :percent")
-      for(s in unique(splits)){
-        pb$tick()
-        i <- which(splits == s)
-        # -> external code in utils-boom
-        pred_breg <- predict_boom(
-          obj = mod,
-          newdata = df_sub[i,],
-          w = unique(w)[2],
-          fam = fam,
-          params = settings$data
-        )
-        # Summarize the posterior
-        preds <- cbind(
-          matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-          matrixStats::rowSds(pred_breg, na.rm = TRUE),
-          matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-          apply(pred_breg, 1, mode)
-        )  |> as.data.frame()
-        names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-        preds$cv <- preds$sd / preds$mean
-        out <- rbind(out, preds)
-        rm(preds, pred_breg)
+        pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
+                                         format = "Projecting on new data (:spin) [:bar] :percent")
+        for(s in unique(splits)){
+          pb$tick()
+          i <- which(splits == s)
+          # -> external code in utils-boom
+          pred_breg <- predict_boom(
+            obj = mod,
+            newdata = df_sub[i,],
+            w = unique(w)[2],
+            fam = fam,
+            params = settings$data
+          )
+          # Summarize the posterior
+          preds <- cbind(
+            matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+            matrixStats::rowSds(pred_breg, na.rm = TRUE),
+            matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+            apply(pred_breg, 1, modal)
+          )  |> as.data.frame()
+          names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+          preds$cv <- preds$sd / preds$mean
+          out <- rbind(out, preds)
+          rm(preds, pred_breg)
+        }
       }
 
       # Now create spatial prediction

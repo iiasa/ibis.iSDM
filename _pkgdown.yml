@@ -183,7 +183,7 @@ reference:
       - has_keyword("misc")
       - print
       - myLog
-      - mode
+      - modal
       - new_id
       - new_waiver
       - ibis_options

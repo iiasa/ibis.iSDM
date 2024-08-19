@@ -3,6 +3,7 @@
 #### New features
 
 #### Minor improvements and bug fixes
+* Support for modal value calculations in `ensemble()` and export of method.
 * Minor :bug: fix related to misaligned thresholds and negative exponential kernels.
 * :fire: :bug: fix for scenario projections that use different grain sizes than for inference.
 
