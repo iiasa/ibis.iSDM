@@ -16,7 +16,7 @@ sum-of-trees formulation (Default: \code{1000}).}
 
 \item{chains}{A number of the number of chains to be used (Default: \code{4}).}
 
-\item{type}{The mode used for creating posterior predictions. Either \code{"link"}
+\item{type}{The type used for creating posterior predictions. Either \code{"link"}
 or \code{"response"} (Default: \code{"response"}).}
 
 \item{...}{Other options.}

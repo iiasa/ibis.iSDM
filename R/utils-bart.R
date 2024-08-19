@@ -87,6 +87,117 @@ varimp.bart <- function(model){
   return(var.df)
 }
 
+#' Prediction with `dbarts` package for bart models
+#'
+#' @description Helper function to create a prediction with [engine_bart] fitted
+#' models.
+#'
+#' @param obj A [list] containing the fitted model.
+#' @param newdata A [`data.frame`] with all the predictor used for model fitting.
+#' @param params A [`list`] with parameters for estimation. Normally created during
+#' model fitting.
+#' @param of A [`numeric`] optional offset.
+#' @param w A [`numeric`] [`vector`] containing the exposure variables for PPMs.
+#' Can be \code{NULL} if the model is not a PPM.
+#' @param run_future A [`logical`] on whether the model is to be run through chunking
+#' and the [future] package (Default: \code{FALSE}).
+#' @param N An optional [`numeric`] value describing the number of chunking pieces (Default: \code{NULL}).
+#'
+#' @returns Always a summarized posterior [`data.frame`] with the respective
+#' statistical moments.
+#'
+#' @keywords internal
+#'
+#' @noRd
+predict_bart <- function(obj, newdata, params, of = NULL, w = NULL, run_future = FALSE, N = NULL) {
+  assertthat::assert_that(
+    is.list(obj),
+    is.matrix(newdata) || is.data.frame(newdata) || inherits(newdata, "SpatialPixelsDataFrame"),
+    is.list(params),
+    is.null(of),
+    is.null(w) || is.numeric(w),
+    is.logical(run_future),
+    is.null(N) || is.numeric(N)
+  )
+
+  # Non-future
+  if(!run_future){
+    # Make a prediction
+    check_package("foreach")
+    # Tile the problem
+    splits <- cut(1:nrow(newdata), nrow(newdata) / min(nrow(newdata) / 4, 100) )
+
+    # Make a prediction
+    out <- foreach::foreach(s = unique(splits),
+                            .inorder = TRUE,
+                            .combine = "rbind",
+                            .errorhandling = "stop",
+                            .multicombine = TRUE,
+                            .export = c("splits", "fit_bart", "newdata", "params", "of"),
+                            .packages = c("dbarts", "matrixStats")) %do% {
+                              i <- which(splits == s)
+
+                              pred_bart <- predict(object = obj,
+                                                   newdata = newdata[i, ],
+                                                   type = params$type,
+                                                   weights = w[i],
+                                                   offset = of[i]
+                              )
+                              # Summarize quantiles and sd from posterior
+                              ms <- as.data.frame(
+                                cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
+                                       matrixStats::colSds(pred_bart),
+                                       matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                                       apply(pred_bart, 2, modal)
+                                )
+                              )
+                              names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+                              ms$cv <- ms$sd / ms$mean
+                              rm(pred_bart)
+                              return( ms )
+                            }
+  } else {
+    # Set up future if set
+    check_package("doFuture")
+    # If not set, use number of threads
+    if(is.null(N)) N <- getOption("ibis.nthread",default = 10)
+
+    # Tile the problem
+    splits <- cut(1:nrow(newdata), nrow(newdata) / min(nrow(newdata) / 4, 100) )
+
+    # Make a prediction
+    out <- foreach::foreach(s = unique(splits),
+                            .inorder = TRUE,
+                            .combine = "rbind",
+                            .errorhandling = "stop",
+                            .options.future = list(seed = TRUE)) %dofuture% {
+                              i <- which(splits == s)
+
+                              pred_bart <- predict(object = obj,
+                                                   newdata = newdata[i, ],
+                                                   type = params$type,
+                                                   weights = w[i],
+                                                   offset = of[i]
+                              )
+                              # Summarize quantiles and sd from posterior
+                              ms <- as.data.frame(
+                                cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
+                                       matrixStats::colSds(pred_bart),
+                                       matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
+                                       apply(pred_bart, 2, terra::modal)
+                                )
+                              )
+                              names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
+                              ms$cv <- ms$sd / ms$mean
+                              rm(pred_bart)
+                              return( ms )
+                            }
+
+    assertthat::assert_that(nrow(out)>0)
+  }
+  return(out)
+}
+
 #' Partial effects for bart models adapted from embarcadero package
 #'
 #' @param model A fitted [dbarts::bart] model.
@@ -192,7 +303,7 @@ bart_partial_effect <- function(model, x.var, equal = FALSE,
       cbind( apply(pd$fd[[i]], 2, function(x) mean(x, na.rm = TRUE)),
              matrixStats::colSds(pd$fd[[i]]),
              matrixStats::colQuantiles(pd$fd[[i]], probs = c(.05,.5,.95)),
-             apply(pd$fd[[i]], 2, mode)
+             apply(pd$fd[[i]], 2, modal)
       )
     )
     names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
