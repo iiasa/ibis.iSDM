@@ -52,6 +52,10 @@ projections. Such as for instance the ability to specifically add spatial
 baselearners via \link{add_latent_spatial} or the specification of monotonically
 constrained priors via \link{GDBPrior}.
 }
+\note{
+The coefficients resulting from gdb with poipa data (Binomial) are only 0.5
+of the typical coefficients of a logit model obtained via glm (see Binomial).
+}
 \examples{
 \dontrun{
 # Add GDB as an engine

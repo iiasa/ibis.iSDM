@@ -498,31 +498,75 @@ engine_glmnet <- function(x,
       w_full_sub <- w_full[full_sub$rowid]
       assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
-      # Attempt prediction
-      if(inherits(cv_gn, "cv.glmnet")){
-        out <- predict(object = cv_gn,
-                       newdata = full_sub,
-                       weights = w_full_sub,
-                       newoffset = ofs_pred[full_sub$rowid],
-                       s = determine_lambda(cv_gn), # Determine the best lambda value
-                       type = params$type
-        )
-      } else {
-        # Assume cva.glmnet
-        out <- predict(
-          object = cv_gn,
-          newdata = full_sub,
-          alpha = cv_gn$alpha,
-          weights = w_full_sub,
-          newoffset = ofs_pred[full_sub$rowid],
-          s = determine_lambda(cv_gn), # Determine the best lambda value
-          type = params$type
-        )
-        # Determine best model based on cross-validated loss
-        # ind <- which.min( sapply(cv_gn$modlist, function(z) min(z$cvup)) )
-        # cv_gn <- cv_gn$modlist[[ind]]
-      }
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Chunk the data
+        splits <- chunk_data(full_sub, N = getOption("ibis.nthread",default = 10),
+                             index_only = TRUE)
 
+        lambda <- determine_lambda(cv_gn)
+
+        out <- foreach::foreach(s = splits,
+                                    .combine = "rbind",
+                                    .inorder = TRUE,
+                                    .options.future = list(seed = TRUE,
+                                                           packages = c("glmnet", "glmnetUtils"))
+        ) %dofuture% {
+          # Make a prediction
+          if(inherits(cv_gn, "cv.glmnet")){
+            out <- predict(object = cv_gn,
+                           newdata = full_sub[s,],
+                           weights = w_full_sub[s],
+                           newoffset = ofs_pred[full_sub$rowid[s]],
+                           s = lambda, # Determine the best lambda value
+                           type = params$type
+            )
+          } else {
+            # Assume cva.glmnet
+            out <- predict(
+              object = cv_gn,
+              newdata = full_sub[s,],
+              alpha = cv_gn$alpha,
+              weights = w_full_sub[s],
+              newoffset = ofs_pred[full_sub$rowid[s]],
+              s = lambda, # Determine the best lambda value
+              type = params$type
+            )
+            # Determine best model based on cross-validated loss
+            # ind <- which.min( sapply(cv_gn$modlist, function(z) min(z$cvup)) )
+            # cv_gn <- cv_gn$modlist[[ind]]
+          }
+          return(out)
+        }
+      } else {
+        # Attempt prediction
+        if(inherits(cv_gn, "cv.glmnet")){
+          out <- predict(object = cv_gn,
+                         newdata = full_sub,
+                         weights = w_full_sub,
+                         newoffset = ofs_pred[full_sub$rowid],
+                         s = determine_lambda(cv_gn), # Determine the best lambda value
+                         type = params$type
+          )
+        } else {
+          # Assume cva.glmnet
+          out <- predict(
+            object = cv_gn,
+            newdata = full_sub,
+            alpha = cv_gn$alpha,
+            weights = w_full_sub,
+            newoffset = ofs_pred[full_sub$rowid],
+            s = determine_lambda(cv_gn), # Determine the best lambda value
+            type = params$type
+          )
+          # Determine best model based on cross-validated loss
+          # ind <- which.min( sapply(cv_gn$modlist, function(z) min(z$cvup)) )
+          # cv_gn <- cv_gn$modlist[[ind]]
+        }
+      }
 
       # Fill output with summaries of the posterior
       prediction[full_sub$rowid] <- out[,1]
@@ -815,29 +859,75 @@ engine_glmnet <- function(x,
       if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
       assertthat::assert_that(nrow(df_sub)>0)
 
-      if(inherits(mod, "cv.glmnet")){
-        pred_gn <- predict(
-          object = mod,
-          newdata = df_sub,
-          weights = df_sub$w, # The second entry of unique contains the non-observed variables
-          newoffset = ofs,
-          na.action = "na.pass",
-          s = determine_lambda(mod), # Determine best available lambda
-          fam = fam,
-          type = type
-        ) |> as.data.frame()
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Chunk the data
+        splits <- chunk_data(df_sub, N = getOption("ibis.nthread",default = 10),
+                             index_only = TRUE)
+        lambda <- determine_lambda(mod)
+
+        pred_gn <- foreach::foreach(s = splits,
+                              .combine = "rbind",
+                              .inorder = TRUE,
+                              .options.future = list(seed = TRUE,
+                                                     packages = c("glmnet", "glmnetUtils"))
+        ) %dofuture% {
+          # Make a prediction
+          if(inherits(mod, "cv.glmnet")){
+            ms <- predict(
+              object = mod,
+              newdata = df_sub[s,],
+              weights = df_sub$w[s], # The second entry of unique contains the non-observed variables
+              newoffset = ofs[s],
+              na.action = "na.pass",
+              s = lambda, # Determine best available lambda
+              fam = fam,
+              type = type
+            ) |> as.data.frame()
+          } else {
+            ms <- predict(
+              object = mod,
+              newdata = df_sub[s,],
+              alpha = mod$alpha[s],
+              weights = df_sub$w[s], # The second entry of unique contains the non-observed variables
+              newoffset = ofs[s],
+              na.action = "na.pass",
+              s = lambda, # Determine the best lambda value
+              fam = fam,
+              type = type
+            )
+          }
+          return(ms)
+        }
+
       } else {
-        pred_gn <- predict(
-          object = mod,
-          newdata = df_sub,
-          alpha = mod$alpha,
-          weights = df_sub$w, # The second entry of unique contains the non-observed variables
-          newoffset = ofs,
-          na.action = "na.pass",
-          s = determine_lambda(mod), # Determine the best lambda value
-          fam = fam,
-          type = type
-        )
+        if(inherits(mod, "cv.glmnet")){
+          pred_gn <- predict(
+            object = mod,
+            newdata = df_sub,
+            weights = df_sub$w, # The second entry of unique contains the non-observed variables
+            newoffset = ofs,
+            na.action = "na.pass",
+            s = determine_lambda(mod), # Determine best available lambda
+            fam = fam,
+            type = type
+          ) |> as.data.frame()
+        } else {
+          pred_gn <- predict(
+            object = mod,
+            newdata = df_sub,
+            alpha = mod$alpha,
+            weights = df_sub$w, # The second entry of unique contains the non-observed variables
+            newoffset = ofs,
+            na.action = "na.pass",
+            s = determine_lambda(mod), # Determine the best lambda value
+            fam = fam,
+            type = type
+          )
+        }
       }
       names(pred_gn) <- layer
       assertthat::assert_that(nrow(pred_gn)>0, nrow(pred_gn) == nrow(df_sub))
