@@ -113,6 +113,7 @@ re-specified and added here to the list.</p>
 <li><p><a href="#method-BiodiversityScenario-get_resolution"><code>BiodiversityScenario$get_resolution()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_model"><code>BiodiversityScenario$get_model()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_limits"><code>BiodiversityScenario$get_limits()</code></a></p></li>
+<li><p><a href="#method-BiodiversityScenario-rm_limits"><code>BiodiversityScenario$rm_limits()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_predictor_names"><code>BiodiversityScenario$get_predictor_names()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_timeperiod"><code>BiodiversityScenario$get_timeperiod()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_constraints"><code>BiodiversityScenario$get_constraints()</code></a></p></li>
@@ -127,6 +128,7 @@ re-specified and added here to the list.</p>
 <li><p><a href="#method-BiodiversityScenario-get_predictors"><code>BiodiversityScenario$get_predictors()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-rm_predictors"><code>BiodiversityScenario$rm_predictors()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_data"><code>BiodiversityScenario$get_data()</code></a></p></li>
+<li><p><a href="#method-BiodiversityScenario-rm_data"><code>BiodiversityScenario$rm_data()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-set_data"><code>BiodiversityScenario$set_data()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-set_latent"><code>BiodiversityScenario$set_latent()</code></a></p></li>
 <li><p><a href="#method-BiodiversityScenario-get_latent"><code>BiodiversityScenario$get_latent()</code></a></p></li>
@@ -248,22 +250,34 @@ re-specified and added here to the list.</p>
 <p>A <code>sf</code> object or NULL.</p>
 </div>
 
-</div><p></p><hr><a id="method-BiodiversityScenario-get_predictor_names"></a><div class="section">
-<h3 id="method-get-predictor-names-">Method <code>get_predictor_names()</code><a class="anchor" aria-label="anchor" href="#method-get-predictor-names-"></a></h3>
-<p>Get names of predictors for scenario object.</p><div class="section">
+</div><p></p><hr><a id="method-BiodiversityScenario-rm_limits"></a><div class="section">
+<h3 id="method-rm-limits-">Method <code><a href="rm_limits.html">rm_limits()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-limits-"></a></h3>
+<p>Remove current limits.</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_predictor_names</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">rm_limits</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
+<p>Invisible</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityScenario-get_predictor_names"></a><div class="section">
+<h3 id="method-get-predictor-names-">Method <code>get_predictor_names()</code><a class="anchor" aria-label="anchor" href="#method-get-predictor-names-"></a></h3>
+<p>Get names of predictors for scenario object.</p><div class="section">
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_predictor_names</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> vector with the names.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_timeperiod"></a><div class="section">
 <h3 id="method-get-timeperiod-">Method <code>get_timeperiod()</code><a class="anchor" aria-label="anchor" href="#method-get-timeperiod-"></a></h3>
 <p>Get time period of projection.</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_timeperiod</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"range"</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -276,51 +290,39 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
+<h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
 <p>A time period from start to end.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_constraints"></a><div class="section">
 <h3 id="method-get-constraints-">Method <code>get_constraints()</code><a class="anchor" aria-label="anchor" href="#method-get-constraints-"></a></h3>
 <p>Get constrains for model</p><div class="section">
-<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_constraints</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
+<h4 id="returns-11">Returns<a class="anchor" aria-label="anchor" href="#returns-11"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the constraints within the scenario.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-rm_constraints"></a><div class="section">
 <h3 id="method-rm-constraints-">Method <code>rm_constraints()</code><a class="anchor" aria-label="anchor" href="#method-rm-constraints-"></a></h3>
 <p>Remove contraints from model</p><div class="section">
-<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">rm_constraints</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-11">Returns<a class="anchor" aria-label="anchor" href="#returns-11"></a></h4>
+<h4 id="returns-12">Returns<a class="anchor" aria-label="anchor" href="#returns-12"></a></h4>
 <p>Invisible</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_threshold"></a><div class="section">
 <h3 id="method-get-threshold-">Method <code>get_threshold()</code><a class="anchor" aria-label="anchor" href="#method-get-threshold-"></a></h3>
 <p>Get thresholds if specified.</p><div class="section">
-<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_threshold</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
-<h4 id="returns-12">Returns<a class="anchor" aria-label="anchor" href="#returns-12"></a></h4>
-<p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with method and value for the threshold.</p>
-</div>
-
-</div><p></p><hr><a id="method-BiodiversityScenario-get_thresholdvalue"></a><div class="section">
-<h3 id="method-get-thresholdvalue-">Method <code>get_thresholdvalue()</code><a class="anchor" aria-label="anchor" href="#method-get-thresholdvalue-"></a></h3>
-<p>Duplicate function for internal consistency to return threshold</p><div class="section">
 <h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_thresholdvalue</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_threshold</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -328,10 +330,22 @@ re-specified and added here to the list.</p>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with method and value for the threshold.</p>
 </div>
 
+</div><p></p><hr><a id="method-BiodiversityScenario-get_thresholdvalue"></a><div class="section">
+<h3 id="method-get-thresholdvalue-">Method <code>get_thresholdvalue()</code><a class="anchor" aria-label="anchor" href="#method-get-thresholdvalue-"></a></h3>
+<p>Duplicate function for internal consistency to return threshold</p><div class="section">
+<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_thresholdvalue</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="returns-14">Returns<a class="anchor" aria-label="anchor" href="#returns-14"></a></h4>
+<p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with method and value for the threshold.</p>
+</div>
+
 </div><p></p><hr><a id="method-BiodiversityScenario-apply_threshold"></a><div class="section">
 <h3 id="method-apply-threshold-">Method <code>apply_threshold()</code><a class="anchor" aria-label="anchor" href="#method-apply-threshold-"></a></h3>
 <p>Apply a new threshold to the projection.</p><div class="section">
-<h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
+<h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">apply_threshold</span><span class="op">(</span>tr <span class="op">=</span> <span class="fu"><a href="../reference/new_waiver.html">new_waiver</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -344,14 +358,14 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-14">Returns<a class="anchor" aria-label="anchor" href="#returns-14"></a></h4>
+<h4 id="returns-15">Returns<a class="anchor" aria-label="anchor" href="#returns-15"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-set_predictors"></a><div class="section">
 <h3 id="method-set-predictors-">Method <code>set_predictors()</code><a class="anchor" aria-label="anchor" href="#method-set-predictors-"></a></h3>
 <p>Set new predictors to this object.</p><div class="section">
-<h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
+<h4 id="usage-16">Usage<a class="anchor" aria-label="anchor" href="#usage-16"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">set_predictors</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -364,14 +378,14 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-15">Returns<a class="anchor" aria-label="anchor" href="#returns-15"></a></h4>
+<h4 id="returns-16">Returns<a class="anchor" aria-label="anchor" href="#returns-16"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-set_constraints"></a><div class="section">
 <h3 id="method-set-constraints-">Method <code>set_constraints()</code><a class="anchor" aria-label="anchor" href="#method-set-constraints-"></a></h3>
 <p>Set new constrains</p><div class="section">
-<h4 id="usage-16">Usage<a class="anchor" aria-label="anchor" href="#usage-16"></a></h4>
+<h4 id="usage-17">Usage<a class="anchor" aria-label="anchor" href="#usage-17"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">set_constraints</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -384,26 +398,26 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-16">Returns<a class="anchor" aria-label="anchor" href="#returns-16"></a></h4>
+<h4 id="returns-17">Returns<a class="anchor" aria-label="anchor" href="#returns-17"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_simulation"></a><div class="section">
 <h3 id="method-get-simulation-">Method <code>get_simulation()</code><a class="anchor" aria-label="anchor" href="#method-get-simulation-"></a></h3>
 <p>Get simulation options and parameters if gound</p><div class="section">
-<h4 id="usage-17">Usage<a class="anchor" aria-label="anchor" href="#usage-17"></a></h4>
+<h4 id="usage-18">Usage<a class="anchor" aria-label="anchor" href="#usage-18"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_simulation</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-17">Returns<a class="anchor" aria-label="anchor" href="#returns-17"></a></h4>
+<h4 id="returns-18">Returns<a class="anchor" aria-label="anchor" href="#returns-18"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the parameters.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-set_simulation"></a><div class="section">
 <h3 id="method-set-simulation-">Method <code>set_simulation()</code><a class="anchor" aria-label="anchor" href="#method-set-simulation-"></a></h3>
 <p>Set simulation objects.</p><div class="section">
-<h4 id="usage-18">Usage<a class="anchor" aria-label="anchor" href="#usage-18"></a></h4>
+<h4 id="usage-19">Usage<a class="anchor" aria-label="anchor" href="#usage-19"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">set_simulation</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -416,26 +430,26 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-18">Returns<a class="anchor" aria-label="anchor" href="#returns-18"></a></h4>
+<h4 id="returns-19">Returns<a class="anchor" aria-label="anchor" href="#returns-19"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_predictors"></a><div class="section">
 <h3 id="method-get-predictors-">Method <code>get_predictors()</code><a class="anchor" aria-label="anchor" href="#method-get-predictors-"></a></h3>
 <p>Get Predictors from the object.</p><div class="section">
-<h4 id="usage-19">Usage<a class="anchor" aria-label="anchor" href="#usage-19"></a></h4>
+<h4 id="usage-20">Usage<a class="anchor" aria-label="anchor" href="#usage-20"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_predictors</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-19">Returns<a class="anchor" aria-label="anchor" href="#returns-19"></a></h4>
+<h4 id="returns-20">Returns<a class="anchor" aria-label="anchor" href="#returns-20"></a></h4>
 <p>A predictor dataset.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-rm_predictors"></a><div class="section">
 <h3 id="method-rm-predictors-">Method <code><a href="rm_predictors.html">rm_predictors()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-predictors-"></a></h3>
 <p>Remove predictors from the object.</p><div class="section">
-<h4 id="usage-20">Usage<a class="anchor" aria-label="anchor" href="#usage-20"></a></h4>
+<h4 id="usage-21">Usage<a class="anchor" aria-label="anchor" href="#usage-21"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">rm_predictors</span><span class="op">(</span><span class="va">names</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -448,14 +462,14 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-20">Returns<a class="anchor" aria-label="anchor" href="#returns-20"></a></h4>
+<h4 id="returns-21">Returns<a class="anchor" aria-label="anchor" href="#returns-21"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_data"></a><div class="section">
 <h3 id="method-get-data-">Method <code><a href="get_data.html">get_data()</a></code><a class="anchor" aria-label="anchor" href="#method-get-data-"></a></h3>
 <p>Get scenario predictions or any other data</p><div class="section">
-<h4 id="usage-21">Usage<a class="anchor" aria-label="anchor" href="#usage-21"></a></h4>
+<h4 id="usage-22">Usage<a class="anchor" aria-label="anchor" href="#usage-22"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"scenarios"</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -468,19 +482,39 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-21">Returns<a class="anchor" aria-label="anchor" href="#returns-21"></a></h4>
+<h4 id="returns-22">Returns<a class="anchor" aria-label="anchor" href="#returns-22"></a></h4>
 <p>This object.</p>
+</div>
+
+</div><p></p><hr><a id="method-BiodiversityScenario-rm_data"></a><div class="section">
+<h3 id="method-rm-data-">Method <code>rm_data()</code><a class="anchor" aria-label="anchor" href="#method-rm-data-"></a></h3>
+<p>Remove scenario predictions</p><div class="section">
+<h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">rm_data</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>what</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> vector with names of what</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-23">Returns<a class="anchor" aria-label="anchor" href="#returns-23"></a></h4>
+<p>Invisible</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-set_data"></a><div class="section">
 <h3 id="method-set-data-">Method <code>set_data()</code><a class="anchor" aria-label="anchor" href="#method-set-data-"></a></h3>
 <p>Set new data in object.</p><div class="section">
-<h4 id="usage-22">Usage<a class="anchor" aria-label="anchor" href="#usage-22"></a></h4>
+<h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">set_data</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A new data object measuing scenarios.</p></dd>
 
@@ -488,19 +522,19 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-22">Returns<a class="anchor" aria-label="anchor" href="#returns-22"></a></h4>
+<h4 id="returns-24">Returns<a class="anchor" aria-label="anchor" href="#returns-24"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-set_latent"></a><div class="section">
 <h3 id="method-set-latent-">Method <code>set_latent()</code><a class="anchor" aria-label="anchor" href="#method-set-latent-"></a></h3>
 <p>Adding latent factors to the object.</p><div class="section">
-<h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
+<h4 id="usage-25">Usage<a class="anchor" aria-label="anchor" href="#usage-25"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">set_latent</span><span class="op">(</span><span class="va">latent</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
+<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>latent</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> containing the data object.</p></dd>
 
@@ -508,43 +542,43 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-23">Returns<a class="anchor" aria-label="anchor" href="#returns-23"></a></h4>
+<h4 id="returns-25">Returns<a class="anchor" aria-label="anchor" href="#returns-25"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_latent"></a><div class="section">
 <h3 id="method-get-latent-">Method <code>get_latent()</code><a class="anchor" aria-label="anchor" href="#method-get-latent-"></a></h3>
 <p>Get latent factors if found in object.</p><div class="section">
-<h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
+<h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_latent</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-24">Returns<a class="anchor" aria-label="anchor" href="#returns-24"></a></h4>
+<h4 id="returns-26">Returns<a class="anchor" aria-label="anchor" href="#returns-26"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the latent settings</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-rm_latent"></a><div class="section">
 <h3 id="method-rm-latent-">Method <code><a href="rm_latent.html">rm_latent()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-latent-"></a></h3>
 <p>Remove latent factors if found in object.</p><div class="section">
-<h4 id="usage-25">Usage<a class="anchor" aria-label="anchor" href="#usage-25"></a></h4>
+<h4 id="usage-27">Usage<a class="anchor" aria-label="anchor" href="#usage-27"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">rm_latent</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-25">Returns<a class="anchor" aria-label="anchor" href="#returns-25"></a></h4>
+<h4 id="returns-27">Returns<a class="anchor" aria-label="anchor" href="#returns-27"></a></h4>
 <p>This object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-plot"></a><div class="section">
 <h3 id="method-plot-">Method <code><a href="plot.html">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
 <p>Plot the predictions made here.</p><div class="section">
-<h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
+<h4 id="usage-28">Usage<a class="anchor" aria-label="anchor" href="#usage-28"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"suitability"</span>, which <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
+<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> describing the layers to be plotted.</p></dd>
 
@@ -560,19 +594,19 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-26">Returns<a class="anchor" aria-label="anchor" href="#returns-26"></a></h4>
+<h4 id="returns-28">Returns<a class="anchor" aria-label="anchor" href="#returns-28"></a></h4>
 <p>A graphical representation</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-plot_threshold"></a><div class="section">
 <h3 id="method-plot-threshold-">Method <code>plot_threshold()</code><a class="anchor" aria-label="anchor" href="#method-plot-threshold-"></a></h3>
 <p>Convenience function to plot thresholds if set</p><div class="section">
-<h4 id="usage-27">Usage<a class="anchor" aria-label="anchor" href="#usage-27"></a></h4>
+<h4 id="usage-29">Usage<a class="anchor" aria-label="anchor" href="#usage-29"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">plot_threshold</span><span class="op">(</span>which <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
+<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>which</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> subset to any specific time steps.</p></dd>
 
@@ -580,31 +614,31 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-27">Returns<a class="anchor" aria-label="anchor" href="#returns-27"></a></h4>
+<h4 id="returns-29">Returns<a class="anchor" aria-label="anchor" href="#returns-29"></a></h4>
 <p>A graphical representation</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-plot_migclim"></a><div class="section">
 <h3 id="method-plot-migclim-">Method <code>plot_migclim()</code><a class="anchor" aria-label="anchor" href="#method-plot-migclim-"></a></h3>
 <p>Plot Migclim results if existing.</p><div class="section">
-<h4 id="usage-28">Usage<a class="anchor" aria-label="anchor" href="#usage-28"></a></h4>
+<h4 id="usage-30">Usage<a class="anchor" aria-label="anchor" href="#usage-30"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">plot_migclim</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-28">Returns<a class="anchor" aria-label="anchor" href="#returns-28"></a></h4>
+<h4 id="returns-30">Returns<a class="anchor" aria-label="anchor" href="#returns-30"></a></h4>
 <p>A graphical representation</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-plot_animation"></a><div class="section">
 <h3 id="method-plot-animation-">Method <code>plot_animation()</code><a class="anchor" aria-label="anchor" href="#method-plot-animation-"></a></h3>
 <p>Plot animation of scenarios if possible</p><div class="section">
-<h4 id="usage-29">Usage<a class="anchor" aria-label="anchor" href="#usage-29"></a></h4>
+<h4 id="usage-31">Usage<a class="anchor" aria-label="anchor" href="#usage-31"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">plot_animation</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"suitability"</span>, fname <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
+<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> describing the layers to be plotted.</p></dd>
 
@@ -616,14 +650,14 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-29">Returns<a class="anchor" aria-label="anchor" href="#returns-29"></a></h4>
+<h4 id="returns-31">Returns<a class="anchor" aria-label="anchor" href="#returns-31"></a></h4>
 <p>A graphical representation</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-plot_relative_change"></a><div class="section">
 <h3 id="method-plot-relative-change-">Method <code>plot_relative_change()</code><a class="anchor" aria-label="anchor" href="#method-plot-relative-change-"></a></h3>
 <p>Plot relative change between baseline and projected thresholds</p><div class="section">
-<h4 id="usage-30">Usage<a class="anchor" aria-label="anchor" href="#usage-30"></a></h4>
+<h4 id="usage-32">Usage<a class="anchor" aria-label="anchor" href="#usage-32"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">plot_relative_change</span><span class="op">(</span></span>
 <span>  position <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  variable <span class="op">=</span> <span class="st">"mean"</span>,</span>
@@ -632,7 +666,7 @@ re-specified and added here to the list.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
+<h4 id="arguments-14">Arguments<a class="anchor" aria-label="anchor" href="#arguments-14"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>position</code></dt>
 <dd><p>Which layer to be plotted</p></dd>
 
@@ -648,14 +682,14 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-30">Returns<a class="anchor" aria-label="anchor" href="#returns-30"></a></h4>
+<h4 id="returns-32">Returns<a class="anchor" aria-label="anchor" href="#returns-32"></a></h4>
 <p>A graphical representation or <code>SpatRaster</code>.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-summary"></a><div class="section">
 <h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
 <p>Summarize the change in layers between timesteps</p><div class="section">
-<h4 id="usage-31">Usage<a class="anchor" aria-label="anchor" href="#usage-31"></a></h4>
+<h4 id="usage-33">Usage<a class="anchor" aria-label="anchor" href="#usage-33"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span></span>
 <span>  layer <span class="op">=</span> <span class="st">"threshold"</span>,</span>
 <span>  plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -664,7 +698,7 @@ re-specified and added here to the list.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-14">Arguments<a class="anchor" aria-label="anchor" href="#arguments-14"></a></h4>
+<h4 id="arguments-15">Arguments<a class="anchor" aria-label="anchor" href="#arguments-15"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>layer</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the variable to be plotted</p></dd>
 
@@ -680,26 +714,26 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-31">Returns<a class="anchor" aria-label="anchor" href="#returns-31"></a></h4>
+<h4 id="returns-33">Returns<a class="anchor" aria-label="anchor" href="#returns-33"></a></h4>
 <p>Summarized coefficients as <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code></p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-summary_beforeafter"></a><div class="section">
 <h3 id="method-summary-beforeafter-">Method <code>summary_beforeafter()</code><a class="anchor" aria-label="anchor" href="#method-summary-beforeafter-"></a></h3>
 <p>Summarize before-after change of first and last layer.</p><div class="section">
-<h4 id="usage-32">Usage<a class="anchor" aria-label="anchor" href="#usage-32"></a></h4>
+<h4 id="usage-34">Usage<a class="anchor" aria-label="anchor" href="#usage-34"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">summary_beforeafter</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="returns-32">Returns<a class="anchor" aria-label="anchor" href="#returns-32"></a></h4>
+<h4 id="returns-34">Returns<a class="anchor" aria-label="anchor" href="#returns-34"></a></h4>
 <p>Summarized coefficients as <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code></p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-plot_scenarios_slope"></a><div class="section">
 <h3 id="method-plot-scenarios-slope-">Method <code>plot_scenarios_slope()</code><a class="anchor" aria-label="anchor" href="#method-plot-scenarios-slope-"></a></h3>
 <p>Calculate slopes across the projection</p><div class="section">
-<h4 id="usage-33">Usage<a class="anchor" aria-label="anchor" href="#usage-33"></a></h4>
+<h4 id="usage-35">Usage<a class="anchor" aria-label="anchor" href="#usage-35"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">plot_scenarios_slope</span><span class="op">(</span></span>
 <span>  what <span class="op">=</span> <span class="st">"suitability"</span>,</span>
 <span>  oftype <span class="op">=</span> <span class="st">"stars"</span></span>
@@ -707,7 +741,7 @@ re-specified and added here to the list.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-15">Arguments<a class="anchor" aria-label="anchor" href="#arguments-15"></a></h4>
+<h4 id="arguments-16">Arguments<a class="anchor" aria-label="anchor" href="#arguments-16"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with layer to be plotted (default: <code>"suitability"</code>).</p></dd>
 
@@ -719,14 +753,14 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-33">Returns<a class="anchor" aria-label="anchor" href="#returns-33"></a></h4>
+<h4 id="returns-35">Returns<a class="anchor" aria-label="anchor" href="#returns-35"></a></h4>
 <p>A plot of the scenario slopes</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-calc_scenarios_slope"></a><div class="section">
 <h3 id="method-calc-scenarios-slope-">Method <code>calc_scenarios_slope()</code><a class="anchor" aria-label="anchor" href="#method-calc-scenarios-slope-"></a></h3>
 <p>Calculate slopes across the projection</p><div class="section">
-<h4 id="usage-34">Usage<a class="anchor" aria-label="anchor" href="#usage-34"></a></h4>
+<h4 id="usage-36">Usage<a class="anchor" aria-label="anchor" href="#usage-36"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">calc_scenarios_slope</span><span class="op">(</span></span>
 <span>  what <span class="op">=</span> <span class="st">"suitability"</span>,</span>
 <span>  plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -735,7 +769,7 @@ re-specified and added here to the list.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-16">Arguments<a class="anchor" aria-label="anchor" href="#arguments-16"></a></h4>
+<h4 id="arguments-17">Arguments<a class="anchor" aria-label="anchor" href="#arguments-17"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with layer to be plotted (default: <code>"suitability"</code>).</p></dd>
 
@@ -751,19 +785,19 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-34">Returns<a class="anchor" aria-label="anchor" href="#returns-34"></a></h4>
+<h4 id="returns-36">Returns<a class="anchor" aria-label="anchor" href="#returns-36"></a></h4>
 <p>A <code>SpatRaster</code> layer or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-mask"></a><div class="section">
 <h3 id="method-mask-">Method <code><a href="mask.html">mask()</a></code><a class="anchor" aria-label="anchor" href="#method-mask-"></a></h3>
 <p>Convenience function to mask all input projections.</p><div class="section">
-<h4 id="usage-35">Usage<a class="anchor" aria-label="anchor" href="#usage-35"></a></h4>
+<h4 id="usage-37">Usage<a class="anchor" aria-label="anchor" href="#usage-37"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">mask</span><span class="op">(</span><span class="va">mask</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-17">Arguments<a class="anchor" aria-label="anchor" href="#arguments-17"></a></h4>
+<h4 id="arguments-18">Arguments<a class="anchor" aria-label="anchor" href="#arguments-18"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>mask</code></dt>
 <dd><p>A <code>SpatRaster</code> or <code>sf</code> object.</p></dd>
 
@@ -779,19 +813,19 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-35">Returns<a class="anchor" aria-label="anchor" href="#returns-35"></a></h4>
+<h4 id="returns-37">Returns<a class="anchor" aria-label="anchor" href="#returns-37"></a></h4>
 <p>Invisible</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-get_centroid"></a><div class="section">
 <h3 id="method-get-centroid-">Method <code>get_centroid()</code><a class="anchor" aria-label="anchor" href="#method-get-centroid-"></a></h3>
 <p>Get centroids of projection layers</p><div class="section">
-<h4 id="usage-36">Usage<a class="anchor" aria-label="anchor" href="#usage-36"></a></h4>
+<h4 id="usage-38">Usage<a class="anchor" aria-label="anchor" href="#usage-38"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">get_centroid</span><span class="op">(</span>patch <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-18">Arguments<a class="anchor" aria-label="anchor" href="#arguments-18"></a></h4>
+<h4 id="arguments-19">Arguments<a class="anchor" aria-label="anchor" href="#arguments-19"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>patch</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> if centroid should be calculated weighted by values.</p></dd>
 
@@ -799,19 +833,19 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-36">Returns<a class="anchor" aria-label="anchor" href="#returns-36"></a></h4>
+<h4 id="returns-38">Returns<a class="anchor" aria-label="anchor" href="#returns-38"></a></h4>
 <p>Returns a <code>sf</code> object.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-save"></a><div class="section">
 <h3 id="method-save-">Method <code><a href="https://rdrr.io/r/base/save.html" class="external-link">save()</a></code><a class="anchor" aria-label="anchor" href="#method-save-"></a></h3>
 <p>Save object as output somewhere</p><div class="section">
-<h4 id="usage-37">Usage<a class="anchor" aria-label="anchor" href="#usage-37"></a></h4>
+<h4 id="usage-39">Usage<a class="anchor" aria-label="anchor" href="#usage-39"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">save</span><span class="op">(</span><span class="va">fname</span>, type <span class="op">=</span> <span class="st">"tif"</span>, dt <span class="op">=</span> <span class="st">"FLT4S"</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-19">Arguments<a class="anchor" aria-label="anchor" href="#arguments-19"></a></h4>
+<h4 id="arguments-20">Arguments<a class="anchor" aria-label="anchor" href="#arguments-20"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>fname</code></dt>
 <dd><p>An output filename as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
@@ -827,19 +861,19 @@ re-specified and added here to the list.</p>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-37">Returns<a class="anchor" aria-label="anchor" href="#returns-37"></a></h4>
+<h4 id="returns-39">Returns<a class="anchor" aria-label="anchor" href="#returns-39"></a></h4>
 <p>Saved spatial prediction on drive.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityScenario-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-38">Usage<a class="anchor" aria-label="anchor" href="#usage-38"></a></h4>
+<h4 id="usage-40">Usage<a class="anchor" aria-label="anchor" href="#usage-40"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityScenario</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-20">Arguments<a class="anchor" aria-label="anchor" href="#arguments-20"></a></h4>
+<h4 id="arguments-21">Arguments<a class="anchor" aria-label="anchor" href="#arguments-21"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
