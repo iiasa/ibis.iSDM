@@ -627,8 +627,10 @@ engine_gdb <- function(x,
         }
 
         # Now predict with model
+        # MH: There seems to be a problem if variables have some name overlap e.g., dbh and dbh_cv
+        # because in this case two columns are returned which is an issue later
         suppressWarnings(pp <- mboost::predict.mboost(object = self$get_data('fit_best'),
-                                                      newdata = dummy_temp, which = v,
+                                                      newdata = dummy_temp, which = which(names(dummy_temp) == v),
                                                       type = type, aggregate = 'sum'))
 
         # If bbs is present and non-linear, use bbs estimate. If model is fitted
