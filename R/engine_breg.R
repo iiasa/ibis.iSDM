@@ -699,10 +699,12 @@ engine_breg <- function(x,
       pred_part <- cbind(
         matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
         matrixStats::rowSds(pred_breg, na.rm = TRUE),
-        matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-        apply(pred_breg, 1, modal)
+        matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE)
       ) |> as.data.frame()
-      names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+      names(pred_part) <- c("mean", "sd", "q05", "q50", "q95")
+      assertthat::assert_that(all(is.numeric(pred_part[,1])),
+                              msg = "Posterior summarizing issue...?")
+      pred_part$mode <- apply(pred_breg, 1, modal)
       pred_part$cv <- pred_part$sd / pred_part$mean
 
       # Now create spatial prediction

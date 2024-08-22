@@ -274,7 +274,7 @@ ibis_future <- function(plan_exists = FALSE,
 
     # isTRUE(Sys.info()[["sysname"]] == "Windows")
     if(strategy == "multicore" && !parallelly::supportsMulticore()){
-      myLog('[Setup]','yellow','Parallization multicore not supported om windows. Changing to multisession.')
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Parallization multicore not supported om windows. Changing to multisession.')
       strategy <- "multisession"
     }
 
@@ -297,7 +297,7 @@ ibis_future <- function(plan_exists = FALSE,
       future::plan(strategy = "cluster", workers = cores)
     }
   }
-  myLog('[Setup]','green','Specified parallel processing plan with strategy: ', strategy)
+  if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Specified parallel processing plan with strategy: ', strategy)
   invisible()
 }
 

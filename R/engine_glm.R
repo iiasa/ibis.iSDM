@@ -371,58 +371,43 @@ engine_glm <- function(x,
 
       # Attempt prediction
       if( getOption('ibis.runparallel',default = FALSE) ){
-        # If relatively small dataset (e.g. under 100 000 rows), simply execute in one go
-        # Reason is that with this much data it will be faster to process on single core.
-        # TODO: This parameter could be saved somewhere
-        if(nrow(full)<100000){
-          out <- try({
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+
+        # Prediction function
+        do_run <- function() {
+          # Chunck the data
+          splits <- chunk_data(full, N = getOption("ibis.nthread"),index_only = TRUE)
+
+          y <- foreach::foreach(s = splits,
+                                .inorder = TRUE
+                                # .options.future = list(globals = ))
+                                ) %dofuture% {
             stats::predict.glm(object = fit_glm,
-                               newdata = full,
+                               newdata = full[s,],
                                type = params$type,
                                se.fit = TRUE,
                                na.action = "na.pass",
-                               weights = w_full
+                               weights = w_full[s,]
             )
-          })
-        } else {
-          check_package("doFuture")
-          if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-            try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
           }
-
-          # Prediction function
-          do_run <- function() {
-            # Chunck the data
-            splits <- chunk_data(full, N = getOption("ibis.nthread"),index_only = TRUE)
-
-            y <- foreach::foreach(s = splits,
-                                  .inorder = TRUE
-                                  # .options.future = list(globals = ))
-                                  ) %dofuture% {
-              stats::predict.glm(object = fit_glm,
-                                 newdata = full[s,],
-                                 type = params$type,
-                                 se.fit = TRUE,
-                                 na.action = "na.pass",
-                                 weights = w_full[s,]
-              )
-            }
-            y
-          }
-          # Run
-          result <- do_run()
-          # Combine all
-          # FIXME: hacky list flattener, but works. Reduce and do.call failed
-          out <- list()
-          for(k in 1:length(result)){
-            out[['fit']] <- c(out[['fit']], result[[k]]$fit)
-            out[['se.fit']] <- c(out[['se.fit']], result[[k]]$se.fit)
-          }
-          # Security check
-          assertthat::assert_that(
-            length(out$fit) == nrow(full)
-          )
-      }
+          y
+        }
+        # Run
+        result <- do_run()
+        # Combine all
+        # FIXME: hacky list flattener, but works. Reduce and do.call failed
+        out <- list()
+        for(k in 1:length(result)){
+          out[['fit']] <- c(out[['fit']], result[[k]]$fit)
+          out[['se.fit']] <- c(out[['se.fit']], result[[k]]$se.fit)
+        }
+        # Security check
+        assertthat::assert_that(
+          length(out$fit) == nrow(full)
+        )
       } else {
         out <- try({
           stats::predict.glm(object = fit_glm,

@@ -200,6 +200,14 @@ test_that('Test other generic functions', {
   suppressWarnings( expect_true( is.nan(logit(5)) ) )
   expect_length(logisticRichard(rpois(10,.5)), 10)
 
+  # Combine formulas
+  form1 <- y ~ x + z
+  form2 <- y ~ x
+  expect_true(is.formula( combine_formulas(form1, form2) ))
+
+  # Modal calculations
+  expect_type( modal(rpois(50,1)), "integer")
+
 })
 
 # ---- #

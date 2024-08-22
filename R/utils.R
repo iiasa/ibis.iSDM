@@ -74,6 +74,7 @@ text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 #' @export
 modal <- function(x, na.rm = TRUE) {
   if(na.rm) x <- x[!is.na(x)]
+  if(length(x)==0) return(NA)
   ux <- unique(x)
   ux[which.max(table(match(x, ux)))]
 }
