@@ -105,6 +105,56 @@ references:
   doi: 10.32614/CRAN.package.doFuture
   version: '>= 0.12.2'
 - type: software
+  title: future
+  abstract: 'future: Unified Parallel and Distributed Processing in R for Everyone'
+  notes: Imports
+  url: https://future.futureverse.org
+  repository: https://CRAN.R-project.org/package=future
+  authors:
+  - family-names: Bengtsson
+    given-names: Henrik
+    email: henrikb@braju.com
+    orcid: https://orcid.org/0000-0002-7579-5165
+  year: '2024'
+  doi: 10.32614/CRAN.package.future
+  version: '>= 1.23.0'
+- type: software
+  title: parallelly
+  abstract: 'parallelly: Enhancing the ''parallel'' Package'
+  notes: Imports
+  url: https://parallelly.futureverse.org
+  repository: https://CRAN.R-project.org/package=parallelly
+  authors:
+  - family-names: Bengtsson
+    given-names: Henrik
+    email: henrikb@braju.com
+    orcid: https://orcid.org/0000-0002-7579-5165
+  year: '2024'
+  doi: 10.32614/CRAN.package.parallelly
+  version: '>= 1.30.0'
+- type: software
+  title: parallel
+  abstract: 'R: A Language and Environment for Statistical Computing'
+  notes: Imports
+  authors:
+  - name: R Core Team
+  institution:
+    name: R Foundation for Statistical Computing
+    address: Vienna, Austria
+  year: '2024'
+- type: software
+  title: foreach
+  abstract: 'foreach: Provides Foreach Looping Construct'
+  notes: Imports
+  url: https://github.com/RevolutionAnalytics/foreach
+  repository: https://CRAN.R-project.org/package=foreach
+  authors:
+  - name: Microsoft
+  - family-names: Weston
+    given-names: Steve
+  year: '2024'
+  doi: 10.32614/CRAN.package.foreach
+- type: software
   title: dplyr
   abstract: 'dplyr: A Grammar of Data Manipulation'
   notes: Imports
@@ -129,32 +179,6 @@ references:
     orcid: https://orcid.org/0000-0003-4777-038X
   year: '2024'
   doi: 10.32614/CRAN.package.dplyr
-- type: software
-  title: foreach
-  abstract: 'foreach: Provides Foreach Looping Construct'
-  notes: Imports
-  url: https://github.com/RevolutionAnalytics/foreach
-  repository: https://CRAN.R-project.org/package=foreach
-  authors:
-  - name: Microsoft
-  - family-names: Weston
-    given-names: Steve
-  year: '2024'
-  doi: 10.32614/CRAN.package.foreach
-- type: software
-  title: future
-  abstract: 'future: Unified Parallel and Distributed Processing in R for Everyone'
-  notes: Imports
-  url: https://future.futureverse.org
-  repository: https://CRAN.R-project.org/package=future
-  authors:
-  - family-names: Bengtsson
-    given-names: Henrik
-    email: henrikb@braju.com
-    orcid: https://orcid.org/0000-0002-7579-5165
-  year: '2024'
-  doi: 10.32614/CRAN.package.future
-  version: '>= 1.23.0'
 - type: software
   title: geodist
   abstract: 'geodist: Fast, Dependency-Free Geodesic Distance Calculations'
@@ -219,7 +243,6 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
-  doi: 10.32614/CRAN.package.graphics
 - type: software
   title: methods
   abstract: 'R: A Language and Environment for Statistical Computing'
@@ -230,7 +253,6 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
-  doi: 10.32614/CRAN.package.methods
 - type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
@@ -261,19 +283,9 @@ references:
   - family-names: Pierce
     given-names: David
     email: dpierce@ucsd.edu
+    orcid: https://orcid.org/0000-0002-2453-9030
   year: '2024'
   doi: 10.32614/CRAN.package.ncdf4
-- type: software
-  title: parallel
-  abstract: 'R: A Language and Environment for Statistical Computing'
-  notes: Imports
-  authors:
-  - name: R Core Team
-  institution:
-    name: R Foundation for Statistical Computing
-    address: Vienna, Austria
-  year: '2024'
-  doi: 10.32614/CRAN.package.parallel
 - type: software
   title: posterior
   abstract: 'posterior: Tools for Working with Posterior Distributions'
@@ -333,7 +345,6 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
-  doi: 10.32614/CRAN.package.stats
 - type: software
   title: terra
   abstract: 'terra: Spatial Data Analysis'
@@ -391,7 +402,6 @@ references:
     name: R Foundation for Statistical Computing
     address: Vienna, Austria
   year: '2024'
-  doi: 10.32614/CRAN.package.utils
 - type: software
   title: 'R: A Language and Environment for Statistical Computing'
   notes: Depends
@@ -497,19 +507,6 @@ references:
     given-names: Rolf
   year: '2024'
   doi: 10.32614/CRAN.package.deldir
-- type: software
-  title: doParallel
-  abstract: 'doParallel: Foreach Parallel Adaptor for the ''parallel'' Package'
-  notes: Suggests
-  url: https://github.com/RevolutionAnalytics/doparallel
-  repository: https://CRAN.R-project.org/package=doParallel
-  authors:
-  - family-names: Corporation
-    given-names: Microsoft
-  - family-names: Weston
-    given-names: Steve
-  year: '2024'
-  doi: 10.32614/CRAN.package.doParallel
 - type: software
   title: ellipsis
   abstract: 'ellipsis: Tools for Working with ...'
