@@ -324,6 +324,39 @@ plot(fit$get_data("fit_best")$evaluation_log)
 ```
 </details>
 
+<details>
+<summary><b>I am predicting over a large area, is there a way to parallize the computation?</b>
+</summary>
+
+Yes and no.
+Generally, the computation speed is handled by the respective engine and not every
+engine supports for example multi-threaded computations.
+However, the most computationally demanding steps in the package is usually the 
+spatial prediction and there are some functionalities to 'tile' up the data over which
+predictions are made.
+
+This is using the R [`future`] package for asynchronous projections.
+
+**Note: This won't usually improve things for small models/covariates as the overhead of setting up a model negates any speed improvements**
+
+To set this up, simply execute the following
+```{r, echo=TRUE,eval=FALSE}
+
+# Set parallel option
+ibis_enable_parallel() # Enable parallel processing in general
+ibis_set_threads(4) # 4 Threads
+ibis_set_strategy("multisession") # R multi-session
+ibis_future() # Set up a future plan
+```
+
+Now most prediction should make use of the specified future plan. This counts for
+both initial model predictions and projections.
+
+If you aim to parallelize over a range of species instead, it might be more worthhile
+to rather parallize the iteration and not the prediction.
+
+</details>
+
 
 ## Model troubleshooting
 

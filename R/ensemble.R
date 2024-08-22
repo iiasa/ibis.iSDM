@@ -44,6 +44,7 @@
 #' * \code{'median'} - Calculates the median of several predictions.
 #' * \code{'max'} - The maximum value across predictions.
 #' * \code{'min'} - The minimum value across predictions.
+#' * \code{'mode'} - The mode/modal values as the most commonly occurring value.
 #' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 #' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 #' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
@@ -135,7 +136,7 @@ methods::setMethod(
     )
 
     # Check the method
-    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'max', 'min',
+    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'max', 'min','mode',
                                   'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
     # Uncertainty calculation
     uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range', 'pca'), several.ok = FALSE)
@@ -184,6 +185,8 @@ methods::setMethod(
           new <- max(ras, na.rm = TRUE)
         } else if(method == 'min'){
           new <- min(ras, na.rm = TRUE)
+        } else if(method == 'mode'){
+          new <- terra::modal(ras, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
@@ -275,6 +278,7 @@ methods::setMethod(
             method == "median" ~ median(ll_val, na.rm = TRUE),
             method == "max" ~ max(ll_val, na.rm = TRUE),
             method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "mode" ~ modal(ll_val, na.rm = TRUE),
             method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
             .default = mean(ll_val, na.rm = TRUE)
           )
@@ -338,6 +342,8 @@ methods::setMethod(
           new <- max(ras, na.rm = TRUE)
         } else if(method == 'min'){
           new <- min(ras, na.rm = TRUE)
+        } else if(method == 'mode'){
+          new <- terra::modal(ras, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
@@ -450,6 +456,9 @@ methods::setMethod(
       } else if(method == 'min'){
         out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                      1, function(x) min(x, na.rm = TRUE))
+      } else if(method == 'mode'){
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) modal(x, na.rm = TRUE))
       } else if(method == 'weighted.mean'){
         out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                      1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
@@ -497,6 +506,7 @@ methods::setMethod(
             method == "median" ~ median(ll_val, na.rm = TRUE),
             method == "max" ~ max(ll_val, na.rm = TRUE),
             method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "mode" ~ modal(ll_val, na.rm = TRUE),
             method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
             .default = mean(ll_val, na.rm = TRUE)
           )

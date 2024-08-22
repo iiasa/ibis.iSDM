@@ -353,7 +353,6 @@ methods::setMethod(
                                        total = length(unique(df$time)))
     }
 
-    # TODO: Consider doing this in parallel but sequential
     times <- sort(unique(df$time))
 
     for(step in times){ # step = times[1]

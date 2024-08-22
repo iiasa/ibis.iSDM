@@ -60,18 +60,23 @@ text_yellow <- function(text) { paste0('\033[33m',text,'\033[39m') }
 #' @inheritParams text_red
 text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 
-#' Calculate the mode
+#' Calculate the mode of a provided vector
 #'
 #' @param A [`vector`] of values or characters.
+#' @param na.rm [`logical`] whether \code{NA} values are to be removed (Default: \code{TRUE})
 #'
-#' @keywords utils
+#' @keywords utils, misc
+#' @examples
+#' # Example
+#' modal(trees$Girth)
 #'
-#' @noRd
-#'
-#' @keywords internal
-mode <- function(x) {
+#' @returns The most common (mode) estimate.
+#' @export
+modal <- function(x, na.rm = TRUE) {
+  if(na.rm) x <- x[!is.na(x)]
+  if(length(x)==0) return(NA)
   ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
+  ux[which.max(table(match(x, ux)))]
 }
 
 #' Check whether function exist in name space
@@ -335,116 +340,6 @@ sanitize_names <- function(names){
   return(
     as.character(new_names)
     )
-}
-
-#' Parallel computation of function
-#'
-#' @description Some computations take considerable amount of time to execute.
-#' This function provides a helper wrapper for running functions of the
-#' [`apply`] family to specified outputs.
-#'
-#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a single
-#' core or parallel [apply] call.
-#' @param FUN A [`function`] passed on for computation.
-#' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
-#' @param approach [`character`] for the parallelization approach taken (Options:
-#' \code{"parallel"} or \code{"future"}).
-#' @param export_package A [`vector`] with packages to export for use on parallel
-#' nodes (Default: \code{NULL}).
-#'
-#' @details By default, the [parallel] package is used for parallel computation,
-#' however an option exists to use the [future] package instead.
-#'
-#' @keywords utils
-#'
-#' @examples
-#' \dontrun{
-#'  run_par(list, mean, cores = 4)
-#' }
-#'
-#' @noRd
-#'
-#' @keywords internal
-run_parallel <- function(X, FUN, cores = 1, approach = "parallel", export_packages = NULL, ...) {
-  assertthat::assert_that(
-    is.list(X) || is.data.frame(X) || is.matrix(X),
-    is.function(FUN),
-    is.numeric(cores),
-    is.null(export_packages) || is.character(export_packages)
-  )
-  # Match approach
-  approach <- match.arg(approach, c("parallel", "future"), several.ok = FALSE)
-
-  # Collect dots
-  dots <- list(...)
-
-  if(!is.list(X)){
-    # Convert input object to a list of split parameters
-    n_vars <- nrow(X)
-    chunk_size <- ceiling(n_vars / cores)
-    n_chunks <- ceiling(n_vars / chunk_size)
-    chunk_list <- vector(length = n_chunks, mode = "list")
-
-    for (i in seq_len(n_chunks)) {
-      if ((chunk_size * (i - 1) + 1) <= n_vars) {
-        chunk <- (chunk_size * (i - 1) + 1):(min(c(chunk_size *
-                                                     i, n_vars)))
-        chunk_list[[i]] <- X[chunk, ]
-      }
-    }
-    assertthat::assert_that(sum(sapply(chunk_list, nrow)) == nrow(X))
-    X <- chunk_list;rm(chunk_list)
-    input_type = "data.frame" # Save to aggregate later again
-  } else { input_type = "list"}
-
-  # Process depending on cores
-  if (cores == 1) {
-    out <- lapply(X, FUN, ...)
-  } else {
-      if(approach == "parallel"){
-        # check_package('doParallel')
-        # require(foreach)
-        # isTRUE(Sys.info()[["sysname"]] == "Windows")
-        # Other operating systems
-        if(!isTRUE(Sys.info()[["sysname"]] == "Windows") && is.list(X)) {
-          out <- parallel::mclapply(X = X, FUN = FUN, mc.cores = cores,
-                                    ...)
-        } else {
-          # Other operating systems
-          cl <- parallel::makePSOCKcluster(cores)
-          on.exit(parallel::stopCluster(cl))
-          if(!is.null(export_packages)){
-            # Send all specified packages to the cluster
-            for(val in export_packages){
-              parallel::clusterExport(cl, varlist = val,
-                                      envir = as.environment(asNamespace(val)))
-            }
-          }
-          out <- parallel::parLapply(cl = cl, X = X, fun = FUN, ...)
-        }
-        # out <- foreach::foreach(z = iterators::iter(X),
-        #                .combine = ifelse(input_type!="list", "rbind", foreach:::defcombine),
-        #                .inorder = FALSE,
-        #                .multicombine = TRUE,
-        #                .errorhandling = 'stop',
-        #                .export = c("FUN"),
-        #                .packages = export_packages,
-        #                ...
-        # ) %dopar% { return( FUN(z, ...) ) }
-      } else {
-        # Check that future is loaded
-        check_package('future.apply')
-        # Check that plan for future has been set up!
-        assertthat::assert_that( getOption("ibis.use_future") == TRUE,
-                                 msg = "Set up a future plan via [ibis_future] to use this approach.")
-        out <- future.apply::future_lapply(cl = cl, X = X, fun = FUN, ...)
-      }
-  }
-  # If input data was not a list, combine again
-  if(input_type != "list" && is.list(out)){
-    out <- do.call(rbind, out)
-  }
-  return( out )
 }
 
 #' Clamp a predictor matrix by given values

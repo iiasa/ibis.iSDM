@@ -141,55 +141,310 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
   invisible()
 }
 
-#' Options to set up ibis for parallel processing with future
+#' Set the parallel processing flag to TRUE
+#' @description
+#' Small helper function to enable parallel processing. If set
+#' to \code{TRUE}, then parallel inference (if supported by engines) and projection is
+#' enabled across the package.
+#' For enabling prediction support beyond sequential prediction see the [`ibis_future`] function.
+#'
+#' @return Invisible
+#' @seealso [future], [ibis_future]
+#' @keywords misc
+#' @export
+ibis_enable_parallel <- function(){
+  options('ibis.runparallel' = TRUE)
+  if(getOption('ibis.nthread')<2){
+    myLog('[Setup]','yellow','Parallelization enabled but less than 2 nodes specified!')
+  }
+  invisible()
+}
+
+#' Set the number of threads for parallel processing.
+#' @description
+#' Small helper function to respecify the strategy for parallel processing (Default: \code{'sequential'}).
+#' @details
+#' Currently supported strategies are:
+#'
+#' * \code{"sequential"} = Resolves futures sequentially in the current R process (Package default).
+#' * \code{"multisession"} = Resolves futures asynchronously across \code{'cores'} sessions.
+#' * \code{"multicore"} = Resolves futures asynchronously across on forked processes. Only works on UNIX systems!
+#' * \code{"cluster"} = Resolves futures asynchronously in sessions on this or more machines.
+#' * \code{"slurm"} = To be implemented: Slurm linkage via batchtools.
+#' @param strategy A [`character`] with the strategy.
+#' @return Invisible
+#' @seealso [future], [ibis_future_run]
+#' @keywords misc
+#' @export
+ibis_set_strategy <- function(strategy = "sequential"){
+  assertthat::assert_that(is.character(strategy))
+
+  strategy <- match.arg(strategy, c("sequential", "multisession", "multicore", "cluster", "slurm"),
+                        several.ok = FALSE)
+  options('ibis.futurestrategy' = strategy)
+  invisible()
+}
+
+#' Set the threads for parallel processing.
+#' @description
+#' Small helper function to respecify the number of threads for parallel processing.
+#' @param threads A [`numeric`] greater thna \code{0}.
+#' @return Invisible
+#' @seealso [future], [ibis_future_run]
+#' @keywords misc
+#' @export
+ibis_set_threads <- function(threads = 2){
+  assertthat::assert_that(is.numeric(threads),
+                          threads >0)
+  options('ibis.nthread' = threads)
+  invisible()
+}
+
+#' Internal function to enable  (a)synchronous parallel processing
+#'
+#' @description
+#' This function checks if parallel processing can be set up and enables it.
+#' **Ideally this is done by the user for more control!**
+#' In the package parallelization is usually only used for predictions and projections,
+#' but not for inference in which case parallel inference should be handled by the engine.
+#' @details
+#' Currently supported strategies are:
+#'
+#' * \code{"sequential"} = Resolves futures sequentially in the current R process (Package default).
+#' * \code{"multisession"} = Resolves futures asynchronously across \code{'cores'} sessions.
+#' * \code{"multicore"} = Resolves futures asynchronously across on forked processes. Only works on UNIX systems!
+#' * \code{"cluster"} = Resolves futures asynchronously in sessions on this or more machines.
+#' * \code{"slurm"} = To be implemented: Slurm linkage via batchtools.
+#' @note
+#' The \code{'plan'} set by [future] exists after the function has been executed.
+#'
+#' If the aim is to parallize across many species, this is better done in a scripted solution.
+#' Make sure not to parallize predictions within existing clusters to avoid out-of-memory
+#' issues.
 #'
 #' @param cores A [`numeric`] number stating the number of cores to use.
 #' @param strategy A [`character`] denoting the strategy to be used for future.
 #' See help of [`future`] for options. (Default: \code{"multisession"}).
+#' @param workers An optional list of remote machines or workers, e.g. \code{"c(remote.server.org)"}.
+#' Alternatively a \code{"cluster"} object can be provided.
 #'
-#' @return None
+#' @return Invisible
 #'
 #' @seealso [future]
 #' @keywords misc
 #'
 #' @examples
 #' \dontrun{
-#' # Starts future job
-#' ibis_future(cores = 4)
+#' # Starts future job. F in this case is a prediction function.
+#' ibis_future(cores = 4, strategy = "multisession")
 #' }
 #'
 #' @export
-ibis_future <- function(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy")) {
+ibis_future <- function(plan_exists = FALSE,
+                        cores = getOption("ibis.nthread",default = 2),
+                        strategy = getOption("ibis.futurestrategy"),
+                        workers = NULL
+                        ) {
   assertthat::assert_that(
+    is.logical(plan_exists),
     is.numeric(cores),
-    is.character(strategy)
+    is.character(strategy),
+    is.null(workers) || is.vector(workers) || (inherits(workers, "ClusterFuture"))
   )
-  check_package("future")
-  # Check that number of cores don't exceed what is possible
-  assertthat::assert_that(cores <= future::availableCores())
 
-  strategy <- match.arg(strategy, c("sequential", "multisession", "multicore", "cluster", "remote"),
-                        several.ok = FALSE)
+  # Check if plan exists, if not specify new plan
+  if(!plan_exists){
+    # Check that number of cores don't exceed what is possible
+    assertthat::assert_that(cores <= parallelly::availableCores()[[1]])
 
-  if(isTRUE(Sys.info()[["sysname"]] == "Windows")){
-    if(strategy == "multicore") stop("Multicore is not supported on windows!")
+    strategy <- match.arg(strategy, c("sequential", "multisession", "multicore", "cluster", "slurm"),
+                          several.ok = FALSE)
+
+    # Check if parallel processing is enabled
+    assertthat::assert_that(
+      getOption("ibis.runparallel", default = FALSE),
+      msg = "Parallel processing not enabled. Run 'ibis_enable_parallel()' !"
+    )
+
+    # Check that more 1 connection is available
+    if(strategy != "sequential"){
+      assertthat::assert_that(parallelly::availableConnections()>1,
+                              msg = "No further connections are available for parallel processing!")
+    }
+
+    # isTRUE(Sys.info()[["sysname"]] == "Windows")
+    if(strategy == "multicore" && !parallelly::supportsMulticore()){
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow','Parallization multicore not supported om windows. Changing to multisession.')
+      strategy <- "multisession"
+    }
+
+    if(is.null(cores)) cores <- 4 # Arbitrary nr of cores if somehow not found
+    if(is.null(workers)) workers <- cores # If no workers are found, use the cores
+
+    # --- #
+    # Define plan based on formulated strategy
+    if(strategy == "slurm"){
+      #TODO: See if a testing environment could be found.
+      stop("Not yet implemented")
+      #e.g. cl <- makeCluster(4, type = "MPI")
+    } else if(strategy == "sequential") {
+      future::plan(strategy = "sequential")
+    } else if(strategy == "multisession"){
+      future::plan(strategy = "multisession", workers = cores)
+    } else if(strategy == "multicore"){
+      future::plan(strategy = "multicore", workers = cores)
+    } else if(strategy == "cluster"){
+      future::plan(strategy = "cluster", workers = cores)
+    }
   }
-
-  # Define plan based on formulated strategy
-  if(strategy == "remote"){
-    #TODO: See if a testing environment could be found.
-    stop("TBD. Requires specific setup.")
-    #e.g. cl <- makeCluster(4, type = "MPI")
-  } else if(strategy == "sequential") {
-    future::plan(strategy = future::sequential())
-  } else if(strategy == "multisession"){
-    future::plan(strategy = future::multisession(workers = cores) )
-  } else if(strategy == "multicore"){
-    future::plan(strategy = future::multicore(workers = cores) )
-  } else if(strategy == "cluster"){
-    future::plan(strategy = future::cluster(workers = cores) )
-  }
-  # Register the doFuture adapate
-  doFuture::registerDoFuture()
+  if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Specified parallel processing plan with strategy: ', strategy)
   invisible()
+}
+
+#' Internal helper function to split a data.frame into chucnks
+#'
+#' @param X A [`data.frame`] or [`matrix`] object to be split.
+#' @param N A [`numeric`] with the number of chunks smaller than \code{`nrow(X)`}.
+#' @param cores A [`numeric`] with the number of processing cores. Used when \code{N} is \code{NULL}.
+#' @param index_only [`logical`] on whether only the indices or split X as list is returnsed (Default: \code{FALSE}).
+#' @keywords internal
+#' @returns A [`list`] object.
+#' @examples
+#' # Chunck example data into 4 subsets
+#' chunk_data(datasets::airquality, N = 4)
+#' @noRd
+chunk_data <- function(X, N = NULL, cores = parallel::detectCores(), index_only = FALSE){
+  assertthat::assert_that(
+    is.data.frame(X) || is.matrix(X),
+    nrow(X) > 1,
+    is.numeric(cores),
+    is.null(N) || is.numeric(N),
+    is.logical(index_only)
+  )
+
+  n_vars <- nrow(X)
+  # Use cores as N otherwise
+  if(is.null(N)) N <- cores
+  chunk_size <- ceiling(n_vars / N)
+  n_chunks <- ceiling(n_vars / chunk_size)
+
+  if(index_only){
+    chunk_list <- list()
+  } else {
+    chunk_list <- vector(length = n_chunks, mode = "list")
+  }
+  for (i in seq_len(n_chunks)) {
+    if ((chunk_size * (i - 1) + 1) <= n_vars) {
+      chunk <- (chunk_size * (i - 1) + 1):(min(c(chunk_size *
+                                                   i, n_vars)))
+      if(index_only){
+        o <- chunk
+      } else {
+        o <- X[chunk, ] |> as.data.frame()
+        colnames(o) <- colnames(X)
+      }
+      chunk_list[[i]] <- o
+      rm(o)
+    }
+  }
+  assertthat::assert_that(is.list(chunk_list))
+  if(!index_only){
+    assertthat::assert_that(sum(sapply(chunk_list, nrow)) == nrow(X),
+                            msg = "Something went wrong with the data chunking...")
+  }
+  return(chunk_list)
+}
+
+#' Parallel computation of function
+#'
+#' @description Some computations take considerable amount of time to execute.
+#' This function provides a helper wrapper for running functions of the
+#' [`apply`] family to specified outputs.
+#'
+#' @param X A [`list`], [`data.frame`] or [`matrix`] object to be fed to a single
+#' core or parallel [apply] call.
+#' @param FUN A [`function`] passed on for computation.
+#' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
+#' @param approach [`character`] for the parallelization approach taken (Options:
+#' \code{"parallel"} or \code{"future"}).
+#' @param export_package A [`vector`] with packages to export for use on parallel
+#' nodes (Default: \code{NULL}).
+#'
+#' @details By default, the [parallel] package is used for parallel computation,
+#' however an option exists to use the [future] package instead.
+#'
+#' @keywords utils
+#'
+#' @examples
+#' \dontrun{
+#'  run_parallel(list, mean, cores = 4)
+#' }
+#'
+#' @export
+run_parallel <- function(X, FUN, cores = 1, approach = "future", export_packages = NULL, ...) {
+  assertthat::assert_that(
+    is.list(X) || is.data.frame(X) || is.matrix(X),
+    is.function(FUN),
+    is.numeric(cores),
+    is.null(export_packages) || is.character(export_packages)
+  )
+  message("The run_parallel function is likely deprecated and is only kept for reference...")
+
+  # Match approach
+  approach <- match.arg(approach, c("parallel", "future"), several.ok = FALSE)
+
+  # Collect dots
+  dots <- list(...)
+
+  if(!is.list(X)){
+    # Convert input object to a list of split parameters
+    X <- chunk_data(X, cores = cores)
+    input_type = "data.frame" # Save to aggregate later again
+  } else { input_type = "list"}
+
+  # Process depending on cores
+  if (cores == 1) {
+    out <- lapply(X, FUN, ...)
+  } else {
+    if(approach == "parallel"){
+      # check_package('doParallel')
+      # require(foreach)
+      # isTRUE(Sys.info()[["sysname"]] == "Windows")
+      # Other operating systems
+      if(!isTRUE(Sys.info()[["sysname"]] == "Windows") && is.list(X)) {
+        out <- parallel::mclapply(X = X, FUN = FUN, mc.cores = cores,
+                                  ...)
+      } else {
+        # Other operating systems
+        cl <- parallel::makePSOCKcluster(cores)
+        on.exit(parallel::stopCluster(cl))
+        if(!is.null(export_packages)){
+          # Send all specified packages to the cluster
+          for(val in export_packages){
+            parallel::clusterExport(cl, varlist = val,
+                                    envir = as.environment(asNamespace(val)))
+          }
+        }
+        out <- parallel::parLapply(cl = cl, X = X, fun = FUN, ...)
+      }
+      # out <- foreach::foreach(z = iterators::iter(X),
+      #                .combine = ifelse(input_type!="list", "rbind", foreach:::defcombine),
+      #                .inorder = FALSE,
+      #                .multicombine = TRUE,
+      #                .errorhandling = 'stop',
+      #                .export = c("FUN"),
+      #                .packages = export_packages,
+      #                ...
+      # ) %dopar% { return( FUN(z, ...) ) }
+    } else {
+      # Check that future is loaded
+      check_package("future")
+      ibis_future()
+    }
+  }
+  # If input data was not a list, combine again
+  if(input_type != "list" && is.list(out)){
+    out <- do.call(rbind, out)
+  }
+  return( out )
 }

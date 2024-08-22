@@ -31,6 +31,10 @@ NULL
 #' baselearners via [add_latent_spatial] or the specification of monotonically
 #' constrained priors via [GDBPrior].
 #'
+#' @note
+#' The coefficients resulting from gdb with poipa data (Binomial) are only 0.5
+#' of the typical coefficients of a logit model obtained via glm (see Binomial).
+#'
 #' @returns An engine.
 #'
 #' @references
@@ -476,13 +480,41 @@ engine_gdb <- function(x,
         }
       }
 
-      # Make a prediction
-      suppressWarnings(
-        pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
-                                           type = self$get_data('params')$type,
-                                           aggregate = 'sum',
-                                           offset = full$w)
-      )
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+
+        # Chunk the data
+        splits <- chunk_data(full, N = getOption("ibis.nthread",default = 10), index_only = TRUE)
+
+        pred_gdb <- foreach::foreach(s = splits,
+                                      .combine = "rbind",
+                                      .inorder = TRUE,
+                                      .options.future = list(seed = TRUE,
+                                                             packages = c("mboost"))
+        ) %dofuture% {
+          # Make a prediction
+          suppressWarnings(
+            mboost::predict.mboost(object = fit_gdb,
+                                   newdata = full[s,],
+                                   type = self$get_data('params')$type,
+                                   aggregate = 'sum',
+                                   offset = full$w[s])
+          )
+        }
+
+      } else {
+        # Make a prediction
+        suppressWarnings(
+          pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
+                                             type = self$get_data('params')$type,
+                                             aggregate = 'sum',
+                                             offset = full$w)
+        )
+      }
+
       # Fill output
       prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
       names(prediction) <- 'mean'
@@ -534,11 +566,36 @@ engine_gdb <- function(x,
       # Subset to non-missing data
       newdata_sub <- subset(newdata, stats::complete.cases(newdata))
 
-      # Predict
-      y <- suppressWarnings(
-        mboost::predict.mboost(object = mod, newdata = newdata_sub,
-                               type = type, aggregate = 'sum')
-      )
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Chunk the data
+        splits <- chunk_data(newdata_sub, N = getOption("ibis.nthread",default = 10),
+                             index_only = TRUE)
+
+        y <- foreach::foreach(s = splits,
+                              .combine = "rbind",
+                              .inorder = TRUE,
+                              .options.future = list(seed = TRUE,
+                                                     packages = c("mboost"))
+        ) %dofuture% {
+          # Make a prediction
+          suppressWarnings(
+            mboost::predict.mboost(object = mod,
+                                   newdata = newdata_sub[s,],
+                                   type = type,
+                                   aggregate = 'sum')
+          )
+        }
+      } else {
+        # Predict
+        y <- suppressWarnings(
+          mboost::predict.mboost(object = mod, newdata = newdata_sub,
+                                 type = type, aggregate = 'sum')
+        )
+      }
 
       # Make empty template
       if(nrow(newdata)==nrow(model$predictors)){

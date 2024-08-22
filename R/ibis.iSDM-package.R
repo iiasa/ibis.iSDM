@@ -29,6 +29,10 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   "geometry",
                   #MJ: Added self here hoping that does not crash all methods.
                   "self",
+                  # Cores for parallel processing
+                  "cores",
+                  # Global prediction function
+                  "predict_boom",
                   "id", "included", "i",
                   "km", "vt", "V2",
                   "limit", "lower", "layer",
