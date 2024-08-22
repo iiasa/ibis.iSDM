@@ -1,9 +1,11 @@
 # ibis.iSDM 0.1.5 (current dev branch)
 
 #### New features
+* Support for 'modal' value calculations in `ensemble()` and export of method.
+* Support for 'superlearner' in `ensemble()`.
+* Support for future processing streamlined. See FAQ section for instructions #18.
 
 #### Minor improvements and bug fixes
-* Support for modal value calculations in `ensemble()` and export of method.
 * Minor :bug: fix related to misaligned thresholds and negative exponential kernels.
 * :fire: :bug: fix for scenario projections that use different grain sizes than for inference.
 

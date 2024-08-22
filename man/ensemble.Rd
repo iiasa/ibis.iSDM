@@ -13,6 +13,8 @@ ensemble(
   layer = "mean",
   normalize = FALSE,
   uncertainty = "cv",
+  point = NULL,
+  field_occurrence = "observed",
   apply_threshold = TRUE
 )
 
@@ -24,6 +26,8 @@ ensemble(
   layer = "mean",
   normalize = FALSE,
   uncertainty = "cv",
+  point = NULL,
+  field_occurrence = "observed",
   apply_threshold = TRUE
 )
 }
@@ -51,6 +55,11 @@ models should be calculated. Available options include \code{"none"}, the
 standard deviation (\code{"sd"}), the average of all PCA axes except the
 first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
 the range between the lowest and highest value (\code{"range"}).}
+
+\item{point}{A \code{\link{sf}} object containing observational data used for model training. Used
+for method \code{'superlearner'} only (Default: \code{NULL}).}
+
+\item{field_occurrence}{A \code{\link{character}} location of biodiversity point records (Default: \code{'observed'}).}
 
 \item{apply_threshold}{A \code{\link{logical}} flag (Default: \code{TRUE}) specifying
 whether threshold values should also be created via \code{"method"}. Only
@@ -92,6 +101,8 @@ Possible options for creating an ensemble includes:
 \item \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 \item \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
 \item \code{'pca'} - Calculates a PCA between predictions of each algorithm and then extract the first axis (the one explaining the most variation).
+\item \code{'superlearner'} - Composites two predictions through a 'meta-model' fitted on top
+(using a \code{\link{glm}} by default). Requires binomial data in current Setup.
 }
 
 In addition to the different ensemble methods, a minimal threshold
