@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-08-20</h4>
+            <h4 data-toc-skip class="date">2024-08-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/08_frequently-asked-questions.Rmd" class="external-link"><code>vignettes/articles/08_frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>08_frequently-asked-questions.Rmd</code></div>
@@ -437,6 +437,31 @@ performance is also to plot the evaluation log and
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Requires a fitted model</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="st">"fit_best"</span><span class="op">)</span><span class="op">$</span><span class="va">evaluation_log</span><span class="op">)</span></span></code></pre></div>
+</details><details><summary><b>I am predicting over a large area, is there a way to parallize the
+computation?</b>
+</summary><p>Yes and no. Generally, the computation speed is handled by the
+respective engine and not every engine supports for example
+multi-threaded computations. However, the most computationally demanding
+steps in the package is usually the spatial prediction and there are
+some functionalities to ‘tile’ up the data over which predictions are
+made.</p>
+<p>This is using the R [<code>future</code>] package for asynchronous
+projections.</p>
+<p><strong>Note: This won’t usually improve things for small
+models/covariates as the overhead of setting up a model negates any
+speed improvements</strong></p>
+<p>To set this up, simply execute the following</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Set parallel option</span></span>
+<span><span class="fu"><a href="../reference/ibis_enable_parallel.html">ibis_enable_parallel</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># Enable parallel processing in general</span></span>
+<span><span class="fu"><a href="../reference/ibis_set_threads.html">ibis_set_threads</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span> <span class="co"># 4 Threads</span></span>
+<span><span class="fu"><a href="../reference/ibis_set_strategy.html">ibis_set_strategy</a></span><span class="op">(</span><span class="st">"multisession"</span><span class="op">)</span> <span class="co"># R multi-session</span></span>
+<span><span class="fu"><a href="../reference/ibis_future.html">ibis_future</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># Set up a future plan</span></span></code></pre></div>
+<p>Now most prediction should make use of the specified future plan.
+This counts for both initial model predictions and projections.</p>
+<p>If you aim to parallelize over a range of species instead, it might
+be more worthhile to rather parallize the iteration and not the
+prediction.</p>
 </details>
 </div>
 <div class="section level3">
@@ -525,7 +550,7 @@ models to infer the suitability of a given area, the units can be hard
 to interpret for non-scientists. An easy way to achieve this has been
 added as a function to each Biodiversity distribution object. See below
 for an example.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Train a model</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="co"># Presence-absence data</span></span>
@@ -553,7 +578,7 @@ than 1 variable) are created, it is necessary to also read them in as
 multi-dimensional array. By default and from Version 0.1.3 onwards,
 files with ending ‘nc’ (netcdf) and with multiple variables are stored
 as such. To read them in:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/stars/" class="external-link">stars</a></span><span class="op">)</span></span>
 <span><span class="va">sc</span> <span class="op">&lt;-</span> <span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/mdim.html" class="external-link">read_mdim</a></span><span class="op">(</span><span class="st">'myscenarioprojection.nc'</span><span class="op">)</span></span>
 <span><span class="co"># Split the attribute variable up</span></span>

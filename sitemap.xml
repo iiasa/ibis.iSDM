@@ -96,8 +96,11 @@
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/get_rastervalue.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis.iSDM.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_dependencies.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_enable_parallel.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_future.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_options.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_set_strategy.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/ibis_set_threads.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/index.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/interpolate_gaps.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/is.Id.html</loc></url>
@@ -108,6 +111,7 @@
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/limiting.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/load_model.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/mask.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/modal.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/myLog.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/new_id.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/new_waiver.html</loc></url>
@@ -131,6 +135,7 @@
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/rm_offset.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/rm_predictors.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/rm_priors.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/run_parallel.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/run_stan.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/sanitize_names.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/scenario.html</loc></url>
