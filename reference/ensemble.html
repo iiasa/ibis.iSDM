@@ -100,6 +100,8 @@ differences in model complexity.</p>
 <span>  layer <span class="op">=</span> <span class="st">"mean"</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  uncertainty <span class="op">=</span> <span class="st">"cv"</span>,</span>
+<span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
 <span>  apply_threshold <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -112,6 +114,8 @@ differences in model complexity.</p>
 <span>  layer <span class="op">=</span> <span class="st">"mean"</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  uncertainty <span class="op">=</span> <span class="st">"cv"</span>,</span>
+<span>  point <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_occurrence <span class="op">=</span> <span class="st">"observed"</span>,</span>
 <span>  apply_threshold <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -158,6 +162,15 @@ first <code>"pca"</code>, the coefficient of variation (<code>"cv"</code>, Defau
 the range between the lowest and highest value (<code>"range"</code>).</p></dd>
 
 
+<dt id="arg-point">point<a class="anchor" aria-label="anchor" href="#arg-point"></a></dt>
+<dd><p>A <code>sf</code> object containing observational data used for model training. Used
+for method <code>'superlearner'</code> only (Default: <code>NULL</code>).</p></dd>
+
+
+<dt id="arg-field-occurrence">field_occurrence<a class="anchor" aria-label="anchor" href="#arg-field-occurrence"></a></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> location of biodiversity point records (Default: <code>'observed'</code>).</p></dd>
+
+
 <dt id="arg-apply-threshold">apply_threshold<a class="anchor" aria-label="anchor" href="#arg-apply-threshold"></a></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag (Default: <code>TRUE</code>) specifying
 whether threshold values should also be created via <code>"method"</code>. Only
@@ -181,6 +194,8 @@ across all models.</p>
 <li><p><code>'min.sd'</code> - Ensemble created by minimizing the uncertainty among predictions.</p></li>
 <li><p><code>'threshold.frequency'</code> - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.</p></li>
 <li><p><code>'pca'</code> - Calculates a PCA between predictions of each algorithm and then extract the first axis (the one explaining the most variation).</p></li>
+<li><p><code>'superlearner'</code> - Composites two predictions through a 'meta-model' fitted on top
+(using a <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></code> by default). Requires binomial data in current Setup.</p></li>
 </ul><p>In addition to the different ensemble methods, a minimal threshold
 (<code>min.value</code>) can be set that needs to be surpassed for averaging. By
 default this option is not used (Default: <code>NULL</code>).</p>
