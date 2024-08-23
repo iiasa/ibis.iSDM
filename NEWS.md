@@ -1,8 +1,9 @@
 # ibis.iSDM 0.1.5 (current dev branch)
 
 #### New features
-* Support for 'modal' value calculations in `ensemble()` and export of method.
+* Support for 'modal' value calculations in `ensemble()`.
 * Support for 'superlearner' in `ensemble()`.
+* Support for 'kmeans' derived threshold calculation in `threshold()`
 * Support for future processing streamlined. See FAQ section for instructions #18.
 
 #### Minor improvements and bug fixes

@@ -28,7 +28,9 @@
 #' @param return_threshold Should threshold value be returned instead (Default: \code{FALSE})
 #' @param ... other parameters not yet set.
 #'
-#' @details The following options are currently implemented:
+#' @details
+#' The following options are currently implemented:
+#'
 #' * \code{'fixed'} = applies a single pre-determined threshold. Requires \code{value}
 #' to be set.
 #' * \code{'mtp'} = minimum training presence is used to find and set the lowest
@@ -52,6 +54,8 @@
 #' Requires the \code{"modEvA"} package to be installed.
 #' * \code{'AUC'} = Determines the optimal AUC of presence records. Requires the
 #' \code{"modEvA"} package to be installed.
+#' * \code{'kmeans'} = Determines a threshold based on a 2 cluster k-means clustering.
+#' The presence class is assumed to be the cluster with the larger mean.
 #'
 #' @returns A [SpatRaster] if a [SpatRaster] object as input. Otherwise the threshold
 #' is added to the respective [`DistributionModel`] or [`BiodiversityScenario`] object.
@@ -113,6 +117,7 @@ methods::setMethod(
     )
     # Matching for correct method
     method <- match.arg(method, c('fixed','mtp','percentile','min.cv',
+                                  'kmeans',
                                   # modEvA measures
                                   'TSS','kappa','F1score','Sensitivity','Specificity',
                                   'Misclass','Omission','Commission','Precision',
@@ -264,6 +269,7 @@ methods::setMethod(
 
     # Match to correct spelling mistakes
     method <- match.arg(method, c('fixed','mtp','percentile','min.cv',
+                                  'kmeans',
                                   # modEvA measures
                                   'TSS','kappa','F1score','Sensitivity','Specificity',
                                   'Misclass','Omission','Commission','Precision',
@@ -325,6 +331,16 @@ methods::setMethod(
         # Combine as a vector
         tr <- c(tr, value)
 
+      } else if(method == 'kmeans') {
+        # K-means based clustering. Presence and absences are identified through
+        # by getting the value within regular sampled values
+        val <- terra::spatSample(raster_thresh, size = 1e6, method = "regular",
+                                 na.rm = TRUE, exhaustive = TRUE)
+        val <- subset(val, complete.cases(val))
+        if(nrow(val)<5) stop("Not enough values for clustering found...")
+        clus <- stats::kmeans(val, centers = 2)
+        tr <- clus$centers[which.min(clus$centers[,1])]
+        rm(clus, val)
       } else {
         # Optimized threshold statistics using the modEvA package
         # FIXME: Could think of porting these functions but too much effort for
