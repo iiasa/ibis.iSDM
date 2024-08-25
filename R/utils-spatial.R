@@ -1044,11 +1044,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   return(out)
 }
 
-#' Function to extract directly the raster value of provided points
+#' Function to extract point values directly from a SpatRaster
 #'
 #' @description This function simply extracts the values from a provided
 #' [`SpatRaster`], [`SpatRasterDataset`] or [`SpatRasterCollection`] object. For
-#' points where or NA values were extracted a small buffer is applied to try and
+#' points where or \code{NA} values were extracted a small buffer is applied to try and
 #' obtain the remaining values.
 #'
 #' @param coords A [`data.frame`], [`matrix`] or [`sf`] object.
@@ -1066,10 +1066,14 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' @keywords utils
 #'
 #' @examples
-#' \dontrun{
+#' # Dummy raster:
+#' r <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+#' # (dummy points)
+#' pp <- terra::spatSample(r,20,as.points = TRUE) |> sf::st_as_sf()
+#'
 #' # Extract values
-#' vals <- get_rastervalue(coords, env)
-#' }
+#' vals <- get_rastervalue(pp, r)
+#' head(vals)
 #'
 #' @export
 get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){

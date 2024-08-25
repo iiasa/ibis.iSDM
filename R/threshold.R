@@ -334,13 +334,13 @@ methods::setMethod(
       } else if(method == 'kmeans') {
         # K-means based clustering. Presence and absences are identified through
         # by getting the value within regular sampled values
-        val <- terra::spatSample(raster_thresh, size = 1e6, method = "regular",
+        ex <- terra::spatSample(raster_thresh, size = 1e6, method = "regular",
                                  na.rm = TRUE, exhaustive = TRUE)
-        val <- subset(val, complete.cases(val))
-        if(nrow(val)<5) stop("Not enough values for clustering found...")
-        clus <- stats::kmeans(val, centers = 2)
-        tr <- clus$centers[which.min(clus$centers[,1])]
-        rm(clus, val)
+        ex <- subset(ex, complete.cases(ex))
+        if(nrow(ex)<5) stop("Not enough values for clustering found...")
+        clus <- stats::kmeans(ex, centers = 2)
+        tr <- clus$centers[which.max(clus$centers[,1])]
+        rm(clus, ex)
       } else {
         # Optimized threshold statistics using the modEvA package
         # FIXME: Could think of porting these functions but too much effort for

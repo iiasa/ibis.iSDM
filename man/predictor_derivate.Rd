@@ -61,13 +61,17 @@ The number of thresholds and thus new derivates is specified via the parameter
 \item \code{'bin'} - Creates a factor representation of a covariates by cutting the
 range of covariates by their percentiles. The number of percentile cuts and thus
 new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+\item \code{'kmeans'} Creates a factor representation of a covariates through a
+\code{\link[=kmeans]{kmeans()}} clustering. The number of clusters are specified via the parameter \code{'nknots'}.
 }
 }
 \examples{
-\dontrun{
-# Create a hinge transformation of one or multiple SpatRaster.
-predictor_derivate(covs, option = "hinge", knots = 4)
-}
+# Dummy raster
+ r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
+
+# Create a hinge transformation with 4 knots of one or multiple SpatRaster.
+new <- predictor_derivate(r_ori, option = "hinge", knots = 4)
+terra::plot(new)
 
 }
 \seealso{

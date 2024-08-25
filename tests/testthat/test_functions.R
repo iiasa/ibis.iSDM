@@ -167,6 +167,10 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   expect_match(attr(tr1, "method"), "percentile")
   expect_match(attr(tr1, "format"), "binary")
 
+  # Kmeans threshold
+  expect_no_error(tr2 <- threshold(r2, method = "kmeans"))
+  expect_match(attr(tr2, "method"), "kmeans")
+  expect_match(attr(tr2, "format"), "binary")
   # --- #
 })
 

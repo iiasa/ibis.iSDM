@@ -3,7 +3,7 @@
 #### New features
 * Support for 'modal' value calculations in `ensemble()`.
 * Support for 'superlearner' in `ensemble()`.
-* Support for 'kmeans' derived threshold calculation in `threshold()`
+* Support for 'kmeans' derived threshold calculation in `threshold()` and `predictor_derivate()`.
 * Support for future processing streamlined. See FAQ section for instructions #18.
 
 #### Minor improvements and bug fixes

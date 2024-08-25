@@ -28,6 +28,11 @@ NULL
 #' This engine is essentially a wrapper for [stats::glm.fit()], however with customized
 #' settings to support offsets and weights.
 #'
+#' If \code{"optim_hyperparam"} is set to \code{TRUE} in [`train()`], then a AIC
+#' based step-wise (backwards) model selection is performed.
+#' Generally however [`engine_glmnet`] should be the preferred package for models
+#' with more than \code{>3} covariates.
+#'
 #' @returns An [Engine].
 #'
 #' @references
@@ -43,6 +48,7 @@ NULL
 #'
 #' # Add GLM as an engine
 #' x <- distribution(background) |> engine_glm()
+#' print(x)
 #'
 #' @name engine_glm
 NULL

@@ -179,6 +179,7 @@ Available options for creating derivates are:
 \item \code{'interaction'} - Add interacting predictors. Interactions need to be specified (\code{"int_variables"})!
 \item \code{'thresh'} - Add threshold derivate predictors.
 \item \code{'hinge'} - Add hinge derivate predictors.
+\item \code{'kmeans'} - Add k-means derived factors.
 \item \code{'bin'} - Add predictors binned by their percentiles.
 }
 }

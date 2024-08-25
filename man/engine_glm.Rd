@@ -45,6 +45,7 @@ package='ibis.iSDM',mustWork = TRUE))
 
 # Add GLM as an engine
 x <- distribution(background) |> engine_glm()
+print(x)
 
 }
 \references{

@@ -51,10 +51,14 @@
 #' @keywords utils
 #'
 #' @examples
-#' \dontrun{
-#' # Where x is a SpatRaster
-#' new_x <- predictor_transform(x, option = 'scale')
-#' }
+#' # Dummy raster
+#' r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .01,sd = .1))
+#'
+#' # Normalize
+#' r_norm <- predictor_transform(r_ori, option = 'norm')
+#' new <- c(r_ori, r_norm)
+#' names(new) <- c("original scale", "normalized units")
+#' terra::plot(new)
 #'
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, state = NULL, method = NULL, ...){
@@ -351,6 +355,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' * \code{'bin'} - Creates a factor representation of a covariates by cutting the
 #' range of covariates by their percentiles. The number of percentile cuts and thus
 #' new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+#' * \code{'kmeans'} Creates a factor representation of a covariates through a
+#' [`kmeans()`] clustering. The number of clusters are specified via the parameter \code{'nknots'}.
 #'
 #' @return Returns the derived adjusted [`SpatRaster`] objects of identical resolution.
 #'
@@ -358,13 +364,16 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' @keywords utils
 #'
 #' @examples
-#' \dontrun{
-#' # Create a hinge transformation of one or multiple SpatRaster.
-#' predictor_derivate(covs, option = "hinge", knots = 4)
-#' }
+#' # Dummy raster
+#'  r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
+#'
+#' # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
+#' new <- predictor_derivate(r_ori, option = "hinge", knots = 4)
+#' terra::plot(new)
 #'
 #' @export
-predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, method = NULL, ...){
+predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
+                               int_variables = NULL, method = NULL, ...){
   assertthat::assert_that(
     is.Raster(env) || inherits(env, "stars"),
     !missing(env),
@@ -382,7 +391,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     base::length(option) == 1
   )
   # Match argument.
-  option <- match.arg(option, c('none','quadratic', 'hinge',
+  option <- match.arg(option, c('none','quadratic', 'hinge', 'kmeans',
                                 'thresh', 'bin', 'interaction'),
                       several.ok = FALSE)
 
@@ -562,6 +571,72 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     } else {
       # For stats layers
       for(val in names(env_list)){
+        # Format cutoffs
+        cu <- cutoffs[which(cutoffs$deriv == val), 3]
+        cu <- strsplit(cu, "_") |> unlist()
+        # Remove any leading points
+        if(any(substr(cu,1, 1)==".")){
+          cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
+        }
+        suppressWarnings( cu <- as.numeric(cu) )
+        nn <- terra::rast()
+        # If NA, set
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeBin(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu,ncol=2,byrow = TRUE) # Convert to pmin and pmax
+          cu <- cbind(cu, 1:nrow(cu))
+        }
+        for(k in 1:terra::nlyr(env_list[[val]])){
+          newcu <- cu
+          # Set smallest and largest value to global minimum/maximum to account for rounding issues
+          newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
+          newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
+
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE)
+          terra::time(o) <- terra::time( env_list[[val]][[k]] )
+          names(o) <- paste0(val, "_",nrow(newcu))
+          suppressWarnings( nn <- append(nn, o) )
+          rm(o, newcu)
+        }
+        new_env[[val]] <- nn
+      }
+      invisible(gc())
+    }
+  }
+
+  # For k-means thresholding
+  if(option == 'kmeans'){
+    if(is.Raster(env)){
+      new_env <- terra::rast()
+      for(val in names(env)){
+        # Also get the cut_off values
+        ex <- terra::values(env[[val]]) |> (\(.) subset(., stats::complete.cases(.)))()
+        if(!is.null(cutoffs)) k <- cutoffs else k <- nknots
+        cu <- stats::kmeans(ex,centers = k)
+        assertthat::assert_that(inherits(cu, "kmeans"),
+                                msg = "K-means clustering failed...")
+        suppressWarnings( o <- terra::k_means(env[[val]], centers = cu$centers[,1]) )
+        if(is.null(o)) next()
+        # Factorize and explode
+        o <- explode_factorized_raster( terra::as.factor(o),
+                                        name = paste0('kmeans_', val))
+        for(i in 1:terra::nlyr(o)){
+          names(o[[i]]) <- paste0('kmeans_',val,'_',round(cu$centers[i], 3))
+          attr(o[[i]], "deriv.kmeans") <- cu$centers[i]
+        }
+        new_env <- c(new_env, o)
+        rm(o)
+      }
+    } else {
+      # For stats layers
+      for(val in names(env_list)){
+        # FIXME: To be implemented once there is a need...
+        stop("KMeans for stars to be implemented...")
         # Format cutoffs
         cu <- cutoffs[which(cutoffs$deriv == val), 3]
         cu <- strsplit(cu, "_") |> unlist()
