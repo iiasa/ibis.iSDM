@@ -113,6 +113,10 @@ process (Default: <code>NULL</code>).</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This engine is essentially a wrapper for <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm.fit()</a></code>, however with customized
 settings to support offsets and weights.</p>
+<p>If <code>"optim_hyperparam"</code> is set to <code>TRUE</code> in <code><a href="train.html">train()</a></code>, then a AIC
+based step-wise (backwards) model selection is performed.
+Generally however <code><a href="engine_glmnet.html">engine_glmnet</a></code> should be the preferred package for models
+with more than <code>&gt;3</code> covariates.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -142,7 +146,7 @@ Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth &amp; Bro
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Add GLM as an engine</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">engine_glm</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-08-25 10:14:16.00418 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2024-10-08 19:46:44.011477 | Creating distribution object...</span></span>
 <span class="r-in"><span><span class="fu"><a href="print.html">print</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB; font-weight: bold;">&lt;Biodiversity distribution model&gt;</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Background extent: </span>
@@ -170,7 +174,7 @@ Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth &amp; Bro
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

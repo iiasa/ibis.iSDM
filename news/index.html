@@ -47,14 +47,16 @@
 <h2 class="pkg-version" data-toc-text="0.1.5" id="ibisisdm-015-current-dev-branch">ibis.iSDM 0.1.5 (current dev branch)<a class="anchor" aria-label="anchor" href="#ibisisdm-015-current-dev-branch"></a></h2>
 <div class="section level5">
 <h5 id="new-features-0-1-5">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-5"></a></h5>
-<ul><li>Support for ‘modal’ value calculations in <code><a href="../reference/ensemble.html">ensemble()</a></code>.</li>
+<ul><li>New visualization function <code><a href="../reference/nicheplot.html">nicheplot()</a></code> to visualize suitability across 2 axes</li>
+<li>Support for ‘modal’ value calculations in <code><a href="../reference/ensemble.html">ensemble()</a></code>.</li>
 <li>Support for ‘superlearner’ in <code><a href="../reference/ensemble.html">ensemble()</a></code>.</li>
 <li>Support for ‘kmeans’ derived threshold calculation in <code><a href="../reference/threshold.html">threshold()</a></code> and <code><a href="../reference/predictor_derivate.html">predictor_derivate()</a></code>.</li>
 <li>Support for future processing streamlined. See FAQ section for instructions <a href="https://github.com/iiasa/ibis.iSDM/issues/18" class="external-link">#18</a>.</li>
 </ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-1-5">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-1-5"></a></h5>
-<ul><li>Minor <span class="emoji" data-emoji="bug">🐛</span> fix related to misaligned thresholds and negative exponential kernels.</li>
+<ul><li>Now overwriting temporary data by default in <code><a href="../reference/predictor_transform.html">predictor_transform()</a></code> and similar functions.</li>
+<li>Minor <span class="emoji" data-emoji="bug">🐛</span> fix related to misaligned thresholds and negative exponential kernels.</li>
 <li>
 <span class="emoji" data-emoji="fire">🔥</span> <span class="emoji" data-emoji="bug">🐛</span> fix for scenario projections that use different grain sizes than for inference.</li>
 </ul></div>
@@ -310,7 +312,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
