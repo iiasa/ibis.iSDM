@@ -253,16 +253,16 @@ methods::setMethod(
           names(ras) <- paste0('model', 1:terra::nlyr(ras))
           ex <- terra::extract(ras, point, ID = FALSE)
           ex <- cbind(point[,field_occurrence], ex)
-          fit <- glm(
-            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> as.formula(),
-            family = binomial(),data = ex
+          fit <- stats::glm(
+            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> stats::as.formula(),
+            family = stats::binomial(),data = ex
           )
           # Now predict output with the meta-learner
           new <- emptyraster(ras)
           new[which(!is.na(ras[[1]])[])] <- terra::predict(
             fit, ras, na.rm = FALSE, type = "response",
             cores = getOption('ibis.nthread'))
-          attr(new, "superlearner.coefficients") <- coef(fit)
+          attr(new, "superlearner.coefficients") <- stats::coef(fit)
           try({ rm(ex,fit) },silent = TRUE)
         }
 
@@ -409,16 +409,16 @@ methods::setMethod(
           names(ras) <- paste0('model', 1:terra::nlyr(ras))
           ex <- terra::extract(ras, point, ID = FALSE)
           ex <- cbind(point[,field_occurrence], ex)
-          fit <- glm(
-            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> as.formula(),
-            family = binomial(),data = ex
+          fit <- stats::glm(
+            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> stats::as.formula(),
+            family = stats::binomial(),data = ex
           )
           # Now predict output with the meta-learner
           new <- emptyraster(ras)
           new[which(!is.na(ras[[1]])[])] <- terra::predict(
             fit, ras, na.rm = FALSE, type = "response",
             cores = getOption('ibis.nthread'))
-          attr(new, "superlearner.coefficients") <- coef(fit)
+          attr(new, "superlearner.coefficients") <- stats::coef(fit)
           try({ rm(ex,fit) },silent = TRUE)
         }
         # Rename

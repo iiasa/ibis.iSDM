@@ -173,7 +173,7 @@ ibis_enable_parallel <- function(){
 #' * \code{"slurm"} = To be implemented: Slurm linkage via batchtools.
 #' @param strategy A [`character`] with the strategy.
 #' @return Invisible
-#' @seealso [future], [ibis_future_run]
+#' @seealso [future], [ibis_future]
 #' @keywords misc
 #' @export
 ibis_set_strategy <- function(strategy = "sequential"){
@@ -222,6 +222,7 @@ ibis_set_threads <- function(threads = 2){
 #' Make sure not to parallize predictions within existing clusters to avoid out-of-memory
 #' issues.
 #'
+#' @param plan_exists A [`logical`] check on whether an existing [`future`] plan exists (Default: \code{FALSE}).
 #' @param cores A [`numeric`] number stating the number of cores to use.
 #' @param strategy A [`character`] denoting the strategy to be used for future.
 #' See help of [`future`] for options. (Default: \code{"multisession"}).
@@ -367,8 +368,9 @@ chunk_data <- function(X, N = NULL, cores = parallel::detectCores(), index_only 
 #' @param cores A [numeric] of the number of cores to use (Default: \code{1}).
 #' @param approach [`character`] for the parallelization approach taken (Options:
 #' \code{"parallel"} or \code{"future"}).
-#' @param export_package A [`vector`] with packages to export for use on parallel
+#' @param export_packages A [`vector`] with packages to export for use on parallel
 #' nodes (Default: \code{NULL}).
+#' @param ... Any other parameter passed on.
 #'
 #' @details By default, the [parallel] package is used for parallel computation,
 #' however an option exists to use the [future] package instead.

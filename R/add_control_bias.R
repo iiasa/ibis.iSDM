@@ -77,7 +77,7 @@
 #' estimating spatial sampling effort and habitat suitability for multiple species
 #' from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5), 933-945.
 #'
-#' @seealso [add_control_extrapolation()]
+#' @seealso [add_limits_extrapolation()]
 #' @keywords bias offset control
 #' @concept The spatial bias weighting was inspired by code in the \code{enmSdmX} package.
 #'

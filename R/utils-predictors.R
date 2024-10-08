@@ -179,7 +179,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
       }
       perc <- unique(perc)
-      out <- terra::classify(env, t(perc)) |> terra::as.int()
+      out <- terra::classify(env, t(perc), overwrite = TRUE) |> terra::as.int()
       attr(out, "transform_params") <- perc
     } else {
       out <- lapply(env_list, function(x) {
@@ -191,7 +191,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         perc <- unique(perc)
         # For terra need to loop here as classify does not support multiple columns
         o <- terra::rast()
-        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) |> terra::as.int() ))
+        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i], overwrite = TRUE) |> terra::as.int() ))
         return(o)
       })
     }
@@ -262,7 +262,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       envMask <- !sum(terra::app(env, is.na))
       assertthat::assert_that(terra::global(envMask, "sum")[,1]>0,
                               msg = 'A predictor is either NA only or no valid values across all layers')
-      env <- terra::mask(env, envMask, maskvalues = 0)
+      env <- terra::mask(env, envMask, maskvalues = 0, overwrite = TRUE)
 
       # Sample covariance from stack and fit PCA
       covMat <- terra::layerCor(env, fun = "cov", na.rm = TRUE)
@@ -597,7 +597,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
           newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
           newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
 
-          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE)
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE, overwrite = TRUE)
           terra::time(o) <- terra::time( env_list[[val]][[k]] )
           names(o) <- paste0(val, "_",nrow(newcu))
           suppressWarnings( nn <- append(nn, o) )
@@ -663,7 +663,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
           newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
           newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
 
-          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE)
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE, overwrite = TRUE)
           terra::time(o) <- terra::time( env_list[[val]][[k]] )
           names(o) <- paste0(val, "_",nrow(newcu))
           suppressWarnings( nn <- append(nn, o) )
@@ -845,7 +845,7 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
       # Remove grid cells that are equal to the number of layers (all values NA)
       none_area <- mask_na == nl
       none_area[none_area == 0 ] <- NA
-      mask_na <- terra::mask(mask_na, mask = none_area, inverse = TRUE)
+      mask_na <- terra::mask(mask_na, mask = none_area, inverse = TRUE, overwrite = TRUE)
 
       # Should any fill be conducted?
       if(fill){
@@ -854,7 +854,7 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
         # Otherwise just homogenize NA values across predictors
         if(terra::global(mask_na,'max',na.rm = TRUE)[,1] > 0){
           mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
-          env <- terra::mask(env, mask = mask_all)
+          env <- terra::mask(env, mask = mask_all, overwrite = TRUE)
         }
       }
       # Should NA coordinates of cells where 1 or more predictor is NA be
@@ -1016,7 +1016,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   }
   # Make cuts and explode
   out <- explode_factorized_raster(
-      terra::classify(v, cu)
+      terra::classify(v, cu, overwrite = TRUE)
   )
 
   # Format threshold names

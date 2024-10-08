@@ -26,6 +26,6 @@ Currently supported strategies are:
 }
 }
 \seealso{
-\link{future}, \link{ibis_future_run}
+\link{future}, \link{ibis_future}
 }
 \keyword{misc}

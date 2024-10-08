@@ -335,7 +335,8 @@ run_stan <- function( model_code, data = list(),
 #' * The brms R-package.
 #'
 #' @export
-posterior_predict_stanfit <- function(obj, form, newdata, type = "predictor", family = NULL, offset = NULL, draws = NULL){
+posterior_predict_stanfit <- function(obj, form, newdata, type = "predictor",
+                                      family = NULL, offset = NULL, draws = NULL){
   assertthat::assert_that(
     inherits(obj, "stanfit") || inherits(obj, "CmdStanFit"),
     is.formula(form),

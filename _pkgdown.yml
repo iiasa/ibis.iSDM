@@ -104,6 +104,8 @@ reference:
     desc: Key functions to summarize, validate or extract information from trained models.
     contents:
       - plot
+      - bivplot
+      - nicheplot
       - print
       - summary
       - coef

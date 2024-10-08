@@ -31,6 +31,7 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   "self",
                   # Cores for parallel processing
                   "cores",
+                  "%dofuture%",
                   # Global prediction function
                   "predict_boom",
                   "id", "included", "i",

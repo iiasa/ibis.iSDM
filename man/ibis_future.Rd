@@ -12,6 +12,8 @@ ibis_future(
 )
 }
 \arguments{
+\item{plan_exists}{A \code{\link{logical}} check on whether an existing \code{\link{future}} plan exists (Default: \code{FALSE}).}
+
 \item{cores}{A \code{\link{numeric}} number stating the number of cores to use.}
 
 \item{strategy}{A \code{\link{character}} denoting the strategy to be used for future.

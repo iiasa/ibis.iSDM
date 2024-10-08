@@ -1,12 +1,14 @@
 # ibis.iSDM 0.1.5 (current dev branch)
 
 #### New features
+* New visualization function `nicheplot()` to visualize suitability across 2 axes
 * Support for 'modal' value calculations in `ensemble()`.
 * Support for 'superlearner' in `ensemble()`.
 * Support for 'kmeans' derived threshold calculation in `threshold()` and `predictor_derivate()`.
 * Support for future processing streamlined. See FAQ section for instructions #18.
 
 #### Minor improvements and bug fixes
+* Now overwriting temporary data by default in `predictor_transform()` and similar functions.
 * Minor :bug: fix related to misaligned thresholds and negative exponential kernels.
 * :fire: :bug: fix for scenario projections that use different grain sizes than for inference.
 

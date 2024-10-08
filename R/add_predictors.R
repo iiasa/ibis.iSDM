@@ -248,7 +248,7 @@ methods::setMethod(
 
     # Mask predictors with existing background layer
     if(bgmask){
-      env <- terra::mask(env, mask = x$background)
+      env <- terra::mask(env, mask = x$background, overwrite = TRUE)
       # Reratify, work somehow only on stacks
       if(has_factors && any(is.factor(env)) ){
         new_env <- env
@@ -350,7 +350,7 @@ methods::setMethod(
       # If it is a raster
       if(is.Raster(x$background)){
         # Check that background and range align, otherwise raise error
-        if(is_comparable_raster(layer, x$background)){
+        if(!is_comparable_raster(layer, x$background)){
           warning('Supplied range does not align with background! Aligning them now...')
           layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
         }
@@ -372,12 +372,12 @@ methods::setMethod(
     if(terra::global(ras1, "min", na.rm = TRUE) == terra::global(ras1, "max", na.rm = TRUE)){
       o <- ras2
       # Ensure that all layers have a minimum and a maximum
-      o[is.na(o)] <- 0; o <- terra::mask(o, x$background)
+      o[is.na(o)] <- 0; o <- terra::mask(o, x$background, overwrite = TRUE)
       names(o) <- c('elev_high')
     } else {
       o <- c(ras1, ras2)
       # Ensure that all layers have a minimum and a maximum
-      o[is.na(o)] <- 0; o <- terra::mask(o, x$background)
+      o[is.na(o)] <- 0; o <- terra::mask(o, x$background, overwrite = TRUE)
       names(o) <- c('elev_low', 'elev_high')
     }
     rm(ras1,ras2)
@@ -553,7 +553,8 @@ methods::setMethod(
     #     ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
     #   }
     # } else {
-    ras_range <- terra::rasterize(layer, temp, field = 1, background = 0)
+    ras_range <- terra::rasterize(layer, temp, field = 1,
+                                  background = 0, overwrite = TRUE)
     # }
 
     # -------------- #
@@ -565,8 +566,8 @@ methods::setMethod(
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
       # Calculate the linear distance from the range
-      dis <- terra::gridDist(ras_range, target = 1)
-      dis <- terra::mask(dis, x$background)
+      dis <- terra::gridDist(ras_range, target = 1, overwrite = TRUE)
+      dis <- terra::mask(dis, x$background, overwrite = TRUE)
       # If max distance is specified
       if(!is.null(distance_max) && !is.infinite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to NA
@@ -581,7 +582,7 @@ methods::setMethod(
 
       # Set NA to 0 and mask again
       dis[is.na(dis)] <- 0
-      dis <- terra::mask(dis, x$background)
+      dis <- terra::mask(dis, x$background, overwrite = TRUE)
       names(dis) <- 'distance_range'
     }
 

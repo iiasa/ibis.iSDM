@@ -3,7 +3,7 @@
 \name{bivplot}
 \alias{bivplot}
 \alias{bivplot,ANY-method}
-\title{Bivariate plot wrapper for distribution objects}
+\title{Bivariate prediction plot for distribution objects}
 \usage{
 bivplot(
   mod,

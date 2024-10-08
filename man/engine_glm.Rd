@@ -37,6 +37,11 @@ for \code{\link[=ensemble]{ensemble()}} of small models (a practice common for r
 \details{
 This engine is essentially a wrapper for \code{\link[stats:glm]{stats::glm.fit()}}, however with customized
 settings to support offsets and weights.
+
+If \code{"optim_hyperparam"} is set to \code{TRUE} in \code{\link[=train]{train()}}, then a AIC
+based step-wise (backwards) model selection is performed.
+Generally however \code{\link{engine_glmnet}} should be the preferred package for models
+with more than \code{>3} covariates.
 }
 \examples{
 # Load background

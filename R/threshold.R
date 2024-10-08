@@ -336,7 +336,7 @@ methods::setMethod(
         # by getting the value within regular sampled values
         ex <- terra::spatSample(raster_thresh, size = 1e6, method = "regular",
                                  na.rm = TRUE, exhaustive = TRUE)
-        ex <- subset(ex, complete.cases(ex))
+        ex <- subset(ex, stats::complete.cases(ex))
         if(nrow(ex)<5) stop("Not enough values for clustering found...")
         clus <- stats::kmeans(ex, centers = 2)
         tr <- clus$centers[which.max(clus$centers[,1])]

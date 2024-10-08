@@ -7,9 +7,9 @@
 modal(x, na.rm = TRUE)
 }
 \arguments{
-\item{na.rm}{\code{\link{logical}} whether \code{NA} values are to be removed (Default: \code{TRUE})}
+\item{x}{A \code{\link{vector}} of values or characters.}
 
-\item{A}{\code{\link{vector}} of values or characters.}
+\item{na.rm}{\code{\link{logical}} whether \code{NA} values are to be removed (Default: \code{TRUE})}
 }
 \value{
 The most common (mode) estimate.

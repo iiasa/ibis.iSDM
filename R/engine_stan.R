@@ -581,7 +581,7 @@ engine_stan <- function(x,
                                        newdata = full@data,
                                        offset = (full$w),
                                        family = fam, # Family
-                                       mode = self$stan_param$type # Type
+                                       type = self$stan_param$type # Type
       )
 
       # Convert full to raster
@@ -660,7 +660,7 @@ engine_stan <- function(x,
                                              newdata = full@data,
                                              offset = (full$w),
                                              family = fam,
-                                             mode = type # Linear predictor
+                                             type = type # Linear predictor
       )
 
       # Fill output with summaries of the posterior
@@ -766,7 +766,7 @@ engine_stan <- function(x,
                                                newdata = df_temp,
                                                offset = df_temp$w,
                                                family = fam,
-                                               mode = type) # Linear predictor
+                                               type = type) # Linear predictor
 
         # FIXME: Something wrong here I guess
         # Also attach the partial variable
@@ -848,7 +848,7 @@ engine_stan <- function(x,
                                              newdata = df_partial@data,
                                              offset = df_partial$w,
                                              family = fam,
-                                             mode = type # Linear predictor
+                                             type = type # Linear predictor
       )
 
       # Get container

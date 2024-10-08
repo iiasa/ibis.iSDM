@@ -57,7 +57,7 @@ plot.Engine <- function(x,...) x$plot(...)
 #' @export
 plot.BiodiversityScenario <- function(x,...) x$plot(...)
 
-#' Bivariate plot wrapper for distribution objects
+#' Bivariate prediction plot for distribution objects
 #'
 #' @description Often there is an intention to display not only the predictions
 #' made with a SDM, but also the uncertainty of the prediction. Uncertainty be
@@ -127,7 +127,7 @@ methods::setMethod(
                             is.character(col) || is.vector(col),
                             is.null(title) || is.character(title),
                             is.null(fname) || is.character(fname),
-                            isTRUE(plot) || is.character(fname)
+                            isTRUE(plot)
     )
     # Check whether object is a raster, otherwise extract object
     if(is.Raster(mod)){
@@ -215,5 +215,170 @@ methods::setMethod(
     }
 
     return(finalPlot)
+  }
+)
+
+#' Niche plot wrapper for distribution objects
+#'
+#' @description
+#' The suitability of any given area for a biodiversity feature can in
+#' many instances be complex and non-linear. Visualizing obtained suitability
+#' predictions (e.g. from [`train()`]) against underlying predictors might help
+#' to explain the underlying gradients of the niche.
+#'
+#' Supported Inputs for this function are either single trained \code{ibis.iSDM}
+#' [`DistributionModel`] objects or alternatively a set of three [`SpatRaster`] objects.
+#' In both cases, users have to make sure that \code{"xvar"} and \code{"yvar"} are set
+#' accordingly.
+#'
+#' @param mod A trained [`DistributionModel`] or alternatively a [`SpatRaster`]
+#' object with \code{prediction} model within.
+#' @param xvar A [`character`] denoting the predictor on the x-axis. Alternatively a [`SpatRaster`]
+#' object can be provided.
+#' @param yvar A [`character`] denoting the predictor on the y-axis. Alternatively a [`SpatRaster`]
+#' object can be provided.
+#' @param plot A [`logical`] indication of whether the result is to be plotted
+#' (Default: \code{TRUE})?
+#' @param fname A [`character`] specifying the output file name a created figure
+#' should be written to.
+#' @param title Allows to respecify the title through a [`character`] (Default: \code{NULL}).
+#' @param ... Other engine specific parameters.
+#'
+#' @return Saved niche plot in \code{'fname'} if specified, otherwise plot.
+#'
+#' @seealso [partial], [plot.DistributionModel]
+#' @keywords misc
+#' @examples
+#' # Make quick prediction
+#' background <- terra::rast(system.file('extdata/europegrid_50km.tif',
+#' package='ibis.iSDM',mustWork = TRUE))
+#' virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
+#' ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
+#'
+#' # Load them as rasters
+#' predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+#'
+#' # Add GLM as an engine and predict
+#' fit <- distribution(background) |>
+#' add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed',
+#' name = 'Virtual points',docheck = FALSE) |>
+#' add_predictors(predictors, transform = 'none',derivates = 'none') |>
+#' engine_glm() |>
+#' train()
+#'
+#' # Plot niche for prediction for temperature and forest cover
+#' nicheplot(fit, xvar = "bio01_mean_50km", yvar = "CLC3_312_mean_50km" )
+#' @export
+#' @name nicheplot
+NULL
+
+#' @rdname nicheplot
+#' @export
+methods::setGeneric(
+  "nicheplot",
+  signature = methods::signature("mod"),
+  function(mod, xvar, yvar, plot = TRUE, fname = NULL, title = NULL,...) standardGeneric("nicheplot"))
+
+#' @rdname nicheplot
+methods::setMethod(
+  "nicheplot",
+  methods::signature(mod = "ANY"),
+  function(mod, xvar, yvar, plot = TRUE, fname = NULL, title = NULL,...) {
+    # Generic checks
+    assertthat::assert_that(is.logical(plot),
+                            is.character(xvar) || is.Raster(xvar),
+                            is.character(yvar) || is.Raster(yvar),
+                            is.null(title) || is.character(title),
+                            is.null(fname) || is.character(fname),
+                            isTRUE(plot)
+    )
+    # Check whether object is a raster, otherwise extract object
+    if(is.Raster(mod)){
+      obj <- mod
+      # Check x and y variables are correct
+      assertthat::assert_that(
+        is.Raster(xvar) && is.Raster(yvar),
+        msg = "SpatRaster objects need to be supplied as xvar and yvar!"
+      )
+      # Align if mismatching
+      if(!is_comparable_raster(obj, xvar)){
+        warning('xvariable not aligned with prediction. Aligning them now...')
+        xvar <- alignRasters(xvar, obj, method = 'bilinear', func = mean, cl = FALSE)
+      }
+      if(!is_comparable_raster(obj, yvar)){
+        warning('yvariable not aligned with prediction. Aligning them now...')
+        yvar <- alignRasters(yvar, obj, method = 'bilinear', func = mean, cl = FALSE)
+      }
+
+    } else {
+      assertthat::assert_that(inherits(mod, "DistributionModel"),
+                              is.Raster(mod$get_data()),
+                              msg = "The nicheplot function currently only works with fitted distribution objects!")
+      # Check that distribution object has a prediction
+      assertthat::assert_that("prediction" %in% mod$show_rasters(),
+                              is.Raster(mod$get_data()),
+                              msg = "No prediction found in the provided object.")
+      obj <- mod$get_data()[[1]] # Get the first layer
+
+      # Also get the xvar/yvar
+      if(is.character(xvar)) xvar <- mod$model$predictors_object$get_data()[[xvar]]
+      if(is.character(yvar)) yvar <- mod$model$predictors_object$get_data()[[yvar]]
+    }
+
+    # Check that all Raster objects are there
+    assertthat::assert_that(
+      is.Raster(xvar), is.Raster(yvar), is.Raster(obj),
+      terra::hasValues(obj),
+      msg = "Layers are not in spatial format?"
+    )
+
+    # Define default title
+    if(is.null(title)){
+      if(is.Raster(mod)) tt <- names(obj) else tt <- paste0("\n (",mod$model$runname,")")
+      title <- paste("Niche plot for prediction ",tt)
+    }
+
+    # Define variable names
+    xvar_lab <- names(xvar)
+    yvar_lab <- names(yvar)
+    col_lab <- names(obj)
+
+    # Now check number of cells and extract. If too large, sample at random
+    o <- c(obj, xvar, yvar)
+    names(o) <- c("mean", "xvar", "yvar")
+    if(terra::ncell(o)>10000){
+      # Messenger
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Visualization]','green','Sampling at random grid cells for extraction.')
+      ex <- terra::spatSample(o, size = 10000, method = "random",
+                              as.df = TRUE, na.rm = TRUE)
+    } else {
+      # Extract
+      ex <- terra::as.data.frame(o, xy = FALSE, na.rm = TRUE, time = FALSE)
+    }
+    assertthat::assert_that(nrow(ex)>0)
+
+    # Now plot
+    viz <- ggplot2::ggplot() +
+      ggplot2::theme_classic(base_size = 20) +
+      ggplot2::geom_point(data = ex, ggplot2::aes(x = xvar, y = yvar, colour = mean, alpha = mean)) +
+      ggplot2::scale_colour_gradientn(colours = ibis_colours$sdm_colour) +
+        ggplot2::guides(colour = ggplot2::guide_colorbar(title = col_lab), alpha = "none") +
+        ggplot2::theme(legend.position = "bottom",
+                       legend.title = ggplot2::element_text(vjust = 1),
+                       legend.key.size = ggplot2::unit(1, "cm")) +
+      ggplot2::labs(
+        title = title,
+        x = xvar_lab,
+        y = yvar_lab
+      )
+
+    # Print the plot
+    if(plot){
+      print(viz)
+    }
+    if(is.character(fname)){
+      cowplot::ggsave2(filename = fname, plot = viz)
+    }
+    return(viz)
   }
 )

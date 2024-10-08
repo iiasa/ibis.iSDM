@@ -24,8 +24,10 @@ core or parallel \link{apply} call.}
 \item{approach}{\code{\link{character}} for the parallelization approach taken (Options:
 \code{"parallel"} or \code{"future"}).}
 
-\item{export_package}{A \code{\link{vector}} with packages to export for use on parallel
+\item{export_packages}{A \code{\link{vector}} with packages to export for use on parallel
 nodes (Default: \code{NULL}).}
+
+\item{...}{Any other parameter passed on.}
 }
 \description{
 Some computations take considerable amount of time to execute.
