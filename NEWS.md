@@ -1,7 +1,7 @@
 # ibis.iSDM 0.1.5 (current dev branch)
 
 #### New features
-* New visualization function `nicheplot()` to visualize suitability across 2 axes
+* New visualization function `nicheplot()` to visualize suitability across 2 axes #87.
 * Support for 'modal' value calculations in `ensemble()`.
 * Support for 'superlearner' in `ensemble()`.
 * Support for 'kmeans' derived threshold calculation in `threshold()` and `predictor_derivate()`.

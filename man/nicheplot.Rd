@@ -3,11 +3,33 @@
 \name{nicheplot}
 \alias{nicheplot}
 \alias{nicheplot,ANY-method}
-\title{Niche plot wrapper for distribution objects}
+\title{Niche plot for distribution objects}
 \usage{
-nicheplot(mod, xvar, yvar, plot = TRUE, fname = NULL, title = NULL, ...)
+nicheplot(
+  mod,
+  xvar = NULL,
+  yvar = NULL,
+  envvars = NULL,
+  overlay_data = FALSE,
+  plot = TRUE,
+  fname = NULL,
+  title = NULL,
+  pal = NULL,
+  ...
+)
 
-\S4method{nicheplot}{ANY}(mod, xvar, yvar, plot = TRUE, fname = NULL, title = NULL, ...)
+\S4method{nicheplot}{ANY}(
+  mod,
+  xvar = NULL,
+  yvar = NULL,
+  envvars = NULL,
+  overlay_data = FALSE,
+  plot = TRUE,
+  fname = NULL,
+  title = NULL,
+  pal = NULL,
+  ...
+)
 }
 \arguments{
 \item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link{SpatRaster}}
@@ -19,6 +41,12 @@ object can be provided.}
 \item{yvar}{A \code{\link{character}} denoting the predictor on the y-axis. Alternatively a \code{\link{SpatRaster}}
 object can be provided.}
 
+\item{envvars}{A \code{\link{SpatRaster}} object containing all environmental variables. Only
+used if \code{xvar} and \code{yvar} is empty (Default: \code{NULL}).}
+
+\item{overlay_data}{A \code{\link{logical}} on whether training data should be overlaid
+on the plot. Only used for \code{\link{DistributionModel}} objects (Default: \code{FALSE}).}
+
 \item{plot}{A \code{\link{logical}} indication of whether the result is to be plotted
 (Default: \code{TRUE})?}
 
@@ -26,6 +54,8 @@ object can be provided.}
 should be written to.}
 
 \item{title}{Allows to respecify the title through a \code{\link{character}} (Default: \code{NULL}).}
+
+\item{pal}{A \code{\link{vector}} with continious colours with viridis plasma by default (Default: \code{NULL}).}
 
 \item{...}{Other engine specific parameters.}
 }
@@ -40,8 +70,10 @@ to explain the underlying gradients of the niche.
 
 Supported Inputs for this function are either single trained \code{ibis.iSDM}
 \code{\link{DistributionModel}} objects or alternatively a set of three \code{\link{SpatRaster}} objects.
-In both cases, users have to make sure that \code{"xvar"} and \code{"yvar"} are set
-accordingly.
+In both cases, users can specify \code{"xvar"} and \code{"yvar"} explicitly
+or leave them empty. In the latter case a principal component analysis (PCA)
+is conducted on the full environmental stack (loaded from \code{\link{DistributionModel}}
+or supplied separately).
 }
 \examples{
 # Make quick prediction

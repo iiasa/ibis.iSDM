@@ -218,7 +218,7 @@ methods::setMethod(
   }
 )
 
-#' Niche plot wrapper for distribution objects
+#' Niche plot for distribution objects
 #'
 #' @description
 #' The suitability of any given area for a biodiversity feature can in
@@ -228,8 +228,10 @@ methods::setMethod(
 #'
 #' Supported Inputs for this function are either single trained \code{ibis.iSDM}
 #' [`DistributionModel`] objects or alternatively a set of three [`SpatRaster`] objects.
-#' In both cases, users have to make sure that \code{"xvar"} and \code{"yvar"} are set
-#' accordingly.
+#' In both cases, users can specify \code{"xvar"} and \code{"yvar"} explicitly
+#' or leave them empty. In the latter case a principal component analysis (PCA)
+#' is conducted on the full environmental stack (loaded from [`DistributionModel`]
+#' or supplied separately).
 #'
 #' @param mod A trained [`DistributionModel`] or alternatively a [`SpatRaster`]
 #' object with \code{prediction} model within.
@@ -237,11 +239,16 @@ methods::setMethod(
 #' object can be provided.
 #' @param yvar A [`character`] denoting the predictor on the y-axis. Alternatively a [`SpatRaster`]
 #' object can be provided.
+#' @param envvars A [`SpatRaster`] object containing all environmental variables. Only
+#' used if \code{xvar} and \code{yvar} is empty (Default: \code{NULL}).
+#' @param overlay_data A [`logical`] on whether training data should be overlaid
+#' on the plot. Only used for [`DistributionModel`] objects (Default: \code{FALSE}).
 #' @param plot A [`logical`] indication of whether the result is to be plotted
 #' (Default: \code{TRUE})?
 #' @param fname A [`character`] specifying the output file name a created figure
 #' should be written to.
 #' @param title Allows to respecify the title through a [`character`] (Default: \code{NULL}).
+#' @param pal An optional [`vector`] with continuous custom colours (Default: \code{NULL}).
 #' @param ... Other engine specific parameters.
 #'
 #' @return Saved niche plot in \code{'fname'} if specified, otherwise plot.
@@ -277,21 +284,34 @@ NULL
 methods::setGeneric(
   "nicheplot",
   signature = methods::signature("mod"),
-  function(mod, xvar, yvar, plot = TRUE, fname = NULL, title = NULL,...) standardGeneric("nicheplot"))
+  function(mod, xvar = NULL, yvar = NULL, envvars = NULL, overlay_data = FALSE,
+           plot = TRUE, fname = NULL, title = NULL, pal = NULL, ...) standardGeneric("nicheplot"))
 
 #' @rdname nicheplot
 methods::setMethod(
   "nicheplot",
   methods::signature(mod = "ANY"),
-  function(mod, xvar, yvar, plot = TRUE, fname = NULL, title = NULL,...) {
+  function(mod, xvar = NULL, yvar = NULL, envvars = NULL, overlay_data = FALSE,
+           plot = TRUE, fname = NULL, title = NULL, pal = NULL, ...) {
     # Generic checks
-    assertthat::assert_that(is.logical(plot),
-                            is.character(xvar) || is.Raster(xvar),
-                            is.character(yvar) || is.Raster(yvar),
+    assertthat::assert_that(
+                            is.null(xvar) || (is.character(xvar) || is.Raster(xvar)),
+                            is.null(yvar) || (is.character(yvar) || is.Raster(yvar)),
+                            is.null(envvars) || is.Raster(envvars),
+                            is.logical(overlay_data),
                             is.null(title) || is.character(title),
                             is.null(fname) || is.character(fname),
-                            isTRUE(plot)
+                            is.logical(plot),
+                            is.null(pal) || is.vector(pal),
+                            msg = "Provide correct parameters (see help file)."
     )
+    check_package("ggplot2") # Should be loaded by default
+
+    # Check specific on x/y variables
+    assertthat::assert_that((is.null(xvar) && is.null(yvar)) ||
+                              (is.character(xvar) && is.character(yvar)),
+                            msg = "Both x and y variable names must be specified!")
+
     # Check whether object is a raster, otherwise extract object
     if(is.Raster(mod)){
       obj <- mod
@@ -300,17 +320,31 @@ methods::setMethod(
         is.Raster(xvar) && is.Raster(yvar),
         msg = "SpatRaster objects need to be supplied as xvar and yvar!"
       )
-      # Align if mismatching
-      if(!is_comparable_raster(obj, xvar)){
-        warning('xvariable not aligned with prediction. Aligning them now...')
-        xvar <- alignRasters(xvar, obj, method = 'bilinear', func = mean, cl = FALSE)
-      }
-      if(!is_comparable_raster(obj, yvar)){
-        warning('yvariable not aligned with prediction. Aligning them now...')
-        yvar <- alignRasters(yvar, obj, method = 'bilinear', func = mean, cl = FALSE)
+
+      # Check if set
+      if(!is.null(xvar) && !is.null(yvar)){
+        # Align if mismatching
+        if(!is_comparable_raster(obj, xvar)){
+          warning('xvariable not aligned with prediction. Aligning them now...')
+          xvar <- alignRasters(xvar, obj, method = 'bilinear', func = mean, cl = FALSE)
+        }
+        if(!is_comparable_raster(obj, yvar)){
+          warning('yvariable not aligned with prediction. Aligning them now...')
+          yvar <- alignRasters(yvar, obj, method = 'bilinear', func = mean, cl = FALSE)
+        }
+      } else {
+        assertthat::assert_that(is.Raster(envvars),
+                                terra::nlyr(envvars)>1,
+                                msg = "A multi layer environmental stack has to be supplied directly!")
+
+        if(!is_comparable_raster(obj, envvars)){
+          warning('Predictorstack not aligned with prediction. Aligning them now...')
+          envvars <- alignRasters(envvars, obj, method = 'bilinear', func = mean, cl = FALSE)
+        }
       }
 
     } else {
+      # Distribution model objects #
       assertthat::assert_that(inherits(mod, "DistributionModel"),
                               is.Raster(mod$get_data()),
                               msg = "The nicheplot function currently only works with fitted distribution objects!")
@@ -320,17 +354,37 @@ methods::setMethod(
                               msg = "No prediction found in the provided object.")
       obj <- mod$get_data()[[1]] # Get the first layer
 
-      # Also get the xvar/yvar
-      if(is.character(xvar)) xvar <- mod$model$predictors_object$get_data()[[xvar]]
-      if(is.character(yvar)) yvar <- mod$model$predictors_object$get_data()[[yvar]]
+      # Check if set
+      if(!is.null(xvar) && !is.null(yvar)){
+        assertthat::assert_that(is.character(xvar), is.character(yvar),
+                                msg = "Specify predictor names for both xvar and yvar.")
+        # Check that variables are present
+        assertthat::assert_that(
+          xvar %in% mod$model$predictors_names, yvar %in% mod$model$predictors_names,
+          msg = "Variables not used in underlying model?"
+        )
+        # Also get the xvar/yvar
+        if(is.character(xvar)) xvar <- mod$model$predictors_object$get_data()[[xvar]]
+        if(is.character(yvar)) yvar <- mod$model$predictors_object$get_data()[[yvar]]
+      } else {
+        if(is.null(envvars)){
+          envvars <- mod$model$predictors_object$get_data()
+        } else {
+          assertthat::assert_that(is.Raster(envvars),
+                                  terra::nlyr(envvars)>1,
+                                  msg = "A multi layer environmental stack has to be supplied directly!")        }
+      }
     }
 
-    # Check that all Raster objects are there
-    assertthat::assert_that(
-      is.Raster(xvar), is.Raster(yvar), is.Raster(obj),
-      terra::hasValues(obj),
-      msg = "Layers are not in spatial format?"
-    )
+    # Get training data if set
+    if(overlay_data){
+      assertthat::assert_that(inherits(mod, "DistributionModel"),
+                              msg = "Data overlay currently only works with a fitted model object!")
+      # Collect Biodiversity occurrence data
+      occ <- collect_occurrencepoints(mod$model,
+                                      include_absences = FALSE,
+                                      addName = TRUE,tosf = TRUE)
+    }
 
     # Define default title
     if(is.null(title)){
@@ -338,47 +392,132 @@ methods::setMethod(
       title <- paste("Niche plot for prediction ",tt)
     }
 
-    # Define variable names
-    xvar_lab <- names(xvar)
-    yvar_lab <- names(yvar)
-    col_lab <- names(obj)
-
-    # Now check number of cells and extract. If too large, sample at random
-    o <- c(obj, xvar, yvar)
-    names(o) <- c("mean", "xvar", "yvar")
-    if(terra::ncell(o)>10000){
-      # Messenger
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Visualization]','green','Sampling at random grid cells for extraction.')
-      ex <- terra::spatSample(o, size = 10000, method = "random",
-                              as.df = TRUE, na.rm = TRUE)
+    # Define colour palette if not set
+    if(is.null(pal)){
+      pal <- ibis_colours$sdm_colour
     } else {
-      # Extract
-      ex <- terra::as.data.frame(o, xy = FALSE, na.rm = TRUE, time = FALSE)
+      assertthat::assert_that(length(pal)>=1)
     }
-    assertthat::assert_that(nrow(ex)>0)
 
-    # Now plot
-    viz <- ggplot2::ggplot() +
-      ggplot2::theme_classic(base_size = 20) +
-      ggplot2::geom_point(data = ex, ggplot2::aes(x = xvar, y = yvar, colour = mean, alpha = mean)) +
-      ggplot2::scale_colour_gradientn(colours = ibis_colours$sdm_colour) +
+    # ----------- #
+    if(is.null(xvar) && is.null(yvar)){
+      # No specific variables found. Conduct a principle component analysis
+      # and predict for the first two axes.
+      assertthat::assert_that(is.Raster(envvars))
+      pca <- terra::prcomp(envvars, maxcell = 10000)
+      rpca <- terra::predict(envvars, pca, index=1:2)
+
+      # Now check number of cells and extract. If too large, sample at random
+      o <- c(obj, rpca)
+      names(o) <- c("mean", "PC1", "PC2")
+      if(terra::ncell(o)>10000){
+        # Messenger
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Visualization]','green','Sampling at random grid cells for extraction.')
+        ex <- terra::spatSample(o, size = 10000, method = "random",
+                                as.df = TRUE, na.rm = TRUE)
+      } else {
+        # Extract
+        ex <- terra::as.data.frame(o, xy = FALSE, na.rm = TRUE, time = FALSE)
+      }
+      assertthat::assert_that(nrow(ex)>0)
+
+      # Define variable names
+      xvar_lab <- "PC1"
+      yvar_lab <- "PC2"
+      col_lab <- names(obj)
+
+      # Now plot
+      viz <- ggplot2::ggplot() +
+        ggplot2::theme_bw(base_size = 20) +
+        ggplot2::geom_point(data = ex, ggplot2::aes(x = PC1, y = PC2, colour = mean, alpha=mean)) +
+        ggplot2::scale_colour_gradientn(colours = pal) +
         ggplot2::guides(colour = ggplot2::guide_colorbar(title = col_lab), alpha = "none") +
         ggplot2::theme(legend.position = "bottom",
                        legend.title = ggplot2::element_text(vjust = 1),
                        legend.key.size = ggplot2::unit(1, "cm")) +
-      ggplot2::labs(
-        title = title,
-        x = xvar_lab,
-        y = yvar_lab
+        ggplot2::labs(
+          title = title,
+          x = xvar_lab,
+          y = yvar_lab
+        )
+
+      # Should the training data be overlaid?
+      if(overlay_data){
+        pp <- terra::extract(o, occ, ID = FALSE)
+        pp$name <- as.factor( occ$name )
+
+        viz <- viz +
+          ggplot2::geom_point(data = pp,
+                              ggplot2::aes(x = PC1, y = PC2),
+                              col = "black",
+                              size = 1.5,show.legend = TRUE) +
+          ggplot2::labs(subtitle = "Training data (black)")
+      }
+
+    } else {
+      # Make plot for two variables which should have been collected above.
+      # Check that all Raster objects are there
+      assertthat::assert_that(
+        is.Raster(xvar), is.Raster(yvar), is.Raster(obj),
+        terra::hasValues(obj),
+        msg = "Layers are not in spatial format?"
       )
+
+      # Define variable names
+      xvar_lab <- names(xvar)
+      yvar_lab <- names(yvar)
+      col_lab <- names(obj)
+
+      # Now check number of cells and extract. If too large, sample at random
+      o <- c(obj, xvar, yvar)
+      names(o) <- c("mean", "xvar", "yvar")
+      if(terra::ncell(o)>10000){
+        # Messenger
+        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Visualization]','green','Sampling at random grid cells for extraction.')
+        ex <- terra::spatSample(o, size = 10000, method = "random",
+                                as.df = TRUE, na.rm = TRUE)
+      } else {
+        # Extract
+        ex <- terra::as.data.frame(o, xy = FALSE, na.rm = TRUE, time = FALSE)
+      }
+      assertthat::assert_that(nrow(ex)>0)
+
+
+      # Now plot
+      viz <- ggplot2::ggplot() +
+        ggplot2::theme_bw(base_size = 20) +
+        ggplot2::geom_point(data = ex, ggplot2::aes(x = xvar, y = yvar, colour = mean, alpha = mean)) +
+        ggplot2::scale_colour_gradientn(colours = pal) +
+        ggplot2::guides(colour = ggplot2::guide_colorbar(title = col_lab), alpha = "none") +
+        ggplot2::theme(legend.position = "bottom",
+                       legend.title = ggplot2::element_text(vjust = 1),
+                       legend.key.size = ggplot2::unit(1, "cm")) +
+        ggplot2::labs(
+          title = title,
+          x = xvar_lab,
+          y = yvar_lab
+        )
+
+      # Should the training data be overlaid?
+      if(overlay_data){
+        pp <- terra::extract(o, occ, ID = FALSE)
+        pp$name <- as.factor( occ$name )
+
+        viz <- viz +
+          ggplot2::geom_point(data = pp,
+                              ggplot2::aes(x = xvar, y = yvar),
+                              col = "black",
+                              size = 1.5,show.legend = TRUE) +
+          ggplot2::labs(subtitle = "Training data (black)")
+      }
+    }
 
     # Print the plot
     if(plot){
-      print(viz)
+      return(viz)
     }
     if(is.character(fname)){
       cowplot::ggsave2(filename = fname, plot = viz)
     }
-    return(viz)
   }
 )
