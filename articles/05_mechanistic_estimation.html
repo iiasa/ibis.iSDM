@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-10-08</h4>
+            <h4 data-toc-skip class="date">2024-10-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/05_mechanistic_estimation.Rmd" class="external-link"><code>vignettes/articles/05_mechanistic_estimation.Rmd</code></a></small>
       <div class="d-none name"><code>05_mechanistic_estimation.Rmd</code></div>
@@ -243,7 +243,7 @@ for further help and explanations of parameters.</p>
 <span></span>
 <span><span class="co"># Project two scenarios with varying local extinction probability</span></span>
 <span><span class="va">df1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">sc1</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is FALSE</span></span>
+<span><span class="co">#&gt; Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is FALSE</span></span>
 <span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">sc2</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">df1</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>scenario <span class="op">=</span> <span class="st">"low"</span><span class="op">)</span>,</span>
 <span>                       <span class="va">df2</span> <span class="op">|&gt;</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>scenario <span class="op">=</span> <span class="st">"high"</span><span class="op">)</span> <span class="op">)</span></span>
