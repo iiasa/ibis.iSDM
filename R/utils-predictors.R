@@ -329,7 +329,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #'
 #' @param env A [`SpatRaster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any
-#' way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).
+#' way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'},
+#' \code{'kmeans'}, \code{'thresh'}, \code{'bin'}).
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param deriv A [`vector`] with [`character`] of specific derivates to create (Default: \code{NULL}).
 #' @param int_variables A [`vector`] with length greater or equal than \code{2}
@@ -370,6 +371,10 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
 #' new <- predictor_derivate(r_ori, option = "hinge", knots = 4)
 #' terra::plot(new)
+#'
+#' # Or a quadratic transformation
+#' new2 <- predictor_derivate(r_ori, option = "quad", knots = 4)
+#' terra::plot(new2)
 #'
 #' @export
 predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
@@ -565,7 +570,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
       for(val in names(env)){
         suppressWarnings( o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
-        new_env <- c(new_env, o)
+        suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {
@@ -629,7 +634,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
           names(o[[i]]) <- paste0('kmeans_',val,'_',round(cu$centers[i], 3))
           attr(o[[i]], "deriv.kmeans") <- cu$centers[i]
         }
-        new_env <- c(new_env, o)
+        suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {
@@ -1007,7 +1012,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 
   if(anyDuplicated(cu)){
     # If duplicated quantiles (e.g. 0, 0, 0.2..), sample from a larger number
-    cu <- terra::quantile(v[], probs = seq(0, 1, by = 1/(nknots*2)) )
+    cu <- terra::quantile(v[], probs = seq(0, 1, by = 1/(nknots*2)), na.rm = TRUE )
     cu <- cu[-which(duplicated(cu))] # Remove duplicated cuts
     if(length(cu)<=2) return( NULL )
     if(length(cu) > nknots){
@@ -1028,6 +1033,207 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   for(i in 1:terra::nlyr(out)){
     attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
   }
+  return(out)
+}
+
+#' Recreate a derivative variable based on their range
+#'
+#' @description
+#' The purpose of this function is to create the range from several derivative
+#' variables. The information to do so is taken from the variable name and it
+#' is assumed that those have been created by [`predictor_derivate()`] function.
+#'
+#' This function return the range of values from the original data that fall within
+#' the set of coefficients. Currently only positive coefficients are taken by default.
+#'
+#' @details
+#' * This function really only makes sense for \code{'bin'}, \code{'thresh'} and
+#' \code{'hinge'} transformations.
+#'
+#' * For \code{'hinge'} the combined \code{min} is returned.
+#'
+#' @note
+#' This is rather an internal function created for a specific use and project. It
+#' might be properly described in an example later.
+#'
+#' @param env The original variable stacks as [`SpatRaster`] or [`stars`].
+#' @param varname A [`character`] of the variable name. Needs to be present in
+#' \code{"env"}.
+#' @param co A set of coefficients obtained via [`stats::coef()`] and a
+#' [`BiodiversityDistribution`] object.
+#' @param to_binary A [`logical`] flag if the output should be converted to binary
+#' format or left in the original units (Default: \code{FALSE}).
+#'
+#' @returns A [`SpatRaster`] object containing the predictor range.
+#' @examples
+#' \dontrun{
+#'  # Assuming derivates of temperatue have been created for a model, this
+#'  # recreates the range over which they apply.
+#'  deriv <- create_derivate_range(env, varname = "Temperature",
+#'   co = coef(fit), to_binary = TRUE)
+#' }
+#'
+#' @author Martin Jung
+#' @keywords internal, utils
+#' @noRd
+create_derivate_range <- function(env, varname, co, to_binary = FALSE){
+  assertthat::assert_that(
+    is.Raster(env) || inherits(env, "stars"),
+    is.character(varname) && length(varname)==1,
+    is.data.frame(co) || is.character(co),
+    is.logical(to_binary)
+  )
+
+  if(is.data.frame(co)){
+    if(nrow(co)==0) {
+      message("No valid coefficients found?")
+      return(NULL)
+    }
+  }
+  if(!(varname %in% names(env))){
+    message("Variable not found in environmental stack!")
+    return(NULL)
+  }
+  # --- #
+
+  # Get the deriv names from the coefficients
+  # If character is supplied, assume those are all positive.
+  if(is.character(co)){
+   co <- data.frame(Feature = co, Beta = 0.01)
+  }
+  deriv <- co[,1]
+  if(is.data.frame(deriv)) deriv <- deriv[[1]] # For Tibble
+
+  # Now split the names use base R
+  cu <- base::strsplit(deriv, "_")
+  df <- data.frame()
+  for(i in 1:length(cu)){ # Number of derivs
+    o <- as.data.frame(cu[[i]] |> t())
+    # Also check for actual variable coverage
+    if(o[1,1] %in% c("thresh")){
+      # FIXME: Why does this use points rather than _ ?
+      check <- paste0(o[,c(2:(ncol(o)-1))],collapse = '_')
+    } else {
+      check <- paste0(o[,c(2:(ncol(o)-2))],collapse = '_')
+    }
+    if(check == varname){
+      df <- rbind(df, cbind(co[i,], o) )
+    }
+  }
+  assertthat::assert_that(nrow(df)>0,
+                          msg = "Coefficient derivate not found for variable?")
+  # Split and get the derivative option
+  df <- split(df, df$V1)
+  assertthat::assert_that(length(df)==1,
+                          msg = "Currently this works only for a single option.")
+  # Match
+  option <- match.arg(names(df), c('hinge', 'thresh', 'bin'),
+                      several.ok = FALSE)
+
+  # Get first entry (only one)
+  o <- df[[1]]
+
+  # Get lowest and highest values from all positive coefficients
+  if(utils::hasName(o, "Beta")) {
+    ind <- which(o$Beta>0)
+    if(length(ind)==0){
+      message("Only negative coefficients found...")
+      return(NULL)
+    }
+  } else {
+    message("Unpredictable territory. Function has been created for linear coefficients...")
+    # No Beta found. Simply take all values here
+    ind <- 1:nrow(o)
+  }
+
+  # Get all valid values
+  vals <- suppressWarnings(
+    o[ind, c(ncol(o)-1,ncol(o))] |> base::unlist() |>
+      as.numeric()
+  )
+  assertthat::assert_that(!all(is.na(vals)),
+                          msg = "No valid values found in variable names?")
+
+  if(option %in% c("bin", "thresh")){
+    # These are simply thresholds so within the range
+    if(option == "thresh"){
+      lb <- o[, ncol(o)] |> as.numeric() |> min()
+
+      # Small helper function
+      do <- function(z, lb){
+        z[z<lb] <- 0
+        return(z)
+      }
+      # Create output
+      if(inherits(env, "stars")){
+        out <- stars_to_raster(env[varname])
+        out <- lapply(out, function(z) do(z, lb))
+      } else {
+        out <- env[[varname]]
+        out <- do(out, lb)
+      }
+    }
+
+    if(option == "bin"){
+      lb <- min(vals, na.rm = TRUE)
+      ub <- max(vals, na.rm = TRUE)
+      assertthat::assert_that(is.numeric(lb),is.numeric(ub))
+
+      # Small helper function
+      do <- function(z, lb, ub){
+        z[z<lb] <- 0
+        z[z>ub] <- 0
+        return(z)
+      }
+
+      # Create output
+      if(inherits(env, "stars")){
+        out <- stars_to_raster(env[varname])
+        out <- lapply(out, function(z) do(z, lb, ub))
+      } else {
+        out <- env[[varname]]
+        out <- do(out, lb, ub)
+      }
+    }
+
+  } else if (option == "hinge") {
+    # Here it gets a bit more tricky as the hinge transformations need to be reproduced
+    out <- terra::rast()
+    for(i in 1:nrow(o[ind, c(ncol(o)-1,ncol(o))])){
+      new <- emptyraster(env)
+      cu <- c( o[ind, c(ncol(o)-1,ncol(o))][i,1], o[ind, c(ncol(o)-1,ncol(o))][i,2] )
+      # Remove any leading points
+      if(any(substr(cu,1, 1)==".")){
+        cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
+      }
+      cu <- as.numeric(cu)
+
+      new[] <- hingeval(env[[varname]][],cu[1], cu[2])
+      names(new) <- o$Feature[ind][i]
+      suppressWarnings(out <- c(out, new))
+      rm(new)
+    }
+    # Now for the spatial mask, simply take the minimum
+    out <- min(out)
+
+  } else {
+    stop("Not yet implemented")
+  }
+
+  # For stars derived lists, reduce back to raster
+  if(is.list(out)){
+    out <- Reduce("c",out)
+  }
+
+  # Return binary layer or subset
+  if(to_binary){
+    out[out!=0] <- 1
+  }
+
+  assertthat::assert_that(is.Raster(out),
+                          ifelse(is.Raster(out),
+                                 terra::hasValues(out),
+                                 terra::hasValues(out[[1]])))
   return(out)
 }
 

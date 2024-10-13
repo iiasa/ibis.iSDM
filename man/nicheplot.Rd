@@ -55,7 +55,7 @@ should be written to.}
 
 \item{title}{Allows to respecify the title through a \code{\link{character}} (Default: \code{NULL}).}
 
-\item{pal}{A \code{\link{vector}} with continious colours with viridis plasma by default (Default: \code{NULL}).}
+\item{pal}{An optional \code{\link{vector}} with continuous custom colours (Default: \code{NULL}).}
 
 \item{...}{Other engine specific parameters.}
 }

@@ -18,7 +18,8 @@ predictor_derivate(
 \item{env}{A \code{\link{SpatRaster}} object.}
 
 \item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any
-way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).}
+way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'},
+\code{'kmeans'}, \code{'thresh'}, \code{'bin'}).}
 
 \item{nknots}{The number of knots to be used for the transformation (Default: \code{4}).}
 
@@ -72,6 +73,10 @@ new derivates is specified via the parameter \code{'nknots'} (Default: \code{4})
 # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
 new <- predictor_derivate(r_ori, option = "hinge", knots = 4)
 terra::plot(new)
+
+# Or a quadratic transformation
+new2 <- predictor_derivate(r_ori, option = "quad", knots = 4)
+terra::plot(new2)
 
 }
 \seealso{
