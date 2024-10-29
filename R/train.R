@@ -1813,7 +1813,7 @@ methods::setMethod(
           o <- terra::mask(out$get_data("prediction"), layer)
         } else {
           # Default! Leaves rest of background to 0
-          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = 0)
+          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = NA)
         }
         out <- out$set_data("prediction", o)
         try({ rm(layer, o) })
