@@ -1820,10 +1820,14 @@ methods::setMethod(
       }
       out$settings$set("has_limits", TRUE)
     } else {
+      if(settings$get('inference_only')==FALSE){
       # set all NAs in prediction to NAs according in predictors
-      o <- terra::mask(out$get_data("prediction"), out$model$predictors_object$get_data()[[1]],
-                       updatevalue = NA)
-      out <- out$set_data("prediction", o)
+        o <- tryCatch(expr = {terra::mask(out$get_data("prediction"), out$model$predictors_object$get_data()[[1]],
+                                          updatevalue = NA)}, error = function(e) NA)
+        if (inherits(x = o, what = "SpatRaster")) {
+          if(terra::hasValues(o)) {out <- out$set_data("prediction", o)} else {warning("Issue while masking prediction")}
+        } else {warning("Issue while fetching predictors object")}
+      }
       out$settings$set("has_limits", FALSE)
     }
 
