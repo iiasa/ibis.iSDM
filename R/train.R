@@ -1820,6 +1820,10 @@ methods::setMethod(
       }
       out$settings$set("has_limits", TRUE)
     } else {
+      # set all NAs in prediction to NAs according in predictors
+      o <- terra::mask(out$get_data("prediction"), out$model$predictors_object$get_data()[[1]],
+                       updatevalue = NA)
+      out <- out$set_data("prediction", o)
       out$settings$set("has_limits", FALSE)
     }
 
