@@ -516,11 +516,13 @@ methods::setMethod(
 
       # select only columns needed by equation
       if (model$biodiversity[[id]]$equation != "<Default>") {
-
         env <- subset(env, select = c("ID", "x", "y", attr(stats::terms.formula(model$biodiversity[[id]]$equation),
                                                            "term.labels")))
-
       }
+
+      # Check for common issues and exclude variables if affected (could be outsourced)
+      # --- Variance check ---
+      env <- predictor_check(env)
 
       # Remove missing values as several engines can't deal with those easily
       miss <- stats::complete.cases(env)
