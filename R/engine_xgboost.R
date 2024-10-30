@@ -875,7 +875,8 @@ engine_xgboost <- function(x,
       if(nrow(newdata)==nrow(model$predictors)){
         prediction <- try({model_to_background(model)}, silent = TRUE)
         prediction[] <- pred_xgb
-        prediction <- terra::mask(prediction, model$background)
+        mask_tmp <- sum(terra::rast(newdata_copy, crs = terra::crs(prediction)))
+        prediction <- terra::mask(prediction, mask_tmp) # make sure to only use nonNA cells
       } else {
         assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),
                                 msg = "Projection data.frame has no valid coordinates or differs in grain!")
