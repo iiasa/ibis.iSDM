@@ -103,6 +103,9 @@ engine_gdb <- function(x,
   # Burn in the background
   template <- terra::rasterize(background, template, field = 0)
 
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+
   # Set up boosting control
   bc <- mboost::boost_control(mstop = iter,
                               nu = learning_rate,

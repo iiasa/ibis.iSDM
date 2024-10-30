@@ -113,8 +113,12 @@ engine_stan <- function(x,
     # If predictor existing, use them
     template <- emptyraster(x$predictors$get_data() )
   }
+
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Define new engine object of class
   eg <- Engine
