@@ -1036,6 +1036,78 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   return(out)
 }
 
+#### Check predictors ----
+
+#' Helper function to check extracted predictors for issues
+#' @description
+#' Here we check the variables in a provided [`data.frame`] for known issues.
+#' Note that this is done vertically (per column) and not horizontally (thus removing observations).
+#'
+#' If any of the conditions are satistified the entire predictor is removed from the model!
+#' @details
+#' Specifically checked are:
+#' [*] Whether all values in a column are \code{NA}.
+#' [*] Whether all values in a column are finite.
+#' [*] Whether the variance of all variables is greater than 0.
+#'
+#' @param env A [`data.frame`] with all predictor variables.
+#' @return A [`data.frame`] potentially with any variable names excluded. If the
+#' function fails due to some reason it returns the original \code{env}.
+#'
+#' @keywords utils
+#'
+#' @examples
+#' \dontrun{
+#'  # Remove highly correlated predictors
+#'  env <- predictor_check( env )
+#' }
+#' @author Martin Jung
+#' @noRd
+predictor_check <- function(env){
+  assertthat::assert_that(
+    is.data.frame(env)
+  )
+  # Dummy copy
+  dummy <- env
+
+  # Check NaN
+  check_nan <- apply(env, 2, function(z) all(is.nan(z)))
+  if(any(check_nan)){
+    if(getOption('ibis.setupmessages', default = TRUE)) {
+      myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_nan)),collapse = "; "),
+            ' variables owing to exclusively NA data!' )
+    }
+    env <- env |> dplyr::select(-dplyr::any_of(names(which(check_nan))))
+  }
+
+  # Check inifinites
+  check_infinite <- apply(env, 2, function(z) any( is.infinite(z) ) )
+  if(any(check_infinite)){
+    if(getOption('ibis.setupmessages', default = TRUE)) {
+      myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_infinite)),collapse = "; "),
+            ' variables owing to observations with infinite values!' )
+    }
+    env <- env |> dplyr::select(-dplyr::any_of(names(which(check_infinite))))
+  }
+
+  # Check variance
+  check_var <- apply(env, 2, function(z) var(z, na.rm = TRUE)) == 0
+  if(any(check_var)){
+    if(getOption('ibis.setupmessages', default = TRUE)) {
+      myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_var)),collapse = "; "),
+            ' variables owing to zero variance!' )
+    }
+  env <- env |> dplyr::select(-dplyr::any_of(names(which(check_var))))
+  }
+
+  # Check whether all columns have been removed, if so revert back for safety?
+  if(ncol(env)==0) env <- dummy
+  rm(dummy)
+
+  # Return
+  return(env)
+}
+
 #### Filter predictor functions ----
 
 #' Filter a set of correlated predictors to fewer ones
