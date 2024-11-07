@@ -136,6 +136,7 @@ reference:
       - predictor_derivate
       - predictor_filter
       - interpolate_gaps
+      - objects_size
       - run_stan
       - wrap_stanmodel
       - sanitize_names

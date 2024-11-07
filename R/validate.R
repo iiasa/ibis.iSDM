@@ -426,6 +426,10 @@ methods::setMethod(
         return(results)
       }
 
+    # R2 score
+    R2_Score <- function(pred, obs, na.rm = TRUE) {
+      return( 1 - sum((obs - pred)^2,na.rm = na.rm)/sum((obs - mean(obs,na.rm = na.rm))^2,na.rm = na.rm) )
+    }
     # Function for Root-mean square error
     RMSE <- function(pred, obs, na.rm = TRUE) {
       sqrt(mean((pred - obs)^2, na.rm = na.rm))
@@ -433,6 +437,10 @@ methods::setMethod(
     # Mean absolute error
     MAE <- function(pred, obs, na.rm = TRUE) {
       mean(abs(pred - obs), na.rm = na.rm)
+    }
+    # Mean Absolute Percentage Error Loss
+    MAPE <- function(pred, obs, na.rm = TRUE){
+      mean(abs((obs - pred)/obs), na.rm = TRUE)
     }
     # Function for log loss/cross-entropy loss.
     Poisson_LogLoss <- function(y_pred, y_true) {
@@ -458,21 +466,23 @@ methods::setMethod(
       modelid = id,
       name = name,
       method = method,
-      metric = c('n','rmse', 'mae',
+      metric = c('n', 'r2', 'rmse', 'mae', 'mape',
                  'logloss','normgini',
                  'cont.boyce'),
       value = NA
     )
     # - #
     out$value[out$metric=='n'] <- nrow(df2) # Number of records
+    out$value[out$metric=='r2'] <- R2_Score(pred = df2$pred, obs = df2[[point_column]]) # R2
     out$value[out$metric=='rmse'] <- RMSE(pred = df2$pred, obs = df2[[point_column]]) # RMSE
     out$value[out$metric=='mae'] <- MAE(pred = df2$pred, obs = df2[[point_column]]) # Mean absolute error
+    out$value[out$metric=='mape'] <- MAPE(pred = df2$pred, obs = df2[[point_column]]) # Mean Absolute Percentage Error Loss
     out$value[out$metric=='normgini'] <- NormalizedGini(y_pred = df2$pred, y_true = df2[[point_column]])
 
     if(!is.null(mod)){
       if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
-        LogLoss <- function(y_pred, y_true) {
-          y_pred <- pmax(y_pred, 1e-15)
+        LogLoss <- function(y_pred, y_true, eps = 1e-15) {
+          y_pred <- pmax(pmin(y_pred, 1 - eps), eps)
           LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
           return(LogLoss)
         }
