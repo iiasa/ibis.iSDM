@@ -8,7 +8,7 @@ posterior_predict_stanfit(
   obj,
   form,
   newdata,
-  mode = "predictor",
+  type = "predictor",
   family = NULL,
   offset = NULL,
   draws = NULL
@@ -21,7 +21,7 @@ posterior_predict_stanfit(
 
 \item{newdata}{A \link{data.frame} with new data to be used for prediction.}
 
-\item{mode}{A \code{\link{character}} of whether the linear \code{predictor} or the \code{response}
+\item{type}{A \code{\link{character}} of whether the linear \code{predictor} or the \code{response}
 is to be summarized.}
 
 \item{family}{A \code{\link{character}} giving the family for simulating linear response

@@ -167,6 +167,10 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
   expect_match(attr(tr1, "method"), "percentile")
   expect_match(attr(tr1, "format"), "binary")
 
+  # Kmeans threshold
+  expect_no_error(tr2 <- threshold(r2, method = "kmeans"))
+  expect_match(attr(tr2, "method"), "kmeans")
+  expect_match(attr(tr2, "format"), "binary")
   # --- #
 })
 
@@ -199,6 +203,14 @@ test_that('Test other generic functions', {
   expect_warning(logit(5))
   suppressWarnings( expect_true( is.nan(logit(5)) ) )
   expect_length(logisticRichard(rpois(10,.5)), 10)
+
+  # Combine formulas
+  form1 <- y ~ x + z
+  form2 <- y ~ x
+  expect_true(is.formula( combine_formulas(form1, form2) ))
+
+  # Modal calculations
+  expect_type( modal(rpois(50,1)), "integer")
 
 })
 

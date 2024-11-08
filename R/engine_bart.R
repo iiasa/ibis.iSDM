@@ -20,7 +20,7 @@ NULL
 #' sum-of-trees formulation (Default: \code{1000}).
 #' @param nburn A [`numeric`] estimate of the burn in samples (Default: \code{250}).
 #' @param chains A number of the number of chains to be used (Default: \code{4}).
-#' @param type The mode used for creating posterior predictions. Either \code{"link"}
+#' @param type The type used for creating posterior predictions. Either \code{"link"}
 #' or \code{"response"} (Default: \code{"response"}).
 #' @param ... Other options.
 #'
@@ -95,12 +95,16 @@ engine_bart <- function(x,
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
 
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+
   # Set up dbarts control with some parameters, rest default
   dc <- dbarts::dbartsControl(keepTrees	= TRUE, # Keep trees
                               n.burn = nburn,
                               n.trees = iter,
                               n.chains = chains,
-                              n.threads = ifelse( dbarts::guessNumCores() < getOption('ibis.nthread'),dbarts::guessNumCores(),getOption('ibis.nthread'))
+                              n.threads = ifelse( dbarts::guessNumCores() < getOption('ibis.nthread'),
+                                                  dbarts::guessNumCores(), getOption('ibis.nthread'))
   )
   # Other parameters
   # Set up the parameter list
@@ -473,58 +477,49 @@ engine_bart <- function(x,
           full[[settings$get('bias_variable')[i]]] <- settings$get('bias_value')[i]
         }
       }
-      check_package("foreach")
       params <- self$get_data("params")
-
       full$rowid <- 1:nrow(full)
-
-      # Tile the problem
-      splits <- cut(1:nrow(full), nrow(full) / min(nrow(full) / 4, 5000) )
-
-      # Get offset if existing
       if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
 
-      # Make a prediction
-      ms <- foreach::foreach(s = unique(splits),
-                             .inorder = TRUE,
-                             .combine = rbind,
-                             .errorhandling = "stop",
-                             .multicombine = TRUE,
-                             .export = c("splits", "fit_bart", "full", "model", "params", "of"),
-                             .packages = c("dbarts", "matrixStats")) %do% {
-                               i <- which(splits == s)
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
 
-                               pred_bart <- predict(object = fit_bart,
-                                                    newdata = full[i, model$biodiversity[[1]]$predictors_names],
-                                                    type = params$type,
-                                                    offset = of[i]
-                               )
-                               # Summarize quantiles and sd from posterior
-                               ms <- as.data.frame(
-                                 cbind( apply(pred_bart, 2, function(x) mean(x, na.rm = TRUE)),
-                                        matrixStats::colSds(pred_bart),
-                                        matrixStats::colQuantiles(pred_bart, probs = c(.05,.5,.95)),
-                                        apply(pred_bart, 2, mode)
-                                 )
-                               )
-                               names(ms) <- c("mean","sd", "q05", "q50", "q95", "mode")
-                               ms$cv <- ms$sd / ms$mean
-                               rm(pred_bart)
-                               return( ms )
-                             } # End of processing
-      assertthat::assert_that(nrow(ms)>0,
-                              nrow(ms) == nrow(full))
+        out <- predict_bart(obj = fit_bart,
+                            newdata = full[, model$biodiversity[[1]]$predictors_names],
+                            params = params,
+                            w = w,
+                            of = of,
+                            # FIXME: Somehow parallel prediction do not work with dbarts (RNG)
+                            # All estimates are 0.5 (random)
+                            # By default turned off....
+                            run_future = FALSE,
+                            N = NULL)
+
+      } else {
+        out <- predict_bart(obj = fit_bart,
+                            newdata = full[, model$biodiversity[[1]]$predictors_names],
+                            params = params,
+                            w = w,
+                            of = of,
+                            run_future = FALSE,
+                            N = NULL)
+      }
+      # End of processing
+      assertthat::assert_that(nrow(out)>0)
 
       # Add them through a loop since the cellid changed
       prediction <- terra::rast()
-      for(post in names(ms)){
+      for(post in names(out)){
         prediction2 <- self$get_data('template')
-        prediction2[as.numeric(full$cellid)] <- ms[[post]]; names(prediction2) <- post
+        prediction2[as.numeric(full$cellid)] <- out[[post]]; names(prediction2) <- post
         suppressWarnings( prediction <- c(prediction, prediction2) )
         rm(prediction2)
       }
       # plot(prediction$mean, col = ibis_colours$sdm_colour)
-      try({rm(ms, full)},silent = TRUE)
+      try({rm(out, full)},silent = TRUE)
     } else {
       # No prediction done
       prediction <- NULL
@@ -676,7 +671,7 @@ engine_bart <- function(x,
         "q50" = matrixStats::rowQuantiles(pred_bart, probs = c(.5)),
         "median" = matrixStats::rowQuantiles(pred_bart, probs = c(.5)),
         "q95" = matrixStats::rowQuantiles(pred_bart, probs = c(.95)),
-        "mode" = apply(pred_bart, 1, mode),
+        "mode" = apply(pred_bart, 1, modal),
         "cv" <- matrixStats::rowSds(pred_bart) / matrixStats::rowMeans2(pred_bart)
       )
 

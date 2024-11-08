@@ -98,6 +98,9 @@ engine_scampr <- function(x,
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
 
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+
   # Set up the parameter list
   params <- list(
     type = type,
@@ -796,7 +799,7 @@ engine_scampr <- function(x,
                         type = "xyz") |>
               emptyraster()
           }, silent = TRUE)
-          prediction[] <- out
+          prediction[df_sub$rowid] <- out
         }
         names(prediction) <- layer
       } else {

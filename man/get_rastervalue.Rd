@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-spatial.R
 \name{get_rastervalue}
 \alias{get_rastervalue}
-\title{Function to extract directly the raster value of provided points}
+\title{Function to extract point values directly from a SpatRaster}
 \usage{
 get_rastervalue(coords, env, ngb_fill = TRUE, rm.na = FALSE)
 }
@@ -24,17 +24,21 @@ data point.
 \description{
 This function simply extracts the values from a provided
 \code{\link{SpatRaster}}, \code{\link{SpatRasterDataset}} or \code{\link{SpatRasterCollection}} object. For
-points where or NA values were extracted a small buffer is applied to try and
+points where or \code{NA} values were extracted a small buffer is applied to try and
 obtain the remaining values.
 }
 \details{
 It is essentially a wrapper for \code{\link[terra:extract]{terra::extract}}.
 }
 \examples{
-\dontrun{
+# Dummy raster:
+r <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+# (dummy points)
+pp <- terra::spatSample(r,20,as.points = TRUE) |> sf::st_as_sf()
+
 # Extract values
-vals <- get_rastervalue(coords, env)
-}
+vals <- get_rastervalue(pp, r)
+head(vals)
 
 }
 \keyword{utils}

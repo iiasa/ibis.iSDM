@@ -127,6 +127,8 @@ Requires the \code{"modEvA"} package to be installed.
 Requires the \code{"modEvA"} package to be installed.
 \item \code{'AUC'} = Determines the optimal AUC of presence records. Requires the
 \code{"modEvA"} package to be installed.
+\item \code{'kmeans'} = Determines a threshold based on a 2 cluster k-means clustering.
+The presence class is assumed to be the cluster with the larger mean.
 }
 }
 \examples{

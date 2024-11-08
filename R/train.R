@@ -516,11 +516,13 @@ methods::setMethod(
 
       # select only columns needed by equation
       if (model$biodiversity[[id]]$equation != "<Default>") {
-
         env <- subset(env, select = c("ID", "x", "y", attr(stats::terms.formula(model$biodiversity[[id]]$equation),
                                                            "term.labels")))
-
       }
+
+      # Check for common issues and exclude variables if affected (could be outsourced)
+      # --- Variance check ---
+      env <- predictor_check(env)
 
       # Remove missing values as several engines can't deal with those easily
       miss <- stats::complete.cases(env)
@@ -602,7 +604,10 @@ methods::setMethod(
       model[['biodiversity']][[id]][['predictors']] <- env
       model[['biodiversity']][[id]][['predictors_names']] <- names(env)[names(env) %notin% c("ID", "x", "y", "Intercept")]
       model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']][, "predictors"] %in% names(env), ]
-    }
+      # makes sure ordering is identical
+      sort_id <- match(model[['biodiversity']][[id]][['predictors_names']], model[['biodiversity']][[id]][['predictors_types']]$predictors)
+      model[['biodiversity']][[id]][['predictors_types']] <- model[['biodiversity']][[id]][['predictors_types']][sort_id, ]
+      }
 
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){
@@ -912,7 +917,9 @@ methods::setMethod(
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
       model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
-      model$predictors <- model$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+      # make sure all in same order
+      model$predictors_types <- model$predictors_types[match(model$predictors_names, model$predictors_types$predictors), ]
+      model$predictors <- dplyr::select(model$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
       model$predictors_object <- model$predictors_object$clone(deep = TRUE)
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
@@ -954,7 +961,9 @@ methods::setMethod(
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
       model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
-      model$predictors <- model$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+      # make sure all in same order
+      model$predictors_types <- model$predictors_types[match(model$predictors_names, model$predictors_types$predictors), ]
+      model$predictors <- dplyr::select(model$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
       model$predictors_object <- model$predictors_object$clone(deep = TRUE)
       if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
         model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
@@ -988,7 +997,9 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1119,7 +1130,9 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1249,7 +1262,9 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1403,7 +1418,9 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1529,7 +1546,9 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1657,7 +1676,9 @@ methods::setMethod(
         model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
         model2$predictors_names <- pred_tmp
         model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        model2$predictors <- model2$predictors |> dplyr::select(dplyr::any_of(c("x", "y", pred_tmp)))
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
         if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
           model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
         }
@@ -1813,7 +1834,7 @@ methods::setMethod(
           o <- terra::mask(out$get_data("prediction"), layer)
         } else {
           # Default! Leaves rest of background to 0
-          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = 0)
+          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = NA)
         }
         out <- out$set_data("prediction", o)
         try({ rm(layer, o) })

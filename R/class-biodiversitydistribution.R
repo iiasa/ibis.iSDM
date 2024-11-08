@@ -142,7 +142,7 @@ BiodiversityDistribution <- R6::R6Class(
     #' @description
     #' Specify new limits to the background
     #' @param x A [`list`] object with method and limit type.
-    #' @seealso [add_control_extrapolation()]
+    #' @seealso [add_limits_extrapolation()]
     #' @return This object.
     set_limits = function(x){
       # Specify list

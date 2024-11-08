@@ -113,8 +113,12 @@ engine_stan <- function(x,
     # If predictor existing, use them
     template <- emptyraster(x$predictors$get_data() )
   }
+
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Define new engine object of class
   eg <- Engine
@@ -581,7 +585,7 @@ engine_stan <- function(x,
                                        newdata = full@data,
                                        offset = (full$w),
                                        family = fam, # Family
-                                       mode = self$stan_param$type # Type
+                                       type = self$stan_param$type # Type
       )
 
       # Convert full to raster
@@ -660,7 +664,7 @@ engine_stan <- function(x,
                                              newdata = full@data,
                                              offset = (full$w),
                                              family = fam,
-                                             mode = type # Linear predictor
+                                             type = type # Linear predictor
       )
 
       # Fill output with summaries of the posterior
@@ -766,7 +770,7 @@ engine_stan <- function(x,
                                                newdata = df_temp,
                                                offset = df_temp$w,
                                                family = fam,
-                                               mode = type) # Linear predictor
+                                               type = type) # Linear predictor
 
         # FIXME: Something wrong here I guess
         # Also attach the partial variable
@@ -848,7 +852,7 @@ engine_stan <- function(x,
                                              newdata = df_partial@data,
                                              offset = df_partial$w,
                                              family = fam,
-                                             mode = type # Linear predictor
+                                             type = type # Linear predictor
       )
 
       # Get container

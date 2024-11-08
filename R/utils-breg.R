@@ -168,58 +168,126 @@ setup_prior_boom <- function(form, data, priors, family, exposure = NULL){
 #' model fitting.
 #' @param w A [`numeric`] [`vector`] containing the exposure variables for PPMs.
 #' Can be \code{NULL} if the model is not a PPM.
+#' @param run_future A [`logical`] on whether the model is to be run through chunking
+#' and the [future] package (Default: \code{FALSE}). **Note that this also summarizes
+#' directly the posterior!**
+#' @param N An optional [`numeric`] value describing the number of chunking pieces (Default: \code{NULL}).
 #'
 #' @note By Default 20% of the iterations are considered as burnin.
 #'
 #' @returns A [`data.frame`] with the respective prediction.
 #'
-#' @keywords utils
+#' @keywords internal
 #'
 #' @noRd
-#'
-#' @keywords internal
-predict_boom <- function(obj, newdata, fam, params, w = NULL) {
+predict_boom <- function(obj, newdata, fam, params, w = NULL, run_future = FALSE, N = NULL) {
   assertthat::assert_that(
     is.list(obj),
     is.data.frame(newdata) || inherits(newdata, "SpatialPixelsDataFrame"),
     is.character(fam),
     is.list(params),
-    is.null(w) || is.numeric(w)
+    is.null(w) || is.numeric(w),
+    is.logical(run_future),
+    is.null(N) || is.numeric(N)
   )
-  check_package("BoomSpikeSlab")
 
-  # Make a prediction
-  if(fam == "poisson"){
-    suppressWarnings(
-      pred_breg <- BoomSpikeSlab::predict.poisson.spike(
-        object = obj,
-        newdata = newdata,
-        exposure = w,
-        burn = ceiling(params$iter*0.2),
-        type = params$type,
-        mean.only = FALSE # Return full posterior
+  # Non-future
+  if(!run_future){
+    # Make a prediction
+    if(fam == "poisson"){
+      suppressWarnings(
+        pred_breg <- BoomSpikeSlab::predict.poisson.spike(
+          object = obj,
+          newdata = newdata,
+          exposure = w,
+          burn = ceiling(params$iter*0.2),
+          type = params$type,
+          mean.only = FALSE # Return full posterior
+        )
       )
-    )
-  } else if(fam == "binomial"){
-    suppressWarnings(
-      pred_breg <- BoomSpikeSlab::predict.logit.spike(
-        object = obj,
-        newdata = newdata,
-        burn = ceiling(params$iter*0.2),
-        type = params$type,
-        mean.only = FALSE # Return full posterior
+    } else if(fam == "binomial"){
+      suppressWarnings(
+        pred_breg <- BoomSpikeSlab::predict.logit.spike(
+          object = obj,
+          newdata = newdata,
+          burn = ceiling(params$iter*0.2),
+          type = params$type,
+          mean.only = FALSE # Return full posterior
+        )
       )
-    )
+    } else {
+      suppressWarnings(
+        pred_breg <- BoomSpikeSlab::predict.lm.spike(
+          object = obj,
+          newdata = newdata,
+          burn = ceiling(params$iter*0.2),
+          type = params$type,
+          mean.only = FALSE # Return full posterior
+        )
+      )
+    }
   } else {
-    suppressWarnings(
-      pred_breg <- BoomSpikeSlab::predict.lm.spike(
-        object = obj,
-        newdata = newdata,
-        burn = ceiling(params$iter*0.2),
-        type = params$type,
-        mean.only = FALSE # Return full posterior
-      )
-    )
+    # Set up future if set
+    check_package("doFuture")
+    # If not set, use number of threads
+    if(is.null(N)) N <- getOption("ibis.nthread",default = 10)
+    # Chunk the data
+    splits <- chunk_data(newdata, N = N, index_only = TRUE)
+
+    pred_breg <- foreach::foreach(s = splits,
+                            .combine = "rbind",
+                            .inorder = TRUE,
+                            .options.future = list(seed = TRUE,
+                                                   packages = c("matrixStats"),
+                                                   globals = structure(TRUE, add = "modal"))
+      ) %dofuture% {
+        if(fam == "poisson"){
+          suppressWarnings(
+            pred_breg <- BoomSpikeSlab::predict.poisson.spike(
+              object = obj,
+              newdata = newdata[s,],
+              exposure = w[s],
+              burn = ceiling(params$iter*0.2),
+              type = params$type,
+              mean.only = FALSE # Return full posterior
+            )
+          )
+        } else if(fam == "binomial"){
+          suppressWarnings(
+            pred_breg <- BoomSpikeSlab::predict.logit.spike(
+              object = obj,
+              newdata = newdata[s,],
+              burn = ceiling(params$iter*0.2),
+              type = params$type,
+              mean.only = FALSE # Return full posterior
+            )
+          )
+        } else {
+          suppressWarnings(
+            pred_breg <- BoomSpikeSlab::predict.lm.spike(
+              object = obj,
+              newdata = newdata[s,],
+              burn = ceiling(params$iter*0.2),
+              type = params$type,
+              mean.only = FALSE # Return full posterior
+            )
+          )
+        }
+        # Summarize the posterior
+        preds <- as.data.frame(
+          cbind(
+            matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+            matrixStats::rowSds(pred_breg, na.rm = TRUE),
+            matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE)
+          )
+        )
+        names(preds) <- c("mean", "sd", "q05", "q50", "q95")
+        preds$cv <- (preds$sd / preds$mean)
+        # Mode
+        preds$mode <- base::apply(pred_breg, 1, FUN = terra::modal) |> as.numeric()
+        return(preds)
+      }
+    assertthat::assert_that(nrow(pred_breg)>0)
   }
   return(pred_breg)
 }

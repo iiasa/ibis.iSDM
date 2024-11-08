@@ -35,6 +35,9 @@
 #' standard deviation (\code{"sd"}), the average of all PCA axes except the
 #' first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
 #' the range between the lowest and highest value (\code{"range"}).
+#' @param point A [`sf`] object containing observational data used for model training. Used
+#' for method \code{'superlearner'} only (Default: \code{NULL}).
+#' @param field_occurrence A [`character`] location of biodiversity point records (Default: \code{'observed'}).
 #' @param apply_threshold A [`logical`] flag (Default: \code{TRUE}) specifying
 #' whether threshold values should also be created via \code{"method"}. Only
 #' applies and works for [`DistributionModel`] and thresholds found.
@@ -44,10 +47,13 @@
 #' * \code{'median'} - Calculates the median of several predictions.
 #' * \code{'max'} - The maximum value across predictions.
 #' * \code{'min'} - The minimum value across predictions.
+#' * \code{'mode'} - The mode/modal values as the most commonly occurring value.
 #' * \code{'weighted.mean'} - Calculates a weighted mean. Weights have to be supplied separately (e.g. TSS).
 #' * \code{'min.sd'} - Ensemble created by minimizing the uncertainty among predictions.
 #' * \code{'threshold.frequency'} - Returns an ensemble based on threshold frequency (simple count). Requires thresholds to be computed.
 #' * \code{'pca'} - Calculates a PCA between predictions of each algorithm and then extract the first axis (the one explaining the most variation).
+#' * \code{'superlearner'} - Composites two predictions through a 'meta-model' fitted on top
+#' (using a [`glm`] by default). Requires binomial data in current Setup.
 #'
 #' In addition to the different ensemble methods, a minimal threshold
 #' (\code{min.value}) can be set that needs to be surpassed for averaging. By
@@ -94,14 +100,17 @@ NULL
 methods::setGeneric("ensemble",
                     signature = methods::signature("..."),
                     function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
-                             normalize = FALSE, uncertainty = "cv", apply_threshold = TRUE) standardGeneric("ensemble"))
+                             normalize = FALSE, uncertainty = "cv",
+                             point = NULL, field_occurrence = 'observed',
+                             apply_threshold = TRUE) standardGeneric("ensemble"))
 
 #' @rdname ensemble
 methods::setMethod(
   "ensemble",
   methods::signature("ANY"),
   function(..., method = "mean", weights = NULL, min.value = NULL, layer = "mean",
-           normalize = FALSE, uncertainty = "cv", apply_threshold = TRUE){
+           normalize = FALSE, uncertainty = "cv",
+           point = NULL, field_occurrence = 'observed', apply_threshold = TRUE){
     if(length(list(...))>1) {
       mc <- list(...)
     } else {
@@ -135,11 +144,22 @@ methods::setMethod(
     )
 
     # Check the method
-    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'max', 'min',
+    method <- match.arg(method, c('mean', 'weighted.mean', 'median', 'max', 'min','mode',
+                                  'superlearner',
                                   'threshold.frequency', 'min.sd', 'pca'), several.ok = FALSE)
     # Uncertainty calculation
     uncertainty <- match.arg(uncertainty, c('none','sd', 'cv', 'range', 'pca'), several.ok = FALSE)
 
+    # Method specific checks
+    if(method == "superlearner"){
+      assertthat::assert_that(!is.null(point),
+                              msg = "Ensemble method superlearner requires a specified point data.")
+      assertthat::assert_that(utils::hasName(point, field_occurrence),
+                              msg = "Field occurrence not found in specified point data.")
+      assertthat::assert_that(dplyr::n_distinct(point[[field_occurrence]])==2,
+                              msg = "Superlearner currently requires binomial data for ensembling!")
+    }
+    # --- #
     # For Distribution model ensembles
     if( all( sapply(mods, function(z) inherits(z, "DistributionModel")) ) ){
       assertthat::assert_that(length(mods)>=2, # Need at least 2 otherwise this does not make sense
@@ -184,6 +204,8 @@ methods::setMethod(
           new <- max(ras, na.rm = TRUE)
         } else if(method == 'min'){
           new <- min(ras, na.rm = TRUE)
+        } else if(method == 'mode'){
+          new <- terra::modal(ras, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
@@ -225,6 +247,23 @@ methods::setMethod(
         } else if(method == 'pca'){
           # Calculate a pca on the layers and return the first axes
           new <- predictor_transform(ras, option = "pca", pca.var = 1)[[1]]
+        } else if(method == 'superlearner'){
+          # Run a superlearner with the specified point data.
+          # Ensure that predictions have unique names
+          names(ras) <- paste0('model', 1:terra::nlyr(ras))
+          ex <- terra::extract(ras, point, ID = FALSE)
+          ex <- cbind(point[,field_occurrence], ex)
+          fit <- stats::glm(
+            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> stats::as.formula(),
+            family = stats::binomial(),data = ex
+          )
+          # Now predict output with the meta-learner
+          new <- emptyraster(ras)
+          new[which(!is.na(ras[[1]])[])] <- terra::predict(
+            fit, ras, na.rm = FALSE, type = "response",
+            cores = getOption('ibis.nthread'))
+          attr(new, "superlearner.coefficients") <- stats::coef(fit)
+          try({ rm(ex,fit) },silent = TRUE)
         }
 
         # Rename
@@ -275,6 +314,7 @@ methods::setMethod(
             method == "median" ~ median(ll_val, na.rm = TRUE),
             method == "max" ~ max(ll_val, na.rm = TRUE),
             method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "mode" ~ modal(ll_val, na.rm = TRUE),
             method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
             .default = mean(ll_val, na.rm = TRUE)
           )
@@ -338,12 +378,13 @@ methods::setMethod(
           new <- max(ras, na.rm = TRUE)
         } else if(method == 'min'){
           new <- min(ras, na.rm = TRUE)
+        } else if(method == 'mode'){
+          new <- terra::modal(ras, na.rm = TRUE)
         } else if(method == 'weighted.mean'){
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
           # Check that thresholds are available
           stop("This function does not (yet) work with directly provided Raster objects.")
-
         } else if(method == 'min.sd'){
           # If method 'min.sd' furthermore check that there is a sd object for all
           # of them
@@ -362,6 +403,23 @@ methods::setMethod(
         } else if(method == 'pca'){
           # Calculate a pca on the layers and return the first axes
           new <- predictor_transform(ras, option = "pca", pca.var = 1)[[1]]
+        } else if(method == 'superlearner'){
+          # Run a superlearner with the specified point data.
+          # Ensure that predictions have unique names
+          names(ras) <- paste0('model', 1:terra::nlyr(ras))
+          ex <- terra::extract(ras, point, ID = FALSE)
+          ex <- cbind(point[,field_occurrence], ex)
+          fit <- stats::glm(
+            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> stats::as.formula(),
+            family = stats::binomial(),data = ex
+          )
+          # Now predict output with the meta-learner
+          new <- emptyraster(ras)
+          new[which(!is.na(ras[[1]])[])] <- terra::predict(
+            fit, ras, na.rm = FALSE, type = "response",
+            cores = getOption('ibis.nthread'))
+          attr(new, "superlearner.coefficients") <- stats::coef(fit)
+          try({ rm(ex,fit) },silent = TRUE)
         }
         # Rename
         names(new) <- paste0("ensemble_", lyr)
@@ -386,7 +444,7 @@ methods::setMethod(
           suppressWarnings( out <- c(out, new) )
         }
       }
-
+      # Check and return output
       assertthat::assert_that(is.Raster(out))
       return(out)
     } else {
@@ -450,6 +508,9 @@ methods::setMethod(
       } else if(method == 'min'){
         out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                      1, function(x) min(x, na.rm = TRUE))
+      } else if(method == 'mode'){
+        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
+                     1, function(x) modal(x, na.rm = TRUE))
       } else if(method == 'weighted.mean'){
         out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
                      1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
@@ -460,6 +521,8 @@ methods::setMethod(
       } else if(method == 'min.sd'){
         stop("This has not been reasonably implemented in this context.")
       } else if(method == 'pca'){
+        stop("This has not been reasonably implemented in this context.")
+      } else if(method == 'superlearner'){
         stop("This has not been reasonably implemented in this context.")
       }
       # Add dimensions to output
@@ -497,6 +560,7 @@ methods::setMethod(
             method == "median" ~ median(ll_val, na.rm = TRUE),
             method == "max" ~ max(ll_val, na.rm = TRUE),
             method == "min" ~ min(ll_val, na.rm = TRUE),
+            method == "mode" ~ modal(ll_val, na.rm = TRUE),
             method == "weighted.mean" ~ weighted.mean(ll_val, w = weights, na.rm = TRUE),
             .default = mean(ll_val, na.rm = TRUE)
           )

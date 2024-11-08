@@ -60,6 +60,7 @@ NULL
 #' * \code{'interaction'} - Add interacting predictors. Interactions need to be specified (\code{"int_variables"})!
 #' * \code{'thresh'} - Add threshold derivate predictors.
 #' * \code{'hinge'} - Add hinge derivate predictors.
+#' * \code{'kmeans'} - Add k-means derived factors.
 #' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
 #' @note
@@ -130,7 +131,7 @@ methods::setMethod(
     assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
                             is.Raster(env),
                             all(transform == 'none') || all( transform %in% c('pca', 'scale', 'norm', 'windsor') ),
-                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin', 'interaction') ),
+                            all(derivates == 'none') || all( derivates %in% c('thresh', 'hinge', 'quadratic', 'bin', 'kmeans', 'interaction') ),
                             is.vector(derivate_knots) || is.numeric(derivate_knots),
                             is.null(names) || assertthat::is.scalar(names) || is.vector(names),
                             is.logical(explode_factors),
@@ -247,7 +248,7 @@ methods::setMethod(
 
     # Mask predictors with existing background layer
     if(bgmask){
-      env <- terra::mask(env, mask = x$background)
+      env <- terra::mask(env, mask = x$background, overwrite = TRUE)
       # Reratify, work somehow only on stacks
       if(has_factors && any(is.factor(env)) ){
         new_env <- env
@@ -349,7 +350,7 @@ methods::setMethod(
       # If it is a raster
       if(is.Raster(x$background)){
         # Check that background and range align, otherwise raise error
-        if(is_comparable_raster(layer, x$background)){
+        if(!is_comparable_raster(layer, x$background)){
           warning('Supplied range does not align with background! Aligning them now...')
           layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
         }
@@ -371,12 +372,12 @@ methods::setMethod(
     if(terra::global(ras1, "min", na.rm = TRUE) == terra::global(ras1, "max", na.rm = TRUE)){
       o <- ras2
       # Ensure that all layers have a minimum and a maximum
-      o[is.na(o)] <- 0; o <- terra::mask(o, x$background)
+      o[is.na(o)] <- 0; o <- terra::mask(o, x$background, overwrite = TRUE)
       names(o) <- c('elev_high')
     } else {
       o <- c(ras1, ras2)
       # Ensure that all layers have a minimum and a maximum
-      o[is.na(o)] <- 0; o <- terra::mask(o, x$background)
+      o[is.na(o)] <- 0; o <- terra::mask(o, x$background, overwrite = TRUE)
       names(o) <- c('elev_low', 'elev_high')
     }
     rm(ras1,ras2)
@@ -552,7 +553,8 @@ methods::setMethod(
     #     ras_range <- raster::rasterize(layer, temp, field = 1, background = NA)
     #   }
     # } else {
-    ras_range <- terra::rasterize(layer, temp, field = 1, background = 0)
+    ras_range <- terra::rasterize(layer, temp, field = 1,
+                                  background = 0, overwrite = TRUE)
     # }
 
     # -------------- #
@@ -564,8 +566,8 @@ methods::setMethod(
       names(dis) <- 'binary_range'
     } else if(method == 'distance'){
       # Calculate the linear distance from the range
-      dis <- terra::gridDist(ras_range, target = 1)
-      dis <- terra::mask(dis, x$background)
+      dis <- terra::gridDist(ras_range, target = 1, overwrite = TRUE)
+      dis <- terra::mask(dis, x$background, overwrite = TRUE)
       # If max distance is specified
       if(!is.null(distance_max) && !is.infinite(distance_max)){
         dis[dis > distance_max] <- NA # Set values above threshold to NA
@@ -580,7 +582,7 @@ methods::setMethod(
 
       # Set NA to 0 and mask again
       dis[is.na(dis)] <- 0
-      dis <- terra::mask(dis, x$background)
+      dis <- terra::mask(dis, x$background, overwrite = TRUE)
       names(dis) <- 'distance_range'
     }
 
@@ -753,7 +755,7 @@ methods::setMethod(
     # names = names = NULL; transform = 'none'; derivates = 'none'; derivate_knots = 4; int_variables = NULL;harmonize_na = FALSE; state = NULL
     # Try and match transform and derivatives arguments
     transform <- match.arg(transform, c('none','pca', 'scale', 'norm', 'windsor', 'percentile'), several.ok = FALSE) # Several ok set to FALSE as states are not working otherwise
-    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'interaction'), several.ok = TRUE)
+    derivates <- match.arg(derivates, c('none','thresh', 'hinge', 'quadratic', 'bin', 'kmeans', 'interaction'), several.ok = TRUE)
 
     assertthat::validate_that(inherits(env,'stars'), msg = 'Projection rasters need to be stars stack!')
     assertthat::assert_that(inherits(x, "BiodiversityScenario"),
@@ -767,8 +769,8 @@ methods::setMethod(
     assertthat::validate_that(length(env) >= 1)
 
     # Get model object
-    obj <- x$get_model()
-    assertthat::assert_that(!(is.null(obj) || is.Waiver(obj)),
+    obj <- x$get_model(copy = TRUE)
+    assertthat::assert_that(!(isFALSE(obj) || is.Waiver(obj)),
                             msg = "No model object found in scenario?")
     model <- obj$model
 
@@ -856,7 +858,7 @@ methods::setMethod(
       # Get variable names
       varn <- obj$get_coefficients()[,1]
       # Are there any derivates present in the coefficients?
-      if(any( length( grep("hinge_|bin_|quadratic_|thresh_|interaction_", varn ) ) > 0 )){
+      if(any( length( grep("hinge_|bin_|kmeans_|quadratic_|thresh_|interaction_", varn ) ) > 0 )){
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Creating predictor derivates...')
         for(dd in derivates){
           if(any(grep(dd, varn))){

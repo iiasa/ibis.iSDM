@@ -344,7 +344,8 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       # Align with template if set
       if(!is.null(template)){
         if(terra::compareGeom(zones, template, stopOnError = FALSE)){
-          zones <- terra::resample(zones, template, method = "near", threads = getOption("ibis.nthread"))
+          zones <- terra::resample(zones, template, method = "near",
+                                   threads = getOption("ibis.nthread"), overwrite = TRUE)
         }
       }
     }
@@ -357,8 +358,8 @@ create_zonaloccurrence_mask <- function(df, zones = NULL, buffer_width = NULL, c
       buf <- sf::st_buffer(x = df, dist = buffer_width, nQuadSegs = 50)
     )
     # Rasterize
-    zones <- terra::rasterize(buf, template, field = 1, background = 0)
-    zones <- terra::mask(zones, template)
+    zones <- terra::rasterize(buf, template, field = 1, background = 0, overwrite = TRUE)
+    zones <- terra::mask(zones, template, overwrite = TRUE)
     # Ratify
     zones <- terra::droplevels(zones)
   }
@@ -629,9 +630,9 @@ st_kde <- function(points, background, bandwidth = 3){
 
   # Resample output for small point mismatches
   if(!terra::compareGeom(out, background, stopOnError = FALSE)){
-    out <- terra::resample(out, background, threads = getOption("ibis.nthread"))
+    out <- terra::resample(out, background, threads = getOption("ibis.nthread"), overwrite = TRUE)
   }
-  out <- terra::mask(out, background)
+  out <- terra::mask(out, background, overwrite = TRUE)
   names(out) <- "kde__coordinates"
   rm(matrix, coords)
   return( out )
@@ -737,7 +738,7 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
   )
 
   # Rasterize the polygon to
-  out <- terra::rasterize(x = poly, y = template, field = field_occurrence)
+  out <- terra::rasterize(x = poly, y = template, field = field_occurrence, overwrite = TRUE)
 
   # Construct new point data
   co <- terra::xyFromCell(out, cell = which(!is.na(out[])) ) |> as.data.frame()
@@ -867,11 +868,12 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
   if(sf::st_crs(data) != sf::st_crs(template)){
     # Project Raster layer
     data <- terra::project(data, terra::crs(template),
-                           method = method, threads = getOption("ibis.nthread"))
+                           method = method,
+                           threads = getOption("ibis.nthread"), overwrite = TRUE)
   }
 
   # Crop raster to template
-  data <- terra::crop(data, template, snap = "out")
+  data <- terra::crop(data, template, snap = "out", overwrite = TRUE)
 
   # Aggregate to minimal scale
   if(is.Raster(template)){
@@ -879,12 +881,14 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
       factor <- floor(data@ncols/template@ncols)
       data <- terra::aggregate(data, fact = factor,
                                fun = func,
-                               cores = ifelse(cl, getOption("ibis.nthread"), 1))
+                               cores = ifelse(cl, getOption("ibis.nthread"), 1),
+                               overwrite = TRUE)
     }
   } else {
     # Resample with target method
-    ras <- terra::rasterize(template, data)
-    data <- terra::resample(data, ras, method = method, threads = getOption("ibis.nthread"))
+    ras <- terra::rasterize(template, data, overwrite = TRUE)
+    data <- terra::resample(data, ras, method = method,
+                            threads = getOption("ibis.nthread"), overwrite = TRUE)
   }
   return(data)
 }
@@ -1044,11 +1048,11 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
   return(out)
 }
 
-#' Function to extract directly the raster value of provided points
+#' Function to extract point values directly from a SpatRaster
 #'
 #' @description This function simply extracts the values from a provided
 #' [`SpatRaster`], [`SpatRasterDataset`] or [`SpatRasterCollection`] object. For
-#' points where or NA values were extracted a small buffer is applied to try and
+#' points where or \code{NA} values were extracted a small buffer is applied to try and
 #' obtain the remaining values.
 #'
 #' @param coords A [`data.frame`], [`matrix`] or [`sf`] object.
@@ -1066,10 +1070,14 @@ get_ngbvalue <- function(coords, env, longlat = TRUE, field_space = c('x','y'), 
 #' @keywords utils
 #'
 #' @examples
-#' \dontrun{
+#' # Dummy raster:
+#' r <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+#' # (dummy points)
+#' pp <- terra::spatSample(r,20,as.points = TRUE) |> sf::st_as_sf()
+#'
 #' # Extract values
-#' vals <- get_rastervalue(coords, env)
-#' }
+#' vals <- get_rastervalue(pp, r)
+#' head(vals)
 #'
 #' @export
 get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
@@ -1516,7 +1524,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", r
 
   # Take coordinates of supplied data and rasterize
   coords <- sf::st_coordinates(data)
-  ras <- terra::rasterize(coords, background, fun = sum) # Get the number of observations per grid cell
+  ras <- terra::rasterize(coords, background, fun = sum, overwrite = TRUE) # Get the number of observations per grid cell
 
   # Lower and upper bounds for thinning
   totake <- c(lower = remainpoints, upper = max(terra::global(ras, "min", na.rm = TRUE)[,1],

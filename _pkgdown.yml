@@ -104,6 +104,8 @@ reference:
     desc: Key functions to summarize, validate or extract information from trained models.
     contents:
       - plot
+      - bivplot
+      - nicheplot
       - print
       - summary
       - coef
@@ -134,6 +136,7 @@ reference:
       - predictor_derivate
       - predictor_filter
       - interpolate_gaps
+      - objects_size
       - run_stan
       - wrap_stanmodel
       - sanitize_names
@@ -163,6 +166,16 @@ reference:
       - Log
       - has_keyword("classes")
 
+  - title: Parallel processing
+    desc: >
+      Functions to enable or set up parallel processing
+    contents:
+      - ibis_future
+      - ibis_enable_parallel
+      - ibis_set_strategy
+      - ibis_set_threads
+      - run_parallel
+
   - title: Miscellaneous functions
     desc: >
      Other functions only relevant for development
@@ -173,9 +186,9 @@ reference:
       - has_keyword("misc")
       - print
       - myLog
+      - modal
       - new_id
       - new_waiver
-      - ibis_future
       - ibis_options
       - ibis_dependencies
 

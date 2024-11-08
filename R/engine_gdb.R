@@ -31,6 +31,10 @@ NULL
 #' baselearners via [add_latent_spatial] or the specification of monotonically
 #' constrained priors via [GDBPrior].
 #'
+#' @note
+#' The coefficients resulting from gdb with poipa data (Binomial) are only 0.5
+#' of the typical coefficients of a logit model obtained via glm (see Binomial).
+#'
 #' @returns An engine.
 #'
 #' @references
@@ -98,6 +102,9 @@ engine_gdb <- function(x,
 
   # Burn in the background
   template <- terra::rasterize(background, template, field = 0)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Set up boosting control
   bc <- mboost::boost_control(mstop = iter,
@@ -476,13 +483,41 @@ engine_gdb <- function(x,
         }
       }
 
-      # Make a prediction
-      suppressWarnings(
-        pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
-                                           type = self$get_data('params')$type,
-                                           aggregate = 'sum',
-                                           offset = full$w)
-      )
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+
+        # Chunk the data
+        splits <- chunk_data(full, N = getOption("ibis.nthread",default = 10), index_only = TRUE)
+
+        pred_gdb <- foreach::foreach(s = splits,
+                                      .combine = "rbind",
+                                      .inorder = TRUE,
+                                      .options.future = list(seed = TRUE,
+                                                             packages = c("mboost"))
+        ) %dofuture% {
+          # Make a prediction
+          suppressWarnings(
+            mboost::predict.mboost(object = fit_gdb,
+                                   newdata = full[s,],
+                                   type = self$get_data('params')$type,
+                                   aggregate = 'sum',
+                                   offset = full$w[s])
+          )
+        }
+
+      } else {
+        # Make a prediction
+        suppressWarnings(
+          pred_gdb <- mboost::predict.mboost(object = fit_gdb, newdata = full,
+                                             type = self$get_data('params')$type,
+                                             aggregate = 'sum',
+                                             offset = full$w)
+        )
+      }
+
       # Fill output
       prediction[as.numeric(full$cellid)] <- pred_gdb[,1]
       names(prediction) <- 'mean'
@@ -534,11 +569,36 @@ engine_gdb <- function(x,
       # Subset to non-missing data
       newdata_sub <- subset(newdata, stats::complete.cases(newdata))
 
-      # Predict
-      y <- suppressWarnings(
-        mboost::predict.mboost(object = mod, newdata = newdata_sub,
-                               type = type, aggregate = 'sum')
-      )
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Chunk the data
+        splits <- chunk_data(newdata_sub, N = getOption("ibis.nthread",default = 10),
+                             index_only = TRUE)
+
+        y <- foreach::foreach(s = splits,
+                              .combine = "rbind",
+                              .inorder = TRUE,
+                              .options.future = list(seed = TRUE,
+                                                     packages = c("mboost"))
+        ) %dofuture% {
+          # Make a prediction
+          suppressWarnings(
+            mboost::predict.mboost(object = mod,
+                                   newdata = newdata_sub[s,],
+                                   type = type,
+                                   aggregate = 'sum')
+          )
+        }
+      } else {
+        # Predict
+        y <- suppressWarnings(
+          mboost::predict.mboost(object = mod, newdata = newdata_sub,
+                                 type = type, aggregate = 'sum')
+        )
+      }
 
       # Make empty template
       if(nrow(newdata)==nrow(model$predictors)){
@@ -553,7 +613,7 @@ engine_gdb <- function(x,
                       type = "xyz") |>
             emptyraster()
         }, silent = TRUE)
-        prediction[] <- y[,1]
+        prediction[as.numeric(newdata_sub$rowid)] <- y[,1]
       }
       names(prediction) <- "mean" # Rename to mean, layer parameter gets ignored for this engine
       return(prediction)
@@ -627,8 +687,10 @@ engine_gdb <- function(x,
         }
 
         # Now predict with model
+        # MH: There seems to be a problem if variables have some name overlap e.g., dbh and dbh_cv
+        # because in this case two columns are returned which is an issue later
         suppressWarnings(pp <- mboost::predict.mboost(object = self$get_data('fit_best'),
-                                                      newdata = dummy_temp, which = v,
+                                                      newdata = dummy_temp, which = which(names(dummy_temp) == v),
                                                       type = type, aggregate = 'sum'))
 
         # If bbs is present and non-linear, use bbs estimate. If model is fitted

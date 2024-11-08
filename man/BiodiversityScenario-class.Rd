@@ -58,6 +58,7 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-get_resolution}{\code{BiodiversityScenario$get_resolution()}}
 \item \href{#method-BiodiversityScenario-get_model}{\code{BiodiversityScenario$get_model()}}
 \item \href{#method-BiodiversityScenario-get_limits}{\code{BiodiversityScenario$get_limits()}}
+\item \href{#method-BiodiversityScenario-rm_limits}{\code{BiodiversityScenario$rm_limits()}}
 \item \href{#method-BiodiversityScenario-get_predictor_names}{\code{BiodiversityScenario$get_predictor_names()}}
 \item \href{#method-BiodiversityScenario-get_timeperiod}{\code{BiodiversityScenario$get_timeperiod()}}
 \item \href{#method-BiodiversityScenario-get_constraints}{\code{BiodiversityScenario$get_constraints()}}
@@ -72,6 +73,7 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-get_predictors}{\code{BiodiversityScenario$get_predictors()}}
 \item \href{#method-BiodiversityScenario-rm_predictors}{\code{BiodiversityScenario$rm_predictors()}}
 \item \href{#method-BiodiversityScenario-get_data}{\code{BiodiversityScenario$get_data()}}
+\item \href{#method-BiodiversityScenario-rm_data}{\code{BiodiversityScenario$rm_data()}}
 \item \href{#method-BiodiversityScenario-set_data}{\code{BiodiversityScenario$set_data()}}
 \item \href{#method-BiodiversityScenario-set_latent}{\code{BiodiversityScenario$set_latent()}}
 \item \href{#method-BiodiversityScenario-get_latent}{\code{BiodiversityScenario$get_latent()}}
@@ -200,6 +202,19 @@ Get provided projection limits if set.
 
 \subsection{Returns}{
 A \code{\link{sf}} object or NULL.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-rm_limits"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-rm_limits}{}}}
+\subsection{Method \code{rm_limits()}}{
+Remove current limits.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$rm_limits()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible
 }
 }
 \if{html}{\out{<hr>}}
@@ -431,6 +446,26 @@ Get scenario predictions or any other data
 }
 \subsection{Returns}{
 This object.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-rm_data"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-rm_data}{}}}
+\subsection{Method \code{rm_data()}}{
+Remove scenario predictions
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$rm_data()}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{what}}{A \code{\link{character}} vector with names of what}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+Invisible
 }
 }
 \if{html}{\out{<hr>}}

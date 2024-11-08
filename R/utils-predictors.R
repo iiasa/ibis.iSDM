@@ -51,10 +51,14 @@
 #' @keywords utils
 #'
 #' @examples
-#' \dontrun{
-#' # Where x is a SpatRaster
-#' new_x <- predictor_transform(x, option = 'scale')
-#' }
+#' # Dummy raster
+#' r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .01,sd = .1))
+#'
+#' # Normalize
+#' r_norm <- predictor_transform(r_ori, option = 'norm')
+#' new <- c(r_ori, r_norm)
+#' names(new) <- c("original scale", "normalized units")
+#' terra::plot(new)
 #'
 #' @export
 predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var = 0.8, state = NULL, method = NULL, ...){
@@ -175,7 +179,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         perc <- terra::global(env, fun = function(z) terra::quantile(z, probs = seq(0,1, length.out = 11), na.rm = TRUE))
       }
       perc <- unique(perc)
-      out <- terra::classify(env, t(perc)) |> terra::as.int()
+      out <- terra::classify(env, t(perc), overwrite = TRUE) |> terra::as.int()
       attr(out, "transform_params") <- perc
     } else {
       out <- lapply(env_list, function(x) {
@@ -187,7 +191,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
         perc <- unique(perc)
         # For terra need to loop here as classify does not support multiple columns
         o <- terra::rast()
-        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i]) |> terra::as.int() ))
+        for(i in 1:nrow(perc)) o <- suppressWarnings( c(o, terra::classify(x[[i]], rcl = t(perc)[,i], overwrite = TRUE) |> terra::as.int() ))
         return(o)
       })
     }
@@ -258,7 +262,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       envMask <- !sum(terra::app(env, is.na))
       assertthat::assert_that(terra::global(envMask, "sum")[,1]>0,
                               msg = 'A predictor is either NA only or no valid values across all layers')
-      env <- terra::mask(env, envMask, maskvalues = 0)
+      env <- terra::mask(env, envMask, maskvalues = 0, overwrite = TRUE)
 
       # Sample covariance from stack and fit PCA
       covMat <- terra::layerCor(env, fun = "cov", na.rm = TRUE)
@@ -325,7 +329,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #'
 #' @param env A [`SpatRaster`] object.
 #' @param option A [`vector`] stating whether predictors should be preprocessed in any
-#' way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'}, \code{'thresh'}, \code{'bin'}).
+#' way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'},
+#' \code{'kmeans'}, \code{'thresh'}, \code{'bin'}).
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).
 #' @param deriv A [`vector`] with [`character`] of specific derivates to create (Default: \code{NULL}).
 #' @param int_variables A [`vector`] with length greater or equal than \code{2}
@@ -351,6 +356,8 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' * \code{'bin'} - Creates a factor representation of a covariates by cutting the
 #' range of covariates by their percentiles. The number of percentile cuts and thus
 #' new derivates is specified via the parameter \code{'nknots'} (Default: \code{4}).
+#' * \code{'kmeans'} Creates a factor representation of a covariates through a
+#' [`kmeans()`] clustering. The number of clusters are specified via the parameter \code{'nknots'}.
 #'
 #' @return Returns the derived adjusted [`SpatRaster`] objects of identical resolution.
 #'
@@ -358,13 +365,20 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #' @keywords utils
 #'
 #' @examples
-#' \dontrun{
-#' # Create a hinge transformation of one or multiple SpatRaster.
-#' predictor_derivate(covs, option = "hinge", knots = 4)
-#' }
+#' # Dummy raster
+#'  r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
+#'
+#' # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
+#' new <- predictor_derivate(r_ori, option = "hinge", knots = 4)
+#' terra::plot(new)
+#'
+#' # Or a quadratic transformation
+#' new2 <- predictor_derivate(r_ori, option = "quad", knots = 4)
+#' terra::plot(new2)
 #'
 #' @export
-predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variables = NULL, method = NULL, ...){
+predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
+                               int_variables = NULL, method = NULL, ...){
   assertthat::assert_that(
     is.Raster(env) || inherits(env, "stars"),
     !missing(env),
@@ -382,7 +396,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
     base::length(option) == 1
   )
   # Match argument.
-  option <- match.arg(option, c('none','quadratic', 'hinge',
+  option <- match.arg(option, c('none','quadratic', 'hinge', 'kmeans',
                                 'thresh', 'bin', 'interaction'),
                       several.ok = FALSE)
 
@@ -556,7 +570,7 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
       for(val in names(env)){
         suppressWarnings( o <- makeBin(env[[val]], n = val, nknots = nknots, cutoffs = cutoffs) )
         if(is.null(o)) next()
-        new_env <- c(new_env, o)
+        suppressWarnings( new_env <- c(new_env, o) )
         rm(o)
       }
     } else {
@@ -588,7 +602,73 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL, int_variab
           newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
           newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
 
-          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE)
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE, overwrite = TRUE)
+          terra::time(o) <- terra::time( env_list[[val]][[k]] )
+          names(o) <- paste0(val, "_",nrow(newcu))
+          suppressWarnings( nn <- append(nn, o) )
+          rm(o, newcu)
+        }
+        new_env[[val]] <- nn
+      }
+      invisible(gc())
+    }
+  }
+
+  # For k-means thresholding
+  if(option == 'kmeans'){
+    if(is.Raster(env)){
+      new_env <- terra::rast()
+      for(val in names(env)){
+        # Also get the cut_off values
+        ex <- terra::values(env[[val]]) |> (\(.) subset(., stats::complete.cases(.)))()
+        if(!is.null(cutoffs)) k <- cutoffs else k <- nknots
+        cu <- stats::kmeans(ex,centers = k)
+        assertthat::assert_that(inherits(cu, "kmeans"),
+                                msg = "K-means clustering failed...")
+        suppressWarnings( o <- terra::k_means(env[[val]], centers = cu$centers[,1]) )
+        if(is.null(o)) next()
+        # Factorize and explode
+        o <- explode_factorized_raster( terra::as.factor(o),
+                                        name = paste0('kmeans_', val))
+        for(i in 1:terra::nlyr(o)){
+          names(o[[i]]) <- paste0('kmeans_',val,'_',round(cu$centers[i], 3))
+          attr(o[[i]], "deriv.kmeans") <- cu$centers[i]
+        }
+        suppressWarnings( new_env <- c(new_env, o) )
+        rm(o)
+      }
+    } else {
+      # For stats layers
+      for(val in names(env_list)){
+        # FIXME: To be implemented once there is a need...
+        stop("KMeans for stars to be implemented...")
+        # Format cutoffs
+        cu <- cutoffs[which(cutoffs$deriv == val), 3]
+        cu <- strsplit(cu, "_") |> unlist()
+        # Remove any leading points
+        if(any(substr(cu,1, 1)==".")){
+          cu[which(substr(cu,1, 1)==".")] <- gsub("^.","",cu[which(substr(cu,1, 1)==".")])
+        }
+        suppressWarnings( cu <- as.numeric(cu) )
+        nn <- terra::rast()
+        # If NA, set
+        if(is.na(cu[1]) || is.na(cu[2])){
+          # Use the default knots for cutting and get knots
+          o <- makeBin(env_list[[val]][[1]], n = val, nknots = nknots, cutoffs = NULL)
+          suppressWarnings( cu <- strsplit(names(o), "_") |>
+                              unlist() |>
+                              as.numeric())
+          cu <- subset(cu, stats::complete.cases(cu))
+          cu <- matrix(cu,ncol=2,byrow = TRUE) # Convert to pmin and pmax
+          cu <- cbind(cu, 1:nrow(cu))
+        }
+        for(k in 1:terra::nlyr(env_list[[val]])){
+          newcu <- cu
+          # Set smallest and largest value to global minimum/maximum to account for rounding issues
+          newcu[1] <- terra::global(env_list[[val]][[k]], "min",na.rm=T)[,1]
+          newcu[nrow(newcu)*2] <- terra::global(env_list[[val]][[k]], "max",na.rm=T)[,1]
+
+          o <- terra::classify(env_list[[val]][[k]], newcu, include.lowest=TRUE, overwrite = TRUE)
           terra::time(o) <- terra::time( env_list[[val]][[k]] )
           names(o) <- paste0(val, "_",nrow(newcu))
           suppressWarnings( nn <- append(nn, o) )
@@ -770,7 +850,7 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
       # Remove grid cells that are equal to the number of layers (all values NA)
       none_area <- mask_na == nl
       none_area[none_area == 0 ] <- NA
-      mask_na <- terra::mask(mask_na, mask = none_area, inverse = TRUE)
+      mask_na <- terra::mask(mask_na, mask = none_area, inverse = TRUE, overwrite = TRUE)
 
       # Should any fill be conducted?
       if(fill){
@@ -779,7 +859,7 @@ predictor_homogenize_na <- function(env, fill = FALSE, fill_method = 'ngb', retu
         # Otherwise just homogenize NA values across predictors
         if(terra::global(mask_na,'max',na.rm = TRUE)[,1] > 0){
           mask_all <- mask_na == 0; mask_all[mask_all == 0] <- NA
-          env <- terra::mask(env, mask = mask_all)
+          env <- terra::mask(env, mask = mask_all, overwrite = TRUE)
         }
       }
       # Should NA coordinates of cells where 1 or more predictor is NA be
@@ -932,7 +1012,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 
   if(anyDuplicated(cu)){
     # If duplicated quantiles (e.g. 0, 0, 0.2..), sample from a larger number
-    cu <- terra::quantile(v[], probs = seq(0, 1, by = 1/(nknots*2)) )
+    cu <- terra::quantile(v[], probs = seq(0, 1, by = 1/(nknots*2)), na.rm = TRUE )
     cu <- cu[-which(duplicated(cu))] # Remove duplicated cuts
     if(length(cu)<=2) return( NULL )
     if(length(cu) > nknots){
@@ -941,7 +1021,7 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
   }
   # Make cuts and explode
   out <- explode_factorized_raster(
-      terra::classify(v, cu)
+      terra::classify(v, cu, overwrite = TRUE)
   )
 
   # Format threshold names
@@ -954,6 +1034,78 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
     attr(out[[i]], "deriv.bin") <- cu[i:(i+1)]
   }
   return(out)
+}
+
+#### Check predictors ----
+
+#' Helper function to check extracted predictors for issues
+#' @description
+#' Here we check the variables in a provided [`data.frame`] for known issues.
+#' Note that this is done vertically (per column) and not horizontally (thus removing observations).
+#'
+#' If any of the conditions are satistified the entire predictor is removed from the model!
+#' @details
+#' Specifically checked are:
+#' [*] Whether all values in a column are \code{NA}.
+#' [*] Whether all values in a column are finite.
+#' [*] Whether the variance of all variables is greater than 0.
+#'
+#' @param env A [`data.frame`] with all predictor variables.
+#' @return A [`data.frame`] potentially with any variable names excluded. If the
+#' function fails due to some reason it returns the original \code{env}.
+#'
+#' @keywords utils
+#'
+#' @examples
+#' \dontrun{
+#'  # Remove highly correlated predictors
+#'  env <- predictor_check( env )
+#' }
+#' @author Martin Jung
+#' @noRd
+predictor_check <- function(env){
+  assertthat::assert_that(
+    is.data.frame(env)
+  )
+  # Dummy copy
+  dummy <- env
+
+  # Check NaN
+  check_nan <- apply(env, 2, function(z) all(is.nan(z)))
+  if(any(check_nan)){
+    if(getOption('ibis.setupmessages', default = TRUE)) {
+      myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_nan)),collapse = "; "),
+            ' variables owing to exclusively NA data!' )
+    }
+    env <- env |> dplyr::select(-dplyr::any_of(names(which(check_nan))))
+  }
+
+  # Check inifinites
+  check_infinite <- apply(env, 2, function(z) any( is.infinite(z) ) )
+  if(any(check_infinite)){
+    if(getOption('ibis.setupmessages', default = TRUE)) {
+      myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_infinite)),collapse = "; "),
+            ' variables owing to observations with infinite values!' )
+    }
+    env <- env |> dplyr::select(-dplyr::any_of(names(which(check_infinite))))
+  }
+
+  # Check variance
+  check_var <- apply(env, 2, function(z) var(z, na.rm = TRUE)) == 0
+  if(any(check_var)){
+    if(getOption('ibis.setupmessages', default = TRUE)) {
+      myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_var)),collapse = "; "),
+            ' variables owing to zero variance!' )
+    }
+  env <- env |> dplyr::select(-dplyr::any_of(names(which(check_var))))
+  }
+
+  # Check whether all columns have been removed, if so revert back for safety?
+  if(ncol(env)==0) env <- dummy
+  rm(dummy)
+
+  # Return
+  return(env)
 }
 
 #### Filter predictor functions ----

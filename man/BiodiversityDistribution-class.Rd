@@ -28,7 +28,7 @@ names(x)
 
 }
 \seealso{
-\code{\link[=add_control_extrapolation]{add_control_extrapolation()}}
+\code{\link[=add_limits_extrapolation]{add_limits_extrapolation()}}
 
 \code{\link[=add_latent_spatial]{add_latent_spatial()}}
 

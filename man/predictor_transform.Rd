@@ -75,10 +75,14 @@ statistical moments on which the models were trained for any variable transforma
 also to ensure that variable ranges are consistent among relative values.
 }
 \examples{
-\dontrun{
-# Where x is a SpatRaster
-new_x <- predictor_transform(x, option = 'scale')
-}
+# Dummy raster
+r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .01,sd = .1))
+
+# Normalize
+r_norm <- predictor_transform(r_ori, option = 'norm')
+new <- c(r_ori, r_norm)
+names(new) <- c("original scale", "normalized units")
+terra::plot(new)
 
 }
 \seealso{

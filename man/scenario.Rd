@@ -30,7 +30,7 @@ that contains the projections of a model.
 }
 \note{
 If a limit has been defined already during \code{\link[=train]{train()}}, for example by adding
-an extrapolation limit \code{\link[=add_control_extrapolation]{add_control_extrapolation()}}, this zonal layer can be
+an extrapolation limit \code{\link[=add_limits_extrapolation]{add_limits_extrapolation()}}, this zonal layer can be
 reused for the projections. \strong{Note: This effectively fixes the projections to certain areas.}
 }
 \examples{

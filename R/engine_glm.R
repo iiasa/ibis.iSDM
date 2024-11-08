@@ -28,6 +28,11 @@ NULL
 #' This engine is essentially a wrapper for [stats::glm.fit()], however with customized
 #' settings to support offsets and weights.
 #'
+#' If \code{"optim_hyperparam"} is set to \code{TRUE} in [`train()`], then a AIC
+#' based step-wise (backwards) model selection is performed.
+#' Generally however [`engine_glmnet`] should be the preferred package for models
+#' with more than \code{>3} covariates.
+#'
 #' @returns An [Engine].
 #'
 #' @references
@@ -43,6 +48,7 @@ NULL
 #'
 #' # Add GLM as an engine
 #' x <- distribution(background) |> engine_glm()
+#' print(x)
 #'
 #' @name engine_glm
 NULL
@@ -83,6 +89,9 @@ engine_glm <- function(x,
 
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Specify default control
   if(is.null(control)){
@@ -327,29 +336,29 @@ engine_glm <- function(x,
       all(w >= 0,na.rm = TRUE)
     )
     # --- #
-    # Determine the optimal lambda through k-fold cross-validation
-    if(getOption("ibis.runparallel")){
-      if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
-                                                     strategy = getOption("ibis.futurestrategy"))
-    }
-    # Depending if regularized should be set, specify this separately
+    # Fit Base model
+    suppressWarnings(
+      fit_glm <- try({
+        stats::glm(formula = form,
+                   data = df,
+                   weights = w, # Case weights
+                   family = fam,
+                   na.action = "na.pass",
+                   control = params$control
+        )
+      },silent = FALSE)
+    )
+    if(inherits(fit_glm, "try-error")) stop("Model failed to converge with provided input data!")
     if( (settings$get('optim_hyperparam')) ){
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow',
-                                                'No hyperparameter optimization for glm implemented!')
-    } else {
+      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',
+                                                                'Running step-wise AIC selection for glm!')
       suppressWarnings(
-        fit_glm <- try({
-          stats::glm(formula = form,
-                     data = df,
-                     weights = w, # Case weights
-                     family = fam,
-                     na.action = "na.pass",
-                     control = params$control
-          )
-        },silent = FALSE)
+        fit_glm <- stats::step(fit_glm,
+                             direction = "backward",
+                             trace = ifelse(getOption('ibis.setupmessages', default = TRUE),1,0)
+                             )
       )
     }
-    if(inherits(fit_glm, "try-error")) stop("Model failed to converge with provided input data!")
 
     # --- #
     # Predict spatially
@@ -368,20 +377,57 @@ engine_glm <- function(x,
       }
       # Make a subset of non-na values
       full$rowid <- 1:nrow(full)
-      full_sub <- subset(full, stats::complete.cases(full))
-      w_full_sub <- w_full[full_sub$rowid]
-      assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
       # Attempt prediction
-      out <- try({
-        stats::predict.glm(object = fit_glm,
-                           newdata = full,
-                           type = params$type,
-                           se.fit = TRUE,
-                           na.action = "na.pass",
-                           weights = w_full
+      if( getOption('ibis.runparallel',default = FALSE) ){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+
+        # Prediction function
+        do_run <- function() {
+          # Chunck the data
+          splits <- chunk_data(full, N = getOption("ibis.nthread"),index_only = TRUE)
+
+          y <- foreach::foreach(s = splits,
+                                .inorder = TRUE
+                                # .options.future = list(globals = ))
+                                ) %dofuture% {
+            stats::predict.glm(object = fit_glm,
+                               newdata = full[s,],
+                               type = params$type,
+                               se.fit = TRUE,
+                               na.action = "na.pass",
+                               weights = w_full[s,]
+            )
+          }
+          y
+        }
+        # Run
+        result <- do_run()
+        # Combine all
+        # FIXME: hacky list flattener, but works. Reduce and do.call failed
+        out <- list()
+        for(k in 1:length(result)){
+          out[['fit']] <- c(out[['fit']], result[[k]]$fit)
+          out[['se.fit']] <- c(out[['se.fit']], result[[k]]$se.fit)
+        }
+        # Security check
+        assertthat::assert_that(
+          length(out$fit) == nrow(full)
         )
-      },silent = TRUE)
+      } else {
+        out <- try({
+          stats::predict.glm(object = fit_glm,
+                             newdata = full,
+                             type = params$type,
+                             se.fit = TRUE,
+                             na.action = "na.pass",
+                             weights = w_full
+          )
+        },silent = TRUE)
+      }
       if(!inherits(out,"try-error")){
         # Fill output with summaries of the posterior
         prediction <- fill_rasters(out |> as.data.frame(),
@@ -392,7 +438,7 @@ engine_glm <- function(x,
       } else {
         stop("GLM prediction failed!")
       }
-      try({rm(out, full, full_sub)},silent = TRUE)
+      try({rm(out, full)},silent = TRUE)
     } else {
       # No prediction done
       prediction <- NULL
@@ -649,29 +695,66 @@ engine_glm <- function(x,
       if(!is.Waiver(model$offset)) ofs <- model$offset else ofs <- NULL
       assertthat::assert_that(nrow(df)>0)
 
-      if(is.null(ofs)){
-        pred_glm <- stats::predict.glm(
-          object = mod,
-          newdata = df,
-          weights = df$w, # The second entry of unique contains the non-observed variables
-          se.fit = FALSE,
-          na.action = "na.pass",
-          fam = fam,
-          type = type
-        ) |> as.data.frame()
-      } else {
-        pred_glm <- stats::predict.glm(
-          object = mod,
-          newdata = df,
-          weights = df$w, # The second entry of unique contains the non-observed variables
-          offset = ofs,
-          se.fit = FALSE,
-          na.action = "na.pass",
-          fam = fam,
-          type = type
-        ) |> as.data.frame()
-      }
+      # Run in parallel if specified or not.
+      if( getOption('ibis.runparallel',default = FALSE) ){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
 
+        # Prediction function
+        do_run <- function() {
+          # Chunck the data
+          splits <- chunk_data(df, N = getOption("ibis.nthread",default = 10),index_only = TRUE)
+
+          y <- foreach::foreach(s = splits,
+                                .inorder = TRUE
+                                # .options.future = list(globals = ))
+          ) %dofuture% {
+            stats::predict.glm(object = mod,
+                               newdata = df[s,],
+                               type = type,
+                               se.fit = FALSE,
+                               na.action = "na.pass",
+                               weights = df$w[s]
+            )
+          }
+          y
+        }
+        # Run
+        result <- do_run()
+        # Combine all
+        # FIXME: hacky list flattener, but works. Reduce and do.call failed
+        pred_glm <- list()
+        for(k in 1:length(result)){
+          pred_glm[['fit']] <- c(pred_glm[['fit']], result[[k]]$fit)
+        }
+        pred_glm <- as.data.frame(pred_glm)
+
+      } else {
+        if(is.null(ofs)){
+          pred_glm <- stats::predict.glm(
+            object = mod,
+            newdata = df,
+            weights = df$w, # The second entry of unique contains the non-observed variables
+            se.fit = FALSE,
+            na.action = "na.pass",
+            fam = fam,
+            type = type
+          ) |> as.data.frame()
+        } else {
+          pred_glm <- stats::predict.glm(
+            object = mod,
+            newdata = df,
+            weights = df$w, # The second entry of unique contains the non-observed variables
+            offset = ofs,
+            se.fit = FALSE,
+            na.action = "na.pass",
+            fam = fam,
+            type = type
+          ) |> as.data.frame()
+        }
+      }
       names(pred_glm) <- layer
       assertthat::assert_that(nrow(pred_glm)>0, nrow(pred_glm) == nrow(df))
 

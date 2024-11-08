@@ -213,7 +213,7 @@ test_that('Scenarios and constraints', {
   expect_null(sc$get_limits())
 
   # Add covariates in various transformations
-  sc <- scenario(fit)
+  sc <- scenario(fit, copy_model = TRUE) # Copy model here over for the test
   x <- sc |> add_predictors(pred_future, transform = "none")
   expect_length(x$get_predictor_names(), 9)
   suppressWarnings(

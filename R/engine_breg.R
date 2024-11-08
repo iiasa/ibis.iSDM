@@ -81,6 +81,9 @@ engine_breg <- function(x,
   # Burn in the background
   template <- terra::rasterize(x$background, template, field = 0)
 
+  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
+  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+
   # Set up the parameter list
   params <- list(
     iter = iter,
@@ -444,55 +447,30 @@ engine_breg <- function(x,
       w_full_sub <- w_full[full_sub$rowid]
       assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
-      # Tile the problem
-      splits <- cut(1:nrow(full_sub), nrow(full_sub) / (min(100, nrow(full_sub) / 10)) )
-
       # Now depending on parallization setting use foreach
       if(getOption("ibis.runparallel")){
-        # Check that future is registered
-        if(!foreach::getDoParRegistered()) ibis_future(cores = getOption("ibis.nthread"),
-                                                       strategy = getOption("ibis.futurestrategy"))
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Prediction function
+        out <- predict_boom(obj = fit_breg,
+                            newdata = full_sub,
+                            w = w_full_sub,
+                            fam = fam,
+                            params = params,
+                            run_future = TRUE,
+                            N = NULL)
 
-        # Run the outgoing command
-        # out <- foreach::foreach(s = unique(splits),
-        #                         .combine = rbind,
-        #                         .export = c("splits", "fit_breg", "full_sub",
-        #                                     "w_full_sub", "fam", "params"),
-        #                         .packages = c("matrixStats"),
-        #                         .multicombine = TRUE,
-        #                         .inorder = TRUE,
-        #                         verbose = settings$get("verbose") ) %do% {
-        out <- parallel::mclapply(unique(splits), function(s) {
-          i <- which(splits == s)
-          # -> external code in utils-boom
-          pred_breg <- predict_boom(
-            obj = fit_breg,
-            newdata = full_sub[i,],
-            w = w_full_sub[i],
-            fam = fam,
-            params = params
-          )
-          # Summarize the posterior
-          preds <- as.data.frame(
-            cbind(
-              matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-              matrixStats::rowSds(pred_breg, na.rm = TRUE),
-              matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-              apply(pred_breg, 1, mode)
-            )
-          )
-          names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-          preds$cv <- preds$sd / preds$mean
-          return(preds)
-        })
-        out <- do.call(rbind, out)
       } else {
+        # Tile the problem
+        splits <- chunk_data(full_sub,N = (min(100, nrow(full_sub) / 10)), index_only = TRUE)
+
         out <- data.frame()
-        pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
+        pb <- progress::progress_bar$new(total = length(splits),
                                          format = "Creating model prediction (:spin) [:bar] :percent")
-        for(s in unique(splits)){
+        for(i in splits){
           pb$tick()
-          i <- which(splits == s)
           # -> external code in utils-boom
           pred_breg <- predict_boom(
             obj = fit_breg,
@@ -506,7 +484,7 @@ engine_breg <- function(x,
             matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
             matrixStats::rowSds(pred_breg, na.rm = TRUE),
             matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-            apply(pred_breg, 1, mode)
+            apply(pred_breg, 1, modal)
           )  |> as.data.frame()
           names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
           preds$cv <- preds$sd / preds$mean
@@ -515,7 +493,7 @@ engine_breg <- function(x,
         }
       }
       assertthat::assert_that(is.data.frame(out), nrow(out)>0,
-                              msg = "Something went wrong withe prediction. Output empty!")
+                              msg = "Something went wrong with the prediction. Output empty!")
       # Fill output with summaries of the posterior
       stk <- terra::rast()
       for(v in colnames(out)){
@@ -624,7 +602,7 @@ engine_breg <- function(x,
           matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
           matrixStats::rowSds(pred_breg, na.rm = TRUE),
           matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-          apply(pred_breg, 1, mode)
+          apply(pred_breg, 1, modal)
         ) |> as.data.frame()
 
         names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
@@ -724,10 +702,12 @@ engine_breg <- function(x,
       pred_part <- cbind(
         matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
         matrixStats::rowSds(pred_breg, na.rm = TRUE),
-        matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-        apply(pred_breg, 1, mode)
+        matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE)
       ) |> as.data.frame()
-      names(pred_part) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+      names(pred_part) <- c("mean", "sd", "q05", "q50", "q95")
+      assertthat::assert_that(all(is.numeric(pred_part[,1])),
+                              msg = "Posterior summarizing issue...?")
+      pred_part$mode <- apply(pred_breg, 1, modal)
       pred_part$cv <- pred_part$sd / pred_part$mean
 
       # Now create spatial prediction
@@ -790,7 +770,7 @@ engine_breg <- function(x,
       mod <- self$get_data('fit_best')
       model <- self$model
       df <- newdata
-      df <- subset(df, select = attr(mod$terms, "term.labels"))
+      df <- subset(df, select = c("x", "y", attr(mod$terms, "term.labels")))
 
       # Clamp?
       if( settings$get("clamp") ) df <- clamp_predictions(model, df)
@@ -812,36 +792,52 @@ engine_breg <- function(x,
       # For Integrated model, take the last one
       fam <- model$biodiversity[[length(model$biodiversity)]]$family
 
-      # Rather predict in steps than for the whole thing
-      out <- data.frame()
+      if(getOption("ibis.runparallel",default = FALSE)){
+        check_package("doFuture")
+        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
+          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
+        }
+        # Prediction function
+        out <- predict_boom(obj = mod,
+                            newdata = df_sub,
+                            w = unique(w)[2],
+                            fam = fam,
+                            params = settings$data,
+                            run_future = TRUE,
+                            N = NULL)
+      } else {
+        # Sequential prediction
+        # Rather predict in steps than for the whole thing
+        out <- data.frame()
 
-      # Tile the problem
-      splits <- cut(1:nrow(df_sub), nrow(df_sub) / (min(100, nrow(df_sub) / 10)) )
+        # Tile the problem
+        splits <- cut(1:nrow(df_sub), nrow(df_sub) / (min(100, nrow(df_sub) / 10)) )
 
-      pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
-                                       format = "Projecting on new data (:spin) [:bar] :percent")
-      for(s in unique(splits)){
-        pb$tick()
-        i <- which(splits == s)
-        # -> external code in utils-boom
-        pred_breg <- predict_boom(
-          obj = mod,
-          newdata = df_sub[i,],
-          w = unique(w)[2],
-          fam = fam,
-          params = settings$data
-        )
-        # Summarize the posterior
-        preds <- cbind(
-          matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
-          matrixStats::rowSds(pred_breg, na.rm = TRUE),
-          matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
-          apply(pred_breg, 1, mode)
-        )  |> as.data.frame()
-        names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
-        preds$cv <- preds$sd / preds$mean
-        out <- rbind(out, preds)
-        rm(preds, pred_breg)
+        pb <- progress::progress_bar$new(total = length(levels(unique(splits))),
+                                         format = "Projecting on new data (:spin) [:bar] :percent")
+        for(s in unique(splits)){
+          pb$tick()
+          i <- which(splits == s)
+          # -> external code in utils-boom
+          pred_breg <- predict_boom(
+            obj = mod,
+            newdata = df_sub[i,],
+            w = unique(w)[2],
+            fam = fam,
+            params = settings$data
+          )
+          # Summarize the posterior
+          preds <- cbind(
+            matrixStats::rowMeans2(pred_breg, na.rm = TRUE),
+            matrixStats::rowSds(pred_breg, na.rm = TRUE),
+            matrixStats::rowQuantiles(pred_breg, probs = c(.05,.5,.95), na.rm = TRUE),
+            apply(pred_breg, 1, modal)
+          )  |> as.data.frame()
+          names(preds) <- c("mean", "sd", "q05", "q50", "q95", "mode")
+          preds$cv <- preds$sd / preds$mean
+          out <- rbind(out, preds)
+          rm(preds, pred_breg)
+        }
       }
 
       # Now create spatial prediction
@@ -857,8 +853,9 @@ engine_breg <- function(x,
                       type = "xyz") |>
             emptyraster()
         }, silent = TRUE)
-        prediction[] <- out[,layer]
+        prediction[df_sub$rowid] <- out[,layer]
       }
+
       names(prediction) <- layer
       return(prediction)
     },overwrite = TRUE)

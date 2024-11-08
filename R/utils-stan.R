@@ -323,7 +323,7 @@ run_stan <- function( model_code, data = list(),
 #' @param obj A \code{"stanfit"} object (as used by rstan).
 #' @param form A [`formula`] object created for the [ibis.iSDM::DistributionModel].
 #' @param newdata A [data.frame] with new data to be used for prediction.
-#' @param mode A [`character`] of whether the linear `predictor` or the `response`
+#' @param type A [`character`] of whether the linear `predictor` or the `response`
 #' is to be summarized.
 #' @param family A [`character`] giving the family for simulating linear response
 #' values (Default: \code{NULL})
@@ -335,16 +335,18 @@ run_stan <- function( model_code, data = list(),
 #' * The brms R-package.
 #'
 #' @export
-posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", family = NULL, offset = NULL, draws = NULL){
+posterior_predict_stanfit <- function(obj, form, newdata, type = "predictor",
+                                      family = NULL, offset = NULL, draws = NULL){
   assertthat::assert_that(
     inherits(obj, "stanfit") || inherits(obj, "CmdStanFit"),
     is.formula(form),
     is.data.frame(newdata),
+    is.character(type),
     is.null(family) || is.character(family),
     is.null(draws) || is.numeric(draws),
     is.null(offset) || (length(offset) == nrow(newdata))
   )
-  mode <- match.arg(mode, c("predictor", "response"), several.ok = FALSE)
+  type <- match.arg(type, c("predictor", "response"), several.ok = FALSE)
   # Build model matrix
   # Note: This removes all NA cells from matrix
   A <- stats::model.matrix(object = stats::delete.response(stats::terms(form)),
@@ -386,7 +388,7 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
   )
 
   # 16/01/2023 - Change towards matrix multiplication by default (below)
-  # if(mode == "predictor"){
+  # if(type == "predictor"){
   #   # Summarize the coefficients from the posterior
   #   pp <- posterior::summarise_draws(pp) |>
   #     subset(select = c("variable", "mean", "q5", "median", "q95", "sd"))  |>
@@ -438,7 +440,7 @@ posterior_predict_stanfit <- function(obj, form, newdata, mode = "predictor", fa
     colnames(a) <- rownames(a) <- NULL
 
     # Backtransformation
-    if(mode == "response"){
+    if(type == "response"){
       if(family == "poisson"){
         a <- apply(a, 2, function(lambda) ilink(lambda, link = "log"))
       } else if(family == "binomial") {

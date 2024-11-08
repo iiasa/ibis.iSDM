@@ -19,7 +19,7 @@ NULL
 #'
 #' @note
 #' If a limit has been defined already during [train()], for example by adding
-#' an extrapolation limit [add_control_extrapolation()], this zonal layer can be
+#' an extrapolation limit [add_limits_extrapolation()], this zonal layer can be
 #' reused for the projections. **Note: This effectively fixes the projections to certain areas.**
 #'
 #' @examples

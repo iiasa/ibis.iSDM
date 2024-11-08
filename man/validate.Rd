@@ -80,7 +80,7 @@ FP the false positive and FN the false negative)
 \item \code{'logloss'} = Log loss, TBD
 \item \code{'normgini'} = Normalized Gini index, TBD
 \item \code{'cont.boyce'} = Continuous Boyce index, Ratio of predicted against expected frequency calculated over
-a moving window: \deqn{\frac{P_{i}{E_{i}} }}, where \deqn{ P_{i} = \frac{p_{i}}{\sum{j=1}^{b} p_{j} }} and \deqn{ E_{i} = \frac{a_{i}}{\sum{j=1}^{b} a_{j} }}
+a moving window: \deqn{\frac{P_{i}}{E_{i}}}, where \deqn{ P_{i} = \frac{p_{i}}{\sum{j=1}^{b} p_{j}} } and \deqn{ E_{i} = \frac{a_{i}}{\sum{j=1}^{b} a_{j}} }
 }
 
 \strong{Discrete:}
