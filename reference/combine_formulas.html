@@ -44,7 +44,7 @@ are used."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Combine or concatenate multiple formula objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/v0.1.5/R/utils-form.R" class="external-link"><code>R/utils-form.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/R/utils-form.R" class="external-link"><code>R/utils-form.R</code></a></small>
       <div class="d-none name"><code>combine_formulas.Rd</code></div>
     </div>
 
@@ -96,11 +96,11 @@ be set to either <code>"lhs"</code>, <code>"rhs"</code> or <code>"both"</code> (
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Combine everything (default)</span></span></span>
 <span class="r-in"><span><span class="fu">combine_formulas</span><span class="op">(</span><span class="va">observed</span> <span class="op">~</span> <span class="va">rainfall</span> <span class="op">+</span> <span class="va">temp</span>, <span class="va">observed</span> <span class="op">~</span> <span class="va">rainfall</span> <span class="op">+</span> <span class="va">forest.cover</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> observed ~ rainfall + temp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55603d107d10&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55bb10622490&gt;</span>
 <span class="r-in"><span><span class="co"># Combine only LHS</span></span></span>
 <span class="r-in"><span><span class="fu">combine_formulas</span><span class="op">(</span><span class="va">observed</span> <span class="op">~</span> <span class="va">rainfall</span> <span class="op">+</span> <span class="va">temp</span>, <span class="va">observed</span> <span class="op">~</span> <span class="va">rainfall</span> <span class="op">+</span> <span class="va">forest.cover</span>, combine <span class="op">=</span> <span class="st">"lhs"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> observed ~ rainfall + temp + rainfall + forest.cover</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55603d107d10&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: 0x55bb10622490&gt;</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
