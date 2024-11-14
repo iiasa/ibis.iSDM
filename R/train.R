@@ -913,7 +913,7 @@ methods::setMethod(
       }
 
       # remove unused predictors
-      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+      pred_tmp <- unique(unlist(lapply(model$biodiversity, function(i) i$predictors_names), use.names = FALSE))
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
       model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
@@ -957,7 +957,7 @@ methods::setMethod(
       }
 
       # remove unused predictors
-      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
+      pred_tmp <- unique(unlist(lapply(model$biodiversity, function(i) i$predictors_names), use.names = FALSE))
       pred_prs <- model$predictors_object$get_names()
       model$predictors_names <- pred_tmp
       model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
