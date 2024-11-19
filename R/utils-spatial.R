@@ -104,6 +104,10 @@ terra_to_sf <- function(input, dissolve = TRUE, dummy = NULL){
     # Combine all
     out <- do.call("rbind",out)
   }
+
+  # make sure date is character for now, causes issues later due to "No set time"
+  if (inherits(out$time, what = "Date")) out$time <- as.character(out$time)
+
   return(out)
 }
 
