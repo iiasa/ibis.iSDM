@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2024-11-19</h4>
+            <h4 data-toc-skip class="date">2024-12-13</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/04_biodiversity_projections.Rmd" class="external-link"><code>vignettes/articles/04_biodiversity_projections.Rmd</code></a></small>
       <div class="d-none name"><code>04_biodiversity_projections.Rmd</code></div>
@@ -188,8 +188,7 @@ guidance on how distribution models are trained, see other vignettes (<a href="0
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">pred_future</span>, transform <span class="op">=</span> <span class="st">'scale'</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="co"># Calculate thresholds at each time step. The threshold estimate is taken from the model object.</span></span>
 <span>  <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in add_predictors(scenario(modf), pred_future, transform = "scale"):</span></span>
-<span><span class="co">#&gt; State variable of transformation not found?</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> State variable of transformation not found?</span></span>
 <span></span>
 <span><span class="co"># This creates a scenario object</span></span>
 <span><span class="va">sc</span></span>
@@ -438,21 +437,6 @@ alternatively <code><a href="../reference/add_constraint_boundary.html">add_cons
 be done while fitting the SDM for the reference conditions (see the
 example with limits (<a href="01_train_simple_model.html">1</a>) ) and
 is considered when doing (future) projections.</p>
-</div>
-<div class="section level2">
-<h2 id="specific-parsers-for-globiom-related-scenarios">Specific parsers for GLOBIOM related scenarios<a class="anchor" aria-label="anchor" href="#specific-parsers-for-globiom-related-scenarios"></a>
-</h2>
-<p>IIASA’s Global Biosphere Management Model (<a href="https://iiasa.github.io/GLOBIOM/" class="external-link">GLOBIOM</a>) is a partial
-equilibrium model and used to analyze the competition for land use
-between agriculture, forestry, and bioenergy, which are the main
-land-based production sectors. It builds on.</p>
-<p>With the ibis.iSDM being part of IIASA’s suite of integrated models,
-there is a direct link available to make use of downscaled GLOBIOM
-outputs. Implemented are functions to either directly format the data
-via [<code><a href="../reference/formatGLOBIOM.html">formatGLOBIOM()</a></code>] or add them to any
-<code>DistributionModel-class</code> or
-<code>BiodiversityScenario-class</code> object directly via
-<code><a href="../reference/add_predictors_globiom.html">add_predictors_globiom()</a></code> .</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
