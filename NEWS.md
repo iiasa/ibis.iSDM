@@ -1,4 +1,10 @@
-# ibis.iSDM 0.1.5 (current dev branch)
+# ibis.iSDM 0.1.6 (current dev branch)
+
+#### New features
+
+#### Minor improvements and bug fixes
+
+# ibis.iSDM 0.1.5
 
 #### New features
 * New visualization function `nicheplot()` to visualize suitability across 2 axes #87.
