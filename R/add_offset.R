@@ -450,7 +450,7 @@ methods::setMethod(
 
     # Check that background and range align, otherwise raise error
     if(is_comparable_raster(layer, x$background)){
-      warning('Supplied range does not align with background! Aligning them now...')
+      cli::cli_alert_warning('Supplied range does not align with background! Aligning them now...')
       layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       names(layer) <- ori.name # In case the layer name got lost
     }
@@ -554,7 +554,7 @@ methods::setMethod(
     if(isTRUE(point) || is.null(point)){
       assertthat::assert_that(length(x$get_biodiversity_types()) > 0)
       #TODO: Collate point from x
-      stop("Automatic point collation not yet implemented. Please supply a sf layer to point!")
+      cli::cli_abort("Automatic point collation not yet implemented. Please supply a sf layer to point!")
     } else if(inherits(point, 'sf')){
       assertthat::assert_that( assertthat::has_name(point, field_occurrence),
                                nrow(point)>1)
@@ -642,7 +642,7 @@ methods::setMethod(
         ras_range <-  abs( dis / terra::global(ras_range, "sum", na.rm = TRUE)[,1]) * -1
         ras_range[is.na(ras_range)] <- terra::global(ras_range, "min", na.rm = TRUE)[,1]
       } else {
-        stop("Distance method not yet implemented.")
+        cli::cli_abort("Distance method not yet implemented.")
       }
 
     } else {
@@ -833,7 +833,7 @@ methods::setMethod(
   }
 
   # Get the coefficients of the best model
-  if(inherits(logisticParam, "try-error")) stop("Offset calculating failed...")
+  if(inherits(logisticParam, "try-error")) cli::cli_abort("Offset calculating failed...")
   co <- logisticParam$coefficients
   names(co) <- c("upper", "lower", "rate", "shift", "skew")
   return(co)
@@ -922,7 +922,7 @@ methods::setMethod(
 
     # Check that background and range align, otherwise raise error
     if(is_comparable_raster(elev, x$background)){
-      warning('Supplied range does not align with background! Aligning them now...')
+      cli::cli_alert_warning('Supplied range does not align with background! Aligning them now...')
       elev <- alignRasters(elev, x$background, method = 'bilinear', func = mean, cl = FALSE)
     }
 

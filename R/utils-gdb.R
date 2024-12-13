@@ -43,7 +43,7 @@ built_formula_gdb <- function(model, id, x, settings){
     # Finally check that a minimum of unique numbers are present in the
     # predictor range and if not, remove them
     covariates <- rm_insufficient_covs(model = obj, tr = 4)
-    if(is.null(covariates)) stop("Not enough variance in training data to fit a SDM!")
+    if(is.null(covariates)) cli::cli_abort("Not enough variance in training data to fit a SDM!")
 
     if(!is.Waiver(priors)){
       # Loop through all provided GDB priors

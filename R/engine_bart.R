@@ -581,7 +581,7 @@ engine_bart <- function(x,
       assertthat::assert_that(all(x.var %in% attr(fit$fit$data@x,'term.labels')),
                               msg = 'Variable not in predicted model' )
 
-      if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
+      if( model$biodiversity[[1]]$family != 'binomial' && transform) cli::cli_alert_warning('Check whether transform should not be set to False!')
 
       # Calculate
       p <- bart_partial_space(fit, predictors, x.var, equal, smooth, transform)

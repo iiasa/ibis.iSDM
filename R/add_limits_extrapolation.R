@@ -165,9 +165,9 @@ methods::setMethod(
 
       # Ensure that limits is intersecting the background
       if(is.Raster(background)){
-        if(suppressMessages(length( sf::st_intersects(layer, terra::as.polygons(background) |> sf::st_as_sf()) )) == 0 ) { layer <- NULL; warning('Provided zones do not intersect the background!') }
+        if(suppressMessages(length( sf::st_intersects(layer, terra::as.polygons(background) |> sf::st_as_sf()) )) == 0 ) { layer <- NULL; cli::cli_alert_warning('Provided zones do not intersect the background!') }
       } else {
-        if(suppressMessages(length( sf::st_intersects(layer, background |> sf::st_as_sf()) )) == 0 ) { layer <- NULL; warning('Provided zones do not intersect the background!') }
+        if(suppressMessages(length( sf::st_intersects(layer, background |> sf::st_as_sf()) )) == 0 ) { layer <- NULL; cli::cli_alert_warning('Provided zones do not intersect the background!') }
       }
 
       # Get first column for zone description and rename
@@ -201,7 +201,7 @@ methods::setMethod(
                      "limits_clip" = limits_clip)
       y <- y$set_limits(x = limits)
     } else if(method == "shape"){
-      stop("Method not yet implemented")
+      cli::cli_abort("Method not yet implemented")
     }
 
     # Return the altered object

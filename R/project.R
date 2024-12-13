@@ -127,7 +127,7 @@ methods::setMethod(
                             msg = "No model or coefficients found!")
     # Get predictors
     new_preds <- mod$get_predictors()
-    if(is.Waiver(new_preds)) stop('No scenario predictors found.')
+    if(is.Waiver(new_preds)) cli::cli_abort('No scenario predictors found.')
 
     # Check extents of models and raise a warning otherwise
     if(!is.Waiver(fit$model$predictors_object)){

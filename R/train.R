@@ -532,8 +532,8 @@ methods::setMethod(
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
       model[['biodiversity']][[id]][['expect']] <- model[['biodiversity']][[id]][['expect']][miss]
       env <- subset(env, miss)
-      if(nrow(env)<=2) stop("Too many missing data points in covariates. Check out 'predictor_homogenize_na' and projections.")
-      if( all( model[['biodiversity']][[id]][['observations']]$observed == 0) ) stop("All presence records fall outside the modelling background.")
+      if(nrow(env)<=2) cli::cli_abort("Too many missing data points in covariates. Check out 'predictor_homogenize_na' and projections.")
+      if( all( model[['biodiversity']][[id]][['observations']]$observed == 0) ) cli::cli_abort("All presence records fall outside the modelling background.")
       # Add intercept
       env$Intercept <- 1
 
@@ -1112,7 +1112,7 @@ methods::setMethod(
 
       # TODO: Combine biodiversity datasets and add factor variable
       # Ideally figure out a convenient way to allow interactions. Maybe by just multiplying all predictors?
-      if(method_integration == "interaction") stop("Not yet implemented")
+      if(method_integration == "interaction") cli::cli_abort("Not yet implemented")
 
       # Process per supplied dataset and in order of supplied data
       for(id in ids) {
@@ -1244,7 +1244,7 @@ methods::setMethod(
 
       # TODO: Combine biodiversity datasets and add factor variable
       # Ideally figure out a convenient way to allow interactions. Maybe by just multiplying all predictors?
-      if(method_integration == "interaction") stop("Not yet implemented")
+      if(method_integration == "interaction") cli::cli_abort("Not yet implemented")
 
       # Process each id
       for(id in ids){
@@ -1380,7 +1380,7 @@ methods::setMethod(
       # Process per supplied dataset
       for(id in ids) {
         # TODO
-        if(length(model$biodiversity)>1) stop("Not yet implemented")
+        if(length(model$biodiversity)>1) cli::cli_abort("Not yet implemented")
 
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_stan(model = model,
@@ -1781,11 +1781,11 @@ methods::setMethod(
     # ----------------------------------------------------------- #
     } else if(x$engine$get_class() == "SCAMPR-Engine"){
 
-      if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
-      if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
+      if(method_integration == "prior") cli::cli_alert_warning("Priors not supported for SCAMPR!")
+      if(length(model$biodiversity)>2) cli::cli_abort("More than 2 datasets not supported for SCAMPR!")
       if(length(model$biodiversity)==2){
         if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
-          stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
+          cli::cli_abort("Datasets of the same type are not supported for SCAMPR. Combine them!")
         }
       }
 
@@ -1802,7 +1802,7 @@ methods::setMethod(
       out <- x$engine$train(model2, settings)
 
     # wrong engine selected
-    } else { stop('Specified Engine not implemented yet.')}
+    } else { cli::cli_abort('Specified Engine not implemented yet.')}
 
 
     #### Wrap up ####

@@ -91,7 +91,7 @@ modal <- function(x, na.rm = TRUE) {
 check_package <- function(x) {
   assertthat::assert_that(is.character(x))
   if (!requireNamespace(x, quietly = TRUE)) {
-    stop(paste0("Package \"",x,"\" needed for this function to work. Please install it."),
+    cli::cli_abort(paste0("Package \"",x,"\" needed for this function to work. Please install it."),
          call. = FALSE)
   }
 }

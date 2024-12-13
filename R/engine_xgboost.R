@@ -861,7 +861,7 @@ engine_xgboost <- function(x,
           }
         }
         newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
-      } else {stop("Not implemented. Supply a data.frame as newdata!")}
+      } else {cli::cli_abort("Not implemented. Supply a data.frame as newdata!")}
 
       # Make a prediction
       suppressWarnings(

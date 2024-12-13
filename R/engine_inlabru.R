@@ -206,7 +206,7 @@ engine_inlabru <- function(x,
         offset <- c( diff(range(sp::coordinates(region.poly)))*0.01,
                      diff(range(sp::coordinates(region.poly)))*0.01)
       } else {
-        warning("Default offset parameter for mesh likely won't work. Specify!")
+        cli::cli_alert_warning("Default offset parameter for mesh likely won't work. Specify!")
         offset <- c( diff(range(sp::coordinates(region.poly)))*0.01,
                      diff(range(sp::coordinates(region.poly)))*0.01)
       }
@@ -247,7 +247,7 @@ engine_inlabru <- function(x,
 
   # Generic plotting function for the mesh
   eg$set("public", "plot", function(assess = FALSE){
-    if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
+    if(is.Waiver(self$get_data('mesh'))) cli::cli_abort("No mesh found!")
     if(assess){
       # For an INLA mesh assessment
       out <- INLA::inla.mesh.assessment(
@@ -618,7 +618,7 @@ engine_inlabru <- function(x,
         }
       } else {
         # FIXME: Make this more generic so that other latent effects are supported
-        stop("Non-SPDE effects not yet implemented")
+        cli::cli_abort("Non-SPDE effects not yet implemented")
       }
     }
     # Set component
@@ -816,9 +816,9 @@ engine_inlabru <- function(x,
 
     # Security checks
     if(inherits(fit_bru, "try-error")){
-      stop('Model did not converge. Try to simplify structure and check priors!')
+      cli::cli_abort('Model did not converge. Try to simplify structure and check priors!')
     }
-    if(is.null(fit_bru$names.fixed)) stop('Model did not converge. Try to simplify structure and check priors!')
+    if(is.null(fit_bru$names.fixed)) cli::cli_abort('Model did not converge. Try to simplify structure and check priors!')
 
     if(!settings$get('inference_only')){
       # Messenger
@@ -1024,7 +1024,7 @@ engine_inlabru <- function(x,
       suppressWarnings(
         out <- inlabru:::predict.bru(
           object = mod,
-          data = newdata,
+          newdata = newdata,
           formula = form,
           probs = c(0.05,0.5,0.95),
           n.samples = n.samples
@@ -1313,7 +1313,7 @@ engine_inlabru <- function(x,
         )
         # Check whether random variable exists, otherwise raise warning
         if(!(what %in% names(mod$summary.random))){
-          stop(paste0(
+          cli::cli_abort(paste0(
             "Spatial random effect not found. Set 'what' to one of these: ",
             paste0(names(mod$summary.random),collapse = " | ")
           ))

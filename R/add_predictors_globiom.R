@@ -114,7 +114,7 @@ methods::setMethod(
     # Check that all names allowed
     problematic_names <- grep("offset|w|weight|spatial_offset|Intercept|spatial.field", names(env),fixed = TRUE)
     if( length(problematic_names)>0 ){
-      stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
+      cli::cli_abort(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
     # Make a clone copy of the object
@@ -222,7 +222,7 @@ methods::setMethod(
 
     # Harmonize NA values
     if(harmonize_na){
-      stop('Missing data harmonization for stars not yet implemented!') #TODO
+      cli::cli_abort('Missing data harmonization for stars not yet implemented!') #TODO
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }
@@ -259,7 +259,7 @@ methods::setMethod(
       # Format to Posix. Assuming years only
       timeperiod <- as.POSIXct(paste0(timeperiod,"-01-01"))
     }
-    if(anyNA(timeperiod)) stop('Third dimension is not a time value!')
+    if(anyNA(timeperiod)) cli::cli_abort('Third dimension is not a time value!')
 
     # Check whether predictors already exist, if so overwrite
     if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
@@ -472,14 +472,14 @@ formatGLOBIOM <- function(fname, oftype = "raster", ignore = NULL,
     assertthat::assert_that(length(names(full_dis))==3)
     stars::st_dimensions(sc) <- full_dis # Target dimensions
 
-  } else { stop("Fileformat not recognized!")}
+  } else { cli::cli_abort("Fileformat not recognized!")}
 
   # Get time dimension (without applying offset) so at the centre
   times <- stars::st_get_dimension_values(sc, "time", center = TRUE)
 
   # Make checks on length of times and if equal to one, drop. check.
   if(length(times)==1){
-    if(period == "projection") stop("Found only a single time slot. Projections not possible.")
+    if(period == "projection") cli::cli_abort("Found only a single time slot. Projections not possible.")
     if(verbose) myLog('[Setup]','yellow','Found only a single time point in file. Dropping time dimension.')
     # Drop the time dimension
     sc <- stars:::adrop.stars(sc, drop = which(names(stars::st_dimensions(sc)) == "time") )

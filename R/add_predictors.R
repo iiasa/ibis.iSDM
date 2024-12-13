@@ -159,7 +159,7 @@ methods::setMethod(
     # Check that background and range align, otherwise raise error
     if(is.Raster(env)){
       if(!is_comparable_raster(env, x$background)){
-        warning('Supplied range does not align with background! Aligning them now...')
+        cli::cli_alert_warning('Supplied range does not align with background! Aligning them now...')
         env <- alignRasters(env, x$background, method = 'bilinear', func = mean, cl = FALSE)
       }
     }
@@ -167,7 +167,7 @@ methods::setMethod(
     # Check that all names allowed
     problematic_names <- grep("offset|w|weight|spatial_offset|observed|Intercept|spatial.field", names(env),fixed = TRUE)
     if( length(problematic_names)>0 ){
-      stop(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
+      cli::cli_abort(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
     }
 
     # Make a clone copy of the object
@@ -351,7 +351,7 @@ methods::setMethod(
       if(is.Raster(x$background)){
         # Check that background and range align, otherwise raise error
         if(!is_comparable_raster(layer, x$background)){
-          warning('Supplied range does not align with background! Aligning them now...')
+          cli::cli_alert_warning('Supplied range does not align with background! Aligning them now...')
           layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
         }
       }
@@ -481,7 +481,7 @@ methods::setMethod(
     # Check that background and range align, otherwise raise error
     if(is.Raster(layer)){
       if(!is_comparable_raster(layer, x$background)){
-        warning('Supplied range does not align with background! Aligning them now...')
+        cli::cli_alert_warning('Supplied range does not align with background! Aligning them now...')
         layer <- alignRasters(layer, x$background, method = 'bilinear', func = mean, cl = FALSE)
       }
     }
@@ -808,7 +808,7 @@ methods::setMethod(
           )
           state <- model$predictors_object$get_transformed_params()
           if(!all(is.null(state))){
-            warning("State variable of transformation not found?")
+            cli::cli_alert_warning("State variable of transformation not found?")
           } else {
             # Subset again to be sure
             state <- state[,which(colnames(state) %in% names(env))]
@@ -833,7 +833,7 @@ methods::setMethod(
 
     # Harmonize NA values
     if(harmonize_na){
-      stop('Missing data harmonization for stars not yet implemented!') #TODO
+      cli::cli_abort('Missing data harmonization for stars not yet implemented!') #TODO
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Harmonizing missing values...')
       env <- predictor_homogenize_na(env, fill = FALSE)
     }

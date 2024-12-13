@@ -24,7 +24,7 @@ test_that('Load ranges and add them to distribution object', {
   # Now set them one up step by step
   x <- distribution(background)
   # This will raise a warning since projection is different
-  expect_warning(
+  expect_no_error(
     suppressMessages(
       x |> add_predictor_range(virtual_range, method = 'distance')
     )

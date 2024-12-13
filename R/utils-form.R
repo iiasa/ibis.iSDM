@@ -32,7 +32,7 @@ formula_terms <- function(formula){
   assertthat::assert_that(
     is.character(formula) || inherits(formula, "formula")
   )
-  if(formula == "<Default>") stop("Default formula found!")
+  if(formula == "<Default>") cli::cli_abort("Default formula found!")
   if(!inherits(formula, "formula")) formula <- stats::as.formula(formula)
   # Get the terms from the formula
   te <- attr(stats::terms.formula(formula), "term.labels")
@@ -196,7 +196,7 @@ combine_formulas <- function(..., combine = "both", env=parent.frame()) {
   rhs <- rhs[sapply(rhs, `!=`, "0")] # drop "0"
   # Check for interaction terms
   chki <- lapply(rhs, function(z) length(grep("*", z, fixed = TRUE))>0)
-  if(any(unlist(chki))) stop("Interaction terms found. Formula combination does not work for these cases!")
+  if(any(unlist(chki))) cli::cli_abort("Interaction terms found. Formula combination does not work for these cases!")
 
   if(any(c("rhs", "both") %in% combine)){
     un <- unlist(rhs)

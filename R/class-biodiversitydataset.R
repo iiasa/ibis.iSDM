@@ -236,7 +236,7 @@ BiodiversityDatasetCollection <- R6::R6Class(
                        'polpa' = 'Polygon - Presence absence'
         )
       }
-      if(is.null(type)) stop('Dataset type not found!')
+      if(is.null(type)) cli::cli_abort('Dataset type not found!')
       w <- which(self$get_types() %in% type)
       self$get_types()[w]
     },

@@ -415,7 +415,7 @@ raster_to_stars <- function(obj){
 
   # Get time dimension
   times <- terra::time(obj)
-  if(all(is.na( as.character(times) ))) stop("Predictor covariates are missing a time dimension! See terra::time() ")
+  if(all(is.na( as.character(times) ))) cli::cli_abort("Predictor covariates are missing a time dimension! See terra::time() ")
   if(!all(inherits(times, "Date"))) times <- as.Date(times) # FIXME: Unit conversion could cause problems?
   prj <- sf::st_crs( terra::crs(obj) )
 
@@ -976,7 +976,7 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
     spdf <- terra::as.points( c(layer, r_wt)) |> sf::st_as_sf()
     spdf <- spdf[which(spdf[[1]]>0), ] # Get only non-zero values
 
-    if(is.na(sf::st_crs(spdf))) stop("Unprojected layer found. Check projections throughout!")
+    if(is.na(sf::st_crs(spdf))) cli::cli_abort("Unprojected layer found. Check projections throughout!")
     # If long-latitude, convert to google mercator for calculating the centroids
     if(sf::st_is_longlat(spdf) ){
       ori.proj <- sf::st_crs(spdf)
@@ -996,7 +996,7 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
     cent <- sf::st_transform(cent, ori.proj)
 
   } else {
-    if(is.na(sf::st_crs(layer))) stop("Unprojected layer found. Check projections throughout!")
+    if(is.na(sf::st_crs(layer))) cli::cli_abort("Unprojected layer found. Check projections throughout!")
     # If long-latitude, convert to google mercator for calculating the centroids
     if(sf::st_is_longlat(layer) ){
       ori.proj <- sf::st_crs(layer)
@@ -1009,7 +1009,7 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
     } else if(unique(sf::st_geometry_type(layer)) %in% c("POINT", "MULTIPOINT")){
       cent <- sf::st_combine(layer) |> sf::st_centroid() |> sf::st_as_sf()
     } else {
-      stop("Centroid calculations not implemented!")
+      cli::cli_abort("Centroid calculations not implemented!")
     }
     # Convert back to original projection
     cent <- sf::st_transform(cent, ori.proj)

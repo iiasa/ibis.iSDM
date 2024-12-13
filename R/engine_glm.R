@@ -348,7 +348,7 @@ engine_glm <- function(x,
         )
       },silent = FALSE)
     )
-    if(inherits(fit_glm, "try-error")) stop("Model failed to converge with provided input data!")
+    if(inherits(fit_glm, "try-error")) cli::cli_abort("Model failed to converge with provided input data!")
     if( (settings$get('optim_hyperparam')) ){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',
                                                                 'Running step-wise AIC selection for glm!')
@@ -436,7 +436,7 @@ engine_glm <- function(x,
         prediction <- terra::mask(prediction, self$get_data("template"))
 
       } else {
-        stop("GLM prediction failed!")
+        cli::cli_abort("GLM prediction failed!")
       }
       try({rm(out, full)},silent = TRUE)
     } else {

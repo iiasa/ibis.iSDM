@@ -278,7 +278,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
   voronoi.polygons <- function (x, bounding.polygon = NULL, range.expand = 0.1)
   {
     if (!inherits(x, "SpatialPoints")) {
-      stop("Must pass a SpatialPoints* object to voronoi.polygons.")
+      cli::cli_abort("Must pass a SpatialPoints* object to voronoi.polygons.")
     }
     crds = sp::coordinates(x)
     if (is.null(bounding.polygon)) {
@@ -286,7 +286,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
         range.expand <- rep(range.expand, 2)
       }
       else if (length(range.expand) > 2) {
-        warning("Only first two elements of range.expand used in voronoi.polygons")
+        cli::cli_alert_warning("Only first two elements of range.expand used in voronoi.polygons")
         range.expand <- range.expand[1:2]
       }
       dxy <- diff(c(t(sp::bbox(x))))[c(1, 3)]
@@ -558,10 +558,10 @@ coef_prediction <- function(mesh, mod, type = 'mean',
 
   # Get formula
   form <- mod$get_data('fit_best_equation')
-  if(length(grep(pattern = '\\*',deparse(form)))) stop('Interactions are not supported!')
+  if(length(grep(pattern = '\\*',deparse(form)))) cli::cli_abort('Interactions are not supported!')
   # Check whether any rw1 effects are in the formula. If so return error
   te <- attr(stats::terms.formula(form),'term.label')
-  if(length(grep(pattern = '\"rw',x = te))>0) stop('This function does not work with INLA rw effects!')
+  if(length(grep(pattern = '\"rw',x = te))>0) cli::cli_abort('This function does not work with INLA rw effects!')
 
   # Manual prediction
   model <- mod$get_data('fit_best')
@@ -575,7 +575,7 @@ coef_prediction <- function(mesh, mod, type = 'mean',
                           type %in% names(model$summary.fixed),
                           all( rownames(model$summary.fixed) %in% names(preds) )
   )
-  if(type !='mean') warning('Predictions other than __mean__ unlikely to work well...!')
+  if(type !='mean') cli::cli_alert_warning('Predictions other than __mean__ unlikely to work well...!')
 
   # Output raster
   if(is.null(coords)) coords <- preds[,c('x','y')]
@@ -670,10 +670,10 @@ post_prediction <- function(mod, nsamples = 100,
   # Get formula
   form <- mod$get_data('fit_best_equation')
   # Some checks on the form
-  if(length(grep(pattern = '\\*',deparse(form)))) stop('Interactions are not (yet) supported!')
+  if(length(grep(pattern = '\\*',deparse(form)))) cli::cli_abort('Interactions are not (yet) supported!')
   # Check whether any rw1 effects are in the formula. If so return error
   te <- attr(stats::terms.formula(form),'term.label')
-  if(length(grep(pattern = '\"rw',x = te))>0) stop('This function does not work with INLA rw effects!')
+  if(length(grep(pattern = '\"rw',x = te))>0) cli::cli_abort('This function does not work with INLA rw effects!')
 
   # Covariates for prediction points
   preds <- mod$model$predictors
@@ -884,7 +884,7 @@ post_prediction <- function(mod, nsamples = 100,
   } else if(is.list(vals[[1]])) {
     vals.names <- names(vals[[1]])
     if (any(vals.names == "")) {
-      warning("Some generated list elements are unnamed")
+      cli::cli_alert_warning("Some generated list elements are unnamed")
     }
     smy <- list()
     for(nm in vals.names) {

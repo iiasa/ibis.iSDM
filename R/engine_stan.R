@@ -431,7 +431,7 @@ engine_stan <- function(x,
     # Now add the model depending on the type
     if(length(model$biodiversity)>1){
       # For integrated model
-      stop("TBD")
+      cli::cli_abort("TBD")
 
     } else if(model$biodiversity[[1]]$type == "poipo" && model$biodiversity[[1]]$family == "poisson"){
       # For poisson process model add likelihood
@@ -454,7 +454,7 @@ engine_stan <- function(x,
       for(i in ir) sm_code$model <- append(sm_code$model, i)
     } else {
       # Else
-      stop("Model as of now not implemented for Stan!")
+      cli::cli_abort("Model as of now not implemented for Stan!")
     }
     # Append prior contributions to model
     sm_code$model <- append(sm_code$model, "
@@ -489,7 +489,7 @@ engine_stan <- function(x,
     # --- #
     # Collect data for stan modelling
     if(length(model$biodiversity)>1){
-      stop("done")
+      cli::cli_abort("done")
     } else {
       has_intercept <- attr(stats::terms(model$biodiversity[[1]]$equation), "intercept")
       # Format data list

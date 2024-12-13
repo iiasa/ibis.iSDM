@@ -286,7 +286,7 @@ ibis_future <- function(plan_exists = FALSE,
     # Define plan based on formulated strategy
     if(strategy == "slurm"){
       #TODO: See if a testing environment could be found.
-      stop("Not yet implemented")
+      cli::cli_abort("Not yet implemented")
       #e.g. cl <- makeCluster(4, type = "MPI")
     } else if(strategy == "sequential") {
       future::plan(strategy = "sequential")

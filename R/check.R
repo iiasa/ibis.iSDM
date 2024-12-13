@@ -154,7 +154,7 @@ methods::setMethod(
     if(stoponwarning){
       # Check if there are any warnings
       if(any(length(ms$Warnings)>0)){
-        stop("Warning raised during checks!")
+        cli::cli_abort("Warning raised during checks!")
       }
     }
     # Compile

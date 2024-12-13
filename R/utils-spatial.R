@@ -194,7 +194,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
       } else if (output_class == "data.frame" ){
         result <- do.call("rbind", split_results)
       } else {
-        stop("Unknown class. st_parallel only accepts the following outputs at present: sfc, list, sf, matrix, sgbp.")
+        cli::cli_abort("Unknown class. st_parallel only accepts the following outputs at present: sfc, list, sf, matrix, sgbp.")
       }
 
       # Return result
@@ -1096,7 +1096,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   ex <- try({terra::extract(x = env,
                             y = coords,
                             method = "simple")}, silent = FALSE)
-  if(inherits(ex, "try-error")) stop(paste("SpatRaster valueextraction failed: ", ex))
+  if(inherits(ex, "try-error")) cli::cli_abort(paste("SpatRaster valueextraction failed: ", ex))
   # Find those that have NA in there
   check_again <- apply(ex, 1, function(x) anyNA(x))
   if(any(check_again)){
@@ -1112,7 +1112,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
                                   # FIXME: This could fail if values are factors?
                                   method = ifelse(ngb_fill, "bilinear", "simple"),
                                   touches = TRUE)}, silent = FALSE)
-    if(inherits(ex_sub, "try-error")) stop(paste("Raster extraction failed!"))
+    if(inherits(ex_sub, "try-error")) cli::cli_abort(paste("Raster extraction failed!"))
     ex[which(check_again),] <- ex_sub[, names(ex)]
   }
   # Add coordinate fields to the predictors as these might be needed later
@@ -1175,7 +1175,7 @@ model_to_background <- function(model){
   }
 
   # If that also failed, raise error
-  if(inherits(template, "try-error")) stop("No file to create a background raster from?")
+  if(inherits(template, "try-error")) cli::cli_abort("No file to create a background raster from?")
   assertthat::assert_that(is.Raster(template))
   return(template)
 }
@@ -1714,7 +1714,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", r
 
   } else if(method == "spatial"){
     # Spatial thinning
-    stop("Not yet implemented!")
+    cli::cli_abort("Not yet implemented!")
   }
 
   # else if (method == "intensity") {

@@ -92,7 +92,7 @@ methods::setMethod(
       # Try and find an alternative layer
       if(obj$biodiversity$length() == 1){
         bid <- obj$biodiversity$get_types()
-      } else stop("No biodiversity layer found of the given type. Please check biodversity data!")
+      } else cli::cli_abort("No biodiversity layer found of the given type. Please check biodversity data!")
     }
 
     # Get covariates
@@ -214,7 +214,7 @@ methods::setMethod(
                                     variable = names(obj))
 
     } else {
-      stop('Not yet implemented!')
+      cli::cli_abort('Not yet implemented!')
     }
 
     # If plot is specified, make figures. Otherwise return the list of rasters

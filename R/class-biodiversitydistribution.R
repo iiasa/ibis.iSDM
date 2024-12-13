@@ -179,7 +179,7 @@ BiodiversityDistribution <- R6::R6Class(
       if(inherits(self$predictors, "PredictorDataset")) {
         self$predictors$get_names()
       } else {
-        stop("feature data is of an unrecognized class")
+        cli::cli_abort("feature data is of an unrecognized class")
       }
     },
 
@@ -283,7 +283,7 @@ BiodiversityDistribution <- R6::R6Class(
     #' @return This object.
     set_engine = function(x) {
       assertthat::assert_that(inherits(x, "Engine"))
-      if(!is.Waiver(self$engine)) warning("Overwriting previously defined engine.")
+      if(!is.Waiver(self$engine)) cli::cli_alert_warning("Overwriting previously defined engine.")
       self$engine <- x
       return(self)
     },

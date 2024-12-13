@@ -337,7 +337,7 @@ methods::setMethod(
         ex <- terra::spatSample(raster_thresh, size = 1e6, method = "regular",
                                  na.rm = TRUE, exhaustive = TRUE)
         ex <- subset(ex, stats::complete.cases(ex))
-        if(nrow(ex)<5) stop("Not enough values for clustering found...")
+        if(nrow(ex)<5) cli::cli_abort("Not enough values for clustering found...")
         clus <- stats::kmeans(ex, centers = 2)
         tr <- clus$centers[which.max(clus$centers[,1])]
         rm(clus, ex)
@@ -463,7 +463,7 @@ methods::setMethod(
                                msg = 'Call \' threshold \' for prediction first!')
       # Get threshold layer
       tr_lyr <- grep('threshold', new$get_model()$show_rasters(), value = TRUE)
-      if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
+      if(length(tr_lyr)>1) cli::cli_alert_warning("There appear to be multiple thresholds. Using the first one.")
       ras_tr <- new$get_model()$get_data( tr_lyr[1] )
       value <- attr(ras_tr[[1]], 'threshold')
       names(value) <- attr(ras_tr[[1]], 'method')

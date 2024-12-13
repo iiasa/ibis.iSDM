@@ -404,7 +404,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
     }
     rm(bg2)
   } else {
-    stop("Method not found. Check validity of absence settings!")
+    cli::cli_abort("Method not found. Check validity of absence settings!")
   }
 
   # Append to the presence information.

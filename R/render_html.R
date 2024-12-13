@@ -50,7 +50,7 @@ methods::setMethod(
     assertthat::assert_that(inherits(mod, "DistributionModel"),
                             msg = "Please provide DistributionModel")
 
-    if(!assertthat::has_extension(path = file, ext = "html")) stop("Please use .html file.",
+    if(!assertthat::has_extension(path = file, ext = "html")) cli::cli_abort("Please use .html file.",
                                                                    call. = FALSE)
 
     # get some meta information document

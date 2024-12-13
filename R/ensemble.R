@@ -384,7 +384,7 @@ methods::setMethod(
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
           # Check that thresholds are available
-          stop("This function does not (yet) work with directly provided Raster objects.")
+          cli::cli_abort("This function does not (yet) work with directly provided Raster objects.")
         } else if(method == 'min.sd'){
           # If method 'min.sd' furthermore check that there is a sd object for all
           # of them
@@ -427,7 +427,7 @@ methods::setMethod(
         attr(new, "method") <- method
         if(uncertainty != "none"){
           if(uncertainty == "pca") {
-            stop("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
+            cli::cli_abort("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
           }
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
@@ -519,11 +519,11 @@ methods::setMethod(
                      1, function(x) sum(x, na.rm = TRUE) / (ncol(lmat)-3) )
         # Check that thresholds are available
       } else if(method == 'min.sd'){
-        stop("This has not been reasonably implemented in this context.")
+        cli::cli_abort("This has not been reasonably implemented in this context.")
       } else if(method == 'pca'){
-        stop("This has not been reasonably implemented in this context.")
+        cli::cli_abort("This has not been reasonably implemented in this context.")
       } else if(method == 'superlearner'){
-        stop("This has not been reasonably implemented in this context.")
+        cli::cli_abort("This has not been reasonably implemented in this context.")
       }
       # Add dimensions to output
       if(inherits(mods[[1]], "stars")){
@@ -576,7 +576,7 @@ methods::setMethod(
       # --- #
       if(uncertainty != 'none'){
         if(uncertainty == "pca") {
-          stop("Currently, uncertainty = 'pca' is not implemented for stars input.")
+          cli::cli_abort("Currently, uncertainty = 'pca' is not implemented for stars input.")
         }
         # Add uncertainty
         out_uncertainty <- switch (uncertainty,
@@ -758,7 +758,7 @@ methods::setMethod(
     # Catch error in case none of them computed
     if(nrow(out)==0){
       if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
-      stop("No estimates found!")
+      cli::cli_abort("No estimates found!")
     }
 
     # Now composite the ensemble depending on the option
@@ -927,7 +927,7 @@ methods::setMethod(
     # Catch error in case none of them computed
     if(length(out)==0){
       if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
-      stop("No estimates found!")
+      cli::cli_abort("No estimates found!")
     }
 
     if(length(out)==1){

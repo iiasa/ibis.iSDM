@@ -72,7 +72,7 @@ methods::setMethod(
       if(sf::st_crs(limits) != sf::st_crs(fit$model$background)) limits <- sf::st_transform(limits, fit$model$background)
       # Ensure that limits is intersecting the background
       if(suppressWarnings( suppressMessages(length( sf::st_intersects(limits, fit$model$background)))==0)) {
-        limits <- NULL; warning('Provided limits do not intersect the background!')
+        limits <- NULL; cli::cli_alert_warning('Provided limits do not intersect the background!')
       }
 
       # Rename geometry just to be sure

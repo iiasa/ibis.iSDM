@@ -862,7 +862,7 @@ methods::setMethod(
     }
     assertthat::assert_that(is.Raster(ras))
     bb <- try({ terra::rasterize(layer, ras, 1)}, silent = TRUE)
-    if(inherits(bb, "try-error")) stop("Provide a rasterized layer of the boundary constraint!")
+    if(inherits(bb, "try-error")) cli::cli_abort("Provide a rasterized layer of the boundary constraint!")
 
     # Call again
     new <- mod$clone(deep = TRUE)
