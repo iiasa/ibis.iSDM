@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.1.5
+version: 0.1.6
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -393,6 +393,19 @@ references:
   year: '2024'
   doi: 10.32614/CRAN.package.uuid
 - type: software
+  title: cli
+  abstract: 'cli: Helpers for Developing Command Line Interfaces'
+  notes: Imports
+  url: https://cli.r-lib.org
+  repository: https://CRAN.R-project.org/package=cli
+  authors:
+  - family-names: Csárdi
+    given-names: Gábor
+    email: csardi.gabor@gmail.com
+  year: '2024'
+  doi: 10.32614/CRAN.package.cli
+  version: '>= 3.6.0'
+- type: software
   title: utils
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
@@ -693,14 +706,15 @@ references:
   url: http://modeva.r-forge.r-project.org/
   repository: https://CRAN.R-project.org/package=modEvA
   authors:
-  - family-names: A.M.
-    given-names: Barbosa
-  - family-names: J.A.
-    given-names: Brown
-  - family-names: A.
-    given-names: Jimenez-Valverde
-  - family-names: R.
-    given-names: Real
+  - family-names: Barbosa
+    given-names: A. Marcia
+    email: ana.marcia.barbosa@gmail.com
+  - family-names: Brown
+    given-names: Jennifer A.
+  - family-names: Jimenez-Valverde
+    given-names: Alberto
+  - family-names: Real
+    given-names: Raimundo
   year: '2024'
   doi: 10.32614/CRAN.package.modEvA
 - type: software
