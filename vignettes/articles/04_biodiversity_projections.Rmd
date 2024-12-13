@@ -241,9 +241,3 @@ sc.fit2$summary_beforeafter()
 ```
 
 Another option for constraining prediction is also by imposing a zonal limit (for instance climatically defined) on the projections (see alternatively `add_constraint_boundary()` above). This has to be done while fitting the SDM for the reference conditions (see the example with limits ([1](01_train_simple_model.html)) ) and is considered when doing (future) projections.
-
-## Specific parsers for GLOBIOM related scenarios
-
-IIASA's Global Biosphere Management Model ([GLOBIOM](https://iiasa.github.io/GLOBIOM/)) is a partial equilibrium model and used to analyze the competition for land use between agriculture, forestry, and bioenergy, which are the main land-based production sectors. It builds on.
-
-With the ibis.iSDM being part of IIASA's suite of integrated models, there is a direct link available to make use of downscaled GLOBIOM outputs. Implemented are functions to either directly format the data via [`formatGLOBIOM()`] or add them to any `DistributionModel-class` or `BiodiversityScenario-class` object directly via `add_predictors_globiom()` . 

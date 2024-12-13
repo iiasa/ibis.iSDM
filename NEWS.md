@@ -3,6 +3,7 @@
 #### New features
 
 #### Minor improvements and bug fixes
+* IIASA internal functionalities such as preparation of GLOBIOM data have been transferred to [BNRTools](https://github.com/iiasa/BNRTools)
 
 # ibis.iSDM 0.1.5
 
