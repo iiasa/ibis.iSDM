@@ -129,6 +129,23 @@ create derivates of provided predictors.</p>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'BiodiversityDistribution,data.frame'</span></span>
+<span><span class="fu">add_predictors</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">env</span>,</span>
+<span>  names <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  transform <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivates <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  derivate_knots <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  int_variables <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  bgmask <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  harmonize_na <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  explode_factors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  priors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  state <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'BiodiversityScenario,SpatRaster'</span></span>
 <span><span class="fu">add_predictors</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
@@ -173,7 +190,7 @@ create derivates of provided predictors.</p>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>A <code>SpatRaster</code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
+<dd><p>A <code>SpatRaster</code>, <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> or <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> object.</p></dd>
 
 
 <dt id="arg-names">names<a class="anchor" aria-label="anchor" href="#arg-names"></a></dt>
@@ -246,9 +263,9 @@ also be combined. Available options for transformation are:</p><ul><li><p><code>
 <li><p><code>'pca'</code> - Converts the predictors to principal components. Note that this
 results in a renaming of the variables to principal component axes!</p></li>
 <li><p><code>'scale'</code> - Transforms all predictors by applying <a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a> on them.</p></li>
-<li><p><code>'norm'</code> - Normalizes all predictors by transforming them to a scale from 0 to 1.</p></li>
+<li><p><code>'norm'</code> - Normalizes all predictors by transforming them to a scale from <code>0</code> to <code>1</code>.</p></li>
 <li><p><code>'windsor'</code> - Applies a windsorization to the target predictors. By default
-this effectively cuts the predictors to the 0.05 and 0.95, thus helping to
+this effectively cuts the predictors to the <code>0.05</code> and <code>0.95</code>, thus helping to
 remove extreme outliers.</p></li>
 </ul><p>Available options for creating derivates are:</p><ul><li><p><code>'none'</code> - No additional predictor derivates are created.</p></li>
 <li><p><code>'quad'</code> - Adds quadratic derivate predictors.</p></li>
@@ -272,7 +289,7 @@ legit to fit a model with only occurrence data and a spatial latent effect
 estimate.</p>
 <p>Certain names such <code>"offset"</code> are forbidden as predictor variable names.
 The function will return an error message if these are used.</p>
-<p>Some engines use binary variables regardless of the parameter <code>explode_factors</code>
+<p>Some engines use binary variables regardless of the parameter <code>"explode_factors"</code>
 set here.</p>
     </div>
 
