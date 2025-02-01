@@ -23,11 +23,13 @@ PredictorDataset <- R6::R6Class(
     #' @field name A name for this object.
     #' @field transformed Saves whether the predictors have been transformed somehow.
     #' @field timeperiod A timeperiod field
+    #' @field is.spatial A [`logical`] flag on whether the predictor is spatial or not.
     id           = character(0),
     data         = new_waiver(),
     name         = character(0),
     transformed  = logical(0),
     timeperiod   = new_waiver(),
+    is.spatial   = NULL,
 
     #' @description
     #' Initializes the object and creates an empty list
@@ -50,6 +52,8 @@ PredictorDataset <- R6::R6Class(
       for(el in names(dots)){
         self[[el]] <- dots[[el]]
       }
+      # Check for spatial
+      self$is.spatial <- ifelse(is.Raster(data) || inherits(data, "stars"), TRUE, FALSE)
     },
 
     #' @description
@@ -117,7 +121,7 @@ PredictorDataset <- R6::R6Class(
             terra::as.data.frame(self$data, xy = TRUE, na.rm = na.rm, ...)
           }
         } else {
-          # For scenario files
+          # For scenario files and other data.frames
           as.data.frame( self$data )
         }
       } else self$data
@@ -131,18 +135,22 @@ PredictorDataset <- R6::R6Class(
       # Get data
       d <- self$get_data()
       if(is.Waiver(d)) return(new_waiver())
-      if(!inherits(d, 'stars')){
+      if(is.Raster(d)){
         # Try and get a z dimension from the raster object
         terra::time(d)
       } else {
-        # Get dimensions
-        o <- stars::st_dimensions(d)
-        # Take third entry as the one likely to be the time variable
-        return(
-          to_POSIXct(
-            stars::st_get_dimension_values(d, names(o)[3], center = TRUE)
+        if(inherits(d, 'stars')){
+          # Get dimensions
+          o <- stars::st_dimensions(d)
+          # Take third entry as the one likely to be the time variable
+          return(
+            to_POSIXct(
+              stars::st_get_dimension_values(d, names(o)[3], center = TRUE)
+            )
           )
-        )
+        } else {
+          return( new_waiver() )
+        }
       }
     },
 
@@ -150,6 +158,10 @@ PredictorDataset <- R6::R6Class(
     #' Get Projection
     #' @return A [`vector`] with the geographical projection of the object.
     get_projection = function(){
+      if(is.data.frame(self$data)){
+        cli::cli_alert_danger("Predictors not in spatial format but projection requested?")
+        return( NULL )
+      }
       assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
       sf::st_crs(self$data)
     },
@@ -158,6 +170,10 @@ PredictorDataset <- R6::R6Class(
     #' Get Resolution
     #' @return A [`numeric`] [`vector`] with the spatial resolution of the data.
     get_resolution = function(){
+      if(is.data.frame(self$data)){
+        cli::cli_alert_danger("Predictors not in spatial format but resolution requested?")
+        return( NULL )
+      }
       assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
       if(is.Raster(self$data)){
         terra::res(self$data)
@@ -170,6 +186,10 @@ PredictorDataset <- R6::R6Class(
     #' Get Extent of predictors
     #' @return A [`numeric`] [`vector`] with the spatial resolution of the data.
     get_ext = function(){
+      if(is.data.frame(self$data)){
+        cli::cli_alert_danger("Predictors not in spatial format but extent requested?")
+        return( NULL )
+      }
       assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'))
       if(is.Raster(self$data)){
         terra::ext(self$get_data()) |> sf::st_bbox()
@@ -181,12 +201,17 @@ PredictorDataset <- R6::R6Class(
     #' @description
     #' Utility function to clip the predictor dataset by another dataset
     #' @details
-    #' This code now also
+    #' This code now also is able to determine the temporally closest
+    #' layer. In case a [`data.frame`] exists as predictor, only that is returned.
     #'
-    #' @param pol A [`sf`] object used for cropping the data
+    #' @param pol A [`sf`] object used for cropping the data.
     #' @param apply_time A [`logical`] flag indicating if time should be acknowledged in cropping.
     #' @return Invisible TRUE
     crop_data = function(pol, apply_time = FALSE){
+      if(is.data.frame(self$data)){
+        cli::cli_abort("Predictors not in spatial format but should be cropped with another layer?")
+        return( NULL )
+      }
       assertthat::assert_that(is.Raster(self$data) || inherits(self$data,'stars'),
                               inherits(pol, 'sf'),
                               is.logical(apply_time),
@@ -256,6 +281,10 @@ PredictorDataset <- R6::R6Class(
     #' @param ... Any other parameters passed on to masking.
     #' @return Invisible
     mask = function(mask, inverse = FALSE, ...){
+      if(is.data.frame(self$data)){
+        cli::cli_abort("Predictors not in spatial format but should be masked with another layer?")
+        return( NULL )
+      }
       if(inherits(self$get_data(), "stars")) invisible(self)
       # Check whether prediction has been created
       prediction <- self$get_data(df = FALSE)
@@ -282,13 +311,18 @@ PredictorDataset <- R6::R6Class(
     #' @param value A new [`SpatRaster`] or [`stars`] object.
     #' @return This object
     set_data = function(value){
-      assertthat::assert_that(is.Raster(value) || inherits(value, "stars"))
+      assertthat::assert_that((is.Raster(value) || inherits(value, "stars"))||is.data.frame(value))
       if(is.Raster(self$get_data()) && is.Raster(value)){
         assertthat::assert_that(is_comparable_raster(self$get_data(), value))
         self$data <- suppressWarnings( c(self$get_data(), value) )
       } else if(inherits(self$get_data(), "stars") && is.Raster(value)) {
         # Stars assumed
         self$data <- st_add_raster(self$get_data(), value)
+      } else if(is.data.frame(self$get_data())) {
+        # Data.frame supplied
+        assertthat::assert_that(nrow(value)>0,
+                                nrow(value)==nrow(self$data))
+        self$data <- cbind(self$get_data(), value)
       } else {
         # Simply try combining them
         self$data <- suppressWarnings( c(self$get_data(), value) )
@@ -354,10 +388,16 @@ PredictorDataset <- R6::R6Class(
             summary( as.data.frame(d) )
           )
         } else {
-          # Assume raster
-          return(
-            terra::summary( d, digits = digits)
-          )
+          if(is.Raster(d)){
+            # Assume raster
+            return(
+              terra::summary( d, digits = digits)
+            )
+          } else {
+            return(
+              summary(d)
+            )
+          }
         }
       }
       rm(d)
@@ -380,6 +420,15 @@ PredictorDataset <- R6::R6Class(
     is_transformed = function(){
       return(
         self$transformed
+      )
+    },
+
+    #' @description
+    #' Is Predictor dataset spatial?
+    #' @return A [`logical`] flag.
+    is_spatial = function(){
+      return(
+        self$is.spatial
       )
     },
 
@@ -411,6 +460,8 @@ PredictorDataset <- R6::R6Class(
     ncell = function() {
       if(inherits(self$get_data(),'SpatRaster'))
         terra::ncell(self$get_data())
+      else if(is.data.frame(self$get_data()))
+        nrow(self$get_data())
       else
         terra::ncell(self$get_data()) |> as.numeric()
     },
@@ -424,8 +475,17 @@ PredictorDataset <- R6::R6Class(
       if(is.Raster(self$data)){
         terra::plot( self$data, col = ibis_colours[['viridis_cividis']] )
       } else {
-        # Assume stars scenario files
-        stars:::plot.stars(self$data, col = ibis_colours[['viridis_cividis']])
+        if(inherits(self$data, "stars")){
+          # Assume stars scenario files
+          stars:::plot.stars(self$data, col = ibis_colours[['viridis_cividis']])
+        } else {
+          if(ncol(self$data)>5) cli::cli_alert_info("Printing only the first 5 columns")
+          if(ncol(self$data)>5) {
+            graphics::pairs.default(self$data[,1:5])
+          } else {
+            graphics::pairs.default(self$data)
+          }
+        }
       }
       graphics::par(par.ori)
     }
@@ -433,7 +493,5 @@ PredictorDataset <- R6::R6Class(
 
   # Any private entries
   private = list(
-    finalize = function() {
-    }
   )
 )

@@ -1108,6 +1108,101 @@ predictor_check <- function(env){
   return(env)
 }
 
+#' Helper function to obtain the data types for a given predictor set
+#'
+#' @description
+#' This function checks a provided predictor either in the form of a
+#' [`SpatRaster`] or [`data.frame`] object. Multidimensional datasets such as
+#' \code{'stars'} are also supported.
+#'
+#' Returns a [`data.frame`] with the name and type of the predictor.
+#'
+#' @details
+#' Variables can be checked on whether they are factors either by type or by
+#' values. For example, in cases where very few integer values are found, a factor
+#' value could be assumed.
+#'
+#' If \code{env} is set to NULL, then a dummy [`data.frame`] is returned.
+#'
+#' @param env A [`data.frame`], [`SpatRaster`] or [`stars`] object with
+#' all predictor variables.
+#' @param guess_factor A [`logical`] estimation on whether a given variable is likely a
+#' factor (Default: \code{FALSE}).
+#' @return A [`data.frame`] with the name and type.
+#'
+#' @examples
+#' # Example
+#' predictor_type(datasets::trees)
+#'
+#' @keywords utils, internal
+#'
+#' @author Martin Jung
+#' @noRd
+predictor_type <- function(env, guess_factor = FALSE){
+  assertthat::assert_that(
+    is.logical(guess_factor)
+  )
+
+  # Internal factor guessing method
+  gf <- function(x, threshold = 0.05) {
+    unique_count <- length(unique(x))
+    len <- length(x)
+
+    # Heuristic: If the number of unique values is small or < threshold% of total rows, it’s categorical
+    if(is.character(x) || is.factor(x) || unique_count < max(10, len * threshold)) {
+      return("factor")
+    } else {
+      return("numeric")
+    }
+  }
+
+  # Process depending on type
+  if(is.null(env)){
+    result <- data.frame(
+      predictors = "dummy",
+      type = "numeric"
+    )
+  } else if(is.data.frame(env)){
+    # Get variable names and types for a data frame
+    result <- data.frame(
+      predictors = colnames(env),
+      type = sapply(env, class),
+      stringsAsFactors = FALSE,
+      row.names = NULL
+    )
+    # Guess factors if set
+    if(guess_factor) result$type <- sapply(env, gf)
+
+  } else if(is.Raster(env)){
+    # Get variable names
+    result <- data.frame(
+      predictors = names(env),
+      stringsAsFactors = FALSE,
+      row.names = NULL
+    )
+    # Check for factors
+    result$type <- ifelse(terra::is.factor(env),"factor", "numeric")
+
+    # Guess factors if set
+    if(guess_factor) result$type <- terra::global(predictors, function(i) gf(i))[,1]
+  } else if(inherits(env, "stars")){
+    stop("Not yet implemented as no need (yet)?")
+  } else {
+    # Dummy
+    result <- data.frame(
+      predictors = "dummy",
+      type = "numeric"
+    )
+  }
+
+  assertthat::assert_that(
+    is.data.frame(result),
+    nrow(result)>0
+  )
+
+  return(result)
+}
+
 #### Filter predictor functions ----
 
 #' Filter a set of correlated predictors to fewer ones

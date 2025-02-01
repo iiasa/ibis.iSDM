@@ -10,7 +10,7 @@ NULL
 #' create derivates of provided predictors.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param env A [`SpatRaster`] or [`stars`] object.
+#' @param env A [`SpatRaster`], [`stars`] or [`data.frame`] object.
 #' @param names A [`vector`] of character names describing the environmental
 #' stack in case they should be renamed.
 #' @param transform A [`vector`] stating whether predictors should be preprocessed
@@ -49,9 +49,9 @@ NULL
 #' * \code{'pca'} - Converts the predictors to principal components. Note that this
 #' results in a renaming of the variables to principal component axes!
 #' * \code{'scale'} - Transforms all predictors by applying [scale] on them.
-#' * \code{'norm'} - Normalizes all predictors by transforming them to a scale from 0 to 1.
+#' * \code{'norm'} - Normalizes all predictors by transforming them to a scale from \code{0} to \code{1}.
 #' * \code{'windsor'} - Applies a windsorization to the target predictors. By default
-#' this effectively cuts the predictors to the 0.05 and 0.95, thus helping to
+#' this effectively cuts the predictors to the \code{0.05} and \code{0.95}, thus helping to
 #' remove extreme outliers.
 #'
 #' Available options for creating derivates are:
@@ -79,7 +79,7 @@ NULL
 #' Certain names such \code{"offset"} are forbidden as predictor variable names.
 #' The function will return an error message if these are used.
 #'
-#' Some engines use binary variables regardless of the parameter \code{explode_factors}
+#' Some engines use binary variables regardless of the parameter \code{"explode_factors"}
 #' set here.
 #'
 #' @examples
@@ -289,6 +289,72 @@ methods::setMethod(
                         int_variables, bgmask, harmonize_na, explode_factors,
                         priors, state, ...)
     return( x )
+  }
+)
+
+#' @rdname add_predictors
+methods::setMethod(
+  "add_predictors",
+  methods::signature(x = "BiodiversityDistribution", env = "data.frame"),
+  function(x, env, names = NULL, priors = NULL, state = NULL, ... ) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            is.data.frame(env),
+                            is.null(names) || assertthat::is.scalar(names) || is.vector(names),
+                            is.null(priors) || inherits(priors,'PriorList'),
+                            is.matrix(state) || is.null(state)
+    )
+    # Messenger
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding predictors...')
+
+    if(!is.null(names)) {
+      assertthat::assert_that(colnames(env) == length(names),
+                              all(is.character(names)),
+                              msg = 'Provided names not of same length as environmental data.')
+      # Set names of env
+      colnames(env) <- names
+    }
+
+    # Check that all names allowed
+    problematic_names <- grep("offset|w|weight|spatial_offset|observed|Intercept|spatial.field", names(env),fixed = TRUE)
+    if( length(problematic_names)>0 ){
+      cli::cli_abort(paste0("Some predictor names are not allowed as they might interfere with model fitting:", paste0(names(env)[problematic_names],collapse = " | ")))
+    }
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
+    # If priors have been set, save them in the distribution object
+    if(!is.null(priors)) {
+      assertthat::assert_that( all( priors$varnames() %in% names(env) ) )
+      y <- y$set_priors(priors)
+    }
+
+    # Grep all vars that are not x or y
+    vars <- colnames(env)
+    assertthat::assert_that(all(c("x","y") %in% vars),
+                            msg = "Coordinates x & y need to be in the supplied data.frame!")
+    vars <- grep("x|y", vars,value = TRUE, invert = TRUE,fixed = FALSE,useBytes = TRUE)
+    assertthat::assert_that(
+      nrow(env)>1, length(vars)>0,
+      msg = "Supplied data.frame not correct?"
+    )
+
+    # Check for attribute to this object to keep track of it
+    transform <- attr(env,'transform')
+    if(is.null(transform)) transform <- "none"
+
+    # Check whether predictors already exist, if so overwrite
+    if(!is.Waiver(x$predictors)) myLog('[Setup]','yellow','Overwriting existing predictors.')
+
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames', default = TRUE)) names(env) <- sanitize_names(names(env))
+
+    # Finally set the data to the BiodiversityDistribution object
+    pd <- PredictorDataset$new(id = new_id(),
+                               data = env,
+                               transformed = ifelse('none' %notin% transform, TRUE, FALSE ),
+                               ...)
+    y$set_predictors(pd)
   }
 )
 

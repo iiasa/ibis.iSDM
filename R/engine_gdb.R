@@ -86,25 +86,14 @@ engine_gdb <- function(x,
   background <- x$background
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(background),
-      crs = terra::crs(background),
-      res = c(diff( (sf::st_bbox(background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(background)[c(1,3)]) ) / 100
-             )
-      )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Set up boosting control
   bc <- mboost::boost_control(mstop = iter,
@@ -272,7 +261,7 @@ engine_gdb <- function(x,
       # Add exposure to full model predictor
       model$exposure <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1])
 
-    } else if(model$biodiversity[[1]]$family != 'poisson'){
+    } else if(model$biodiversity[[1]]$family == 'binomial'){
       # calculating the case weights (equal weights)
       # the order of weights should be the same as presences and backgrounds in the training data
       prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences

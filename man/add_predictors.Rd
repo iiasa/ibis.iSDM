@@ -5,6 +5,7 @@
 \alias{add_predictors,BiodiversityDistribution,SpatRasterCollection-method}
 \alias{add_predictors,BiodiversityDistribution,SpatRaster-method}
 \alias{add_predictors,BiodiversityDistribution,stars-method}
+\alias{add_predictors,BiodiversityDistribution,data.frame-method}
 \alias{add_predictors,BiodiversityScenario,SpatRaster-method}
 \alias{add_predictors,BiodiversityScenario,stars-method}
 \title{Add predictors to a Biodiversity distribution object}
@@ -73,6 +74,22 @@ add_predictors(
   ...
 )
 
+\S4method{add_predictors}{BiodiversityDistribution,data.frame}(
+  x,
+  env,
+  names = NULL,
+  transform = "none",
+  derivates = "none",
+  derivate_knots = 4,
+  int_variables = NULL,
+  bgmask = TRUE,
+  harmonize_na = FALSE,
+  explode_factors = FALSE,
+  priors = NULL,
+  state = NULL,
+  ...
+)
+
 \S4method{add_predictors}{BiodiversityScenario,SpatRaster}(
   x,
   env,
@@ -108,7 +125,7 @@ add_predictors(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{env}{A \code{\link{SpatRaster}} or \code{\link{stars}} object.}
+\item{env}{A \code{\link{SpatRaster}}, \code{\link{stars}} or \code{\link{data.frame}} object.}
 
 \item{names}{A \code{\link{vector}} of character names describing the environmental
 stack in case they should be renamed.}
@@ -166,9 +183,9 @@ also be combined. Available options for transformation are:
 \item \code{'pca'} - Converts the predictors to principal components. Note that this
 results in a renaming of the variables to principal component axes!
 \item \code{'scale'} - Transforms all predictors by applying \link{scale} on them.
-\item \code{'norm'} - Normalizes all predictors by transforming them to a scale from 0 to 1.
+\item \code{'norm'} - Normalizes all predictors by transforming them to a scale from \code{0} to \code{1}.
 \item \code{'windsor'} - Applies a windsorization to the target predictors. By default
-this effectively cuts the predictors to the 0.05 and 0.95, thus helping to
+this effectively cuts the predictors to the \code{0.05} and \code{0.95}, thus helping to
 remove extreme outliers.
 }
 
@@ -199,7 +216,7 @@ estimate.
 Certain names such \code{"offset"} are forbidden as predictor variable names.
 The function will return an error message if these are used.
 
-Some engines use binary variables regardless of the parameter \code{explode_factors}
+Some engines use binary variables regardless of the parameter \code{"explode_factors"}
 set here.
 }
 \examples{

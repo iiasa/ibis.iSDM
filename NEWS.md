@@ -1,6 +1,8 @@
 # ibis.iSDM 0.1.6 (current dev branch)
 
 #### New features
+* Support for [`data.frame`] as predictors in `add_predictors()` #136
+* Convenience function to allow [`data.frame`] and [`SpatRaster`] to be supplied directly via `project()` #136
 
 #### Minor improvements and bug fixes
 * IIASA internal functionalities such as preparation of GLOBIOM data have been transferred to [BNRTools](https://github.com/iiasa/BNRTools)

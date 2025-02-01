@@ -100,25 +100,14 @@ engine_stan <- function(x,
   if(is.null(cores)) cores <- getOption('ibis.nthread')
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(x$background),
-      crs = terra::crs(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
-      )
-    )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(x$background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Define new engine object of class
   eg <- Engine

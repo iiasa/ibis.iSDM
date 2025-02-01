@@ -932,6 +932,55 @@ emptyraster <- function(x, ...) { # add name, filename,
   }
 }
 
+#' @title Create a background layer for prediction.
+#'
+#' @description This function creates a background layer to be used for predictions.
+#' Opposed to [emptyraster()] this function internally works with the class objects.
+#'
+#' @param x A \code{BiodiversityDistribution} object.
+#'
+#' @return an empty [`SpatRaster`] object.
+#'
+#' @keywords internal
+#' @noRd
+create_background <- function(x) {
+  assertthat::assert_that(
+    R6::is.R6(x),
+    inherits(x, "BiodiversityDistribution")
+  )
+  # Create a background raster
+  if(is.Waiver(x$predictors)){
+    # Create from background
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
+      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
+              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
+      )
+    )
+  } else {
+    # If predictor existing, use them
+    dat <- x$predictors$get_data()
+    if(is.Raster(dat)){
+      template <- emptyraster(dat)
+    } else {
+      template <- terra::rast(
+        ext = terra::ext(x$background),
+        crs = terra::crs(x$background),
+        res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
+                diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
+        )
+      )
+    }
+  }
+  # Burn in the background
+  if(is.Raster(template)){
+    template <- terra::rasterize(x$background, template, field = 0)
+  }
+
+  return(template)
+}
+
 #' Function to extract nearest neighbour predictor values of provided points
 #'
 #' @description This function performs nearest neighbour matching between

@@ -4,6 +4,8 @@
 \alias{project}
 \alias{project.BiodiversityScenario}
 \alias{project,BiodiversityScenario-method}
+\alias{project.DistributionModel}
+\alias{project,DistributionModel-method}
 \title{Project a fitted model to a new environment and covariates}
 \usage{
 project.BiodiversityScenario(x, ...)
@@ -14,13 +16,26 @@ project.BiodiversityScenario(x, ...)
   stabilize = FALSE,
   stabilize_method = "loess",
   layer = "mean",
+  env = NULL,
+  verbose = getOption("ibis.setupmessages", default = TRUE),
+  ...
+)
+
+project.DistributionModel(x, ...)
+
+\S4method{project}{DistributionModel}(
+  x,
+  env,
+  layer = "mean",
   verbose = getOption("ibis.setupmessages", default = TRUE),
   ...
 )
 }
 \arguments{
 \item{x}{A \code{\link{BiodiversityScenario}} object with set predictors. Note that some
-constrains such as \code{MigClim} can still simulate future change without projections.}
+constrains such as \code{MigClim} can still simulate future change without projections.
+Alternatively a \code{\link{DistributionModel}} object can be supplied if other scenario
+functions are not needed. In this case provide a \code{env} parameter value.}
 
 \item{...}{passed on parameters.}
 
@@ -34,6 +49,9 @@ should be stabilized (Default: \code{FALSE}).}
 applied. Currently supported is \code{`loess`}.}
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
+
+\item{env}{An optional \code{\link{SpatRaster}} or \code{\link{data.frame}} object for prediction.
+Ignored unless a \code{\link{DistributionModel}} object is supplied (Default: \code{NULL}).}
 
 \item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further
 information during the model fitting (Default: \code{FALSE}).}
