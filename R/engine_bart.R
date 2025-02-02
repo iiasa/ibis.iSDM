@@ -264,28 +264,30 @@ engine_bart <- function(x,
                                                                 !predictors %in% vf)
     }
 
-    # Prediction container
-    pred_cov <- model$predictors[,c('x','y',model$biodiversity[[1]]$predictors_names)]
-    if(any(model$predictors_types$type=='factor')){
-      vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
-      # Get factors
-      for (i in 1:length(vf)) {
-        z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
-        # Remove variables from train_cov and append
-        pred_cov[[vf[i]]] <- NULL
-        pred_cov <- cbind(pred_cov, z)
-        model$predictors_types <- rbind(model$predictors_types,
-                                        data.frame(predictors = colnames(z), type = "numeric"))
+    if(!settings$get("inference_only")){
+      # Prediction container
+      pred_cov <- model$predictors[,c('x','y',model$biodiversity[[1]]$predictors_names)]
+      if(any(model$predictors_types$type=='factor')){
+        vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
+        # Get factors
+        for (i in 1:length(vf)) {
+          z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
+          # Remove variables from train_cov and append
+          pred_cov[[vf[i]]] <- NULL
+          pred_cov <- cbind(pred_cov, z)
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = colnames(z), type = "numeric"))
+        }
+
+        pred_cov <- pred_cov[,c("x", "y", colnames(train_cov))]
+        model$predictors <- pred_cov # Save new in model object
+
+        model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
+        model$predictors_names <- colnames(pred_cov)
+        assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
       }
-
-      pred_cov <- pred_cov[,c("x", "y", colnames(train_cov))]
-      model$predictors <- pred_cov # Save new in model object
-
-      model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
-      model$predictors_names <- colnames(pred_cov)
-      assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
+      rm(train_cov, pred_cov)
     }
-    rm(train_cov, pred_cov)
 
     # Process and add priors if set
     params <- self$get_data("params")
@@ -334,20 +336,24 @@ engine_bart <- function(x,
     data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
     if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
     w <- model$biodiversity[[1]]$expect # The expected weight
-    full <- model$predictors # All predictors
 
-    # Select predictors
-    full <- subset(full, select = c('x','y', model$biodiversity[[1]]$predictors_names))
-    full$cellid <- rownames(full) # Add rownames
-    full <- subset(full, stats::complete.cases(full))
+    # Select predictors for full prediction if needed
+    if(!settings$get("inference_only")){
+      full <- model$predictors # All predictors
+      full <- subset(full, select = c('x','y', model$biodiversity[[1]]$predictors_names))
+      full$cellid <- rownames(full) # Add rownames
+      full <- subset(full, stats::complete.cases(full))
 
-    # Clamp?
-    if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+      # Clamp?
+      if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+      assertthat::assert_that(
+        all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      )
+    }
 
     assertthat::assert_that(
       is.null(w) || length(w) == nrow(data),
-      is.formula(equation),
-      all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      is.formula(equation)
     )
 
     if(!is.Waiver(model$offset)){
@@ -632,7 +638,7 @@ engine_bart <- function(x,
       settings$set("type", type)
 
       # Clamp?
-      if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
+      if( settings$get("clamp") ) newdata <- clamp_predictions(model = model, pred = newdata)
 
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){

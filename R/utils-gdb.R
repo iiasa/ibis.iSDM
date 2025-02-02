@@ -19,7 +19,6 @@ built_formula_gdb <- function(model, id, x, settings){
   assertthat::assert_that(
     is.list(model),
     length(model) > 0,
-    assertthat::has_name(model, "predictors"),
     inherits(x, "BiodiversityDistribution"),
     inherits(settings, 'Settings'),
     is.character(id) || is.Id(id),
@@ -141,7 +140,8 @@ built_formula_gdb <- function(model, id, x, settings){
     assertthat::assert_that(
       is.formula(form),
       attr(stats::terms(form), "response")==1, # Has Response
-      all( all.vars(form) %in% c('observed', obj[['predictors_names']]) )
+      all( all.vars(form) %in% c('observed', obj[['predictors_names']]) ),
+      msg = "Failed to construct GDB formula..."
     )
   }
 
@@ -267,8 +267,11 @@ rm_insufficient_covs <- function(model, tr = 5){
 
   # Now get all continuous ones
   vars_num <- model$predictors_types$predictors[model$predictors_types$type=="numeric"]
+  vars_num <- vars_num[vars_num %in% model$predictors_names]
   vars_fac <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
+  vars_fac <- vars_fac[vars_fac %in% model$predictors_names]
 
+  # Calculate on observation level predictors
   vars_uniques <- apply(model$predictors[,vars_num], 2, function(x) length(unique(x,na.rm = TRUE)) )
 
   # Get all variables smaller than the threshold and return the original
@@ -288,10 +291,11 @@ rm_insufficient_covs <- function(model, tr = 5){
   }
   assertthat::assert_that(all(sufficient %in% model$predictors_names)) # This should return a character of covariate names
   if(length(sufficient)==0){
-    return(NULL)
-  } else {
-    return(sufficient)
+    # Assume binary variables only are in there
+    sufficient <- names(which(vars_uniques >= 2))
+    if(length(sufficient)==0) return(NULL)
   }
+  return(sufficient)
 }
 
 #' Calculate weights for Point Process models

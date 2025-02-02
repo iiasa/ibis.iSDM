@@ -331,55 +331,61 @@ engine_xgboost <- function(x,
     #                                 label = labels[c(ind_test)]
     # )
     # --- #
-    # Prediction container
-    pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
-    if(any(model$predictors_types$type=='factor')){
-      vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
-      # Get factors
-      for (i in 1:length(vf)) {
-        z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
-        # Remove variables from train_cov and append
-        pred_cov[[vf[i]]] <- NULL
-        pred_cov <- cbind(pred_cov, z)
-        model$predictors_types <- rbind(model$predictors_types,
-                                        data.frame(predictors = colnames(z), type = "numeric"))
-      }
-
-      model$predictors <- pred_cov # Save new in model object
-
-      model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
-      model$predictors_names <- colnames(pred_cov)
-      assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
-    }
-    pred_cov <- as.matrix( pred_cov )
-    # Ensure that the column names are identical for both
-    pred_cov <- pred_cov[, colnames(train_cov)]
-
-    # Clamp?
-    if( settings$get("clamp") ) pred_cov <- clamp_predictions(model, pred_cov)
-
-    # Set target variables to bias_value for prediction if specified
-    if(!is.Waiver(settings$get('bias_variable'))){
-      for(i in 1:length(settings$get('bias_variable'))){
-        if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)){
-          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
-          next()
+    # If predictions are to be used, define here
+    if(!settings$get('inference_only')){
+      # Prediction container
+      pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
+      if(any(model$predictors_types$type=='factor')){
+        vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
+        # Get factors
+        for (i in 1:length(vf)) {
+          z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
+          # Remove variables from train_cov and append
+          pred_cov[[vf[i]]] <- NULL
+          pred_cov <- cbind(pred_cov, z)
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = colnames(z), type = "numeric"))
         }
-        pred_cov[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
+
+        model$predictors <- pred_cov # Save new in model object
+
+        model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
+        model$predictors_names <- colnames(pred_cov)
+        assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
       }
+      pred_cov <- as.matrix( pred_cov )
+      # Ensure that the column names are identical for both
+      pred_cov <- pred_cov[, colnames(train_cov)]
+
+      # Clamp?
+      if( settings$get("clamp") ) pred_cov <- clamp_predictions(model, pred_cov)
+
+      # Set target variables to bias_value for prediction if specified
+      if(!is.Waiver(settings$get('bias_variable'))){
+        for(i in 1:length(settings$get('bias_variable'))){
+          if(settings$get('bias_variable')[i] %notin% colnames(pred_cov)){
+            if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Did not find bias variable in prediction object!')
+            next()
+          }
+          pred_cov[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
+        }
+      }
+      df_pred <- xgboost::xgb.DMatrix(data = as.matrix(pred_cov))
+      assertthat::assert_that(all(colnames(df_train) == colnames(df_pred)))
+
     }
-    df_pred <- xgboost::xgb.DMatrix(data = as.matrix(pred_cov))
-    assertthat::assert_that(all(colnames(df_train) == colnames(df_pred)))
 
     if(fam == "count:poisson"){
       # Specifically for count poisson data we will set the areas
-      assertthat::assert_that(all(is.finite(log(w))),
-                              all(is.finite(log(w_full))))
+      assertthat::assert_that(all(is.finite(log(w))))
       # as an exposure offset for the base_margin
       xgboost::setinfo(df_train, "base_margin", log(w))
       # xgboost::setinfo(df_test, "base_margin", log(w[ind_test]))
-      assertthat::assert_that(nrow(df_pred) == length(w_full))
-      xgboost::setinfo(df_pred, "base_margin", log(w_full))
+      if(!settings$get('inference_only')){
+        assertthat::assert_that(nrow(df_pred) == length(w_full),
+                                all(is.finite(log(w_full))) )
+        xgboost::setinfo(df_pred, "base_margin", log(w_full))
+      }
       params$eval_metric <- "logloss"
     } else if(fam == 'binary:logistic'){
       params$eval_metric <- "logloss"
@@ -406,13 +412,15 @@ engine_xgboost <- function(x,
       # Set offset to 1 (log(0)) in case nothing is found
       if(is.null(xgboost::getinfo(df_train, "base_margin"))) {
         of_train <- rep(1, nrow(model$biodiversity[[1]]$observations[,c("x","y")]))
-        of_pred <- rep(1, nrow(model$offset))
+        if(!settings$get('inference_only')) of_pred <- rep(1, nrow(model$offset))
       } else {
         # For the offset we simply add the (log-transformed) offset to the existing one
         # given that for example log(2*3) == log(2) + log(3)
         of_train <- xgboost::getinfo(df_train, "base_margin")
         # of_test <- xgboost::getinfo(df_test, "base_marginfit_xgb") |> exp()
-        of_pred <- xgboost::getinfo(df_pred, "base_margin")
+        if(!settings$get('inference_only')){
+          of_pred <- xgboost::getinfo(df_pred, "base_margin")
+        }
       }
       # -- Add offset to full prediction and load vector --
 
@@ -431,28 +439,32 @@ engine_xgboost <- function(x,
       #                     # field_space = c('x','y')
       # )
       # names(of2)[which(names(of2)==names(model$offset_object))] <- "spatial_offset"
-      assertthat::assert_that(nrow(of1) == length(of_train),
-                              # nrow(of2) == length(of_test),
-                              nrow(of) == length(of_pred))
+      assertthat::assert_that(nrow(of1) == length(of_train)) # nrow(of2) == length(of_test)
       of_train <- of_train + of1[,"spatial_offset"]
       # of_test <- of_test + of2[,"spatial_offset"]
-      of_pred <- of_pred + of[,"spatial_offset"]
-
       # Check that values are valid
-      assertthat::assert_that(all(is.finite(of_train)), all(is.finite(of_pred)),
-                              !anyNA(of_train), !anyNA(of_pred))
+      assertthat::assert_that(all(is.finite(of_train)), !anyNA(of_train), )
 
       # Set the new offset
       xgboost::setinfo(df_train, "base_margin", ( of_train ))
       # xgboost::setinfo(df_test, "base_margin", of_test)
-      xgboost::setinfo(df_pred, "base_margin", ( of_pred ))
+      if(!settings$get('inference_only')){
+        assertthat::assert_that(nrow(of) == length(of_pred))
+        of_pred <- of_pred + of[,"spatial_offset"]
+
+        assertthat::assert_that(
+          !anyNA(of_pred), all(is.finite(of_pred))
+        )
+        # Set the new offset
+        xgboost::setinfo(df_pred, "base_margin", ( of_pred ))
+      }
     }
 
     # --- #
     # Save both training and predicting data in the engine data
     self$set_data("df_train", df_train)
     # self$set_data("df_test", df_test)
-    self$set_data("df_pred", df_pred)
+    if(!settings$get('inference_only')) self$set_data("df_pred", df_pred)
     # --- #
 
     # Set objective

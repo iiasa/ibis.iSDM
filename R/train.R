@@ -281,8 +281,9 @@ methods::setMethod(
                                 crs = terra::crs(x$background));names(dummy) <- 'dummy'
         }
         model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE, na.rm = FALSE)
-        model[['predictors_names']] <- 'dummy'
-        model[['predictors_types']] <- predictor_type(dummy)
+        model[['predictors_names']] <- x$predictors$get_names()
+        model[['predictors_names']] <- model[['predictors_names']][model[['predictors_names']] %notin% c("x","y")]
+        model[['predictors_types']] <- predictor_type(x$predictors$get_data())
         model[['predictors_object']] <- PredictorDataset$new(id = new_id(), data = dummy)
       }
     } else {
@@ -900,6 +901,9 @@ methods::setMethod(
                             length(model$biodiversity)>=1,
                             is.data.frame(model$predictors) && nrow(model$predictors)>0,
                             length(model$predictors_names)>0,
+                            # Check for odd NA values
+                            !anyNA(model$predictors_names),
+                            !anyNA(model$predictors_types),
                             nrow(model$biodiversity[[1]]$observations)>0,
                             length(model[['biodiversity']][[1]][['expect']])>1,
                             all(c("predictors","background","biodiversity") %in% names(model) ),

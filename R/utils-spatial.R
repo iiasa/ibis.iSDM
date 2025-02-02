@@ -1283,6 +1283,77 @@ fill_rasters <- function(post, background){
   return(out)
 }
 
+
+#' Clamp a predictor matrix by given values
+#'
+#' @description To limit extreme extrapolation it is possible to \code{'clamp'}
+#' an existing projection to the range of predictor values observed during model
+#' training. This function takes an internal model matrix and restricts the
+#' values seen in the predictor matrix to those observed during training.
+#'
+#' @param model A [`list`] with the input data used for inference. Created during model setup.
+#' @param pred An optional [`data.frame`] of the prediction container.
+#'
+#' @note This function is meant to be used within a certain \code{"engine"} or
+#' within [`project`].
+#'
+#' @returns A [`data.frame`] with the clamped predictors.
+#'
+#' @keywords utils
+#'
+#' @references
+#' Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017).
+#' Opening the black box: An open-source release of Maxent. Ecography.
+#' https://doi.org/10.1111/ecog.03049
+#'
+#' @noRd
+#'
+#' @keywords internal
+clamp_predictions <- function(model, pred){
+  assertthat::assert_that(
+    is.list(model),
+    assertthat::has_name(model, "biodiversity"),
+    (is.data.frame(pred) || is.matrix(pred)) || missing(pred)
+  )
+
+  # For each biodiversity dataset, calculate the range of predictors observed
+  vars_clamp <- data.frame()
+  for(ds in model$biodiversity){
+    # Calculate range for each NUMERIC variable
+    vals <- ds$predictors_names[ds$predictors_types[, 2] == "numeric"]
+    vals <- vals[stats::complete.cases(vals)] # Do this to account for x, y, ID other columns
+    rr <- apply(ds$predictors[,vals, drop = FALSE],
+                MARGIN = 2, function(z) range(z, na.rm = TRUE)) |>
+      t() |> as.data.frame() |> tibble::rownames_to_column("variable")
+    names(rr) <- c("variable", "min", "max")
+    vars_clamp <- rbind(vars_clamp, rr)
+    rm(rr)
+  }
+
+  # Aggregate if multiple variables
+  if(anyDuplicated(vars_clamp$variable) > 0){
+    o1 <- aggregate(vars_clamp$min, by = list(vars_clamp$variable), FUN = min)
+    o2 <- aggregate(vars_clamp$max, by = list(vars_clamp$variable), FUN = max)
+    names(o1) <- c("variable", "min")
+    names(o2) <- c("variable", "max")
+    vars_clamp <- merge(o1, o2)
+  }
+  # --- #
+  # Now clamp either predictors
+  if(missing(pred)) pred <- model$predictors
+
+  # Now clamp the prediction matrix with the clamped variables
+  for (v in intersect(vars_clamp$variable, names(pred))) {
+    pred[, v] <- pmin(
+      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
+      vars_clamp$max[vars_clamp$variable==v])
+  }
+
+  assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
+                           nrow(pred)>0)
+  return(pred)
+}
+
 #' Create a polynomial transformation from coordinates
 #'
 #' @description This function transforms the coordinates of a supplied file through

@@ -150,25 +150,28 @@ engine_stan <- function(x,
     # Set cores
     options(mc.cores = self$stan_param$cores)
 
-    # FIXME: Stan should handle factors directly. For now outsourced to split up
-    if(any(model$predictors_types$type=="factor")){
-      vf <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
-      for(k in vf){
-        o <- explode_factor(model$predictors[[k]],name = k)
-        model$predictors <- cbind(model$predictors, o)
-        model$predictors_names <- c(model$predictors_names, colnames(o))
-        model$predictors_types <- rbind(model$predictors_types,
-                                        data.frame(predictors = colnames(o), type = "numeric") )
-        # Finally remove the original column from the predictor object
-        model$predictors[[k]] <- NULL
-        model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
-        model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
-        # Explode the columns in the raster object
-        model$predictors_object$data <- c(
-          model$predictors_object$data,
-          explode_factorized_raster(model$predictors_object$data[[k]])
-        )
-        model$predictors_object$data <- terra::subset(model$predictors_object$data, k, negate = TRUE)
+    if(!settings$get('inference_only')){
+      # FIXME: Stan should handle factors directly. For now outsourced to split up
+      cli::cli_alert_warning("Splitting factors up for prediction!")
+      if(any(model$predictors_types$type=="factor")){
+        vf <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
+        for(k in vf){
+          o <- explode_factor(model$predictors[[k]],name = k)
+          model$predictors <- cbind(model$predictors, o)
+          model$predictors_names <- c(model$predictors_names, colnames(o))
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = colnames(o), type = "numeric") )
+          # Finally remove the original column from the predictor object
+          model$predictors[[k]] <- NULL
+          model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
+          model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
+          # Explode the columns in the raster object
+          model$predictors_object$data <- c(
+            model$predictors_object$data,
+            explode_factorized_raster(model$predictors_object$data[[k]])
+          )
+          model$predictors_object$data <- terra::subset(model$predictors_object$data, k, negate = TRUE)
+        }
       }
     }
 

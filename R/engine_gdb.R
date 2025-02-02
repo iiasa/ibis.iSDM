@@ -330,41 +330,35 @@ engine_gdb <- function(x,
                   data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE]) )
     w <- model$biodiversity[[1]]$expect
 
-    # Select predictors
-    full <- model$predictors
-    full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
-    full$cellid <- rownames(full) # Add row.names
-    full$w <- model$exposure
-    full$Intercept <- 1
-    full <- subset(full, stats::complete.cases(full))
+    # Select predictors for full if needed
+    if(!settings$get('inference_only')){
+      full <- model$predictors
+      full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
+      full$cellid <- rownames(full) # Add row.names
+      full$w <- model$exposure
+      full$Intercept <- 1
+      full <- subset(full, stats::complete.cases(full))
+      # Clamp?
+      if( settings$get("clamp") ) full <- clamp_predictions(model, full)
 
-    # Clamp?
-    if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+      full$w <- scale_weight(full$w)
+      assertthat::assert_that(
+        all(model$biodiversity[[1]]$predictors_names %in% names(full)),
+        all(names(full[,model$biodiversity[[1]]$predictors_names]) %in% names(data)),
+        all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      )
+    } else { full <- NULL }
 
     # Rescale exposure
-    check_package('scales')
-    w <- scales::rescale(w, to = c(1e-6, 1))
-    full$w <- scales::rescale(full$w, to = c(1e-6, 1))
-    if(anyNA(w)){
-      w[is.na(w)] <- 1e-6
-      full$w[is.na(full$w)] <- 1e-6
-    }
+    w <- scale_weight(w)
 
     assertthat::assert_that(
       is.null(w) || length(w) == nrow(data),
       is.formula(equation),
-      all(model$biodiversity[[1]]$predictors_names %in% names(full)),
-      all(names(full[,model$biodiversity[[1]]$predictors_names]) %in% names(data)),
-      all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      msg = "(Internal) Number of weights do not match number of observations?"
     )
 
     if(!is.Waiver(model$offset)){
-      # Add offset to full prediction and load vector
-      n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
-      names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
-      # Add weights
-      # n <- n + full$w
-      full <- cbind(full, n)
       # And for biodiversity object
       n <- cbind(model$biodiversity[[1]]$offset[,"spatial_offset"],
                  model$biodiversity[[1]]$offset[,"spatial_offset"]) |> as.data.frame()
@@ -372,6 +366,14 @@ engine_gdb <- function(x,
       # Add weights
       # n <- n + w
       data <- cbind(data, n)
+      if(!settings$get("inference_only")){
+        # Add offset to full prediction and load vector
+        n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
+        names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
+        # Add weights
+        # n <- n + full$w
+        full <- cbind(full, n)
+      }
     }
 
     # --- #

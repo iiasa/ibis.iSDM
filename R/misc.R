@@ -190,7 +190,7 @@ ibis_set_strategy <- function(strategy = "sequential"){
 #' Small helper function to respecify the number of threads for parallel processing.
 #' @param threads A [`numeric`] greater thna \code{0}.
 #' @return Invisible
-#' @seealso [future], [ibis_future_run]
+#' @seealso [future]
 #' @keywords misc
 #' @export
 ibis_set_threads <- function(threads = 2){

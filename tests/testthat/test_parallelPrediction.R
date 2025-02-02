@@ -82,4 +82,28 @@ test_that('Testing parallel setup', {
 
   # Set parallel to FALSE again
   options('ibis.runparallel' = FALSE)
+
+  # --- #
+  # Train in splits with data.frame predictors here
+  preds <- terra::extract(predictors, poa, xy = TRUE, ID = FALSE)
+  expect_equal(nrow(preds), nrow(poa))
+
+  expect_no_error(
+    x <- distribution(background) |>
+    add_biodiversity_poipa(poipa = poa, field_occurrence = 'Observed',docheck = FALSE) |>
+    add_predictors(preds, transform = 'none',derivates = 'none') |>
+    engine_glm()
+  )
+
+  expect_no_error(
+    fit1 <- train(x, "test", inference_only = TRUE)
+  )
+
+  # Now attempt a prediction
+  expect_no_error(
+    p <- project(fit1, predictors)
+  )
+  expect_s4_class(p, "SpatRaster")
+  expect_lte(terra::global(p,"max",na.rm=T)[,1], 1)
+
 })

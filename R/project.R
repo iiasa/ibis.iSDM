@@ -789,7 +789,7 @@ methods::setMethod(
       template <- emptyraster(env)
     } else {
       assertthat::assert_that(
-        hasName(env, "x") && hasName(env, "y"),
+        utils::hasName(env, "x") && utils::hasName(env, "y"),
         msg = "Coordinates as x and y need to be supplied!"
       )
       # Create template
@@ -802,7 +802,7 @@ methods::setMethod(
     }
 
     # If raster convert to data.frame for further predictions
-    if(is.Raster(env)) env <- as.data.frame(env, xy = TRUE)
+    if(is.Raster(env)) env <- terra::as.data.frame(env, xy = TRUE, na.rm =FALSE)
 
     # --- #
     # Now predict

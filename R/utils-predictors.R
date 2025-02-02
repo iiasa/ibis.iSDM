@@ -1091,7 +1091,7 @@ predictor_check <- function(env){
   }
 
   # Check variance
-  check_var <- apply(env, 2, function(z) var(z, na.rm = TRUE)) == 0
+  check_var <- apply(env, 2, function(z) stats::var(z, na.rm = TRUE)) == 0
   if(any(check_var)){
     if(getOption('ibis.setupmessages', default = TRUE)) {
       myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_var)),collapse = "; "),
