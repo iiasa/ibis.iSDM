@@ -860,6 +860,10 @@ engine_glmnet <- function(x,
       # Make a subset of non-na values
       df$rowid <- 1:nrow(df)
       df_sub <- base::subset(df, stats::complete.cases(df))
+      if(nrow(df_sub)==0) {
+        cli::cli_alert_danger("Every observation has missing data?")
+        df_sub <- df
+      }
       if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
       assertthat::assert_that(nrow(df_sub)>0)
 

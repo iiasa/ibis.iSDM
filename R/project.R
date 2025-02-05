@@ -806,7 +806,11 @@ methods::setMethod(
 
     # --- #
     # Now predict
-    out <- x$project(newdata = env, layer = layer)
+    out <- try({ x$project(newdata = env, layer = layer) })
+    if(inherits(out, 'try-error')){
+      cli::cli_alert_danger("Projection failed! Returning emptyraster gracefully")
+      return(template)
+    }
     names(out) <- paste0("suitability", "_", layer)
     if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( model$background )
     # --- #

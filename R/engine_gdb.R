@@ -559,6 +559,10 @@ engine_gdb <- function(x,
       newdata$rowid <- 1:nrow(newdata)
       # Subset to non-missing data
       newdata_sub <- subset(newdata, stats::complete.cases(newdata))
+      if(nrow(newdata_sub)==0) {
+        cli::cli_alert_danger("Every observation has missing data?")
+        newdata_sub <- newdata
+      }
 
       if(getOption("ibis.runparallel",default = FALSE)){
         check_package("doFuture")
