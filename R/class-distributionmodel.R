@@ -271,8 +271,8 @@ DistributionModel <- R6::R6Class(
                     colNA = NA, col = ibis_colours[['sdm_colour']]
         )
       } else {
-        message(
-          paste0('No model predictions found.')
+        cli::cli_alert_warning(
+          paste0('No model predictions found in object.')
         )
       }
     },
@@ -309,7 +309,7 @@ DistributionModel <- R6::R6Class(
                     colNA = NA, col = col
         )
       } else {
-        message("No computed threshold was found!")
+        cli::cli_alert_warning("No computed threshold was found!")
         invisible(self)
       }
     },
@@ -381,6 +381,7 @@ DistributionModel <- R6::R6Class(
       assertthat::assert_that(is.character(what))
       # Get model
       obj <- self$get_data(x)
+      cli::cli_inform('Calculating partial dependence plots...')
       if( self$get_name() == 'GDB-Model'){
         # How many effects
         n <- length( stats::coef( obj ))
@@ -412,7 +413,6 @@ DistributionModel <- R6::R6Class(
         ggplot2::ggplot() +
           inlabru::gg(obj$summary.fixed, bar = TRUE)
       } else if( self$get_name() == 'BART-Model'){
-        message('Calculating partial dependence plots')
         self$partial(obj, x.var = what, ...)
       } else if( self$get_name() == 'BREG-Model'){
         if(what == "fixed") what <- "coefficients"

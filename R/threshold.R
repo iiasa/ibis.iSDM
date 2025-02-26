@@ -297,7 +297,7 @@ methods::setMethod(
       # Specify by type:
       if(method == "fixed"){
         # Fixed threshold. Confirm to be set
-        assertthat::assert_that(is.numeric(value), msg = 'Fixed value is missing!')
+        assertthat::assert_that(is.numeric(value), msg = 'For method Fixed, a constant value needs to be supplied!')
         tr <- value
       } else if(method == "mtp"){
         assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
@@ -431,8 +431,8 @@ methods::setMethod(
 #'
 #' @param obj A [BiodiversityScenario] object to which an existing threshold is
 #' to be added.
-#' @param value A [`numeric`] value specifying the specific threshold for scenarios
-#' (Default: \code{NULL} Grab from object).
+#' @param value A [`numeric`] value specifying
+#' the specific threshold for scenarios (Default: \code{NULL} grabs the value from \code{obj}).
 #' @param ... Any other parameter. Used to fetch value if set somehow.
 #'
 #' @rdname threshold
@@ -449,9 +449,6 @@ methods::setMethod(
       assertthat::assert_that(is.numeric(value),
                               msg = "Parameter value not found and other numeric values not found?")
     }
-
-    # Assert that predicted raster is present
-    assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
 
     # Make a clone copy of the object
     new <- obj$clone(deep = TRUE)

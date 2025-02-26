@@ -140,7 +140,6 @@ methods::setMethod(
       }
     }
 
-
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Missing projection of future predictors.')
 
@@ -254,12 +253,22 @@ methods::setMethod(
     # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
     if(!is.Waiver(scenario_threshold)){
-      # Not get the baseline raster
-      thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
-      assertthat::assert_that(!is.na(thresh_reference))
-      baseline_threshold <- mod$get_model()$get_data(thresh_reference)
-
+      # If scenario threshold is numeric and not a raster, create a baseline
+      if(is.numeric(scenario_threshold) && !is.Raster(scenario_threshold)){
+        baseline_threshold <- try({
+          # Get prediction and threshold
+          threshold(fit$get_data(),method = 'fixed', value = scenario_threshold)
+        },silent = TRUE)
+        if(inherits(baseline_threshold, "try-error")) cli::cli_alert_danger("Set thresholds require a prediction first!")
+      } else {
+        # Assume an existing threshold exists
+        thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
+        assertthat::assert_that(!is.na(thresh_reference))
+        baseline_threshold <- fit$get_data(thresh_reference)
+      }
+      # Correct CRS just in case
       if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( background )
+
       # Furthermore apply new limits also to existing predictions (again)
       if(!is.null( mod$get_limits() )){
         # Get Limit and settings from model
@@ -286,7 +295,6 @@ methods::setMethod(
         baseline_threshold <- terra::extend(baseline_threshold, template)
         baseline_threshold <- terra::crop(baseline_threshold, template)
       }
-
     } else {
       baseline_threshold <- new_waiver()
     }
