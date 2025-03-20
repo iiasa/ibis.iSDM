@@ -366,7 +366,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #'
 #' @examples
 #' # Dummy raster
-#'  r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
+#' r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
 #'
 #' # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
 #' new <- predictor_derivate(r_ori, option = "hinge", knots = 4)
@@ -802,6 +802,132 @@ predictor_derivate <- function(env, option, nknots = 4, deriv = NULL,
   return(new_env)
 }
 
+#' Summarize and replace values in predictors with an aggregation
+#'
+#' @description
+#' This function supports the aggregation and specification of
+#' values inside a predictor set. Concretely, all predictor values
+#' underneath each zonal polygon (or id) are summarized through a
+#' function and then set as new values to the predictor set.
+#'
+#' @details
+#' Potential uses of this function include for example
+#' the summary of values within a set of regions (such as countries or super cells).
+#' Optional target layers (for example another zone) and values can be defined.
+#'
+#' @param env A [`SpatRaster`] object with the predictors.
+#' @param layer Either a [`SpatRaster`] or a [`sf`] object.
+#' @param fun A custom function or [`character`]. A range of methods
+#' are supported by default such as \code{"mean"}, \code{"sum"}, \code{"min"} or \code{"max"} (Default: \code{"mean"}).
+#' @param target_layer (Optional) [`SpatRaster`] object with categorical zones for which the summarized value is to be set.
+#' @param value (Optional) [`numeric`] value instead of the layer.
+#'
+#' @returns A [`SpatRaster`] object with the same number of layers as the input.
+#'
+#' @keywords utils
+#'
+#' @examples
+#' \dontrun{
+#' # Load example data
+#' background <- terra::rast(system.file('extdata/europegrid_50km.tif',
+#' package='ibis.iSDM',mustWork = TRUE))
+#'
+#' co <- terra::rast(system.file('extdata/countries.tif',
+#' package='ibis.iSDM',mustWork = TRUE))
+#'
+#' # Get the UK
+#' co <- co=="United Kingdom"
+#' co[co==0] <- NA
+#'
+#' # Get list of test predictors
+#' ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM',
+#' mustWork = TRUE),full.names = TRUE)
+#' # Load them as rasters
+#' env <- terra::rast(ll[3])
+#'
+#' # Load the layer
+#' env_r <- predictor_summarize_zones(env, layer = co, fun = 'mean')
+#' terra::plot(c(env, env_r), main = c("original", "aggregated"))
+#' }
+#' @export
+predictor_summarize_zones <- function(
+    env,
+    layer,
+    fun = "mean",
+    target_layer = NULL,
+    value = NULL
+    ){
+  assertthat::assert_that(
+    is.Raster(env) || inherits(env, 'stars'),
+    is.Raster(layer) || inherits(layer, "sf"),
+    missing(fun) || is.character(fun),
+    is.Raster(target_layer) || is.null(target_layer),
+    is.null(value) || is.numeric(value)
+  )
+
+  # Match the function if is a character
+  if(is.character(fun)) fun <- match.arg(fun, choices = c("mean", "sum", "min", "max"), several.ok = FALSE)
+  if(!is.character(fun)) assertthat::assert_that(
+    is.function(fun),
+    msg = "A set or specified function needs to be supplied!"
+  )
+
+  # If Layer is an sf object, rasterize first
+  if(inherits(layer, "sf")){
+    cli::cli_alert_warning("sf provided zone layer found. Rasterizing with fixed value!")
+    layer <- terra::rasterize(layer, env, 1)
+  }
+
+  # Workflow for raster layers
+  if(is.Raster(env)){
+    nl <- terra::nlyr(env)
+
+    old <- terra::deepcopy(env)
+
+    # Calculate the zones and return a raster
+    z <- terra::zonal(x = env,
+                      z = layer,
+                      fun = fun,
+                      touches = TRUE,
+                      as.raster = TRUE,
+                      na.rm = TRUE
+    )
+    if(!is.null(value)) z[!is.na(z)] <- value
+
+    # -- #
+    # Then replace the original values for the summarized ones
+    if(!is.null(target_layer)){
+      # Check that this aligns with predictor
+      assertthat::assert_that(is.Raster(target_layer))
+
+      cli::cli_alert_info("Replacing values in target zone...")
+      vals <- terra::unique(z)
+      if(nrow(vals)>1){
+        cli::cli_alert_danger("More than one zone summarized for target layer. Using average!")
+        vals <- apply(vals, 2, function(z) mean(z, na.rm = TRUE) )
+      }
+      # Now use the target layer instead
+      z <- terra::deepcopy(target_layer)
+      z <- as.numeric(z)
+      z[!is.na(z)] <- as.numeric(vals)
+    }
+    old <- terra::mask(old, z, inverse=TRUE)
+    new <- sum(old, z, na.rm=TRUE)
+    try({rm(old, z)},silent = TRUE)
+    assertthat::assert_that(
+      terra::hasValues(new), msg = "All values have been masked out?"
+    )
+  } else if(inherits(env, 'stars')){
+    cli::cli_abort('Not implemented yet.')
+  }
+  # Security checks
+  assertthat::assert_that(
+    is.Raster(new) || is.list(new) || inherits(new, 'stars')
+  )
+  # Return the result
+  return(new)
+}
+
 #' Homogenize NA values across a set of predictors.
 #'
 #' @description This method allows the homogenization of missing data across a
@@ -1214,8 +1340,8 @@ predictor_type <- function(env, guess_factor = FALSE){
 #' Some of the options require different packages to be pre-installed, such as
 #' \code{ranger} or \code{Boruta}.
 #'
-#' @param env A [`data.frame`] or [`matrix`] with extracted environmental covariates
-#' for a given species.
+#' @param env A [`SpatRaster`] or alternatively [`data.frame`] or
+#' [`matrix`] with extracted environmental covariates for a given species.
 #' @param keep A [`vector`] with variables to keep regardless. These are usually
 #' variables for which prior information is known.
 #' @param method Which method to use for constructing the correlation matrix
@@ -1244,21 +1370,36 @@ predictor_type <- function(env, guess_factor = FALSE){
 #' @examples
 #' \dontrun{
 #'  # Remove highly correlated predictors
-#'  env <- predictor_filter( env, option = "pearson")
+#'  env <- predictor_filter(env, option = "pearson")
 #' }
 #'
 #' @export
-predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
+predictor_filter <- function(env, keep = NULL, method = "pearson", ...){
   assertthat::assert_that(
-    is.data.frame(env) || is.matrix(env),
-    ncol(env) >2,
+    is.Raster(env) || (is.data.frame(env) || is.matrix(env)),
     is.null(keep) || is.vector(keep),
     is.character(method)
   )
+  if( (is.data.frame(env) || is.matrix(env))) {
+    assertthat::assert_that( ncol(env) >2 )
+  } else { assertthat::assert_that( terra::nlyr(env) >= 2) }
+
   # Match the predictor names
   method <- match.arg(method,
                       c("none", "pearson", "spearman", "kendall", "abess", "boruta"),
                       several.ok = FALSE)
+
+  # Convert to data.frame/matrix if not already set
+  if(is.Raster(env)){
+    assertthat::assert_that(method %in% c("none", "pearson", "spearman", "kendall"),
+                            msg = "For directly supplied layers this currently only works for correlation statistics.")
+    if(method == 'none') return(env) # Return immediately
+
+    cli::cli_alert_info("Running predictor filtering on gridded inputs.")
+    df <- terra::as.data.frame(env, xy = TRUE, na.rm = FALSE)
+    if(is.null(keep)) keep <- c("x","y") else keep <- c(keep, "x", "y")
+
+  } else df <- env
 
   # Now apply the filter depending on the option
   if(method == "none"){
@@ -1266,26 +1407,32 @@ predictor_filter <- function( env, keep = NULL, method = "pearson", ...){
   } else if(method %in% c("pearson", "spearman", "kendall")){
     # Simply collinearity check based on colinear predictors
     co <- predictors_filter_collinearity(
-      env, keep = keep, method = method, ...
+      df, keep = keep, method = method, ...
     )
   } else if(method == "abess"){
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Applying abess method to reduce predictors...')
     co <- predictors_filter_abess(
-      env = env, keep = keep, method = method, ...
+      env = df, keep = keep, method = method, ...
     )
   } else if(method == "boruta"){
     check_package("Boruta")
     co <- predictors_filter_boruta(
-      env = env, keep = keep, method = method, ...
+      env = df, keep = keep, method = method, ...
     )
-
   } else {
     stop("Method not yet implemented!")
   }
 
   # Security checks and return
   assertthat::assert_that(is.null(co) || is.character(co))
-  return(co)
+
+  # Now return output depending on input type
+  if(is.Raster(env)){
+    sub <- env[[which(!(names(env) %in% co))]]
+    return(sub)
+  } else {
+    return(co)
+  }
 }
 
 #' Identify collinear predictors
@@ -1320,7 +1467,7 @@ predictors_filter_collinearity <- function( env, keep = NULL, cutoff = getOption
   if(length(singular_var)>0) x <- x[,-singular_var]
 
   # Calculate correlation matrix
-  cm <- stats::cor(x, method = method)
+  cm <- stats::cor(x, method = method, use = "pairwise.complete.obs")
 
   # Copied from the \code{caret} package to avoid further dependencies
   if (any(!stats::complete.cases(cm))) stop("The correlation matrix has some missing values.")

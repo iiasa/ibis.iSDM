@@ -292,12 +292,19 @@ hingeval <- function (x, min, max){
 #' Threshold transformation
 #' @param x A [`vector`] with numeric values.
 #' @param knot [`numeric`] threshold value as cutoff.
+#' @param sense [`character`] on the direction as gt, gte, lt or lte (Default: \code{"gte"}).
 #'
 #' @noRd
 #'
 #' @keywords internal
-thresholdval <- function(x, knot) {
-    ifelse(x >= knot, 1, 0)
+thresholdval <- function(x, knot, sense = "gte") {
+  assertthat::assert_that(is.character(sense))
+  switch(sense,
+    "gt" = ifelse(x > knot, 1, 0),
+    "gte" = ifelse(x >= knot, 1, 0),
+    "lt" = ifelse(x < knot, 1, 0),
+    "lte" = ifelse(x <= knot, 1, 0)
+  )
 }
 
 #' Rescale vector to a new range

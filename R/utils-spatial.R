@@ -903,7 +903,10 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' \code{SpatRaster} object. It is primarily used in the package to create the
 #' outputs for the predictions.
 #'
-#' @param x A \code{SpatRaster*} object corresponding.
+#' @param x A \code{SpatRaster*}, \code{stars} or a \code{sf} object from which coordinates
+#' can be obtained. Note that for \code{sf} objects the parameter \code{res} needs
+#' to be supplied.
+#' @param res (Optional) [`numeric`] estimate on the resolution of the output (Default: \code{NULL}).
 #' @param ... other arguments that can be passed to \code{\link{terra}}
 #'
 #' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
@@ -916,18 +919,32 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' emptyraster(r)
 #'
 #' @export
-emptyraster <- function(x, ...) { # add name, filename,
-  assertthat::assert_that(is.Raster(x) || inherits(x, "stars"))
+emptyraster <- function(x, res = NULL, ...) { # add name, filename,
+  assertthat::assert_that((is.Raster(x) || inherits(x, "stars"))||
+                            inherits(x, "sf") )
   if(is.Raster(x)){
     terra::rast(nrows = nrow(x), ncols = ncol(x),
                 crs = terra::crs(x),
                 ext = terra::ext(x), ...)
-  } else {
+  } else if(inherits(x, "stars")) {
     crs <- sf::st_crs(x)
     terra::rast(nrows = nrow(x), ncols = ncol(x),
                 crs = terra::crs(crs$wkt),
                 ext = terra::ext(sf::st_bbox(x)),
                 resolution = stars::st_res(x),
+                ...)
+  } else {
+    assertthat::assert_that(all(is.numeric(res)),
+                            msg = "For non-gridded objects a resolution needs to be provided!")
+    # Get coordinates
+    if(inherits(x, "sf")) coords <- terra::vect(coords)
+    if(inherits(x, "data.frame") | inherits(x, "matrix")) coords <- terra::vect(as.matrix(x), type = "points", atts = NULL)
+
+    # Rasterize
+    if(inherits(x, "sf")) crs <- terra::crs(sf::st_crs(x)$wkt) else crs <- NULL
+    terra::rast(x = coords,
+                res = res,
+                crs = crs,
                 ...)
   }
 }
@@ -1473,28 +1490,14 @@ explode_factorized_raster <- function(ras, name = NULL){
     # Get name
     # Create output template
     temp <- emptyraster(ras)
+
+    # Set name unless set
     if(is.null(name)) name <- names(ras)
 
-    # Extract data
-    o <- data.frame(val = values(ras));names(o) <- name;o[[name]] <- factor(o[[name]])
-
-    # Check if there is an NaN and remove if present.
-    if( any(is.nan( terra::levels(o[[name]]) ) | terra::levels(o[[name]]) == "NaN") ){
-      lvl <- terra::levels(o[[name]])
-      if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
-      if(any(lvl == "NaN")) lvl <- lvl[-which(lvl == "NaN")]
-    } else {
-      lvl <- terra::levels(o[[name]])
-    }
-
-    # Make function that converts all factors to split rasters
-    f <- as.data.frame(
-      outer(o[[name]], lvl, function(w, f) ifelse(w == f, 1, 0))
-    )
-
-    # Fill template rasters
-    out <- fill_rasters(f, temp)
-    names(out) <- paste(name, lvl, sep = ".")
+    # Segregate
+    out <- terra::segregate(ras)
+    lvl <- levels(ras[[name]])[[1]][[2]]
+    names(out) <- paste(name, lvl, sep = ".") |> sanitize_names()
 
   } else if(terra::nlyr(ras)>1){
     # Alternatively if input is stack
@@ -1510,29 +1513,14 @@ explode_factorized_raster <- function(ras, name = NULL){
 
       sub <- ras[[k]]
 
-      temp <- emptyraster(sub)
+      # Get sub name
       if(is.null(name)) new_name <- names(sub) else new_name <- name
 
-      # Extract data
-      o <- data.frame(val = values(sub));names(o) <- new_name;o[[new_name]] <- factor(o[[new_name]])
+      # Segregate and get levels
+      new <- terra::segregate(sub)
+      lvl <- levels(sub)[[1]][[2]]
 
-      # Check if there is an NaN and remove if present.
-      if( any(is.nan(terra::levels(o[[new_name]])) | terra::levels(o[[new_name]]) == "NaN") ){
-        lvl <- terra::levels(o[[new_name]])
-        if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
-        if(any(lvl == "Nan")) lvl <- lvl[-which(lvl == "NaN")]
-      } else {
-        lvl <- terra::levels(o[[new_name]])
-      }
-
-      # Make function that converts all factors to split rasters
-      f <- as.data.frame(
-        outer(o[[new_name]], lvl, function(w, f) ifelse(w == f, 1, 0))
-      )
-
-      # Fill template rasters
-      new <- fill_rasters(f, temp)
-      names(new) <- paste(new_name, lvl, sep = ".")
+      names(new) <- paste(new_name, lvl, sep = ".") |> sanitize_names()
       suppressWarnings( out <- c(out, new) )
     }
   }

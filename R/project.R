@@ -375,7 +375,7 @@ methods::setMethod(
       # check that timestep has data
       assertthat::assert_that(nrow(nd)>0, !all(is.na(dplyr::select(nd, dplyr::any_of(mod_pred_names)))))
 
-      # Apply adaptability constrain
+      # Apply adaptability constrain which currently tend alter variables directly
       if("adaptability" %in% names(scenario_constraints)){
         if(scenario_constraints[["adaptability"]]$method == "nichelimit") {
           nd <- .nichelimit(newdata = nd, model = mod$get_model()[['model']],
@@ -383,6 +383,14 @@ methods::setMethod(
                            value = scenario_constraints[["adaptability"]]$params['value'],
                            increment = scenario_constraints[["adaptability"]]$params['increment'],
                            increment_step = which(step==times) )
+        }
+        if(scenario_constraints[["adaptability"]]$method == "fixedlimit") {
+          nd <- .fixedlimit(newdata = nd, model = mod$get_model()[['model']],
+                            names = scenario_constraints[["adaptability"]]$params['names'],
+                            value = scenario_constraints[["adaptability"]]$params['value'] |> as.numeric(),
+                            value_min = scenario_constraints[["adaptability"]]$params['value_min'] |> as.numeric(),
+                            value_max = scenario_constraints[["adaptability"]]$params['value_max'] |> as.numeric()
+                            )
         }
       }
 

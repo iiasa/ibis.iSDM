@@ -9,7 +9,10 @@ add_constraint_adaptability(
   mod,
   method = "nichelimit",
   names = NULL,
+  approach = "thresh",
   value = 1,
+  value_min = NULL,
+  value_max = NULL,
   increment = 0,
   ...
 )
@@ -18,7 +21,10 @@ add_constraint_adaptability(
   mod,
   method = "nichelimit",
   names = NULL,
+  approach = "thresh",
   value = 1,
+  value_min = NULL,
+  value_max = NULL,
   increment = 0,
   ...
 )
@@ -32,8 +38,16 @@ to the scenario. See details for more information.}
 \item{names}{A \code{\link{character}} vector with names of the predictors for which an
 adaptability threshold should be set (Default: \code{NULL} for all).}
 
+\item{approach}{\code{\link{character}} on whether thresholds or hinges are to be
+calculated (Default: \code{'thresh'}). For \code{'fixedlimit'} this controls how strongly
+the limits are enforced (e.g. abrupt or linearly).}
+
 \item{value}{A \code{\link{numeric}} value in units of standard deviation (Default:
-\code{1}).}
+\code{1}) or alternatively as prefered value for \code{"fixedlimit"}.}
+
+\item{value_min}{A \code{\link{numeric}} minimum value used for method \code{"fixedlimit"}.}
+
+\item{value_max}{A \code{\link{numeric}} maximum value used for method \code{"fixedlimit"}.}
 
 \item{increment}{A \code{\link{numeric}} constant that is added to value at every time
 step (Default: \code{0}). Allows incremental widening of the niche space,
@@ -46,12 +60,22 @@ constraints.}
 Adaptability constraints assume that suitable habitat for
 species in (future) projections might be unsuitable if it is outside the
 range of conditions currently observed for the species.
+}
+\details{
+Currently implemented are the following approaches:
 
-Currently only \code{nichelimit} is implemented, which adds a simple constrain on
-the predictor parameter space, which can be defined through the
-\code{"value"} parameter. For example by setting it to \code{1} (Default),
-any projections are constrained to be within the range of at maximum 1
-standard deviation from the range of covariates used for model training.
+\link{*} \code{'nichelimit'} = This adds a simple constrain on the predictor parameter space,
+which can be defined through the \code{"value"} parameter. For example by setting
+it to \code{1} (Default), any projections are constrained to be within the
+range of at maximum 1 standard deviation from the range of covariates used
+for model training. The parameter \code{"increment"} furthermore allows to
+step-wise increase the value range by a certain amount per time step.
+
+\link{*} \code{'fixedlimit'} = Here we can supply a fixed limit for a given variable, provided
+as a minimum (\code{"value_min"}), maximum (\code{"value_max"}) and preferred (\code{"value"})
+range in which a biodiversity feature exist. Common applications include for example
+known thermal limits with regards to temperature. Internally this function applies
+a normalized hinge transform based on the supplied values.
 }
 \examples{
 \dontrun{

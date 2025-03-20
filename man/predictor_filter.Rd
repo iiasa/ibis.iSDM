@@ -7,8 +7,8 @@
 predictor_filter(env, keep = NULL, method = "pearson", ...)
 }
 \arguments{
-\item{env}{A \code{\link{data.frame}} or \code{\link{matrix}} with extracted environmental covariates
-for a given species.}
+\item{env}{A \code{\link{SpatRaster}} or alternatively \code{\link{data.frame}} or
+\code{\link{matrix}} with extracted environmental covariates for a given species.}
 
 \item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually
 variables for which prior information is known.}
@@ -51,7 +51,7 @@ linearity, appropriateness of response, normality, etc).
 \examples{
 \dontrun{
  # Remove highly correlated predictors
- env <- predictor_filter( env, option = "pearson")
+ env <- predictor_filter(env, option = "pearson")
 }
 
 }

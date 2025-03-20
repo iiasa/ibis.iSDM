@@ -101,9 +101,21 @@ test_that('Custom functions - Test gridded transformations and ensembles', {
                               terra::global(r3,"mean")[,1],
                               terra::global(r3,"max")[,1]) )
   names(ff) <- "fact"
+  expect_no_error(explode_factorized_raster(ff)) # This should work?
   suppressWarnings( tff <- predictor_derivate(c(s,ff), option = "int",
                                               int_variables = c("lyra", "fact")) )
   expect_s4_class(tff, "SpatRaster")
+
+  # -- #
+  # Predictor summary
+  z <- emptyraster(r1)
+  z[c(250:270)] <- 1
+  # Make a zone
+  expect_no_error(
+    ff <- predictor_summarize_zones(r1, z, fun = "mean")
+  )
+  expect_length(unique(terra::extract(ff, 250:270)), 1) # Only expect a single value
+  expect_s4_class(ff, "SpatRaster")
 
   # --- #
   # Finally do some ensemble calculations

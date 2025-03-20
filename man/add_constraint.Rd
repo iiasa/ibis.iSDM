@@ -67,6 +67,9 @@ the prediction.
 a modest amount of extrapolation beyond the known occurrences. This can be particular
 useful to limit the influence of increasing marginal responses and avoid biologically
 unrealistic projections.
+\item \code{fixedlimit} - Sets limit on a given variable based on minimum, maximum
+and preferred range of the variable in question. Common use case is for example to
+constrain future climatically-forced projections by the thermal limit of a species.
 }
 
 \strong{Boundary and size}:

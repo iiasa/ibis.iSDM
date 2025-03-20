@@ -3,10 +3,13 @@
 #### New features
 * Support for [`data.frame`] as predictors in `add_predictors()` #136
 * Convenience function to allow [`data.frame`] and [`SpatRaster`] to be supplied directly via `project()` #136
+* Small helper function to summarize values in a zone [`predictor_summarize_zones()`].
+* New scenario projection constraint option in [`add_constraint_adaptability()`] for (thermal) limitation of a variable #137
 
 #### Minor improvements and bug fixes
 * IIASA internal functionalities such as preparation of GLOBIOM data have been transferred to [BNRTools](https://github.com/iiasa/BNRTools)
 * Small bug fixed related to manual provision of scenario thresholds.
+* `predictor_filter()` now also accepts [`SpatRaster`] objects as inputs.
 
 # ibis.iSDM 0.1.5
 

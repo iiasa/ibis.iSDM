@@ -48,6 +48,9 @@ NULL
 #' a modest amount of extrapolation beyond the known occurrences. This can be particular
 #' useful to limit the influence of increasing marginal responses and avoid biologically
 #' unrealistic projections.
+#' * \code{fixedlimit} - Sets limit on a given variable based on minimum, maximum
+#' and preferred range of the variable in question. Common use case is for example to
+#' constrain future climatically-forced projections by the thermal limit of a species.
 #'
 #' **Boundary and size**:
 #' * \code{boundary} - Applies a hard boundary constraint on the projection, thus
@@ -110,7 +113,7 @@ methods::setMethod(
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
                                     "hardbarrier","resistance",
                                     "boundary", "minsize", "threshold",
-                                    "nichelimit"), several.ok = FALSE)
+                                    "nichelimit", "fixedlimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
     o <- switch(method,
@@ -128,6 +131,8 @@ methods::setMethod(
                   "resistance" = add_constraint_connectivity(mod, method = "resistance", ...),
                   # --- #
                   "nichelimit" = add_constraint_adaptability(mod, method = "nichelimit", ...),
+                  # --- #
+                  "fixedlimit" = add_constraint_adaptability(mod, method = "fixedlimit", ...),
                   # --- #
                   "boundary" = add_constraint_boundary(mod, ...),
                   # --- #
@@ -575,17 +580,32 @@ methods::setMethod(
 #' species in (future) projections might be unsuitable if it is outside the
 #' range of conditions currently observed for the species.
 #'
-#' Currently only `nichelimit` is implemented, which adds a simple constrain on
-#' the predictor parameter space, which can be defined through the
-#' \code{"value"} parameter. For example by setting it to \code{1} (Default),
-#' any projections are constrained to be within the range of at maximum 1
-#' standard deviation from the range of covariates used for model training.
+#' @details
+#' Currently implemented are the following approaches:
+#'
+#' [*] \code{'nichelimit'} = This adds a simple constrain on the predictor parameter space,
+#' which can be defined through the \code{"value"} parameter. For example by setting
+#' it to \code{1} (Default), any projections are constrained to be within the
+#' range of at maximum 1 standard deviation from the range of covariates used
+#' for model training. The parameter \code{"increment"} furthermore allows to
+#' step-wise increase the value range by a certain amount per time step.
+#'
+#' [*] \code{'fixedlimit'} = Here we can supply a fixed limit for a given variable, provided
+#' as a minimum (\code{"value_min"}), maximum (\code{"value_max"}) and preferred (\code{"value"})
+#' range in which a biodiversity feature exist. Common applications include for example
+#' known thermal limits with regards to temperature. Internally this function applies
+#' a normalized hinge transform based on the supplied values.
 #'
 #' @inheritParams add_constraint
 #' @param names A [`character`] vector with names of the predictors for which an
 #'   adaptability threshold should be set (Default: \code{NULL} for all).
+#' @param approach [`character`] on whether thresholds or hinges are to be
+#' calculated (Default: \code{'thresh'}). For \code{'fixedlimit'} this controls how strongly
+#' the limits are enforced (e.g. abrupt or linearly).
 #' @param value A [`numeric`] value in units of standard deviation (Default:
-#'   \code{1}).
+#'   \code{1}) or alternatively as prefered value for \code{"fixedlimit"}.
+#' @param value_min A [`numeric`] minimum value used for method \code{"fixedlimit"}.
+#' @param value_max A [`numeric`] maximum value used for method \code{"fixedlimit"}.
 #' @param increment A [`numeric`] constant that is added to value at every time
 #'   step (Default: \code{0}). Allows incremental widening of the niche space,
 #'   thus opening constraints.
@@ -605,24 +625,30 @@ NULL
 #' @export
 methods::setGeneric("add_constraint_adaptability",
                     signature = methods::signature("mod"),
-                    function(mod, method = "nichelimit", names = NULL, value = 1, increment = 0, ...) standardGeneric("add_constraint_adaptability"))
+                    function(mod, method = "nichelimit", names = NULL,
+                             approach = "thresh", value = 1,
+                             value_min = NULL, value_max = NULL, increment = 0, ...) standardGeneric("add_constraint_adaptability"))
 
 #' @rdname add_constraint_adaptability
 methods::setMethod(
   "add_constraint_adaptability",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, method = "nichelimit", names = NULL, value = 1, increment = 0, ...){
+  function(mod, method = "nichelimit", names = NULL, approach = "thresh",
+           value = 1, value_min = NULL, value_max = NULL, increment = 0, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
       !is.Waiver(mod$get_predictors()),
       is.character(method),
+      is.character(approach),
       is.null(names) || is.character(names),
       is.null(value) || is.numeric(value),
+      is.null(value_min) || is.numeric(value_min),
+      is.null(value_max) || is.numeric(value_max),
       is.numeric(increment)
     )
     # Match method
     method <- match.arg(arg = method,
-                        choices = c("nichelimit"), several.ok = FALSE)
+                        choices = c("nichelimit", "fixedlimit"), several.ok = FALSE)
 
     # Add processing method #
     # --- #
@@ -639,6 +665,21 @@ methods::setMethod(
       co[['adaptability']] <- list(method = method,
                                    params = c("names" = names, "value" = value,
                                               "increment" = increment))
+    } else if(method == "fixedlimit") {
+      assertthat::assert_that(
+        is.numeric(value_min), is.numeric(value_max),
+        value_max > value_min,
+        msg = "Ensure that variable limits are correctly set!"
+      )
+      if(is.null(names)) names <- NA
+      if(length(names)!=length(value_min)) cli::cli_alert_warning("More variable names that limits provided...")
+      co[['adaptability']] <- list(method = method,
+                                   params = c("names" = names,
+                                              "approach" = approach,
+                                              "value" = value,
+                                              "value_min" = value_min,
+                                              "value_max" = value_max)
+                                   )
     }
     # --- #
     new <- mod$clone(deep = TRUE)
@@ -707,6 +748,76 @@ methods::setMethod(
     if(length(max_ex)>0) nd[max_ex,n] <- NA
     # FIXME Or rather do a smooth logistic decay for less extreme?
   }
+  return(nd)
+}
+
+#' Adaptability constrain by applying a fixed (thermal) limit
+#'
+#' @param newdata A [`data.frame`] with the information about new data layers.
+#' @param model A [`list`] created by the modelling object containing the full
+#' predictors and biodiversity predictors.
+#' @param approach [`character`] on whether thresholds or hinges are to be calculated (Default: \code{'thresh'}).
+#' @param names A [`character`] or \code{NULL} of the names of predictors.
+#' @param value A [`numeric`] value of the preferred
+#' @param value_min A [`numeric`] minimum value used for method \code{"fixedlimit"}.
+#' @param value_max A [`numeric`] maximum value used for method \code{"fixedlimit"}.
+#'
+#' @noRd
+#'
+#' @keywords internal
+.fixedlimit <- function(newdata, model, approach = "thresh", names = NULL,
+                        value = NULL, value_min = NULL, value_max = NULL){
+  assertthat::assert_that(
+    is.data.frame(newdata) || is.Raster(newdata),
+    is.list(model),
+    is.character(approach),
+    is.null(value) || is.numeric(as.numeric(value)),
+    is.null(names) || is.na(names) || is.character(names),
+    is.numeric(value_min),
+    is.numeric(value_max),
+    as.numeric(value_max) > as.numeric(value_min)
+  )
+  approach <- match.arg(approach, c("thresh", "hinge"), several.ok = FALSE)
+  # Check that names are present if set
+  if(is.null(names) || is.na(names)) names <- model$predictors_names
+  if(is.character(names) ) assertthat::assert_that(all(names %in% model$predictors_names))
+  if(is.Raster(newdata)) newdata <- terra::as.data.frame(newdata,xy = TRUE, na.rm = FALSE)
+  # --- #
+  rr <- sapply(newdata, function(x) range(x, na.rm = TRUE)) # Calculate ranges
+  if(ncol(rr)>0) rr <- rr |> as.data.frame()
+  rr <- subset(rr, select = names) # select only relevant coloumns
+
+  # Go through each of the variable names and apply
+  nd <- newdata
+  for(n in names){
+    if(!(n %in% names(rr))) next() # If variable not present in model frame, skip
+
+    if(approach == "hinge"){
+      # Calculate hinge values
+      val1 <- hingeval(
+        x = nd[[n]],
+        min = seq(rr[1,n],value_min,length.out = 3)[2], # Take a value in between for min
+        max = value_min
+      )
+      val2 <- hingeval(
+        x = nd[[n]],
+        min = seq(value_max,rr[2,n],length.out = 3)[2],
+        max = value_max
+      )
+    } else if(approach == "thresh"){
+      # Calculate thresholds
+      val1 <- thresholdval(nd[[n]], value_min, sense = "gte")
+      val2 <- thresholdval(nd[[n]], value_max, sense = "lt")
+    }
+    # Combine both through a pairwise minimum
+    val <- pmin(val1,val2);rm(val1,val2)
+    val[val==0] <- NA # Set 0 here to NA since those do not contribute anything
+    # plot(val~nd[[n]])
+    # Apply the hinge transform on the original values
+    nd[[n]] <- val * nd[[n]]
+  }
+
+  # Now reset
   return(nd)
 }
 

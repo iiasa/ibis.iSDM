@@ -343,6 +343,14 @@ test_that('Scenarios and constraints', {
   expect_type(mod2b$get_constraints(), "list")
   expect_length(mod2b$get_constraints(), 2)
 
+  # Adaptability constrain
+  mod3 <- mod |> add_constraint_adaptability(method = 'fixedlimit',
+                                             names = "bio01",
+                                             approach = "hinge",
+                                             value_min = 0, value_max = 15)
+  expect_type(mod3$get_constraints(), "list")
+  expect_length(mod3$get_constraints(), 1)
+
   # Connectivity stuff
   res <- pred_current$urban
   mod2 <- mod |> add_constraint_connectivity(method = "resistance", resistance = res)
