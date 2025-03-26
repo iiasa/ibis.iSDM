@@ -10,6 +10,7 @@
 * IIASA internal functionalities such as preparation of GLOBIOM data have been transferred to [BNRTools](https://github.com/iiasa/BNRTools)
 * Small bug fixed related to manual provision of scenario thresholds.
 * `predictor_filter()` now also accepts [`SpatRaster`] objects as inputs.
+* Small fix so that bounding box extent is correctly printed #138
 
 # ibis.iSDM 0.1.5
 

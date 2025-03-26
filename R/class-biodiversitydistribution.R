@@ -95,8 +95,8 @@ BiodiversityDistribution <- R6::R6Class(
 
       message(paste0('\033[1m','\033[36m','<', self$name(),'>','\033[39m','\033[22m',
                      ifelse(is.Waiver(self$limits), "\nBackground extent: ", "\nBackground extent (limited): "),
-                     "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
-                     "\n     ymin: ", ex[['extent']][3], ", ymax: ", ex[['extent']][4],
+                     "\n     xmin: ", ex[['extent']]['xmin'], ", xmax: ", ex[['extent']]['xmax'],",",
+                     "\n     ymin: ", ex[['extent']]['ymin'], ", ymax: ", ex[['extent']]['ymax'],
                      "\n   projection: ", ex[['proj']],
                      "\n --------- ",
                      "\n", self$biodiversity$show(),
