@@ -335,13 +335,11 @@ engine_gdb <- function(x,
       full <- model$predictors
       full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
       full$cellid <- rownames(full) # Add row.names
-      full$w <- model$exposure
       full$Intercept <- 1
       full <- subset(full, stats::complete.cases(full))
       # Clamp?
       if( settings$get("clamp") ) full <- clamp_predictions(model, full)
-
-      full$w <- scale_weight(full$w)
+      full$w <- scale_weight(model$exposure)
       assertthat::assert_that(
         all(model$biodiversity[[1]]$predictors_names %in% names(full)),
         all(names(full[,model$biodiversity[[1]]$predictors_names]) %in% names(data)),

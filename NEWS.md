@@ -11,6 +11,7 @@
 * Small bug fixed related to manual provision of scenario thresholds.
 * `predictor_filter()` now also accepts [`SpatRaster`] objects as inputs.
 * Small fix so that bounding box extent is correctly printed #138
+* Small bug fix to `engine_gdb` in dev branch.
 
 # ibis.iSDM 0.1.5
 
