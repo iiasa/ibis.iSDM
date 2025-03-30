@@ -48,7 +48,7 @@ Imports:
     stars (>= 0.5),
     ncmeta,
     stats,
-    terra (>= 1.7-10), 
+    terra (>= 1.8-28), 
     tibble (>= 2.0.0),
     uuid,
     cli (>= 3.6.0),
