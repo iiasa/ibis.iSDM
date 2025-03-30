@@ -1496,11 +1496,11 @@ explode_factorized_raster <- function(ras, name = NULL){
 
     # Segregate
     out <- terra::segregate(ras)
-    lvl <- levels(ras[[name]])[[1]][[2]]
+    lvl <- levels(ras)[[1]][,2]
     names(out) <- paste(name, lvl, sep = ".") |> sanitize_names()
 
   } else if(terra::nlyr(ras)>1){
-    # Alternatively if input is stack
+    # Alternatively if input is a stack
     fcts <- is.factor(ras)
 
     # Get non-factor variables
