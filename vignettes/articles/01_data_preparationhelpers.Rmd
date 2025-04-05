@@ -325,7 +325,7 @@ layers. In `ibis.iSDM` the use of these functions is further eased through a
 convenience function for spatial replacement and aggregation. It is also possible 
 to assign values (for example from a specific zone) to a different area.
 
-```{r}
+```{r, eval=FALSE}
 library(terra)
 # Load a zonal layer
 countries <- terra::rast(system.file("extdata/countries.tif",package = "ibis.iSDM", mustWork = TRUE))
