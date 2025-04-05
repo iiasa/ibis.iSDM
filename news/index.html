@@ -49,11 +49,18 @@
 <h5 id="new-features-0-1-6">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-6"></a></h5>
 <ul><li>Support for [<code>data.frame</code>] as predictors in <code><a href="../reference/add_predictors.html">add_predictors()</a></code> <a href="https://github.com/iiasa/ibis.iSDM/issues/136" class="external-link">#136</a></li>
 <li>Convenience function to allow [<code>data.frame</code>] and [<code>SpatRaster</code>] to be supplied directly via <code><a href="../reference/project.html">project()</a></code> <a href="https://github.com/iiasa/ibis.iSDM/issues/136" class="external-link">#136</a></li>
+<li>Small helper function to summarize values in a zone [<code><a href="../reference/predictor_summarize_zones.html">predictor_summarize_zones()</a></code>].</li>
+<li>New scenario projection constraint option in [<code><a href="../reference/add_constraint_adaptability.html">add_constraint_adaptability()</a></code>] for (thermal) limitation of a variable <a href="https://github.com/iiasa/ibis.iSDM/issues/137" class="external-link">#137</a></li>
 </ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-1-6">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-1-6"></a></h5>
 <ul><li>IIASA internal functionalities such as preparation of GLOBIOM data have been transferred to <a href="https://github.com/iiasa/BNRTools" class="external-link">BNRTools</a>
 </li>
+<li>Small bug fixed related to manual provision of scenario thresholds.</li>
+<li>
+<code><a href="../reference/predictor_filter.html">predictor_filter()</a></code> now also accepts [<code>SpatRaster</code>] objects as inputs.</li>
+<li>Small fix so that bounding box extent is correctly printed <a href="https://github.com/iiasa/ibis.iSDM/issues/138" class="external-link">#138</a></li>
+<li>Small bug fix to <code>engine_gdb</code> in dev branch.</li>
 </ul></div>
 </div>
     <div class="section level2">

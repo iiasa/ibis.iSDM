@@ -73,7 +73,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2025-02-05</h4>
+            <h4 data-toc-skip class="date">2025-04-05</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -381,6 +381,51 @@ interact with forest cover.</p>
 <p><img src="01_data_preparationhelpers_files/figure-html/Derivate%20interaction-1.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
+<h3 id="spatially-summarize-predictor-data">Spatially summarize predictor data<a class="anchor" aria-label="anchor" href="#spatially-summarize-predictor-data"></a>
+</h3>
+<p>Occasionally predictor values in a certain region might only be
+available for a few grid cells or be associated with considerable
+uncertainty. Similarly, gridded layers can also be modified to test
+stylistic scenarios (for example what if the entirety of the United
+Kingdom would be Forest?). The <code>terra</code> R-package has a range
+of functions to aggregate or replace data in gridded layers. In
+<code>ibis.iSDM</code> the use of these functions is further eased
+through a convenience function for spatial replacement and aggregation.
+It is also possible to assign values (for example from a specific zone)
+to a different area.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/" class="external-link">terra</a></span><span class="op">)</span></span>
+<span><span class="co"># Load a zonal layer</span></span>
+<span><span class="va">countries</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/countries.tif"</span>,package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get the United Kingdom</span></span>
+<span><span class="va">uk</span> <span class="op">&lt;-</span> <span class="va">countries</span> <span class="op">==</span> <span class="st">"United Kingdom"</span></span>
+<span><span class="va">uk</span><span class="op">[</span><span class="va">uk</span><span class="op">==</span><span class="fl">0</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span> <span class="co"># Set non target </span></span>
+<span></span>
+<span><span class="co"># Get Sweden</span></span>
+<span><span class="va">sw</span> <span class="op">&lt;-</span> <span class="va">countries</span> <span class="op">==</span> <span class="st">"Sweden"</span></span>
+<span><span class="va">sw</span><span class="op">[</span><span class="va">sw</span><span class="op">==</span><span class="fl">0</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span> <span class="co"># Set non target </span></span>
+<span></span>
+<span><span class="co"># Take a Forest class</span></span>
+<span><span class="va">layer</span> <span class="op">&lt;-</span> <span class="va">predictors</span><span class="op">$</span><span class="va">CLC3_312_mean_50km</span></span>
+<span></span>
+<span><span class="co"># Aggregate by countries</span></span>
+<span><span class="va">layer_co</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_summarize_zones.html">predictor_summarize_zones</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">layer</span>,</span>
+<span>                                      layer <span class="op">=</span> <span class="va">countries</span>,</span>
+<span>                                      fun <span class="op">=</span> <span class="st">'mean'</span></span>
+<span>                                     <span class="op">)</span></span>
+<span><span class="co"># Alternative: Replace only values of the UK with the average of the swedish values</span></span>
+<span><span class="va">layer_uk</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_summarize_zones.html">predictor_summarize_zones</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">layer</span>,</span>
+<span>                                      layer <span class="op">=</span> <span class="va">sw</span>,</span>
+<span>                                      target_layer <span class="op">=</span> <span class="va">uk</span>,</span>
+<span>                                      fun <span class="op">=</span> <span class="st">'mean'</span></span>
+<span>                                     <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Show the difference</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">layer_co</span>, <span class="va">layer_uk</span><span class="op">)</span>,</span>
+<span>     main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"aggregated"</span>, <span class="st">"UK replaced"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
 <h3 id="homogenize-missing-data-among-predictors">Homogenize missing data among predictors<a class="anchor" aria-label="anchor" href="#homogenize-missing-data-among-predictors"></a>
 </h3>
 <p>As mentioned above, during model training covariates will be
@@ -392,7 +437,7 @@ considered missing among all other predictors as well. The
 harmonize and check the extent of missing data in a set of predictors
 which can be convenient for assessing errors during data
 preparation.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Make a subset of all predictors to show the concept</span></span>
 <span><span class="va">layers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">predictors</span>,  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"aspect_mean_50km"</span>,</span>
 <span>                                        <span class="st">"CLC3_312_mean_50km"</span>,</span>
@@ -407,11 +452,11 @@ preparation.</p>
 <span></span>
 <span><span class="co"># Now all the predictors have identical coverage of NA values</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-1-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-1.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Or assess like this</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="op">!</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summarize-generics.html" class="external-link">noNA</a></span><span class="op">(</span><span class="va">new</span><span class="op">$</span><span class="va">aspect_mean_50km</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Missing observations"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-1-2.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-2.png" width="700" style="display: block; margin: auto;"></p>
 <hr>
 </div>
 </div>
@@ -429,7 +474,7 @@ finer temporal grain.</p>
 <p>For this purpose the <em>ibis.iSDM</em> contains a dedicated function
 (<code><a href="../reference/interpolate_gaps.html">interpolate_gaps()</a></code>), that can also be directly called
 within <code><a href="../reference/project.html">project()</a></code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Load some stars rasters</span></span>
 <span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/predictors_presfuture/'</span>,</span>
@@ -444,7 +489,7 @@ within <code><a href="../reference/project.html">project()</a></code>.</p>
 <span></span>
 <span><span class="co"># The predictors are here only available every 10 years</span></span>
 <span><span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_dimensions.html" class="external-link">st_get_dimension_values</a></span><span class="op">(</span><span class="va">pred_future</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Units: [(days since 1970-1-1)]</span></span>
+<span><span class="co">#&gt; Units: [days since 1970-1-1]</span></span>
 <span><span class="co">#&gt; [1] 16436 20089 23741 27394 31046 34699 38351 42004 45656</span></span>
 <span></span>
 <span><span class="co"># --- #</span></span>
@@ -479,7 +524,7 @@ within <code><a href="../reference/project.html">project()</a></code>.</p>
 <p>As with <code>SpatRaster</code> covariates, it is also possible to
 create transformed or derivate versions of scenario predictors through
 the same helper function.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load some stars rasters</span></span>
 <span><span class="va">ll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/predictors_presfuture/'</span>,</span>
 <span>                             package <span class="op">=</span> <span class="st">'ibis.iSDM'</span>,</span>
