@@ -252,16 +252,27 @@ methods::setMethod(
           # Ensure that predictions have unique names
           names(ras) <- paste0('model', 1:terra::nlyr(ras))
           ex <- terra::extract(ras, point, ID = FALSE)
-          ex <- cbind(point[,field_occurrence], ex)
-          fit <- stats::glm(
-            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> stats::as.formula(),
-            family = stats::binomial(),data = ex
-          )
+          ex <- cbind(point[,field_occurrence] |> sf::st_drop_geometry(), ex)
+          vars <- names(ras)
+
+          # If any variable is fully NAs, remove
+          check <- apply(ex, 2, function(z) all(is.na(z)))
+          if(any(check)){
+            cli::cli_alert_warning(paste("Removing ", names(which(check)), "because there are only NA values..."))
+            ex <- ex[,which(!check)]
+            vars <- vars[vars %in% names(which(!check))]
+          }
+          fit <- try({
+              stats::glm(
+              formula = paste(field_occurrence, "~", paste0(vars, collapse = ' + ')) |> stats::as.formula(),
+              family = stats::binomial(),data = ex)
+            },silent = TRUE)
+          if(inherits(fit, 'try-error')) cli::cli_abort('SuperlearModel did not fit...', fit)
           # Now predict output with the meta-learner
-          new <- emptyraster(ras)
-          new[which(!is.na(ras[[1]])[])] <- terra::predict(
-            fit, ras, na.rm = FALSE, type = "response",
+          new <- terra::predict(
+            object = ras, model = fit, na.rm = FALSE, type = "response",
             cores = getOption('ibis.nthread'))
+          names(new) <- paste0('superlearner_lyr')
           attr(new, "superlearner.coefficients") <- stats::coef(fit)
           try({ rm(ex,fit) },silent = TRUE)
         }

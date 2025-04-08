@@ -322,7 +322,8 @@ thresholdval <- function(x, knot, sense = "gte") {
 #'
 #' @noRd
 scale_weight <- function(v, method = "scale"){
-  if(is.null(v)) return(1) # Return dummy 1 for equal weight
+  if(is.null(v)) return(NULL) # Return dummy 1 for equal weight
+  if(length(v)==0) return(NULL)
   assertthat::assert_that(
     length(v)>1,
     is.character(method)

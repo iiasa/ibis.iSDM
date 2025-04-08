@@ -1198,6 +1198,7 @@ predictor_check <- function(env){
 
   # Check NaN
   check_nan <- apply(env, 2, function(z) all(is.nan(z)))
+  if(any(is.na(check_nan))) check_nan[is.na(check_nan)] <- FALSE
   if(any(check_nan)){
     if(getOption('ibis.setupmessages', default = TRUE)) {
       myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_nan)),collapse = "; "),
@@ -1218,6 +1219,7 @@ predictor_check <- function(env){
 
   # Check variance
   check_var <- apply(env, 2, function(z) stats::var(z, na.rm = TRUE)) == 0
+  if(any(is.na(check_var))) check_var[is.na(check_var)] <- FALSE
   if(any(check_var)){
     if(getOption('ibis.setupmessages', default = TRUE)) {
       myLog('[Setup]','yellow', 'Excluded ', paste0(names(which(check_var)),collapse = "; "),
