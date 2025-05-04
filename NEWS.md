@@ -1,6 +1,7 @@
 # ibis.iSDM 0.1.6 (current dev branch)
 
 #### New features
+* Support for model calibration with or without testing data #139
 * Support for [`data.frame`] as predictors in `add_predictors()` #136
 * Convenience function to allow [`data.frame`] and [`SpatRaster`] to be supplied directly via `project()` #136
 * Small helper function to summarize values in a zone [`predictor_summarize_zones()`].

@@ -192,11 +192,13 @@ methods::setMethod(
       if (getOption('ibis.setupmessages', default = TRUE) && x$show_biodiversity_length() > 2) {
         myLog('[Setup]','yellow','Using more than two biodiversity datasets is experimental.')
       }
-
     }
 
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Collecting input parameters.')
+
+    # Deprecation notice
+    if(optim_hyperparam) cli::cli_alert_warning("[Deprecation] Optimizing parameters via train is deprecated. Use `calibrate()`")
 
     # --- #
     # filter_predictors = "none"; optim_hyperparam = FALSE; keep_models=TRUE;runname = "test";inference_only = FALSE; verbose = TRUE;only_linear=TRUE;method_integration="predictor";aggregate_observations = TRUE; clamp = FALSE

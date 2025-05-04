@@ -365,6 +365,7 @@ methods::setMethod(
                                        total = length(unique(df$time)))
     }
 
+    # Times slot
     times <- sort(unique(df$time))
 
     for(step in times){ # step = times[1]
@@ -786,7 +787,8 @@ methods::setMethod(
     # Further checks
     assertthat::assert_that(
       length(co)>0,
-      is.list(model)
+      is.list(model),
+      msg = "No valid model coefficients found?"
     )
     # If names are to be sanitized, cleanl
     if(settings$get("ibis.cleannames")){
@@ -816,6 +818,7 @@ methods::setMethod(
           emptyraster()
       },silent = TRUE)
     }
+    assertthat::assert_that(is.Raster(template),msg = "Output raster generation failed.")
 
     # If raster convert to data.frame for further predictions
     if(is.Raster(env)) env <- terra::as.data.frame(env, xy = TRUE, na.rm =FALSE)
@@ -826,11 +829,11 @@ methods::setMethod(
     if(inherits(out, 'try-error')){
       cli::cli_alert_danger("Projection failed! Returning emptyraster gracefully")
       return(template)
+    } else {
+      names(out) <- paste0("suitability", "_", layer)
+      if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( model$background )
     }
-    names(out) <- paste0("suitability", "_", layer)
-    if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( model$background )
     # --- #
-
     return(out)
   }
 )

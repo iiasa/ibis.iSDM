@@ -109,6 +109,7 @@ reference:
       - print
       - summary
       - coef
+      - calibrate
       - validate
       - similarity
       - effects

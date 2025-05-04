@@ -644,6 +644,31 @@ engine_glm <- function(x,
       return(cofs)
     }, overwrite = TRUE)
 
+    #### Calibrate the model ----
+    obj$set("public", "calibrate", function(newdata = NULL, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
+      # Get best object
+      fit <- self$get_data("fit_best")
+      if(is.Waiver(fit)) return(obj)
+      settings <- self$settings
+
+      # Get the parameters
+      fam <- fit$family
+      df <- fit$data
+      w <- fit$weights
+      form <- fit$formula
+      params <- list(control = stats::glm.control())
+
+      suppressWarnings(
+        fit <- stats::step(fit,
+                           direction = "both",
+                           steps = 1000,
+                           k = 2,
+                           trace = ifelse(verbose,1,0)
+        )
+      )
+
+    }, overwrite = TRUE)
+
     # Engine-specific projection function
     obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
       assertthat::assert_that("model" %in% names(self),
@@ -759,6 +784,9 @@ engine_glm <- function(x,
                       type = "xyz") |>
             emptyraster()
         }, silent = TRUE)
+      }
+      if(inherits(prediction, "try-error")){
+        prediction <- try({model_to_background(model)}, silent = TRUE)
       }
       prediction <- fill_rasters(pred_glm, prediction)
       return(prediction)

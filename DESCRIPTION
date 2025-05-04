@@ -113,6 +113,7 @@ Collate:
     'class-prior.R'
     'class-priorlist.R'
     'add_priors.R'
+    'calibrate.R'
     'check.R'
     'class-engine.R'
     'class-settings.R'
