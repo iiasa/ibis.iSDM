@@ -814,6 +814,19 @@ references:
   year: '2025'
   doi: 10.32614/CRAN.package.rmarkdown
 - type: software
+  title: kissmig
+  abstract: 'kissmig: a Keep It Simple Species Migration Model'
+  notes: Suggests
+  url: https://purl.oclc.org/wsl/kissmig
+  repository: https://CRAN.R-project.org/package=kissmig
+  authors:
+  - family-names: Nobis
+    given-names: Michael P.
+    email: michael.nobis@wsl.ch
+  year: '2025'
+  doi: 10.32614/CRAN.package.kissmig
+  version: '>= 2.0'
+- type: software
   title: lubridate
   abstract: 'lubridate: Make Dealing with Dates a Little Easier'
   notes: Suggests
