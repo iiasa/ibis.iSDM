@@ -184,6 +184,10 @@ methods::setMethod(
                            field_occurrence = field_occurrence, format = format,
                            return_threshold = return_threshold)
     assertthat::assert_that(is.Raster(out))
+
+    # If there are multiple, only take the first one (mean)
+    if(terra::nlyr(out)>1) out <- out[[grep("mean", names(out))]]
+
     # Add result to new obj and clean up old thresholds before
     tr_lyr <- grep('threshold', obj$show_rasters(),value = TRUE)
     new_obj <- obj$clone(deep = TRUE)

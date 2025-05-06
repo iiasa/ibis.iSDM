@@ -406,7 +406,11 @@ methods::setMethod(
   return(out)
 }
 
-#' Keep it simple migration calculation.
+#' Keep it simple migration (kissmig) calculation.
+#'
+#' @description
+#' Internal wrapper function to call the kissmig package for dispersal
+#' calculations.
 #'
 #' @param baseline_threshold The [`SpatRaster`] with presence/absence
 #' information from a previous year.
@@ -415,6 +419,7 @@ methods::setMethod(
 #' @param resistance A resistance [`SpatRaster`] object with values to be
 #' omitted during distance calculation (Default: \code{NULL}).
 #'
+#' @return A [`SpatRaster`] object with the dispersal mask and the new layer.
 #' @noRd
 #'
 #' @keywords internal
@@ -437,17 +442,16 @@ methods::setMethod(
   }
 
   # Simulate kissmig for a given threshold and suitability raster
-  km <- kissmig::kissmig(O = terra_to_raster( baseline_threshold ),
+  km <- kissmig::kissmig(O = baseline_threshold,
                          # Rescale newsuit to 0-1
-                         S = predictor_transform(new_suit, 'norm') |>
-                           terra_to_raster(),
+                         S = predictor_transform(new_suit, 'norm'),
                          it = as.numeric( params['iteration'] ),
                          type = params['type'],
                          pext = as.numeric(params['pext']),
                          pcor = as.numeric(params['pcor'])
                         )
-  # Convert to terra again
-  km <- terra::rast(km)
+
+  # Check if km is a factor, if yes convert to int
   if(is.factor(km)) km <- terra::as.int(km)
 
   # Now multiply the net suitability projection with this mask Thus removing any

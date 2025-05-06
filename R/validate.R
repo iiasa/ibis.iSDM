@@ -123,7 +123,7 @@ methods::setMethod(
       if(length(tr_lyr)>1) cli::cli_alert_warning("There appear to be multiple thresholds. Using the first one.")
       threshold <- mod$get_data(tr_lyr[1])
       # Get mean layer if there are multiple
-      if( grep(layer, names(threshold),value = TRUE ) != "") threshold <- threshold[[grep(layer, names(threshold),value = TRUE )]]
+      if( grep(layer, names(threshold),value = TRUE )[1] != "") threshold <- threshold[[grep(layer, names(threshold),value = TRUE )[1] ]]
     } else { threshold <- NULL }
 
     # Check that threshold and method match

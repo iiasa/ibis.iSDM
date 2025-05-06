@@ -754,7 +754,7 @@ engine_glm <- function(x,
         assertthat::assert_that(utils::hasName(df,"x")&&utils::hasName(df,"y"),
                                 msg = "Projection data.frame has no valid coordinates or differs in grain!")
         prediction <- try({
-          terra::rast(df[,c("x", "y")],
+          terra::rast(df[,c("x", "y", "rowid")],
                       crs = terra::crs(model$background),
                       type = "xyz") |>
             emptyraster()
