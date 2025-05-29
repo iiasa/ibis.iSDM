@@ -72,7 +72,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2025-05-06</h4>
+            <h4 data-toc-skip class="date">2025-05-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -404,21 +404,21 @@ gathered data.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 7 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 8 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 1 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 7 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 8 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species continuous</span></span>
 <span><span class="co">#&gt;       metric       value</span></span>
 <span><span class="co">#&gt; 1          n 208.0000000</span></span>
 <span><span class="co">#&gt; 2         r2        -Inf</span></span>
-<span><span class="co">#&gt; 3       rmse   0.6086282</span></span>
-<span><span class="co">#&gt; 4        mae   0.5301424</span></span>
-<span><span class="co">#&gt; 5       mape   0.5301424</span></span>
-<span><span class="co">#&gt; 6    logloss   1.4538895</span></span>
+<span><span class="co">#&gt; 3       rmse   0.6102929</span></span>
+<span><span class="co">#&gt; 4        mae   0.5319183</span></span>
+<span><span class="co">#&gt; 5       mape   0.5319183</span></span>
+<span><span class="co">#&gt; 6    logloss   1.4566172</span></span>
 <span><span class="co">#&gt; 7   normgini         NaN</span></span>
 <span><span class="co">#&gt; 8 cont.boyce          NA</span></span>
 <span></span>
@@ -426,19 +426,19 @@ gathered data.</p>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 cfcf5e78-5029-43e1-a422-d997455b8cb4 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 978f36ce-e25d-4286-9ecc-e599bf2095ed Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
 <span><span class="co">#&gt; 1                    n 596.0000000</span></span>
 <span><span class="co">#&gt; 2                  auc   0.6868557</span></span>
@@ -565,7 +565,7 @@ effectively also limits the prediction background / output!</strong></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
