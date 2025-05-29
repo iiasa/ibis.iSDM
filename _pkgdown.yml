@@ -135,8 +135,8 @@ reference:
       - predictor_transform
       - predictor_derivate
       - predictor_filter
+      - predictor_summarize_zones
       - interpolate_gaps
-      - objects_size
       - run_stan
       - wrap_stanmodel
       - sanitize_names

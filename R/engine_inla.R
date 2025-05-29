@@ -293,7 +293,7 @@ engine_inla <- function(x,
   },overwrite = TRUE)
   # Generic plotting function for the mesh
   eg$set("public", "plot", function(assess = FALSE){
-    if(is.Waiver(self$get_data('mesh'))) stop("No mesh found!")
+    if(is.Waiver(self$get_data('mesh'))) cli::cli_abort("No mesh found!")
 
     if(assess){
       # For an INLA mesh assessment
@@ -783,7 +783,7 @@ engine_inla <- function(x,
                                   num.threads = getOption('ibis.nthread')
       )
       },silent = FALSE)
-      if(inherits(fit_pred,'try-error')) { print(fit_pred); stop('Model did not converge. Try to simplify structure and check priors!') }
+      if(inherits(fit_pred,'try-error')) { print(fit_pred); cli::cli_abort('Model did not converge. Try to simplify structure and check priors!') }
       # Create a spatial prediction
       index.pred <- INLA::inla.stack.index(stk_full, 'stk_pred')$data
       # Which type of prediction (linear predictor or response scale)
@@ -858,7 +858,7 @@ engine_inla <- function(x,
                               mode %in% c('coef','sim','full'),
                               assertthat::has_name(newdata,c('x','y'))
       )
-      stop("Projection using engine INLA is deprecated. Use engine_inlabru !")
+      cli::cli_abort("Projection using engine INLA is deprecated. Use engine_inlabru !")
 
       # Try and guess backtransformation
       if(is.null(backtransf)){
@@ -875,9 +875,9 @@ engine_inla <- function(x,
         )
       } else if(mode == 'sim'){
         # Simulate from posterior. Not yet coded
-        stop('Simulation from posterior not yet implemented. Use inlabru instead!')
+        cli::cli_abort('Simulation from posterior not yet implemented. Use inlabru instead!')
       } else {
-        stop('Full prediction not yet added.')
+        cli::cli_abort('Full prediction not yet added.')
       }
       # Return result
       return(out)
@@ -891,7 +891,7 @@ engine_inla <- function(x,
       # model.matrix(~ vars, data = newDummydata) fed to make.lincomb
       # provide via lincomb = M to an INLA call.
       # Both should be identical
-      stop("Partial function not implemented. Consider using inlabru instead!")
+      cli::cli_abort("Partial function not implemented. Consider using inlabru instead!")
       # Check that provided model exists and variable exist in model
       mod <- self$get_data('fit_best')
       assertthat::assert_that(inherits(mod,'inla'),

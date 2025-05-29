@@ -95,8 +95,8 @@ BiodiversityDistribution <- R6::R6Class(
 
       message(paste0('\033[1m','\033[36m','<', self$name(),'>','\033[39m','\033[22m',
                      ifelse(is.Waiver(self$limits), "\nBackground extent: ", "\nBackground extent (limited): "),
-                     "\n     xmin: ", ex[['extent']][1], ", xmax: ", ex[['extent']][2],",",
-                     "\n     ymin: ", ex[['extent']][3], ", ymax: ", ex[['extent']][4],
+                     "\n     xmin: ", ex[['extent']]['xmin'], ", xmax: ", ex[['extent']]['xmax'],",",
+                     "\n     ymin: ", ex[['extent']]['ymin'], ", ymax: ", ex[['extent']]['ymax'],
                      "\n   projection: ", ex[['proj']],
                      "\n --------- ",
                      "\n", self$biodiversity$show(),
@@ -179,7 +179,7 @@ BiodiversityDistribution <- R6::R6Class(
       if(inherits(self$predictors, "PredictorDataset")) {
         self$predictors$get_names()
       } else {
-        stop("feature data is of an unrecognized class")
+        cli::cli_abort("feature data is of an unrecognized class")
       }
     },
 
@@ -283,7 +283,7 @@ BiodiversityDistribution <- R6::R6Class(
     #' @return This object.
     set_engine = function(x) {
       assertthat::assert_that(inherits(x, "Engine"))
-      if(!is.Waiver(self$engine)) warning("Overwriting previously defined engine.")
+      if(!is.Waiver(self$engine)) cli::cli_alert_warning("Overwriting previously defined engine.")
       self$engine <- x
       return(self)
     },

@@ -27,6 +27,8 @@ This class describes the PredictorDataset and is used to store covariates within
 \item{\code{transformed}}{Saves whether the predictors have been transformed somehow.}
 
 \item{\code{timeperiod}}{A timeperiod field}
+
+\item{\code{is.spatial}}{A \code{\link{logical}} flag on whether the predictor is spatial or not.}
 }
 \if{html}{\out{</div>}}
 }
@@ -52,6 +54,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \item \href{#method-PredictorDataset-summary}{\code{PredictorDataset$summary()}}
 \item \href{#method-PredictorDataset-has_derivates}{\code{PredictorDataset$has_derivates()}}
 \item \href{#method-PredictorDataset-is_transformed}{\code{PredictorDataset$is_transformed()}}
+\item \href{#method-PredictorDataset-is_spatial}{\code{PredictorDataset$is_spatial()}}
 \item \href{#method-PredictorDataset-get_transformed_params}{\code{PredictorDataset$get_transformed_params()}}
 \item \href{#method-PredictorDataset-length}{\code{PredictorDataset$length()}}
 \item \href{#method-PredictorDataset-ncell}{\code{PredictorDataset$ncell()}}
@@ -252,14 +255,15 @@ Utility function to clip the predictor dataset by another dataset
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{pol}}{A \code{\link{sf}} object used for cropping the data}
+\item{\code{pol}}{A \code{\link{sf}} object used for cropping the data.}
 
 \item{\code{apply_time}}{A \code{\link{logical}} flag indicating if time should be acknowledged in cropping.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Details}{
-This code now also
+This code now also is able to determine the temporally closest
+layer. In case a \code{\link{data.frame}} exists as predictor, only that is returned.
 }
 
 \subsection{Returns}{
@@ -383,6 +387,19 @@ A \code{\link{logical}} flag.
 Predictors have been transformed?
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$is_transformed()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{logical}} flag.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PredictorDataset-is_spatial"></a>}}
+\if{latex}{\out{\hypertarget{method-PredictorDataset-is_spatial}{}}}
+\subsection{Method \code{is_spatial()}}{
+Is Predictor dataset spatial?
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PredictorDataset$is_spatial()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

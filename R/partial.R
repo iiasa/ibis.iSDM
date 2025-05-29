@@ -62,7 +62,7 @@ methods::setMethod(
     if(inherits(mod,'DistributionModel')){
       partial.DistributionModel(mod, x.var, constant, variable_length, values, newdata, plot, type, ...)
     } else {
-      stop('Partial response calculation not supported!')
+      cli::cli_abort('Partial response calculation not supported!')
     }
   }
 )
@@ -129,7 +129,7 @@ methods::setMethod(
     if(inherits(mod,'DistributionModel')){
       spartial.DistributionModel(mod, x.var, constant, newdata, plot, ...)
     } else {
-      stop('Spatial partial response calculation not supported!')
+      cli::cli_abort('Spatial partial response calculation not supported!')
     }
   }
 )
@@ -331,7 +331,7 @@ methods::setMethod(
         ggplot2::theme(legend.title = ggplot2::element_blank())
 
     } else {
-      stop("NOT yet implemented! Need to adapt partial calculation to allow multiple values.")
+      cli::cli_abort("NOT yet implemented! Need to adapt partial calculation to allow multiple values.")
       # Build new data.frame container
       new <- data.frame(
         var1 = seq(vars_lims[1,1],vars_lims[2,1], length.out = 100), # plot.df$rug[plot.df$variable==x.var[1]]

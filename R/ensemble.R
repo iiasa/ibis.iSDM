@@ -252,16 +252,27 @@ methods::setMethod(
           # Ensure that predictions have unique names
           names(ras) <- paste0('model', 1:terra::nlyr(ras))
           ex <- terra::extract(ras, point, ID = FALSE)
-          ex <- cbind(point[,field_occurrence], ex)
-          fit <- stats::glm(
-            formula = paste(field_occurrence, "~", paste0(names(ras), collapse = ' + ')) |> stats::as.formula(),
-            family = stats::binomial(),data = ex
-          )
+          ex <- cbind(point[,field_occurrence] |> sf::st_drop_geometry(), ex)
+          vars <- names(ras)
+
+          # If any variable is fully NAs, remove
+          check <- apply(ex, 2, function(z) all(is.na(z)))
+          if(any(check)){
+            cli::cli_alert_warning(paste("Removing ", names(which(check)), "because there are only NA values..."))
+            ex <- ex[,which(!check)]
+            vars <- vars[vars %in% names(which(!check))]
+          }
+          fit <- try({
+              stats::glm(
+              formula = paste(field_occurrence, "~", paste0(vars, collapse = ' + ')) |> stats::as.formula(),
+              family = stats::binomial(),data = ex)
+            },silent = TRUE)
+          if(inherits(fit, 'try-error')) cli::cli_abort('SuperlearModel did not fit...', fit)
           # Now predict output with the meta-learner
-          new <- emptyraster(ras)
-          new[which(!is.na(ras[[1]])[])] <- terra::predict(
-            fit, ras, na.rm = FALSE, type = "response",
+          new <- terra::predict(
+            object = ras, model = fit, na.rm = FALSE, type = "response",
             cores = getOption('ibis.nthread'))
+          names(new) <- paste0('superlearner_lyr')
           attr(new, "superlearner.coefficients") <- stats::coef(fit)
           try({ rm(ex,fit) },silent = TRUE)
         }
@@ -384,7 +395,7 @@ methods::setMethod(
           new <- terra::weighted.mean( ras, w = weights, na.rm = TRUE)
         } else if(method == 'threshold.frequency'){
           # Check that thresholds are available
-          stop("This function does not (yet) work with directly provided Raster objects.")
+          cli::cli_abort("This function does not (yet) work with directly provided Raster objects.")
         } else if(method == 'min.sd'){
           # If method 'min.sd' furthermore check that there is a sd object for all
           # of them
@@ -427,7 +438,7 @@ methods::setMethod(
         attr(new, "method") <- method
         if(uncertainty != "none"){
           if(uncertainty == "pca") {
-            stop("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
+            cli::cli_abort("Currently, uncertainty = 'pca' is not implemented for SpatRaster input.")
           }
           # Add uncertainty
           ras_uncertainty <- switch (uncertainty,
@@ -519,11 +530,11 @@ methods::setMethod(
                      1, function(x) sum(x, na.rm = TRUE) / (ncol(lmat)-3) )
         # Check that thresholds are available
       } else if(method == 'min.sd'){
-        stop("This has not been reasonably implemented in this context.")
+        cli::cli_abort("This has not been reasonably implemented in this context.")
       } else if(method == 'pca'){
-        stop("This has not been reasonably implemented in this context.")
+        cli::cli_abort("This has not been reasonably implemented in this context.")
       } else if(method == 'superlearner'){
-        stop("This has not been reasonably implemented in this context.")
+        cli::cli_abort("This has not been reasonably implemented in this context.")
       }
       # Add dimensions to output
       if(inherits(mods[[1]], "stars")){
@@ -576,7 +587,7 @@ methods::setMethod(
       # --- #
       if(uncertainty != 'none'){
         if(uncertainty == "pca") {
-          stop("Currently, uncertainty = 'pca' is not implemented for stars input.")
+          cli::cli_abort("Currently, uncertainty = 'pca' is not implemented for stars input.")
         }
         # Add uncertainty
         out_uncertainty <- switch (uncertainty,
@@ -758,7 +769,7 @@ methods::setMethod(
     # Catch error in case none of them computed
     if(nrow(out)==0){
       if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
-      stop("No estimates found!")
+      cli::cli_abort("No estimates found!")
     }
 
     # Now composite the ensemble depending on the option
@@ -927,7 +938,7 @@ methods::setMethod(
     # Catch error in case none of them computed
     if(length(out)==0){
       if(getOption("ibis.setupmessages", default = TRUE)) myLog("[Inference]","red","None of the models seemed to contain the variable.")
-      stop("No estimates found!")
+      cli::cli_abort("No estimates found!")
     }
 
     if(length(out)==1){

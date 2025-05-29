@@ -242,7 +242,51 @@ methods::setMethod(
     model[['background']] <- x$background
 
     # Get overall Predictor data
-    if(is.Waiver(x$get_predictor_names())) {
+    if(!is.Waiver(x$get_predictor_names())) {
+      # Check for predictor type
+      if(x$predictors$is_spatial()){
+        # Convert Predictors to data.frame
+        model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
+
+        # Check whether any of the variables are fully NA, if so exclude
+        if( any( apply(model[['predictors']], 2, function(z) all(is.na(z))) )){
+          chk <- which( apply(model[['predictors']], 2, function(z) all(is.na(z))) )
+          if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
+                                                                    paste0('The following variables are fully missing and are removed:\n',
+                                                                           paste(names(chk),collapse = " | "))
+          )
+          model[['predictors']] <- model[['predictors']][,-chk]
+          x$predictors$rm_data(names(chk)) # Remove the variables
+        }
+
+        # Also set predictor names
+        model[['predictors_names']] <- x$get_predictor_names()
+        # Get predictor types
+        model[['predictors_types']] <- predictor_type(model[['predictors']])
+        # Assign attribute to predictors to store the name of object
+        model[['predictors_object']] <- x$predictors$clone(deep = TRUE)
+      } else {
+        if(!inference_only){
+          cli::cli_alert_warning("No spatial predictors found. Set to inference only!")
+          inference_only <- TRUE
+          settings$set('inference_only', inference_only)
+        }
+        # Dummy covariate of background raster
+        if(is.Raster(x$engine$get_data("template"))){
+          dummy <- emptyraster(x$engine$get_data("template"));names(dummy) <- "dummy"
+          dummy[] <- 1 ; dummy <- terra::mask(dummy, x$background)
+        } else {
+          dummy <- terra::rast( terra::ext(x$background),
+                                nrow=100, ncol=100, val=1,
+                                crs = terra::crs(x$background));names(dummy) <- 'dummy'
+        }
+        model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE, na.rm = FALSE)
+        model[['predictors_names']] <- x$predictors$get_names()
+        model[['predictors_names']] <- model[['predictors_names']][model[['predictors_names']] %notin% c("x","y")]
+        model[['predictors_types']] <- predictor_type(x$predictors$get_data())
+        model[['predictors_object']] <- PredictorDataset$new(id = new_id(), data = dummy)
+      }
+    } else {
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0('No predictor terms found. Using dummy.'))
       # Dummy covariate of background raster
       # Check if the engine has a template and if so use that one
@@ -256,32 +300,8 @@ methods::setMethod(
       }
       model[['predictors']] <- terra::as.data.frame(dummy, xy = TRUE, na.rm = FALSE)
       model[['predictors_names']] <- 'dummy'
-      model[['predictors_types']] <- data.frame(predictors = 'dummy', type = 'numeric')
+      model[['predictors_types']] <- predictor_type(dummy)
       model[['predictors_object']] <- PredictorDataset$new(id = new_id(), data = dummy)
-    } else {
-      # Convert Predictors to data.frame
-      model[['predictors']] <- x$predictors$get_data(df = TRUE, na.rm = FALSE)
-
-      # Check whether any of the variables are fully NA, if so exclude
-      if( any( apply(model[['predictors']], 2, function(z) all(is.na(z))) )){
-        chk <- which( apply(model[['predictors']], 2, function(z) all(is.na(z))) )
-        if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',
-                                                  paste0('The following variables are fully missing and are removed:\n',
-                                                         paste(names(chk),collapse = " | "))
-        )
-        model[['predictors']] <- model[['predictors']][,-chk]
-        x$predictors$rm_data(names(chk)) # Remove the variables
-      }
-
-      # Also set predictor names
-      model[['predictors_names']] <- x$get_predictor_names()
-      # Get predictor types
-      lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-      model[['predictors_types']] <- data.frame(predictors = names(lu), type = ifelse(lu,'factor', 'numeric'),
-                                                row.names = NULL)
-      # Assign attribute to predictors to store the name of object
-      model[['predictors_object']] <- x$predictors$clone(deep = TRUE)
-      rm(lu)
     }
 
     # Calculate latent variables if set
@@ -300,8 +320,10 @@ methods::setMethod(
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','yellow',paste0(m, ' terms are not supported for engine. Switching to poly...'))
         x$set_latent(type = '<Spatial>', 'poly')
       }
+
       # Calculate latent spatial terms (saved in engine data)
       if( length( grep('Spatial',x$get_latent() ) ) > 0 ){
+        if(!x$predictors$is_spatial()) cli::cli_abort("Spatial terms currently not supported without providing predictors.")
         # If model is polynominal, get coordinates of first entry for names of transformation
         if(m == 'poly' & x$get_engine() %notin% c("<GDB>","<SCAMPR>")){
           # And the full predictor container
@@ -309,7 +331,7 @@ methods::setMethod(
           model$predictors <- cbind(model$predictors, coords_poly)
           model$predictors_names <- c(model$predictors_names, names(coords_poly))
           model$predictors_types <- rbind(model$predictors_types,
-                                          data.frame(predictors = names(coords_poly), type = "numeric"))
+                                          predictor_type(coords_poly))
           # Also add to predictor object
           pred <- model$predictors_object$get_data(df = FALSE)
           new <-  fill_rasters(coords_poly, emptyraster(pred))
@@ -332,19 +354,18 @@ methods::setMethod(
             o <- subset(o, select = "geometry")
             poi <- rbind(poi, o)
           }
-          # Ensure we have a backgroudn raster
+          # Ensure we have a background raster
           if(inherits(x$background, "sf")){
             bg <- terra::rasterize(x$background, model$predictors_object$get_data(), 1)
           } else {bg <- x$background }
-          # Then calculate
+          # Then calculate Kernel density with a small bandwidth
           ras <- st_kde(points = poi, background = bg, bandwidth = 3)
           # Add to predictor objects, names, types and the object
           model[['predictors']] <- cbind.data.frame( model[['predictors']], terra::as.data.frame(ras, na.rm = FALSE) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(ras) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
-                                                          data.frame(predictors = names(ras),
-                                                                     type = "numeric" )
-          )
+                                                          predictor_type(ras)
+                                                          )
           if( !all(names(ras) %in% model[['predictors_object']]$get_names()) ){
             model[['predictors_object']]$data <- c(model[['predictors_object']]$data, ras)
           }
@@ -369,14 +390,12 @@ methods::setMethod(
           model[['predictors']] <- cbind.data.frame( model[['predictors']], terra::as.data.frame(cc, na.rm = FALSE) )
           model[['predictors_names']] <- c( model[['predictors_names']], names(cc) )
           model[['predictors_types']] <- rbind.data.frame(model[['predictors_types']],
-                                                          data.frame(predictors = names(cc),
-                                                                     type = "numeric" )
-          )
+                                                          predictor_type(cc)
+                                                          )
           if( !all(names(cc) %in% model[['predictors_object']]$get_names()) ){
             model[['predictors_object']]$data <- c(model[['predictors_object']]$data, cc)
           }
           rm(cc, biodiversity_ids)
-
         }
       }
 
@@ -385,7 +404,7 @@ methods::setMethod(
     } else {
       model[["latent"]] <- new_waiver()
       settings$set('has_latent', FALSE)
-    }# End of latent factor loop
+    } # End of latent factor loop
 
     # Set offset if existing
     if(!is.Waiver(x$offset)){
@@ -430,10 +449,8 @@ methods::setMethod(
             model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
             # Get predictor types
             lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-            model[['predictors_types']] <- data.frame(predictors = names(lu),
-                                                      type = ifelse(lu, 'factor', 'numeric') )
+            model[['predictors_types']] <- predictor_type(lu)
           }
-          assertthat::assert_that(nrow(model[['predictors']]) == terra::ncell(model$predictors_object$get_data()))
         }
       }
     }
@@ -442,6 +459,9 @@ methods::setMethod(
     model[['biodiversity']] <- list()
     # Specify list of ids
     biodiversity_ids <- as.character( x$biodiversity$get_ids() )
+    if(length(biodiversity_ids)>1 && !(x$predictors$is_spatial()))
+      cli::cli_abort("Non-spatial predictors do currently not work for more than one biodiversity dataset!")
+
     for(id in biodiversity_ids) {
       model[['biodiversity']][[id]][['name']]         <- x$biodiversity$data[[id]]$name # Name of the species
       model[['biodiversity']][[id]][['observations']] <- x$biodiversity$get_data(id) # Observational data
@@ -500,24 +520,40 @@ methods::setMethod(
 
       # Aggregate observations if poipo
       if(aggregate_observations && model[['biodiversity']][[id]][['type']] == "poipo"){
+        if(!(x$predictors$is_spatial())) cli::cli_alert_warning("Aggregation with non-spatial predictors likely does not work...")
         model$biodiversity[[id]]$observations <- aggregate_observations2grid(
           df = model$biodiversity[[id]]$observations,
-          template = emptyraster(x$predictors$get_data(df = FALSE)),
+          template = emptyraster(model$predictors_object$get_data()),
           field_occurrence = "observed")
         # Check and reset multiplication weights
         model[['biodiversity']][[id]][['expect']] <- rep(unique( model[['biodiversity']][[id]][['expect']] )[1],
                                                          nrow(model$biodiversity[[id]]$observations))
       }
 
-      # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
-      env <- get_rastervalue(coords = model$biodiversity[[id]]$observations,
-                             env = model$predictors_object$get_data(df = FALSE),
-                             rm.na = FALSE)
+      if(x$predictors$is_spatial()){
+        # Now extract coordinates and extract estimates, shifted to raster extraction by default to improve speed!
+        env <- get_rastervalue(coords = model$biodiversity[[id]]$observations,
+                               env = model$predictors_object$get_data(df = FALSE),
+                               rm.na = FALSE)
 
-      # select only columns needed by equation
-      if (model$biodiversity[[id]]$equation != "<Default>") {
-        env <- subset(env, select = c("ID", "x", "y", attr(stats::terms.formula(model$biodiversity[[id]]$equation),
-                                                           "term.labels")))
+        # select only columns needed by equation
+        if (model$biodiversity[[id]]$equation != "<Default>") {
+          env <- subset(env, select = c("ID", "x", "y", attr(stats::terms.formula(model$biodiversity[[id]]$equation),
+                                                             "term.labels")))
+        }
+      } else {
+        # Predictors provided directly
+        assertthat::assert_that(
+          nrow(model$biodiversity[[id]]$observations) == nrow(x$predictors$get_data()),
+          msg = "There are different number of observations and predictor rows!"
+        )
+        env <- x$predictors$get_data()
+        # Filter to target variables
+        if (model$biodiversity[[id]]$equation != "<Default>") {
+          env <- env |> dplyr::select(dplyr::any_of(c("x","y",
+                                                    attr(stats::terms.formula(model$biodiversity[[id]]$equation),
+                                                         "term.labels"))))
+        }
       }
 
       # Check for common issues and exclude variables if affected (could be outsourced)
@@ -532,8 +568,8 @@ methods::setMethod(
       model[['biodiversity']][[id]][['observations']] <- model[['biodiversity']][[id]][['observations']][miss,]
       model[['biodiversity']][[id]][['expect']] <- model[['biodiversity']][[id]][['expect']][miss]
       env <- subset(env, miss)
-      if(nrow(env)<=2) stop("Too many missing data points in covariates. Check out 'predictor_homogenize_na' and projections.")
-      if( all( model[['biodiversity']][[id]][['observations']]$observed == 0) ) stop("All presence records fall outside the modelling background.")
+      if(nrow(env)<=2) cli::cli_abort("Too many missing data points in covariates. Check out 'predictor_homogenize_na' and projections.")
+      if( all( model[['biodiversity']][[id]][['observations']]$observed == 0) ) cli::cli_abort("All presence records fall outside the modelling background.")
       # Add intercept
       env$Intercept <- 1
 
@@ -603,11 +639,16 @@ methods::setMethod(
       # Save predictors extracted for biodiversity extraction
       model[['biodiversity']][[id]][['predictors']] <- env
       model[['biodiversity']][[id]][['predictors_names']] <- names(env)[names(env) %notin% c("ID", "x", "y", "Intercept")]
-      model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']][, "predictors"] %in% names(env), ]
-      # makes sure ordering is identical
-      sort_id <- match(model[['biodiversity']][[id]][['predictors_names']], model[['biodiversity']][[id]][['predictors_types']]$predictors)
-      model[['biodiversity']][[id]][['predictors_types']] <- model[['biodiversity']][[id]][['predictors_types']][sort_id, ]
+      if(!x$predictors$is_spatial()){
+        # Small work around for cases when none spatial predictors are supplied
+        model[['biodiversity']][[id]][['predictors_types']] <- predictor_type(env)
+      } else {
+        model[['biodiversity']][[id]][['predictors_types']] <- model[['predictors_types']][model[['predictors_types']][, "predictors"] %in% names(env), ]
+        # makes sure ordering is identical
+        sort_id <- match(model[['biodiversity']][[id]][['predictors_names']], model[['biodiversity']][[id]][['predictors_types']]$predictors)
+        model[['biodiversity']][[id]][['predictors_types']] <- model[['biodiversity']][[id]][['predictors_types']][sort_id, ]
       }
+    }
 
     # If the method of integration is weights and there are more than 2 datasets, combine
     if(method_integration == "weight" && length(model$biodiversity)>=2){
@@ -860,6 +901,9 @@ methods::setMethod(
                             length(model$biodiversity)>=1,
                             is.data.frame(model$predictors) && nrow(model$predictors)>0,
                             length(model$predictors_names)>0,
+                            # Check for odd NA values
+                            !anyNA(model$predictors_names),
+                            !anyNA(model$predictors_types),
                             nrow(model$biodiversity[[1]]$observations)>0,
                             length(model[['biodiversity']][[1]][['expect']])>1,
                             all(c("predictors","background","biodiversity") %in% names(model) ),
@@ -912,17 +956,20 @@ methods::setMethod(
         if(model$biodiversity[[id]]$family == 'binomial') model$biodiversity[[id]][['expect']] <- rep(1, nrow(model$biodiversity[[id]]$predictors) ) * model$biodiversity[[id]]$expect
       }
 
-      # remove unused predictors
-      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
-      pred_prs <- model$predictors_object$get_names()
-      model$predictors_names <- pred_tmp
-      model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
-      # make sure all in same order
-      model$predictors_types <- model$predictors_types[match(model$predictors_names, model$predictors_types$predictors), ]
-      model$predictors <- dplyr::select(model$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-      model$predictors_object <- model$predictors_object$clone(deep = TRUE)
-      if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-        model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+      # Work around for cases with non-spatial predictors
+      if(x$predictors$is_spatial()){
+        # remove unused predictors
+        pred_tmp <- unique(unlist(lapply(model$biodiversity, function(i) i$predictors_names), use.names = FALSE))
+        pred_prs <- model$predictors_object$get_names()
+        model$predictors_names <- pred_tmp
+        model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
+        # make sure all in same order
+        model$predictors_types <- model$predictors_types[match(model$predictors_names, model$predictors_types$predictors), ]
+        model$predictors <- dplyr::select(model$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+        model$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
       }
 
       # Run the engine setup script
@@ -956,17 +1003,20 @@ methods::setMethod(
                                                                 settings = settings)
       }
 
-      # remove unused predictors
-      pred_tmp <- unique(c(sapply(model$biodiversity, function(i) i$predictors_names)))
-      pred_prs <- model$predictors_object$get_names()
-      model$predictors_names <- pred_tmp
-      model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
-      # make sure all in same order
-      model$predictors_types <- model$predictors_types[match(model$predictors_names, model$predictors_types$predictors), ]
-      model$predictors <- dplyr::select(model$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-      model$predictors_object <- model$predictors_object$clone(deep = TRUE)
-      if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-        model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+      # Work around for cases with non-spatial predictors
+      if(x$predictors$is_spatial()){
+        # remove unused predictors
+        pred_tmp <- unique(unlist(lapply(model$biodiversity, function(i) i$predictors_names), use.names = FALSE))
+        pred_prs <- model$predictors_object$get_names()
+        model$predictors_names <- pred_tmp
+        model$predictors_types <- model$predictors_types[model$predictors_type$predictors %in% pred_tmp, ]
+        # make sure all in same order
+        model$predictors_types <- model$predictors_types[match(model$predictors_names, model$predictors_types$predictors), ]
+        model$predictors <- dplyr::select(model$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+        model$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
       }
 
       # Run the engine setup script
@@ -991,17 +1041,20 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # remove unused predictors
-        pred_tmp <- model2$biodiversity[[1]]$predictors_names
-        pred_prs <- model$predictors_object$get_names()
-        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-        model2$predictors_names <- pred_tmp
-        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        # make sure all in same order
-        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        # Work around for cases with non-spatial predictors
+        if(x$predictors$is_spatial()){
+          # remove unused predictors
+          pred_tmp <- model2$biodiversity[[1]]$predictors_names
+          pred_prs <- model$predictors_object$get_names()
+          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+          model2$predictors_names <- pred_tmp
+          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+          # make sure all in same order
+          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+          }
         }
 
         # remove unused priors
@@ -1112,7 +1165,7 @@ methods::setMethod(
 
       # TODO: Combine biodiversity datasets and add factor variable
       # Ideally figure out a convenient way to allow interactions. Maybe by just multiplying all predictors?
-      if(method_integration == "interaction") stop("Not yet implemented")
+      if(method_integration == "interaction") cli::cli_abort("Not yet implemented")
 
       # Process per supplied dataset and in order of supplied data
       for(id in ids) {
@@ -1124,17 +1177,20 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # remove unused predictors
-        pred_tmp <- model2$biodiversity[[1]]$predictors_names
-        pred_prs <- model$predictors_object$get_names()
-        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-        model2$predictors_names <- pred_tmp
-        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        # make sure all in same order
-        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        # Work around for cases with non-spatial predictors
+        if(x$predictors$is_spatial()){
+          # remove unused predictors
+          pred_tmp <- model2$biodiversity[[1]]$predictors_names
+          pred_prs <- model$predictors_object$get_names()
+          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+          model2$predictors_names <- pred_tmp
+          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+          # make sure all in same order
+          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+          }
         }
 
         # remove unused priors
@@ -1244,7 +1300,7 @@ methods::setMethod(
 
       # TODO: Combine biodiversity datasets and add factor variable
       # Ideally figure out a convenient way to allow interactions. Maybe by just multiplying all predictors?
-      if(method_integration == "interaction") stop("Not yet implemented")
+      if(method_integration == "interaction") cli::cli_abort("Not yet implemented")
 
       # Process each id
       for(id in ids){
@@ -1256,17 +1312,20 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # remove unused predictors
-        pred_tmp <- model2$biodiversity[[1]]$predictors_names
-        pred_prs <- model$predictors_object$get_names()
-        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-        model2$predictors_names <- pred_tmp
-        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        # make sure all in same order
-        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        # Work around for cases with non-spatial predictors
+        if(x$predictors$is_spatial()){
+          # remove unused predictors
+          pred_tmp <- model2$biodiversity[[1]]$predictors_names
+          pred_prs <- model$predictors_object$get_names()
+          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+          model2$predictors_names <- pred_tmp
+          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+          # make sure all in same order
+          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+          }
         }
 
         # remove unused priors
@@ -1380,7 +1439,7 @@ methods::setMethod(
       # Process per supplied dataset
       for(id in ids) {
         # TODO
-        if(length(model$biodiversity)>1) stop("Not yet implemented")
+        if(length(model$biodiversity)>1) cli::cli_abort("Not yet implemented")
 
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_stan(model = model,
@@ -1412,17 +1471,20 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # remove unused predictors
-        pred_tmp <- model2$biodiversity[[1]]$predictors_names
-        pred_prs <- model$predictors_object$get_names()
-        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-        model2$predictors_names <- pred_tmp
-        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        # make sure all in same order
-        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        # Work around for cases with non-spatial predictors
+        if(x$predictors$is_spatial()){
+          # remove unused predictors
+          pred_tmp <- model2$biodiversity[[1]]$predictors_names
+          pred_prs <- model$predictors_object$get_names()
+          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+          model2$predictors_names <- pred_tmp
+          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+          # make sure all in same order
+          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+          }
         }
 
         # remove unused priors
@@ -1540,17 +1602,20 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # remove unused predictors
-        pred_tmp <- model2$biodiversity[[1]]$predictors_names
-        pred_prs <- model$predictors_object$get_names()
-        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-        model2$predictors_names <- pred_tmp
-        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        # make sure all in same order
-        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        # Work around for cases with non-spatial predictors
+        if(x$predictors$is_spatial()){
+          # remove unused predictors
+          pred_tmp <- model2$biodiversity[[id]]$predictors_names
+          pred_prs <- model$predictors_object$get_names()
+          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+          model2$predictors_names <- pred_tmp
+          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+          # make sure all in same order
+          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+          }
         }
 
         # remove unused priors
@@ -1670,17 +1735,20 @@ methods::setMethod(
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
 
-        # remove unused predictors
-        pred_tmp <- model2$biodiversity[[1]]$predictors_names
-        pred_prs <- model$predictors_object$get_names()
-        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-        model2$predictors_names <- pred_tmp
-        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-        # make sure all in same order
-        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        # Work around for cases with non-spatial predictors
+        if(x$predictors$is_spatial()){
+          # remove unused predictors
+          pred_tmp <- model2$biodiversity[[1]]$predictors_names
+          pred_prs <- model$predictors_object$get_names()
+          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+          model2$predictors_names <- pred_tmp
+          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+          # make sure all in same order
+          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+          }
         }
 
         # remove unused priors
@@ -1781,11 +1849,11 @@ methods::setMethod(
     # ----------------------------------------------------------- #
     } else if(x$engine$get_class() == "SCAMPR-Engine"){
 
-      if(method_integration == "prior") warning("Priors not supported for SCAMPR!")
-      if(length(model$biodiversity)>2) stop("More than 2 datasets not supported for SCAMPR!")
+      if(method_integration == "prior") cli::cli_alert_warning("Priors not supported for SCAMPR!")
+      if(length(model$biodiversity)>2) cli::cli_abort("More than 2 datasets not supported for SCAMPR!")
       if(length(model$biodiversity)==2){
         if( model$biodiversity[[1]]$type == model$biodiversity[[2]]$type){
-          stop("Datasets of the same type are not supported for SCAMPR. Combine them!")
+          cli::cli_abort("Datasets of the same type are not supported for SCAMPR. Combine them!")
         }
       }
 
@@ -1802,7 +1870,7 @@ methods::setMethod(
       out <- x$engine$train(model2, settings)
 
     # wrong engine selected
-    } else { stop('Specified Engine not implemented yet.')}
+    } else { cli::cli_abort('Specified Engine not implemented yet.')}
 
 
     #### Wrap up ####

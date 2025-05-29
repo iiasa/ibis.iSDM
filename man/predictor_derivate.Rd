@@ -68,7 +68,7 @@ new derivates is specified via the parameter \code{'nknots'} (Default: \code{4})
 }
 \examples{
 # Dummy raster
- r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
+r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
 
 # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
 new <- predictor_derivate(r_ori, option = "hinge", knots = 4)

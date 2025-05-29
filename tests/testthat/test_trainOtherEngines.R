@@ -27,7 +27,7 @@ test_that('Train a distribution model with XGboost', {
   x <- distribution(background) |>
     add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
-    engine_xgboost()
+    engine_xgboost(iter = 2000)
 
   # Make a check
   expect_no_error( check(x) )
@@ -40,9 +40,6 @@ test_that('Train a distribution model with XGboost', {
 
   # Run a check (should work without errors at least)
   expect_no_error( suppressMessages( check(mod) ) )
-
-  # Make a check
-  expect_no_error( check(mod) )
 
   # Expect summary
   expect_s3_class(summary(mod), "data.frame")
@@ -186,7 +183,7 @@ test_that('Train a distribution model with Breg', {
   future_dummy <- predictors
   terra::time(future_dummy) <- rep("2020-01-01", terra::nlyr(future_dummy)) |> as.Date()
   expect_no_error(
-    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy) |> project()  )
+    scenario(mod,copy_model = TRUE) |> add_predictors(future_dummy,transform = 'none') |> project()  )
 })
 
 # ---- #

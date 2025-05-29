@@ -211,9 +211,9 @@ methods::setMethod(
       if(sf::st_crs(limits) != sf::st_crs(background)) limits <- sf::st_transform(limits, background)
       # Ensure that limits is intersecting the background
       if(is.Raster(background)){
-        if(suppressMessages(length( sf::st_intersects(limits, terra::as.polygons(background) |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+        if(suppressMessages(length( sf::st_intersects(limits, terra::as.polygons(background) |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; cli::cli_alert_warning('Provided limits do not intersect the background!') }
       } else {
-        if(suppressMessages(length( sf::st_intersects(limits, background |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; warning('Provided limits do not intersect the background!') }
+        if(suppressMessages(length( sf::st_intersects(limits, background |> sf::st_as_sf()) )) == 0 ) { limits <- NULL; cli::cli_alert_warning('Provided limits do not intersect the background!') }
       }
 
       # Rename geometry just to be sure

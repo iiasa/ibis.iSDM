@@ -120,10 +120,10 @@ methods::setMethod(
     prediction <- mod$get_data('prediction')[[layer]]
     if( any(grep('threshold', mod$show_rasters())) ){
       tr_lyr <- grep('threshold', mod$show_rasters(),value = TRUE)
-      if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
+      if(length(tr_lyr)>1) cli::cli_alert_warning("There appear to be multiple thresholds. Using the first one.")
       threshold <- mod$get_data(tr_lyr[1])
       # Get mean layer if there are multiple
-      if( grep(layer, names(threshold),value = TRUE ) != "") threshold <- threshold[[grep(layer, names(threshold),value = TRUE )]]
+      if( grep(layer, names(threshold),value = TRUE )[1] != "") threshold <- threshold[[grep(layer, names(threshold),value = TRUE )[1] ]]
     } else { threshold <- NULL }
 
     # Check that threshold and method match
@@ -308,7 +308,7 @@ methods::setMethod(
     if(!is.null(attr(df, "sf_column"))) df[[attr(df, "sf_column")]] <- NULL
     # Remove any NAs
     df <- subset(df, stats::complete.cases(df))
-    if(nrow(df) < 2) stop("Validation was not possible owing to missing data.")
+    if(nrow(df) < 2) cli::cli_abort("Validation was not possible owing to missing data.")
     # --- #
     # Messenger
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Validation]','green','Calculating validation statistics')
@@ -578,7 +578,7 @@ methods::setMethod(
     # FIXME: Hacky. This likely won't work with specific formulations
     if(!is.null(mod)){
       if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
-        LogLoss <- function(y_pred, y_true) {
+        LogLoss <- function(y_pred, y_true, eps = NULL) {
           LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
           return(LogLoss)
         }

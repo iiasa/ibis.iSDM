@@ -62,7 +62,7 @@ methods::setMethod(
         # FIXME: If errors occur, check harmonization of saving among engines.
         mod$save(fname = fname)
       } else {
-        stop("Model engine not recognized? Older version?")
+        cli::cli_abort("Model engine not recognized? Older version?")
       }
     } else if(is.Raster(mod)){
         if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
@@ -70,7 +70,7 @@ methods::setMethod(
         } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
           writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
         } else {
-          stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
+          cli::cli_abort("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
         }
     } else if(is.data.frame(mod)){
       utils::write.csv(x = mod,file = fname,...)
@@ -121,7 +121,7 @@ methods::setMethod(
     } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
       writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
     } else {
-      stop("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
+      cli::cli_abort("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
     }
     invisible()
   }
@@ -218,6 +218,10 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
   }
 
   if(file.exists(fname)) warning('Overwritting existing file...')
+
+  # Assign some basic metadata
+  terra::metags(file) <- c("model=ibis.iSDM",
+                           "model_version" = utils::packageVersion("ibis.iSDM"))
 
   # Save output
   terra::writeRaster(

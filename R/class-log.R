@@ -53,7 +53,7 @@ Log <- R6::R6Class(
       try({output = base::file( self$filename, open = 'wt', method = 'default') },
           silent = TRUE)
 
-      if(class(output)[1]=='try-error') { stop('Log file could not be opened!')}
+      if(class(output)[1]=='try-error') { cli::cli_abort('Log file could not be opened!')}
 
       # For each type append
       # Writing console or message output to log file

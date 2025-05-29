@@ -76,7 +76,7 @@ methods::setMethod(
     )
     assertthat::assert_that(length(variable)==1,msg = 'More than one prior variable supplied. Use BREGPriors')
     # Both hyper and ip can not both be NULL
-    if(is.null(hyper) && is.null(ip)) stop("Set either hyper and/or ip to a non-null value!")
+    if(is.null(hyper) && is.null(ip)) cli::cli_abort("Set either hyper and/or ip to a non-null value!")
 
     # Sanitize names if specified
     if(getOption('ibis.cleannames', default = TRUE)) variable <- sanitize_names(variable)
@@ -130,7 +130,7 @@ methods::setMethod(
     )
     assertthat::assert_that(length(variable)>1, msg = 'Only one prior variable supplied. Use BREGPrior')
     # Both hyper and ip can not both be NULL
-    if(is.null(hyper) && is.null(ip)) stop("Set either hyper and/or ip to a non-null value!")
+    if(is.null(hyper) && is.null(ip)) cli::cli_abort("Set either hyper and/or ip to a non-null value!")
 
     # Check that ip is between 0 and 1
     if(!is.null(ip)) assertthat::assert_that(ip >= 0, ip <= 1)

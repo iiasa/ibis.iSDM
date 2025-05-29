@@ -100,25 +100,14 @@ engine_stan <- function(x,
   if(is.null(cores)) cores <- getOption('ibis.nthread')
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(x$background),
-      crs = terra::crs(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
-      )
-    )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(x$background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Define new engine object of class
   eg <- Engine
@@ -161,25 +150,28 @@ engine_stan <- function(x,
     # Set cores
     options(mc.cores = self$stan_param$cores)
 
-    # FIXME: Stan should handle factors directly. For now outsourced to split up
-    if(any(model$predictors_types$type=="factor")){
-      vf <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
-      for(k in vf){
-        o <- explode_factor(model$predictors[[k]],name = k)
-        model$predictors <- cbind(model$predictors, o)
-        model$predictors_names <- c(model$predictors_names, colnames(o))
-        model$predictors_types <- rbind(model$predictors_types,
-                                        data.frame(predictors = colnames(o), type = "numeric") )
-        # Finally remove the original column from the predictor object
-        model$predictors[[k]] <- NULL
-        model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
-        model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
-        # Explode the columns in the raster object
-        model$predictors_object$data <- c(
-          model$predictors_object$data,
-          explode_factorized_raster(model$predictors_object$data[[k]])
-        )
-        model$predictors_object$data <- terra::subset(model$predictors_object$data, k, negate = TRUE)
+    if(!settings$get('inference_only')){
+      # FIXME: Stan should handle factors directly. For now outsourced to split up
+      cli::cli_alert_warning("Splitting factors up for prediction!")
+      if(any(model$predictors_types$type=="factor")){
+        vf <- model$predictors_types$predictors[model$predictors_types$type=="factor"]
+        for(k in vf){
+          o <- explode_factor(model$predictors[[k]],name = k)
+          model$predictors <- cbind(model$predictors, o)
+          model$predictors_names <- c(model$predictors_names, colnames(o))
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = colnames(o), type = "numeric") )
+          # Finally remove the original column from the predictor object
+          model$predictors[[k]] <- NULL
+          model$predictors_names <- model$predictors_names[-which( model$predictors_names == k )]
+          model$predictors_types <- subset(model$predictors_types, subset = predictors != k)
+          # Explode the columns in the raster object
+          model$predictors_object$data <- c(
+            model$predictors_object$data,
+            explode_factorized_raster(model$predictors_object$data[[k]])
+          )
+          model$predictors_object$data <- terra::subset(model$predictors_object$data, k, negate = TRUE)
+        }
       }
     }
 
@@ -431,7 +423,7 @@ engine_stan <- function(x,
     # Now add the model depending on the type
     if(length(model$biodiversity)>1){
       # For integrated model
-      stop("TBD")
+      cli::cli_abort("TBD")
 
     } else if(model$biodiversity[[1]]$type == "poipo" && model$biodiversity[[1]]$family == "poisson"){
       # For poisson process model add likelihood
@@ -454,7 +446,7 @@ engine_stan <- function(x,
       for(i in ir) sm_code$model <- append(sm_code$model, i)
     } else {
       # Else
-      stop("Model as of now not implemented for Stan!")
+      cli::cli_abort("Model as of now not implemented for Stan!")
     }
     # Append prior contributions to model
     sm_code$model <- append(sm_code$model, "
@@ -489,7 +481,7 @@ engine_stan <- function(x,
     # --- #
     # Collect data for stan modelling
     if(length(model$biodiversity)>1){
-      stop("done")
+      cli::cli_abort("done")
     } else {
       has_intercept <- attr(stats::terms(model$biodiversity[[1]]$equation), "intercept")
       # Format data list

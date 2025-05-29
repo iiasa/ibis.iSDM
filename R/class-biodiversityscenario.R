@@ -180,7 +180,7 @@ BiodiversityScenario <- R6::R6Class(
       if(inherits(self$predictors, "PredictorDataset")) {
         self$predictors$get_names()
       } else {
-        stop("Feature data is of an unrecognized class")
+        cli::cli_abort("Feature data is of an unrecognized class")
       }
     },
 
@@ -537,7 +537,7 @@ BiodiversityScenario <- R6::R6Class(
       thresh_reference <- grep('threshold',obj$show_rasters(),value = T)
       # If there is more than one threshold only use the one from variable
       if(base::length(thresh_reference)>1) {
-        warning('More than one baseline threshold. Using the first one.')
+        cli::cli_alert_warning('More than one baseline threshold. Using the first one.')
         thresh_reference <- grep(variable, thresh_reference,value = T)[1]
       }
       # Check that baseline and scenarios are all there
@@ -674,7 +674,7 @@ BiodiversityScenario <- R6::R6Class(
           times <- stars::st_get_dimension_values(scenario, which = 'band')
         } else {
           times <- NULL
-          stop("Summary without time dimension not yet implemented!")
+          cli::cli_abort("Summary without time dimension not yet implemented!")
         }
         # Get area
         ar <- stars:::st_area.stars(scenario)
@@ -888,7 +888,7 @@ BiodiversityScenario <- R6::R6Class(
                             'INT2S','INT2U','INT4S',
                             'INT4U','FLT4S','FLT8S'), several.ok = FALSE )
 
-      if(file.exists(fname)) warning('Overwritting existing file...')
+      if(file.exists(fname)) cli::cli_alert_warning('Overwritting existing file...')
 
       # Respecify type if output filename has already been set
       if(gsub('\\.','', tools::file_ext(fname)) != type) type <- gsub('\\.','', tools::file_ext(fname))

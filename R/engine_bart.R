@@ -78,25 +78,14 @@ engine_bart <- function(x,
   if(nburn > iter) nburn <- floor( iter / 4)
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(x$background),
-      crs = terra::crs(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
-      )
-    )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(x$background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Set up dbarts control with some parameters, rest default
   dc <- dbarts::dbartsControl(keepTrees	= TRUE, # Keep trees
@@ -275,28 +264,30 @@ engine_bart <- function(x,
                                                                 !predictors %in% vf)
     }
 
-    # Prediction container
-    pred_cov <- model$predictors[,c('x','y',model$biodiversity[[1]]$predictors_names)]
-    if(any(model$predictors_types$type=='factor')){
-      vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
-      # Get factors
-      for (i in 1:length(vf)) {
-        z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
-        # Remove variables from train_cov and append
-        pred_cov[[vf[i]]] <- NULL
-        pred_cov <- cbind(pred_cov, z)
-        model$predictors_types <- rbind(model$predictors_types,
-                                        data.frame(predictors = colnames(z), type = "numeric"))
+    if(!settings$get("inference_only")){
+      # Prediction container
+      pred_cov <- model$predictors[,c('x','y',model$biodiversity[[1]]$predictors_names)]
+      if(any(model$predictors_types$type=='factor')){
+        vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
+        # Get factors
+        for (i in 1:length(vf)) {
+          z <- explode_factor(pred_cov[[vf[i]]], name = vf[i])
+          # Remove variables from train_cov and append
+          pred_cov[[vf[i]]] <- NULL
+          pred_cov <- cbind(pred_cov, z)
+          model$predictors_types <- rbind(model$predictors_types,
+                                          data.frame(predictors = colnames(z), type = "numeric"))
+        }
+
+        pred_cov <- pred_cov[,c("x", "y", colnames(train_cov))]
+        model$predictors <- pred_cov # Save new in model object
+
+        model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
+        model$predictors_names <- colnames(pred_cov)
+        assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
       }
-
-      pred_cov <- pred_cov[,c("x", "y", colnames(train_cov))]
-      model$predictors <- pred_cov # Save new in model object
-
-      model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
-      model$predictors_names <- colnames(pred_cov)
-      assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
+      rm(train_cov, pred_cov)
     }
-    rm(train_cov, pred_cov)
 
     # Process and add priors if set
     params <- self$get_data("params")
@@ -345,20 +336,24 @@ engine_bart <- function(x,
     data <- subset(data, select = c('observed', model$biodiversity[[1]]$predictors_names) )
     if(model$biodiversity[[1]]$family=='binomial') data$observed <- factor(data$observed)
     w <- model$biodiversity[[1]]$expect # The expected weight
-    full <- model$predictors # All predictors
 
-    # Select predictors
-    full <- subset(full, select = c('x','y', model$biodiversity[[1]]$predictors_names))
-    full$cellid <- rownames(full) # Add rownames
-    full <- subset(full, stats::complete.cases(full))
+    # Select predictors for full prediction if needed
+    if(!settings$get("inference_only")){
+      full <- model$predictors # All predictors
+      full <- subset(full, select = c('x','y', model$biodiversity[[1]]$predictors_names))
+      full$cellid <- rownames(full) # Add rownames
+      full <- subset(full, stats::complete.cases(full))
 
-    # Clamp?
-    if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+      # Clamp?
+      if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+      assertthat::assert_that(
+        all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      )
+    }
 
     assertthat::assert_that(
       is.null(w) || length(w) == nrow(data),
-      is.formula(equation),
-      all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      is.formula(equation)
     )
 
     if(!is.Waiver(model$offset)){
@@ -581,7 +576,7 @@ engine_bart <- function(x,
       assertthat::assert_that(all(x.var %in% attr(fit$fit$data@x,'term.labels')),
                               msg = 'Variable not in predicted model' )
 
-      if( model$biodiversity[[1]]$family != 'binomial' && transform) warning('Check whether transform should not be set to False!')
+      if( model$biodiversity[[1]]$family != 'binomial' && transform) cli::cli_alert_warning('Check whether transform should not be set to False!')
 
       # Calculate
       p <- bart_partial_space(fit, predictors, x.var, equal, smooth, transform)
@@ -643,7 +638,7 @@ engine_bart <- function(x,
       settings$set("type", type)
 
       # Clamp?
-      if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
+      if( settings$get("clamp") ) newdata <- clamp_predictions(model = model, pred = newdata)
 
       if(!is.Waiver(settings$get('bias_variable'))){
         for(i in 1:length(settings$get('bias_variable'))){
@@ -683,7 +678,7 @@ engine_bart <- function(x,
         assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),
                                 msg = "Projection data.frame has no valid coordinates or differs in grain!")
         prediction <- try({
-          terra::rast(newdata_copy[,c("x", "y")],
+          terra::rast(newdata_copy[,c("x", "y", "rowid")],
                       crs = terra::crs(model$background),
                       type = "xyz") |>
             emptyraster()

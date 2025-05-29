@@ -104,6 +104,10 @@ terra_to_sf <- function(input, dissolve = TRUE, dummy = NULL){
     # Combine all
     out <- do.call("rbind",out)
   }
+
+  # make sure date is character for now, causes issues later due to "No set time"
+  if (inherits(out$time, what = "Date")) out$time <- as.character(out$time)
+
   return(out)
 }
 
@@ -190,7 +194,7 @@ point_in_polygon <- function(poly, points, coords = c('x','y')){
       } else if (output_class == "data.frame" ){
         result <- do.call("rbind", split_results)
       } else {
-        stop("Unknown class. st_parallel only accepts the following outputs at present: sfc, list, sf, matrix, sgbp.")
+        cli::cli_abort("Unknown class. st_parallel only accepts the following outputs at present: sfc, list, sf, matrix, sgbp.")
       }
 
       # Return result
@@ -899,7 +903,10 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' \code{SpatRaster} object. It is primarily used in the package to create the
 #' outputs for the predictions.
 #'
-#' @param x A \code{SpatRaster*} object corresponding.
+#' @param x A \code{SpatRaster*}, \code{stars} or a \code{sf} object from which coordinates
+#' can be obtained. Note that for \code{sf} objects the parameter \code{res} needs
+#' to be supplied.
+#' @param res (Optional) [`numeric`] estimate on the resolution of the output (Default: \code{NULL}).
 #' @param ... other arguments that can be passed to \code{\link{terra}}
 #'
 #' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
@@ -912,20 +919,83 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' emptyraster(r)
 #'
 #' @export
-emptyraster <- function(x, ...) { # add name, filename,
-  assertthat::assert_that(is.Raster(x) || inherits(x, "stars"))
+emptyraster <- function(x, res = NULL, ...) { # add name, filename,
+  assertthat::assert_that((is.Raster(x) || inherits(x, "stars"))||
+                            inherits(x, "sf") )
   if(is.Raster(x)){
     terra::rast(nrows = nrow(x), ncols = ncol(x),
                 crs = terra::crs(x),
                 ext = terra::ext(x), ...)
-  } else {
+  } else if(inherits(x, "stars")) {
     crs <- sf::st_crs(x)
     terra::rast(nrows = nrow(x), ncols = ncol(x),
                 crs = terra::crs(crs$wkt),
                 ext = terra::ext(sf::st_bbox(x)),
                 resolution = stars::st_res(x),
                 ...)
+  } else {
+    assertthat::assert_that(all(is.numeric(res)),
+                            msg = "For non-gridded objects a resolution needs to be provided!")
+    # Get coordinates
+    if(inherits(x, "sf")) coords <- terra::vect(coords)
+    if(inherits(x, "data.frame") | inherits(x, "matrix")) coords <- terra::vect(as.matrix(x), type = "points", atts = NULL)
+
+    # Rasterize
+    if(inherits(x, "sf")) crs <- terra::crs(sf::st_crs(x)$wkt) else crs <- NULL
+    terra::rast(x = coords,
+                res = res,
+                crs = crs,
+                ...)
   }
+}
+
+#' @title Create a background layer for prediction.
+#'
+#' @description This function creates a background layer to be used for predictions.
+#' Opposed to [emptyraster()] this function internally works with the class objects.
+#'
+#' @param x A \code{BiodiversityDistribution} object.
+#'
+#' @return an empty [`SpatRaster`] object.
+#'
+#' @keywords internal
+#' @noRd
+create_background <- function(x) {
+  assertthat::assert_that(
+    R6::is.R6(x),
+    inherits(x, "BiodiversityDistribution")
+  )
+  # Create a background raster
+  if(is.Waiver(x$predictors)){
+    # Create from background
+    template <- terra::rast(
+      ext = terra::ext(x$background),
+      crs = terra::crs(x$background),
+      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
+              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
+      )
+    )
+  } else {
+    # If predictor existing, use them
+    dat <- x$predictors$get_data()
+    if(is.Raster(dat)){
+      template <- emptyraster(dat)
+    } else {
+      template <- terra::rast(
+        ext = terra::ext(x$background),
+        crs = terra::crs(x$background),
+        res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
+                diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
+        )
+      )
+    }
+  }
+  # Burn in the background
+  if(is.Raster(template)){
+    template <- terra::rasterize(x$background, template, field = 0)
+  }
+
+  return(template)
 }
 
 #' Function to extract nearest neighbour predictor values of provided points
@@ -1092,7 +1162,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
   ex <- try({terra::extract(x = env,
                             y = coords,
                             method = "simple")}, silent = FALSE)
-  if(inherits(ex, "try-error")) stop(paste("SpatRaster valueextraction failed: ", ex))
+  if(inherits(ex, "try-error")) cli::cli_abort(paste("SpatRaster valueextraction failed: ", ex))
   # Find those that have NA in there
   check_again <- apply(ex, 1, function(x) anyNA(x))
   if(any(check_again)){
@@ -1108,7 +1178,7 @@ get_rastervalue <- function(coords, env, ngb_fill = TRUE, rm.na = FALSE){
                                   # FIXME: This could fail if values are factors?
                                   method = ifelse(ngb_fill, "bilinear", "simple"),
                                   touches = TRUE)}, silent = FALSE)
-    if(inherits(ex_sub, "try-error")) stop(paste("Raster extraction failed!"))
+    if(inherits(ex_sub, "try-error")) cli::cli_abort(paste("Raster extraction failed!"))
     ex[which(check_again),] <- ex_sub[, names(ex)]
   }
   # Add coordinate fields to the predictors as these might be needed later
@@ -1171,7 +1241,7 @@ model_to_background <- function(model){
   }
 
   # If that also failed, raise error
-  if(inherits(template, "try-error")) stop("No file to create a background raster from?")
+  if(inherits(template, "try-error")) cli::cli_abort("No file to create a background raster from?")
   assertthat::assert_that(is.Raster(template))
   return(template)
 }
@@ -1228,6 +1298,77 @@ fill_rasters <- function(post, background){
     terra::nlyr(out) == ncol(post)
   )
   return(out)
+}
+
+
+#' Clamp a predictor matrix by given values
+#'
+#' @description To limit extreme extrapolation it is possible to \code{'clamp'}
+#' an existing projection to the range of predictor values observed during model
+#' training. This function takes an internal model matrix and restricts the
+#' values seen in the predictor matrix to those observed during training.
+#'
+#' @param model A [`list`] with the input data used for inference. Created during model setup.
+#' @param pred An optional [`data.frame`] of the prediction container.
+#'
+#' @note This function is meant to be used within a certain \code{"engine"} or
+#' within [`project`].
+#'
+#' @returns A [`data.frame`] with the clamped predictors.
+#'
+#' @keywords utils
+#'
+#' @references
+#' Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017).
+#' Opening the black box: An open-source release of Maxent. Ecography.
+#' https://doi.org/10.1111/ecog.03049
+#'
+#' @noRd
+#'
+#' @keywords internal
+clamp_predictions <- function(model, pred){
+  assertthat::assert_that(
+    is.list(model),
+    assertthat::has_name(model, "biodiversity"),
+    (is.data.frame(pred) || is.matrix(pred)) || missing(pred)
+  )
+
+  # For each biodiversity dataset, calculate the range of predictors observed
+  vars_clamp <- data.frame()
+  for(ds in model$biodiversity){
+    # Calculate range for each NUMERIC variable
+    vals <- ds$predictors_names[ds$predictors_types[, 2] == "numeric"]
+    vals <- vals[stats::complete.cases(vals)] # Do this to account for x, y, ID other columns
+    rr <- apply(ds$predictors[,vals, drop = FALSE],
+                MARGIN = 2, function(z) range(z, na.rm = TRUE)) |>
+      t() |> as.data.frame() |> tibble::rownames_to_column("variable")
+    names(rr) <- c("variable", "min", "max")
+    vars_clamp <- rbind(vars_clamp, rr)
+    rm(rr)
+  }
+
+  # Aggregate if multiple variables
+  if(anyDuplicated(vars_clamp$variable) > 0){
+    o1 <- aggregate(vars_clamp$min, by = list(vars_clamp$variable), FUN = min)
+    o2 <- aggregate(vars_clamp$max, by = list(vars_clamp$variable), FUN = max)
+    names(o1) <- c("variable", "min")
+    names(o2) <- c("variable", "max")
+    vars_clamp <- merge(o1, o2)
+  }
+  # --- #
+  # Now clamp either predictors
+  if(missing(pred)) pred <- model$predictors
+
+  # Now clamp the prediction matrix with the clamped variables
+  for (v in intersect(vars_clamp$variable, names(pred))) {
+    pred[, v] <- pmin(
+      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
+      vars_clamp$max[vars_clamp$variable==v])
+  }
+
+  assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
+                           nrow(pred)>0)
+  return(pred)
 }
 
 #' Create a polynomial transformation from coordinates
@@ -1349,31 +1490,17 @@ explode_factorized_raster <- function(ras, name = NULL){
     # Get name
     # Create output template
     temp <- emptyraster(ras)
+
+    # Set name unless set
     if(is.null(name)) name <- names(ras)
 
-    # Extract data
-    o <- data.frame(val = values(ras));names(o) <- name;o[[name]] <- factor(o[[name]])
-
-    # Check if there is an NaN and remove if present.
-    if( any(is.nan( terra::levels(o[[name]]) ) | terra::levels(o[[name]]) == "NaN") ){
-      lvl <- terra::levels(o[[name]])
-      if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
-      if(any(lvl == "NaN")) lvl <- lvl[-which(lvl == "NaN")]
-    } else {
-      lvl <- terra::levels(o[[name]])
-    }
-
-    # Make function that converts all factors to split rasters
-    f <- as.data.frame(
-      outer(o[[name]], lvl, function(w, f) ifelse(w == f, 1, 0))
-    )
-
-    # Fill template rasters
-    out <- fill_rasters(f, temp)
-    names(out) <- paste(name, lvl, sep = ".")
+    # Segregate
+    out <- terra::segregate(ras)
+    lvl <- levels(ras)[[1]][,2]
+    names(out) <- paste(name, lvl, sep = ".") |> sanitize_names()
 
   } else if(terra::nlyr(ras)>1){
-    # Alternatively if input is stack
+    # Alternatively if input is a stack
     fcts <- is.factor(ras)
 
     # Get non-factor variables
@@ -1386,29 +1513,14 @@ explode_factorized_raster <- function(ras, name = NULL){
 
       sub <- ras[[k]]
 
-      temp <- emptyraster(sub)
+      # Get sub name
       if(is.null(name)) new_name <- names(sub) else new_name <- name
 
-      # Extract data
-      o <- data.frame(val = values(sub));names(o) <- new_name;o[[new_name]] <- factor(o[[new_name]])
+      # Segregate and get levels
+      new <- terra::segregate(sub)
+      lvl <- levels(sub)[[1]][[2]]
 
-      # Check if there is an NaN and remove if present.
-      if( any(is.nan(terra::levels(o[[new_name]])) | terra::levels(o[[new_name]]) == "NaN") ){
-        lvl <- terra::levels(o[[new_name]])
-        if(any(is.nan(lvl))) lvl <- lvl[-which(is.nan(lvl))]
-        if(any(lvl == "Nan")) lvl <- lvl[-which(lvl == "NaN")]
-      } else {
-        lvl <- terra::levels(o[[new_name]])
-      }
-
-      # Make function that converts all factors to split rasters
-      f <- as.data.frame(
-        outer(o[[new_name]], lvl, function(w, f) ifelse(w == f, 1, 0))
-      )
-
-      # Fill template rasters
-      new <- fill_rasters(f, temp)
-      names(new) <- paste(new_name, lvl, sep = ".")
+      names(new) <- paste(new_name, lvl, sep = ".") |> sanitize_names()
       suppressWarnings( out <- c(out, new) )
     }
   }
@@ -1710,7 +1822,7 @@ thin_observations <- function(data, background, env = NULL, method = "random", r
 
   } else if(method == "spatial"){
     # Spatial thinning
-    stop("Not yet implemented!")
+    cli::cli_abort("Not yet implemented!")
   }
 
   # else if (method == "intensity") {

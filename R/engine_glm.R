@@ -73,25 +73,14 @@ engine_glm <- function(x,
   if(type=="predictor") type <- "link" # Convenience conversion
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(x$background),
-      crs = terra::crs(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
-      )
-    )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(x$background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Specify default control
   if(is.null(control)){
@@ -348,7 +337,7 @@ engine_glm <- function(x,
         )
       },silent = FALSE)
     )
-    if(inherits(fit_glm, "try-error")) stop("Model failed to converge with provided input data!")
+    if(inherits(fit_glm, "try-error")) cli::cli_abort("Model failed to converge with provided input data!")
     if( (settings$get('optim_hyperparam')) ){
       if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',
                                                                 'Running step-wise AIC selection for glm!')
@@ -436,7 +425,7 @@ engine_glm <- function(x,
         prediction <- terra::mask(prediction, self$get_data("template"))
 
       } else {
-        stop("GLM prediction failed!")
+        cli::cli_abort("GLM prediction failed!")
       }
       try({rm(out, full)},silent = TRUE)
     } else {
@@ -765,7 +754,7 @@ engine_glm <- function(x,
         assertthat::assert_that(utils::hasName(df,"x")&&utils::hasName(df,"y"),
                                 msg = "Projection data.frame has no valid coordinates or differs in grain!")
         prediction <- try({
-          terra::rast(df[,c("x", "y")],
+          terra::rast(df[,c("x", "y", "rowid")],
                       crs = terra::crs(model$background),
                       type = "xyz") |>
             emptyraster()

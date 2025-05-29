@@ -325,11 +325,11 @@ methods::setMethod(
       if(!is.null(xvar) && !is.null(yvar)){
         # Align if mismatching
         if(!is_comparable_raster(obj, xvar)){
-          warning('xvariable not aligned with prediction. Aligning them now...')
+          cli::cli_alert_warning('xvariable not aligned with prediction. Aligning them now...')
           xvar <- alignRasters(xvar, obj, method = 'bilinear', func = mean, cl = FALSE)
         }
         if(!is_comparable_raster(obj, yvar)){
-          warning('yvariable not aligned with prediction. Aligning them now...')
+          cli::cli_alert_warning('yvariable not aligned with prediction. Aligning them now...')
           yvar <- alignRasters(yvar, obj, method = 'bilinear', func = mean, cl = FALSE)
         }
       } else {
@@ -338,7 +338,7 @@ methods::setMethod(
                                 msg = "A multi layer environmental stack has to be supplied directly!")
 
         if(!is_comparable_raster(obj, envvars)){
-          warning('Predictorstack not aligned with prediction. Aligning them now...')
+          cli::cli_alert_warning('Predictorstack not aligned with prediction. Aligning them now...')
           envvars <- alignRasters(envvars, obj, method = 'bilinear', func = mean, cl = FALSE)
         }
       }

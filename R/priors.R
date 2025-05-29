@@ -83,7 +83,7 @@ methods::setMethod(
     if(any(vars == "spde")){
       if(any(duplicated(cbind(vars,types)))){
         ll <- ll[-which(duplicated(cbind(vars,types),fromLast = TRUE))]
-        warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
+        cli::cli_alert_warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
       }
     } else {
       # Remove duplicated variables, taking only the one added
@@ -183,7 +183,7 @@ methods::setMethod(
     if(any(vars == "spde")){
       if(any(duplicated(cbind(vars,types)))){
         ll <- ll[-which(duplicated(cbind(vars,types),fromLast = TRUE))]
-        warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
+        cli::cli_alert_warning(paste0('Ignoring duplicated prior(s) for: ', paste0(vars[which(duplicated(vars))],collapse = ', ')))
       }
     } else {
       # Remove duplicated variables, taking only the one added

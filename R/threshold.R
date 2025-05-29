@@ -184,6 +184,10 @@ methods::setMethod(
                            field_occurrence = field_occurrence, format = format,
                            return_threshold = return_threshold)
     assertthat::assert_that(is.Raster(out))
+
+    # If there are multiple, only take the first one (mean)
+    if(terra::nlyr(out)>1) out <- out[[grep("mean", names(out))]]
+
     # Add result to new obj and clean up old thresholds before
     tr_lyr <- grep('threshold', obj$show_rasters(),value = TRUE)
     new_obj <- obj$clone(deep = TRUE)
@@ -297,7 +301,7 @@ methods::setMethod(
       # Specify by type:
       if(method == "fixed"){
         # Fixed threshold. Confirm to be set
-        assertthat::assert_that(is.numeric(value), msg = 'Fixed value is missing!')
+        assertthat::assert_that(is.numeric(value), msg = 'For method Fixed, a constant value needs to be supplied!')
         tr <- value
       } else if(method == "mtp"){
         assertthat::assert_that(!is.null(poi_pres),msg = "Threshold method requires supplied point data!")
@@ -337,7 +341,7 @@ methods::setMethod(
         ex <- terra::spatSample(raster_thresh, size = 1e6, method = "regular",
                                  na.rm = TRUE, exhaustive = TRUE)
         ex <- subset(ex, stats::complete.cases(ex))
-        if(nrow(ex)<5) stop("Not enough values for clustering found...")
+        if(nrow(ex)<5) cli::cli_abort("Not enough values for clustering found...")
         clus <- stats::kmeans(ex, centers = 2)
         tr <- clus$centers[which.max(clus$centers[,1])]
         rm(clus, ex)
@@ -431,8 +435,8 @@ methods::setMethod(
 #'
 #' @param obj A [BiodiversityScenario] object to which an existing threshold is
 #' to be added.
-#' @param value A [`numeric`] value specifying the specific threshold for scenarios
-#' (Default: \code{NULL} Grab from object).
+#' @param value A [`numeric`] value specifying
+#' the specific threshold for scenarios (Default: \code{NULL} grabs the value from \code{obj}).
 #' @param ... Any other parameter. Used to fetch value if set somehow.
 #'
 #' @rdname threshold
@@ -450,9 +454,6 @@ methods::setMethod(
                               msg = "Parameter value not found and other numeric values not found?")
     }
 
-    # Assert that predicted raster is present
-    assertthat::assert_that( is.Raster(obj$get_model()$get_data('prediction')) )
-
     # Make a clone copy of the object
     new <- obj$clone(deep = TRUE)
 
@@ -463,7 +464,7 @@ methods::setMethod(
                                msg = 'Call \' threshold \' for prediction first!')
       # Get threshold layer
       tr_lyr <- grep('threshold', new$get_model()$show_rasters(), value = TRUE)
-      if(length(tr_lyr)>1) warning("There appear to be multiple thresholds. Using the first one.")
+      if(length(tr_lyr)>1) cli::cli_alert_warning("There appear to be multiple thresholds. Using the first one.")
       ras_tr <- new$get_model()$get_data( tr_lyr[1] )
       value <- attr(ras_tr[[1]], 'threshold')
       names(value) <- attr(ras_tr[[1]], 'method')

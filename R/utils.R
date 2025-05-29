@@ -91,7 +91,7 @@ modal <- function(x, na.rm = TRUE) {
 check_package <- function(x) {
   assertthat::assert_that(is.character(x))
   if (!requireNamespace(x, quietly = TRUE)) {
-    stop(paste0("Package \"",x,"\" needed for this function to work. Please install it."),
+    cli::cli_abort(paste0("Package \"",x,"\" needed for this function to work. Please install it."),
          call. = FALSE)
   }
 }
@@ -292,12 +292,57 @@ hingeval <- function (x, min, max){
 #' Threshold transformation
 #' @param x A [`vector`] with numeric values.
 #' @param knot [`numeric`] threshold value as cutoff.
+#' @param sense [`character`] on the direction as gt, gte, lt or lte (Default: \code{"gte"}).
 #'
 #' @noRd
 #'
 #' @keywords internal
-thresholdval <- function(x, knot) {
-    ifelse(x >= knot, 1, 0)
+thresholdval <- function(x, knot, sense = "gte") {
+  assertthat::assert_that(is.character(sense))
+  switch(sense,
+    "gt" = ifelse(x > knot, 1, 0),
+    "gte" = ifelse(x >= knot, 1, 0),
+    "lt" = ifelse(x < knot, 1, 0),
+    "lte" = ifelse(x <= knot, 1, 0)
+  )
+}
+
+#' Rescale vector to a new range
+#'
+#' @description
+#' This function uses the [scales] R-package by default to rescale
+#' a given numeric value to a new range from \code{0} to \code{1}.
+#' Alternatively the calculation could be done as \code{x/max(x)}.
+#'
+#' @param v A [`vector`] of [`numeric`] estimates to be normalized.
+#' @param method A [`character`] on which option to applied.
+#'
+#' @returns A [`vector`] of rescaled numerisanitized [`character`].
+#' @keywords utils, internal
+#'
+#' @noRd
+scale_weight <- function(v, method = "scale"){
+  if(is.null(v)) return(NULL) # Return dummy 1 for equal weight
+  if(length(v)==0) return(NULL)
+  assertthat::assert_that(
+    length(v)>1,
+    is.character(method)
+  )
+  # Different methods
+  method <- match.arg(method, choices = c("scale", "max"),several.ok = FALSE)
+
+  # Check for NA and set to 0
+  if(anyNA(v)) v[which(is.na(v))] <- 1e-6
+
+  if(method == "scale"){
+    check_package("scales")
+    v <- scales::rescale(v, to = c(1e-6, 1))
+  } else if(method == "max"){
+    v <- v / max(v, na.rm = TRUE)
+  }
+
+  assertthat::assert_that(all(is.numeric(v)))
+  return(v)
 }
 
 #' Sanitize variable names
@@ -340,74 +385,6 @@ sanitize_names <- function(names){
   return(
     as.character(new_names)
     )
-}
-
-#' Clamp a predictor matrix by given values
-#'
-#' @description To limit extreme extrapolation it is possible to \code{'clamp'}
-#' an existing projection to the range of predictor values observed during model
-#' training. This function takes an internal model matrix and restricts the
-#' values seen in the predictor matrix to those observed during training.
-#'
-#' @param model A [`list`] with the input data used for inference. Created during model setup.
-#' @param pred An optional [`data.frame`] of the prediction container.
-#'
-#' @note This function is meant to be used within a certain \code{"engine"} or
-#' within [`project`].
-#'
-#' @returns A [`data.frame`] with the clamped predictors.
-#'
-#' @keywords utils
-#'
-#' @references
-#' Phillips, S. J., Anderson, R. P., Dudík, M., Schapire, R. E., & Blair, M. E. (2017).
-#' Opening the black box: An open-source release of Maxent. Ecography.
-#' https://doi.org/10.1111/ecog.03049
-#'
-#' @noRd
-#'
-#' @keywords internal
-clamp_predictions <- function(model, pred){
-  assertthat::assert_that(
-    is.list(model),
-    assertthat::has_name(model, "biodiversity"),
-    (is.data.frame(pred) || is.matrix(pred)) || missing(pred)
-  )
-
-  # For each biodiversity dataset, calculate the range of predictors observed
-  vars_clamp <- data.frame()
-  for(ds in model$biodiversity){
-    # Calculate range for each NUMERIC variable
-    rr <- apply(ds$predictors[,ds$predictors_names[ds$predictors_types[, 2] == "numeric"], drop = FALSE],
-                MARGIN = 2, function(z) range(z, na.rm = TRUE)) |>
-      t() |> as.data.frame() |> tibble::rownames_to_column("variable")
-    names(rr) <- c("variable", "min", "max")
-    vars_clamp <- rbind(vars_clamp, rr)
-    rm(rr)
-  }
-
-  # Aggregate if multiple variables
-  if(anyDuplicated(vars_clamp$variable) > 0){
-    o1 <- aggregate(vars_clamp$min, by = list(vars_clamp$variable), FUN = min)
-    o2 <- aggregate(vars_clamp$max, by = list(vars_clamp$variable), FUN = max)
-    names(o1) <- c("variable", "min")
-    names(o2) <- c("variable", "max")
-    vars_clamp <- merge(o1, o2)
-  }
-  # --- #
-  # Now clamp either predictors
-  if(missing(pred)) pred <- model$predictors
-
-  # Now clamp the prediction matrix with the clamped variables
-  for (v in intersect(vars_clamp$variable, names(pred))) {
-    pred[, v] <- pmin(
-      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
-      vars_clamp$max[vars_clamp$variable==v])
-  }
-
-  assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),
-                           nrow(pred)>0)
-  return(pred)
 }
 
 #' Outlier detection via reverse jackknife
@@ -631,109 +608,4 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
     }
   }
   return(locs)
-}
-
-#' @title Shows size of objects in the R environment
-#' @description Shows the size of the objects currently in the R environment.
-#' Helps to locate large objects cluttering the R environment and/or
-#' causing memory problems during the execution of large workflows.
-#'
-#' @param n Number of objects to show, Default: `10`
-#' @return A data frame with the row names indicating the object name,
-#' the field 'Type' indicating the object type, 'Size' indicating the object size,
-#' and the columns 'Length/Rows' and 'Columns' indicating the object dimensions if applicable.
-#'
-#' @examples
-#' if(interactive()){
-#'
-#'  #creating dummy objects
-#'  x <- matrix(runif(100), 10, 10)
-#'  y <- matrix(runif(10000), 100, 100)
-#'
-#'  #reading their in-memory size
-#'  objects_size()
-#'
-#' }
-#' @author Bias Benito
-#' @rdname objects_size
-#' @importFrom utils object.size
-#' @export
-objects_size <- function(n = 10) {
-
-  .ls.objects <- function (
-    pos = 1,
-    pattern,
-    order.by,
-    decreasing=FALSE,
-    head=FALSE,
-    n=5
-  ){
-
-    napply <- function(names, fn) sapply(
-      names,
-      function(x) fn(get(x, pos = pos))
-    )
-
-    names <- ls(
-      pos = pos,
-      pattern = pattern
-    )
-
-    obj.class <- napply(
-      names,
-      function(x) as.character(class(x))[1]
-    )
-
-    obj.mode <- napply(
-      names,
-      mode
-    )
-
-    obj.type <- ifelse(
-      is.na(obj.class),
-      obj.mode,
-      obj.class
-    )
-
-    obj.prettysize <- napply(
-      names,
-      function(x) {format(utils::object.size(x), units = "auto") }
-    )
-
-    obj.size <- napply(
-      names,
-      object.size
-    )
-
-    obj.dim <- t(
-      napply(
-        names,
-        function(x)as.numeric(dim(x))[1:2]
-      )
-    )
-
-    vec <- is.na(obj.dim)[, 1] & (obj.type != "function")
-
-    obj.dim[vec, 1] <- napply(names, length)[vec]
-
-    out <- data.frame(
-      obj.type,
-      obj.prettysize,
-      obj.dim
-    )
-    names(out) <- c("Type", "Size", "Length/Rows", "Columns")
-    if (!missing(order.by))
-      out <- out[order(out[[order.by]], decreasing=decreasing), ]
-    if (head)
-      out <- head(out, n)
-    out
-  }
-
-  .ls.objects(
-    order.by = "Size",
-    decreasing=TRUE,
-    head=TRUE,
-    n=n
-  )
-
 }

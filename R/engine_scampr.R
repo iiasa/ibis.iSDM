@@ -81,25 +81,14 @@ engine_scampr <- function(x,
   dens <- match.arg(dens, choices = c("posterior", "prior"), several.ok = FALSE)
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(x$background),
-      crs = terra::crs(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
-      )
-    )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(x$background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Set up the parameter list
   params <- list(
@@ -428,7 +417,7 @@ engine_scampr <- function(x,
       }
     }
 
-    if(inherits(fit_scampr, "try-error")) stop("Model failed to converge with provided input data!")
+    if(inherits(fit_scampr, "try-error")) cli::cli_abort("Model failed to converge with provided input data!")
 
     # --- #
     # Predict spatially
@@ -468,7 +457,7 @@ engine_scampr <- function(x,
         names(prediction) <- "mean"
         prediction <- terra::mask(prediction, self$get_data("template"))
       } else {
-        stop("SCAMPR prediction failed!")
+        cli::cli_abort("SCAMPR prediction failed!")
       }
       try({rm(out, full, full_sub)},silent = TRUE)
     } else {
@@ -670,7 +659,7 @@ engine_scampr <- function(x,
         prediction[df_sub$rowid] <- out
         names(prediction) <- "mean"
       } else {
-        stop("Spartial prediction of scampr failed...")
+        cli::cli_abort("Spartial prediction of scampr failed...")
       }
 
       # Do plot and return result
@@ -727,7 +716,7 @@ engine_scampr <- function(x,
       # Get model for object
       model <- self$model
       if(!is.Waiver(model$latent)){
-        stop("Plotting of spatial field not yet implemented!")
+        cli::cli_abort("Plotting of spatial field not yet implemented!")
       }
     }, overwrite = TRUE)
 
@@ -803,7 +792,7 @@ engine_scampr <- function(x,
         }
         names(prediction) <- layer
       } else {
-        stop("Projection of scampr failed...")
+        cli::cli_abort("Projection of scampr failed...")
       }
 
       return(prediction)

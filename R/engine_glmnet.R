@@ -97,25 +97,14 @@ engine_glmnet <- function(x,
   if(type=="predictor") type <- "link" # Convenience conversion
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(x$background),
-      crs = terra::crs(x$background),
-      res = c(diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(x$background)[c(1,3)]) ) / 100
-      )
-    )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(x$background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Set up the parameter list
   params <- list(
@@ -150,7 +139,7 @@ engine_glmnet <- function(x,
     invisible()
   },overwrite = TRUE)
 
-  # Setup function
+  #### Setup function ----
   eg$set("public", "setup", function(model, settings = NULL, ...){
     # Simple security checks
     assertthat::assert_that(
@@ -190,47 +179,55 @@ engine_glmnet <- function(x,
       bg <- self$get_data("template")
       assertthat::assert_that(!is.na( terra::global(bg, "min", na.rm = TRUE)[,1]))
 
-      # Add pseudo-absence points
-      presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
-                                   field_occurrence = 'observed',
-                                   template = bg,
-                                   settings = model$biodiversity[[1]]$pseudoabsence_settings)
-      if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
-      # Sample environmental points for absence only points
-      abs <- subset(presabs, observed == 0)
-      # Re-extract environmental information for absence points
-      envs <- get_rastervalue(coords = abs[,c('x','y')],
-                              env = model$predictors_object$get_data(df = FALSE),
-                              rm.na = FALSE)
-      if(assertthat::has_name(model$biodiversity[[1]]$predictors, "Intercept")){ envs$Intercept <- 1}
+      len <- nrow(model$biodiversity[[1]]$observations)
+      if(sum(model$biodiversity[[1]]$observations[['observed']]==0)<pmax(len/2,1000)){
+        if(getOption('ibis.setupmessages', default = TRUE)) cli::cli_alert_info("Adding background points to poipo model observations!")
 
-      # Format out
-      df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
-                  envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
-      any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
-      if(length(any_missing)>0) {
-        presabs <- presabs[-any_missing,] # This works as they are in the same order
-        model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+        # Add pseudo-absence points
+        presabs <- add_pseudoabsence(df = model$biodiversity[[1]]$observations,
+                                     field_occurrence = 'observed',
+                                     template = bg,
+                                     settings = model$biodiversity[[1]]$pseudoabsence_settings)
+        if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
+        # Sample environmental points for absence only points
+        abs <- subset(presabs, observed == 0)
+        # Re-extract environmental information for absence points
+        envs <- get_rastervalue(coords = abs[,c('x','y')],
+                                env = model$predictors_object$get_data(df = FALSE),
+                                rm.na = FALSE)
+        if(assertthat::has_name(model$biodiversity[[1]]$predictors, "Intercept")){ envs$Intercept <- 1}
+
+        # Format out
+        df <- rbind(model$biodiversity[[1]]$predictors[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)],
+                    envs[,c('x','y','Intercept', model$biodiversity[[1]]$predictors_names)] )
+        any_missing <- which(apply(df, 1, function(x) any(is.na(x))))
+        if(length(any_missing)>0) {
+          presabs <- presabs[-any_missing,] # This works as they are in the same order
+          model$biodiversity[[1]]$expect <- model$biodiversity[[1]]$expect[-any_missing]
+        }
+        df <- subset(df, stats::complete.cases(df))
+        assertthat::assert_that(nrow(presabs) == nrow(df))
+
+        # Check that expect matches
+        if(length(model$biodiversity[[1]]$expect)!=nrow(df)){
+          # Fill the absences with 1 as multiplier. This works since absences follow the presences
+          model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
+                                               rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
+        }
+
+        # Overwrite observation data
+        model$biodiversity[[1]]$observations <- presabs
+
+        # Preprocessing security checks
+        assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
+                                 any(!is.na(presabs[['observed']])),
+                                 length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$observations),
+                                 nrow(df) == nrow(model$biodiversity[[1]]$observations)
+        )
+      } else {
+        if(getOption('ibis.setupmessages', default = TRUE)) cli::cli_alert_info("Not adding pseudo-absence points.")
+        df <- model$biodiversity[[1]]$observations
       }
-      df <- subset(df, stats::complete.cases(df))
-      assertthat::assert_that(nrow(presabs) == nrow(df))
-
-      # Check that expect matches
-      if(length(model$biodiversity[[1]]$expect)!=nrow(df)){
-        # Fill the absences with 1 as multiplier. This works since absences follow the presences
-        model$biodiversity[[1]]$expect <- c( model$biodiversity[[1]]$expect,
-                                             rep(1, nrow(presabs)-length(model$biodiversity[[1]]$expect) ))
-      }
-
-      # Overwrite observation data
-      model$biodiversity[[1]]$observations <- presabs
-
-      # Preprocessing security checks
-      assertthat::assert_that( all( model$biodiversity[[1]]$observations[['observed']] >= 0 ),
-                               any(!is.na(presabs[['observed']])),
-                               length(model$biodiversity[[1]]$expect) == nrow(model$biodiversity[[1]]$observations),
-                               nrow(df) == nrow(model$biodiversity[[1]]$observations)
-      )
 
       # Add offset if existent
       if(!is.Waiver(model$offset)){
@@ -257,15 +254,19 @@ engine_glmnet <- function(x,
       # Rasterize observed presences
       pres <- terra::rasterize( guess_sf(model$biodiversity[[1]]$observations[,c("x","y")]),
                                 bg, fun = 'count', background = 0)
-      # Get for the full dataset
-      w_full <- ppm_weights(df = model$predictors,
-                            pa = pres[],
-                            bg = bg,
-                            weight = 1 # Set those to 1 so that absences become ratio of pres/abs
-      )
 
-      # Add exposure to full model predictor
-      model$exposure <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1]) # Multiply with prior weight (first value)
+      # Unless set to inference only, also use full weights
+      if(!settings$get("inference_only")){
+        # Get for the full dataset
+        w_full <- ppm_weights(df = model$predictors,
+                              pa = pres[],
+                              bg = bg,
+                              weight = 1 # Set those to 1 so that absences become ratio of pres/abs
+        )
+
+        # Add exposure to full model predictor
+        model$exposure <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1]) # Multiply with prior weight (first value)
+      }
 
     } else if(fam == "binomial"){
       # Check that observations are all <=1
@@ -859,6 +860,10 @@ engine_glmnet <- function(x,
       # Make a subset of non-na values
       df$rowid <- 1:nrow(df)
       df_sub <- base::subset(df, stats::complete.cases(df))
+      if(nrow(df_sub)==0) {
+        cli::cli_alert_danger("Every observation has missing data?")
+        df_sub <- df
+      }
       if(!is.Waiver(model$offset)) ofs <- model$offset[df_sub$rowid] else ofs <- NULL
       assertthat::assert_that(nrow(df_sub)>0)
 

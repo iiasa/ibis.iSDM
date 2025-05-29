@@ -118,6 +118,8 @@ test_that('Add further tests for model fits', {
   expect_s4_class(o, "SpatRaster")
   expect_length(names(o), 2) # Should be at maximum 2 layers
 
+
+
   # ----------- #
   # Partial stuff
   skip_if_not_installed("pdp")

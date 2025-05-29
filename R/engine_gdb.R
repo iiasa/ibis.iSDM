@@ -86,25 +86,14 @@ engine_gdb <- function(x,
   background <- x$background
 
   # Create a background raster
-  if(is.Waiver(x$predictors)){
-    # Create from background
-    template <- terra::rast(
-      ext = terra::ext(background),
-      crs = terra::crs(background),
-      res = c(diff( (sf::st_bbox(background)[c(1,3)]) ) / 100, # Simplified assumption for resolution
-              diff( (sf::st_bbox(background)[c(1,3)]) ) / 100
-             )
-      )
-  } else {
-    # If predictor existing, use them
-    template <- emptyraster(x$predictors$get_data() )
+  template <- create_background(x)
+
+  # mask template where all predictor layers are NA; change na.rm = FALSE for complete.cases
+  if (!is.Waiver(x$predictors)){
+    if(x$predictors$is_spatial()){
+      template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
+    }
   }
-
-  # Burn in the background
-  template <- terra::rasterize(background, template, field = 0)
-
-  # mask template where all predictor layers are NA; change na.rm = FALSE for comeplete.cases
-  if (!is.Waiver(x$predictors)) template <- terra::mask(template, sum(x$predictors$get_data(), na.rm = TRUE))
 
   # Set up boosting control
   bc <- mboost::boost_control(mstop = iter,
@@ -272,7 +261,7 @@ engine_gdb <- function(x,
       # Add exposure to full model predictor
       model$exposure <- w_full * (1/unique(model$biodiversity[[1]]$expect)[1])
 
-    } else if(model$biodiversity[[1]]$family != 'poisson'){
+    } else if(model$biodiversity[[1]]$family == 'binomial'){
       # calculating the case weights (equal weights)
       # the order of weights should be the same as presences and backgrounds in the training data
       prNum <- as.numeric(table(model$biodiversity[[1]]$observations[['observed']])["1"]) # number of presences
@@ -341,41 +330,37 @@ engine_gdb <- function(x,
                   data.frame(observed = model$biodiversity[[1]]$observations[,'observed', drop = TRUE]) )
     w <- model$biodiversity[[1]]$expect
 
-    # Select predictors
-    full <- model$predictors
-    full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
-    full$cellid <- rownames(full) # Add row.names
-    full$w <- model$exposure
-    full$Intercept <- 1
-    full <- subset(full, stats::complete.cases(full))
-
-    # Clamp?
-    if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+    # Select predictors for full if needed
+    if(!settings$get('inference_only')){
+      full <- model$predictors
+      full <- subset(full, select = c('x','y',model$biodiversity[[1]]$predictors_names))
+      full$cellid <- rownames(full) # Add row.names
+      full$Intercept <- 1
+      full <- subset(full, stats::complete.cases(full))
+      # Clamp?
+      if( settings$get("clamp") ) full <- clamp_predictions(model, full)
+      # Weight scaling
+      full_w <- scale_weight(model$exposure)
+      if(length(full_w)!=nrow(full)){
+        full$w <- full_w[as.numeric(full$cellid)]
+      } else full$w <- full_w
+      assertthat::assert_that(
+        all(model$biodiversity[[1]]$predictors_names %in% names(full)),
+        all(names(full[,model$biodiversity[[1]]$predictors_names]) %in% names(data)),
+        all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      )
+    } else { full <- NULL }
 
     # Rescale exposure
-    check_package('scales')
-    w <- scales::rescale(w, to = c(1e-6, 1))
-    full$w <- scales::rescale(full$w, to = c(1e-6, 1))
-    if(anyNA(w)){
-      w[is.na(w)] <- 1e-6
-      full$w[is.na(full$w)] <- 1e-6
-    }
+    w <- scale_weight(w)
 
     assertthat::assert_that(
       is.null(w) || length(w) == nrow(data),
       is.formula(equation),
-      all(model$biodiversity[[1]]$predictors_names %in% names(full)),
-      all(names(full[,model$biodiversity[[1]]$predictors_names]) %in% names(data)),
-      all( model$biodiversity[[1]]$predictors_names %in% names(full) )
+      msg = "(Internal) Number of weights do not match number of observations?"
     )
 
     if(!is.Waiver(model$offset)){
-      # Add offset to full prediction and load vector
-      n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
-      names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
-      # Add weights
-      # n <- n + full$w
-      full <- cbind(full, n)
       # And for biodiversity object
       n <- cbind(model$biodiversity[[1]]$offset[,"spatial_offset"],
                  model$biodiversity[[1]]$offset[,"spatial_offset"]) |> as.data.frame()
@@ -383,6 +368,14 @@ engine_gdb <- function(x,
       # Add weights
       # n <- n + w
       data <- cbind(data, n)
+      if(!settings$get("inference_only")){
+        # Add offset to full prediction and load vector
+        n <- data.frame(model$offset[as.numeric(full$cellid), "spatial_offset"], model$offset[as.numeric(full$cellid), "spatial_offset"] )
+        names(n) <- c( "spatial_offset", paste0('offset(',"spatial_offset",')') )
+        # Add weights
+        # n <- n + full$w
+        full <- cbind(full, n)
+      }
     }
 
     # --- #
@@ -568,6 +561,10 @@ engine_gdb <- function(x,
       newdata$rowid <- 1:nrow(newdata)
       # Subset to non-missing data
       newdata_sub <- subset(newdata, stats::complete.cases(newdata))
+      if(nrow(newdata_sub)==0) {
+        cli::cli_alert_danger("Every observation has missing data?")
+        newdata_sub <- newdata
+      }
 
       if(getOption("ibis.runparallel",default = FALSE)){
         check_package("doFuture")

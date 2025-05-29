@@ -13,6 +13,8 @@ NULL
 #'
 #' @param x A [`BiodiversityScenario`] object with set predictors. Note that some
 #' constrains such as \code{MigClim} can still simulate future change without projections.
+#' Alternatively a [`DistributionModel`] object can be supplied if other scenario
+#' functions are not needed. In this case provide a \code{env} parameter value.
 #' @param date_interpolation A [`character`] on whether dates should be interpolated.
 #' Options include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
 #' @param stabilize A [`logical`] value indicating whether the suitability projection
@@ -20,6 +22,8 @@ NULL
 #' @param stabilize_method [`character`] stating the stabilization method to be
 #' applied. Currently supported is \code{`loess`}.
 #' @param layer A [`character`] specifying the layer to be projected (Default: \code{"mean"}).
+#' @param env An optional [`SpatRaster`] or [`data.frame`] object for prediction.
+#' Ignored unless a [`DistributionModel`] object is supplied (Default: \code{NULL}).
 #' @param verbose Setting this [`logical`] value to \code{TRUE} prints out further
 #' information during the model fitting (Default: \code{FALSE}).
 #' @param ... passed on parameters.
@@ -97,7 +101,7 @@ methods::setMethod(
   "project",
   methods::signature(x = "BiodiversityScenario"),
   function(x, date_interpolation = "none", stabilize = FALSE, stabilize_method = "loess",
-           layer = "mean", verbose = getOption('ibis.setupmessages', default = TRUE), ...){
+           layer = "mean", env = NULL, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
     # MJ: Workaround to ensure project generic does not conflict with terra::project
     mod <- x
     # date_interpolation = "none"; stabilize = FALSE; stabilize_method = "loess"; layer="mean"
@@ -127,7 +131,7 @@ methods::setMethod(
                             msg = "No model or coefficients found!")
     # Get predictors
     new_preds <- mod$get_predictors()
-    if(is.Waiver(new_preds)) stop('No scenario predictors found.')
+    if(is.Waiver(new_preds)) cli::cli_abort('No scenario predictors found.')
 
     # Check extents of models and raise a warning otherwise
     if(!is.Waiver(fit$model$predictors_object)){
@@ -135,7 +139,6 @@ methods::setMethod(
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow',paste0('Model predictors and scenario predictors have different resolution!'))
       }
     }
-
 
     new_crs <- new_preds$get_projection()
     if(is.na(new_crs)) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','yellow','Missing projection of future predictors.')
@@ -250,12 +253,22 @@ methods::setMethod(
     # Get constraints, threshold values and other parameters
     scenario_threshold <- mod$get_threshold()
     if(!is.Waiver(scenario_threshold)){
-      # Not get the baseline raster
-      thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
-      assertthat::assert_that(!is.na(thresh_reference))
-      baseline_threshold <- mod$get_model()$get_data(thresh_reference)
-
+      # If scenario threshold is numeric and not a raster, create a baseline
+      if(is.numeric(scenario_threshold) && !is.Raster(scenario_threshold)){
+        baseline_threshold <- try({
+          # Get prediction and threshold
+          threshold(fit$get_data(),method = 'fixed', value = scenario_threshold)
+        },silent = TRUE)
+        if(inherits(baseline_threshold, "try-error")) cli::cli_alert_danger("Set thresholds require a prediction first!")
+      } else {
+        # Assume an existing threshold exists
+        thresh_reference <- grep('threshold',fit$show_rasters(),value = T)[1] # Use the first one always
+        assertthat::assert_that(!is.na(thresh_reference))
+        baseline_threshold <- fit$get_data(thresh_reference)
+      }
+      # Correct CRS just in case
       if(is.na(terra::crs(baseline_threshold))) terra::crs(baseline_threshold) <- terra::crs( background )
+
       # Furthermore apply new limits also to existing predictions (again)
       if(!is.null( mod$get_limits() )){
         # Get Limit and settings from model
@@ -282,7 +295,6 @@ methods::setMethod(
         baseline_threshold <- terra::extend(baseline_threshold, template)
         baseline_threshold <- terra::crop(baseline_threshold, template)
       }
-
     } else {
       baseline_threshold <- new_waiver()
     }
@@ -363,7 +375,7 @@ methods::setMethod(
       # check that timestep has data
       assertthat::assert_that(nrow(nd)>0, !all(is.na(dplyr::select(nd, dplyr::any_of(mod_pred_names)))))
 
-      # Apply adaptability constrain
+      # Apply adaptability constrain which currently tend alter variables directly
       if("adaptability" %in% names(scenario_constraints)){
         if(scenario_constraints[["adaptability"]]$method == "nichelimit") {
           nd <- .nichelimit(newdata = nd, model = mod$get_model()[['model']],
@@ -371,6 +383,14 @@ methods::setMethod(
                            value = scenario_constraints[["adaptability"]]$params['value'],
                            increment = scenario_constraints[["adaptability"]]$params['increment'],
                            increment_step = which(step==times) )
+        }
+        if(scenario_constraints[["adaptability"]]$method == "fixedlimit") {
+          nd <- .fixedlimit(newdata = nd, model = mod$get_model()[['model']],
+                            names = scenario_constraints[["adaptability"]]$params['names'],
+                            value = scenario_constraints[["adaptability"]]$params['value'] |> as.numeric(),
+                            value_min = scenario_constraints[["adaptability"]]$params['value_min'] |> as.numeric(),
+                            value_max = scenario_constraints[["adaptability"]]$params['value_max'] |> as.numeric()
+                            )
         }
       }
 
@@ -739,6 +759,78 @@ methods::setMethod(
     out <- mod$clone(deep = TRUE)
     out$scenarios <- proj
     out$scenarios_migclim <- mc
+    return(out)
+  }
+)
+
+#' @rdname project
+#' @export
+project.DistributionModel <- function(x,...) project(x,...)
+
+#' @rdname project
+#' @export
+methods::setMethod(
+  "project",
+  methods::signature(x = "DistributionModel"),
+  function(x, env, layer = "mean", verbose = getOption('ibis.setupmessages', default = TRUE), ...){
+    assertthat::assert_that(
+      is.Raster(env) || is.data.frame(env),
+      is.character(layer)
+    )
+    # Get coefficients and model
+    # co <- x$get_coefficients()[,1]
+    co <- x$model$biodiversity[[1]]$predictors_names
+    model <- x$model
+    settings <- x$settings
+
+    # Further checks
+    assertthat::assert_that(
+      length(co)>0,
+      is.list(model)
+    )
+    # If names are to be sanitized, cleanl
+    if(settings$get("ibis.cleannames")){
+      nn <- sanitize_names(names(env))
+      names(env) <- nn
+    }
+
+    # Check that all predictor names are present
+    assertthat::assert_that(
+      all(co %in% names(env)),
+      msg = "Not all coefficients are found in the fitted model..."
+    )
+
+    # Make a template
+    if(is.Raster(env)) {
+      template <- emptyraster(env)
+    } else {
+      assertthat::assert_that(
+        utils::hasName(env, "x") && utils::hasName(env, "y"),
+        msg = "Coordinates as x and y need to be supplied!"
+      )
+      # Create template
+      template <- try({
+        terra::rast(env[,c("x", "y")],
+                    crs = terra::crs(model$background),
+                    type = "xyz") |>
+          emptyraster()
+      },silent = TRUE)
+    }
+
+    # If raster convert to data.frame for further predictions
+    if(is.Raster(env)) env <- terra::as.data.frame(env, xy = TRUE, na.rm =FALSE)
+
+    # --- #
+    # Now predict
+    out <- try({ x$project(newdata = env, layer = layer) })
+    if(inherits(out, 'try-error')){
+      cli::cli_alert_danger("Projection failed! Returning emptyraster gracefully")
+      return(template)
+    }
+    names(out) <- paste0("suitability", "_", layer)
+    if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( model$background )
+    # --- #
+
     return(out)
   }
 )

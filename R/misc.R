@@ -190,7 +190,7 @@ ibis_set_strategy <- function(strategy = "sequential"){
 #' Small helper function to respecify the number of threads for parallel processing.
 #' @param threads A [`numeric`] greater thna \code{0}.
 #' @return Invisible
-#' @seealso [future], [ibis_future_run]
+#' @seealso [future]
 #' @keywords misc
 #' @export
 ibis_set_threads <- function(threads = 2){
@@ -286,7 +286,7 @@ ibis_future <- function(plan_exists = FALSE,
     # Define plan based on formulated strategy
     if(strategy == "slurm"){
       #TODO: See if a testing environment could be found.
-      stop("Not yet implemented")
+      cli::cli_abort("Not yet implemented")
       #e.g. cl <- makeCluster(4, type = "MPI")
     } else if(strategy == "sequential") {
       future::plan(strategy = "sequential")

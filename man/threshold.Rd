@@ -56,8 +56,8 @@ to be added.}
 
 \item{method}{A specifc method for thresholding. See details for available options.}
 
-\item{value}{A \code{\link{numeric}} value specifying the specific threshold for scenarios
-(Default: \code{NULL} Grab from object).}
+\item{value}{A \code{\link{numeric}} value specifying
+the specific threshold for scenarios (Default: \code{NULL} grabs the value from \code{obj}).}
 
 \item{point}{A \code{\link{sf}} object containing observational data used for model training.}
 

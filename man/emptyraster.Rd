@@ -4,10 +4,14 @@
 \alias{emptyraster}
 \title{Create an empty \code{SpatRaster} based on a template}
 \usage{
-emptyraster(x, ...)
+emptyraster(x, res = NULL, ...)
 }
 \arguments{
-\item{x}{A \code{SpatRaster*} object corresponding.}
+\item{x}{A \code{SpatRaster*}, \code{stars} or a \code{sf} object from which coordinates
+can be obtained. Note that for \code{sf} objects the parameter \code{res} needs
+to be supplied.}
+
+\item{res}{(Optional) \code{\link{numeric}} estimate on the resolution of the output (Default: \code{NULL}).}
 
 \item{...}{other arguments that can be passed to \code{\link{terra}}}
 }
