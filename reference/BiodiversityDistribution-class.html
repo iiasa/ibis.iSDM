@@ -11,7 +11,7 @@ classes. Generally stores all objects and parameters added to a model."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,7 +44,7 @@ classes. Generally stores all objects and parameters added to a model."><meta pr
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Biodiversity Distribution master class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/v0.1.6/R/class-biodiversitydistribution.R" class="external-link"><code>R/class-biodiversitydistribution.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/R/class-biodiversitydistribution.R" class="external-link"><code>R/class-biodiversitydistribution.R</code></a></small>
       <div class="d-none name"><code>BiodiversityDistribution-class.Rd</code></div>
     </div>
 
@@ -97,7 +97,7 @@ functions.</p>
 
 
 <dt><code>control</code></dt>
-<dd><p>An optional Control object.</p></dd>
+<dd><p>An optional Control object such as for biases.</p></dd>
 
 
 <dt><code>latentfactors</code></dt>
@@ -587,7 +587,7 @@ functions.</p>
 
 
 <dt><code>value</code></dt>
-<dd><p>A bias value as <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code>.</p></dd>
+<dd><p>A vector of supplied values. For <code>"bias"</code> those should be <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code>.</p></dd>
 
 
 </dl><p></p></div>
@@ -614,16 +614,24 @@ functions.</p>
 </div>
 <div class="section">
 <h4 id="returns-26">Returns<a class="anchor" aria-label="anchor" href="#returns-26"></a></h4>
-<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the bias object if found.</p>
+<p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the control object if found.</p>
 </div>
 
 </div><p></p><hr><a id="method-BiodiversityDistribution-rm_control"></a><div class="section">
 <h3 id="method-rm-control-">Method <code><a href="rm_control.html">rm_control()</a></code><a class="anchor" aria-label="anchor" href="#method-rm-control-"></a></h3>
 <p>Remove bias controls if found.</p><div class="section">
 <h4 id="usage-27">Usage<a class="anchor" aria-label="anchor" href="#usage-27"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">rm_control</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">BiodiversityDistribution</span><span class="op">$</span><span class="fu">rm_control</span><span class="op">(</span><span class="va">type</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
+<div class="section">
+<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>type</code></dt>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type of control object.</p></dd>
+
+
+</dl><p></p></div>
+</div>
 <div class="section">
 <h4 id="returns-27">Returns<a class="anchor" aria-label="anchor" href="#returns-27"></a></h4>
 <p>This object.</p>
@@ -661,7 +669,7 @@ functions.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
+<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A <code><a href="Log-class.html">Log</a></code> object.</p></dd>
 
@@ -717,7 +725,7 @@ functions.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-12">Arguments<a class="anchor" aria-label="anchor" href="#arguments-12"></a></h4>
+<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>names</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the predictors to be removed.</p></dd>
 
@@ -737,7 +745,7 @@ functions.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-13">Arguments<a class="anchor" aria-label="anchor" href="#arguments-13"></a></h4>
+<h4 id="arguments-14">Arguments<a class="anchor" aria-label="anchor" href="#arguments-14"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>names</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the priors to be removed.</p></dd>
 
@@ -853,7 +861,7 @@ functions.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-14">Arguments<a class="anchor" aria-label="anchor" href="#arguments-14"></a></h4>
+<h4 id="arguments-15">Arguments<a class="anchor" aria-label="anchor" href="#arguments-15"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -872,7 +880,7 @@ functions.</p>
 <span class="r-in"><span>package<span class="op">=</span><span class="st">'ibis.iSDM'</span>,mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Define model</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2025-05-29 10:32:31.852658 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2025-06-19 20:44:48.655659 | Creating distribution object...</span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] ".__enclos_env__"             "engine"                     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [3] "log"                         "offset"                     </span>
