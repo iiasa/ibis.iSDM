@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.1.6
+version: 0.1.7
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -585,7 +585,7 @@ references:
   title: gnlm
   abstract: 'gnlm: Generalized Nonlinear Regression Models'
   notes: Suggests
-  url: http://www.commanster.eu/rcode.html
+  url: https://www.commanster.eu/rcode.html
   repository: https://CRAN.R-project.org/package=gnlm
   authors:
   - family-names: Swihart
