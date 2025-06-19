@@ -166,6 +166,8 @@ methods::setMethod(
 #' object.
 #'
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param type A [`character`] vector describing the type of control to be removed.
+#' Can be missing.
 #'
 #' @family control
 #' @seealso [add_control_bias()]
@@ -187,18 +189,20 @@ NULL
 methods::setGeneric(
   "rm_control",
   signature = methods::signature("x"),
-  function(x) standardGeneric("rm_control"))
+  function(x, type) standardGeneric("rm_control"))
 
 #' @rdname rm_control
 methods::setMethod(
   "rm_control",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution") )
+  function(x, type) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            missing(type) || is.character(type)
+    )
     # Make a deep copy
     y <- x$clone(deep = TRUE)
 
-    y <- y$rm_control()
+    y <- y$rm_control(type)
     # Return x without control
     return(y)
   }

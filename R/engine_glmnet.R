@@ -805,14 +805,16 @@ engine_glmnet <- function(x,
     }, overwrite = TRUE)
 
     # Get coefficients from glmnet
-    obj$set("public", "get_coefficients", function(){
+    obj$set("public", "get_coefficients", function(exclude_intercept = TRUE){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
-      cofs <- tidy_glmnet_summary(obj)
+      cofs <- tidy_glmnet_summary(obj, exclude_intercept = exclude_intercept)
       names(cofs) <- c("Feature", "Beta")
-      # Remove intercept(s)
-      int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
-      if(length(int)>0) cofs <- cofs[-int,]
+      if(exclude_intercept){
+        # Remove intercept(s)
+        int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+        if(length(int)>0) cofs <- cofs[-int,]
+      }
       return(cofs)
     },overwrite = TRUE)
 

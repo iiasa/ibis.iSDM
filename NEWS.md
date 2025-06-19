@@ -1,4 +1,11 @@
-# ibis.iSDM 0.1.6 (current dev branch)
+# ibis.iSDM 0.1.7 (current dev branch)
+
+#### New features
+* Implementation of small ensemble of models for linear engines (`add_control_esm()`) #141
+
+#### Minor improvements and bug fixes
+
+# ibis.iSDM 0.1.6
 
 #### New features
 * Support for [`data.frame`] as predictors in `add_predictors()` #136

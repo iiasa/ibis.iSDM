@@ -5,12 +5,15 @@
 \alias{rm_control,BiodiversityDistribution-method}
 \title{Remove control from an existing distribution object}
 \usage{
-rm_control(x)
+rm_control(x, type)
 
-\S4method{rm_control}{BiodiversityDistribution}(x)
+\S4method{rm_control}{BiodiversityDistribution}(x, type)
 }
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+
+\item{type}{A \code{\link{character}} vector describing the type of control to be removed.
+Can be missing.}
 }
 \description{
 This function allows to remove set control obtions from an existing \link{distribution}

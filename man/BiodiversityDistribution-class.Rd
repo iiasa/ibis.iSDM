@@ -54,7 +54,7 @@ names(x)
 
 \item{\code{priors}}{An optional \code{\link{PriorList}} object.}
 
-\item{\code{control}}{An optional Control object.}
+\item{\code{control}}{An optional Control object such as for biases.}
 
 \item{\code{latentfactors}}{A \code{\link{character}} on whether latentfactors are used.}
 
@@ -534,7 +534,7 @@ Set new bias control
 
 \item{\code{method}}{The method used to create the object.}
 
-\item{\code{value}}{A bias value as \code{\link{numeric}}.}
+\item{\code{value}}{A vector of supplied values. For \code{"bias"} those should be \code{\link{numeric}}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -559,7 +559,7 @@ Get bias control (print name)
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A \code{\link{character}} with the bias object if found.
+A \code{\link{character}} with the control object if found.
 }
 }
 \if{html}{\out{<hr>}}
@@ -568,9 +568,16 @@ A \code{\link{character}} with the bias object if found.
 \subsection{Method \code{rm_control()}}{
 Remove bias controls if found.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_control()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_control(type)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{A \code{\link{character}} with the type of control object.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 This object.
 }

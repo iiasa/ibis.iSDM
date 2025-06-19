@@ -306,7 +306,7 @@ methods::setMethod(
   # Check for small lon-lat values
   if(terra::is.lonlat(baseline_threshold)){
     if(value < 1){
-      message('Very small average dispersal vlaue provided. Check that they are in unit m!')
+      cli::cli_alert_warning('Very small average dispersal vlaue provided. Check that they are in unit m!')
     }
   }
 

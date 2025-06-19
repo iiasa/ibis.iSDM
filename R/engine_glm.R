@@ -635,11 +635,11 @@ engine_glm <- function(x,
       return(rd)
     }, overwrite = TRUE)
 
-    # Get coefficients from glmnet
-    obj$set("public", "get_coefficients", function(){
+    # Get coefficients from model
+    obj$set("public", "get_coefficients", function(exclude_intercept = TRUE){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
-      cofs <- tidy_glm_summary(obj)
+      cofs <- tidy_glm_summary(obj, exclude_intercept = exclude_intercept)
       names(cofs)[1:2] <- c("Feature", "Beta")
       return(cofs)
     }, overwrite = TRUE)

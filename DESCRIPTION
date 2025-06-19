@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.1.6
+Version: 0.1.7
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -101,6 +101,7 @@ Collate:
     'add_constraint.R'
     'add_constraint_MigClim.R'
     'add_control_bias.R'
+    'add_control_esm.R'
     'add_latent.R'
     'add_limits_extrapolation.R'
     'class-log.R'
