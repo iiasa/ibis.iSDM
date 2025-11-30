@@ -32,7 +32,8 @@ It is essentially a wrapper for \code{\link[terra:extract]{terra::extract}}.
 }
 \examples{
 # Dummy raster:
-r <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
+r <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5,
+ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .5,sd = .1))
 # (dummy points)
 pp <- terra::spatSample(r,20,as.points = TRUE) |> sf::st_as_sf()
 

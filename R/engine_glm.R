@@ -635,11 +635,11 @@ engine_glm <- function(x,
       return(rd)
     }, overwrite = TRUE)
 
-    # Get coefficients from glmnet
-    obj$set("public", "get_coefficients", function(){
+    # Get coefficients from model
+    obj$set("public", "get_coefficients", function(exclude_intercept = TRUE){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
-      cofs <- tidy_glm_summary(obj)
+      cofs <- tidy_glm_summary(obj, exclude_intercept = exclude_intercept)
       names(cofs)[1:2] <- c("Feature", "Beta")
       return(cofs)
     }, overwrite = TRUE)
@@ -779,7 +779,7 @@ engine_glm <- function(x,
         assertthat::assert_that(utils::hasName(df,"x")&&utils::hasName(df,"y"),
                                 msg = "Projection data.frame has no valid coordinates or differs in grain!")
         prediction <- try({
-          terra::rast(df[,c("x", "y")],
+          terra::rast(df[,c("x", "y", "rowid")],
                       crs = terra::crs(model$background),
                       type = "xyz") |>
             emptyraster()

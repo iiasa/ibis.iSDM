@@ -307,9 +307,9 @@ methods::setMethod(
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding predictors...')
 
     if(!is.null(names)) {
-      assertthat::assert_that(colnames(env) == length(names),
+      assertthat::assert_that(length(colnames(env)) == length(names),
                               all(is.character(names)),
-                              msg = 'Provided names not of same length as environmental data.')
+                              msg = 'Provided names are not of the same length as the environmental data.')
       # Set names of env
       colnames(env) <- names
     }

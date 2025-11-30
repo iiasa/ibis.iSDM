@@ -678,7 +678,7 @@ engine_bart <- function(x,
         assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),
                                 msg = "Projection data.frame has no valid coordinates or differs in grain!")
         prediction <- try({
-          terra::rast(newdata_copy[,c("x", "y")],
+          terra::rast(newdata_copy[,c("x", "y", "rowid")],
                       crs = terra::crs(model$background),
                       type = "xyz") |>
             emptyraster()
