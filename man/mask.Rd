@@ -20,7 +20,7 @@ mask.BiodiversityScenario(x, mask, inverse = FALSE, ...)
 \item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection},
 \link{PredictorDataset} or \link{BiodiversityScenario}.}
 
-\item{mask}{A \code{\link{sf}} or \code{\link{SpatRaster}} object.}
+\item{mask}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object.}
 
 \item{inverse}{A \code{\link{logical}} flag whether to take inverse of the mask instead
 (Default: \code{FALSE}).}
@@ -36,7 +36,7 @@ by the ibis.iSDM package and an external layer, then intersects both. It
 currently takes either a \link{DistributionModel}, \link{BiodiversityDatasetCollection},
 \link{PredictorDataset} or \link{BiodiversityScenario} as input.
 
-As mask either a \code{\link{sf}} or \code{\link{SpatRaster}} object can be chosen. The mask will
+As mask either a \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object can be chosen. The mask will
 be converted internally depending on the object.
 }
 \examples{

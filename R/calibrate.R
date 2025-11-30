@@ -6,8 +6,13 @@
 #' or a new of observational records against which the model should be calibrated
 #' against. See details for more information.
 #'
+#' @note
+#' This function largely conducts semi-automatic calibration and does not allow
+#' manual fine-tuning of parameters. For more advanced tuning, it is recommended
+#' to extract the model from the engine and conduct manual calibration.
+#'
 #' @details
-#' The function `calibrate` is used to re-calibrate a fitted model in an engine.
+#' The function `calibrate()` is used to re-calibrate a fitted model in an engine.
 #' This is often also known as "tuning" a model. The function takes a fitted model object
 #' and a set of parameters, and uses the data to find the best set of parameters.
 #'
@@ -66,16 +71,19 @@ methods::setMethod(
     )
 
     # If data is provided, check
-    if(is.null(point)) {
+    if(!is.null(point)) {
       assertthat::assert_that(
-        inherits(point, "data.frame") || inherits(point, 'matrix'),
+        inherits(point, "data.frame") || inherits(point, 'sf'),
         nrow(point) > 0,
-        msg = "The testing point data must be a non-empty data.frame."
+        msg = "The testing point data must be a non-empty data.frame or sf object."
       )
       assertthat::assert_that(
         all(field_occurrence %in% colnames(point)),
         msg = paste0("The testing point data must contain the column: ", field_occurrence)
       )
+
+      cli::cli_alert_warning("Calibration with point data not yet implemented.")
+      point <- NULL
     }
 
     # --- #
@@ -83,7 +91,26 @@ methods::setMethod(
     if (verbose) cli::cli_alert_info("Starting calibration...")
 
     # Calibrate a model
-    modc <- mod$calibrate(...)
+    modc <- mod$clone(deep = TRUE)
+    fit <- try({
+      modc$calibrate(newdata = point)
+    }, silent = TRUE)
+    if(inherits(fit, "try-error")){
+      cli::cli_abort("Calibration failed: {fit}. Defaulting to original model.")
+      return(mod)
+    }
+    if (verbose) cli::cli_alert_success("Calibration completed.")
+
+    # Replace the fitted model
+    modc$set_data('fit_best', fit)
+
+    # Recreating any projections if found
+    if( modc$has_prediction() ){
+      # Remake a projection
+      if (verbose) cli::cli_alert_info("Recreating model projection...")
+      ras <- modc$project(newdata = modc$model$predictors)
+      modc$set_data('prediction', ras)
+    }
 
     return(modc)
     # --- #

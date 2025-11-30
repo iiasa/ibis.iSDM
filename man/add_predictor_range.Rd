@@ -35,7 +35,7 @@ add_predictor_range(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+\item{layer}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the range for the target
 feature.}
 
 \item{method}{\code{\link{character}} describing how the range should be included
@@ -43,7 +43,7 @@ feature.}
 
 \item{distance_max}{Numeric threshold on the maximum distance (Default: \code{NULL}).}
 
-\item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with
+\item{fraction}{An optional \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object that is multiplied with
 digitized raster layer. Can be used to for example to remove or reduce the
 expected value (Default: \code{NULL}).}
 
@@ -52,8 +52,8 @@ default prior assumptions.}
 }
 \description{
 This function allows to add a species range which is usually
-drawn by experts in a separate process as spatial explicit prior. Both \code{\link{sf}}
-and \code{\link{SpatRaster}}-objects are supported as input.
+drawn by experts in a separate process as spatial explicit prior. Both \code{\link[sf:sf]{sf::sf}}
+and \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}-objects are supported as input.
 
 Users are advised to look at the \code{"bossMaps"} R-package presented as
 part of Merow et al. (2017), which allows flexible calculation of non-linear

@@ -36,7 +36,7 @@ add_biodiversity_poipa(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{poipa}{A \code{\link{data.frame}} or \code{\link{sf}} object of presence-absence point
+\item{poipa}{A \code{\link{data.frame}} or \code{\link[sf:sf]{sf::sf}} object of presence-absence point
 occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}

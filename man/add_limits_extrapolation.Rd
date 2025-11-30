@@ -26,7 +26,7 @@ add_limits_extrapolation(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the prediction
+\item{layer}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object that limits the prediction
 surface when intersected with input data (Default: \code{NULL}).}
 
 \item{method}{A \code{\link{character}} vector describing the method used for controlling

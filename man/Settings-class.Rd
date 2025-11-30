@@ -5,7 +5,7 @@
 \alias{Settings}
 \title{Prototype for model settings object}
 \description{
-Basic \code{\link{R6}} object for Settings object, a List that stores settings used
+Basic \code{\link[R6:R6Class]{R6::R6}} object for Settings object, a List that stores settings used
 related to model training.
 }
 \keyword{classes}

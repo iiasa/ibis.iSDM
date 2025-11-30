@@ -2,15 +2,15 @@
 % Please edit documentation in R/utils-spatial.R
 \name{alignRasters}
 \alias{alignRasters}
-\title{Align a \code{\linkS4class{SpatRaster}} object to another by harmonizing geometry and
+\title{Align a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object to another by harmonizing geometry and
 extend.}
 \usage{
 alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 }
 \arguments{
-\item{data}{\code{\linkS4class{SpatRaster}} object to be resampled.}
+\item{data}{\code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object to be resampled.}
 
-\item{template}{\code{\linkS4class{SpatRaster}} or \code{\link{sf}} object from which geometry can
+\item{template}{\code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object from which geometry can
 be extracted.}
 
 \item{method}{method for resampling (Options: \code{"near"} or \code{"bilinear"}).}
@@ -21,7 +21,7 @@ be extracted.}
 (Default: \code{TRUE}).}
 }
 \value{
-New \code{\link{SpatRaster}} object aligned to the supplied template layer.
+New \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object aligned to the supplied template layer.
 }
 \description{
 If the data is not in the same projection as the template, the alignment will

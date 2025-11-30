@@ -48,6 +48,7 @@ Could be further pretified and commands outsourced.
 \item \href{#method-DistributionModel-get_thresholdvalue}{\code{DistributionModel$get_thresholdvalue()}}
 \item \href{#method-DistributionModel-get_thresholdtype}{\code{DistributionModel$get_thresholdtype()}}
 \item \href{#method-DistributionModel-show_rasters}{\code{DistributionModel$show_rasters()}}
+\item \href{#method-DistributionModel-has_prediction}{\code{DistributionModel$has_prediction()}}
 \item \href{#method-DistributionModel-get_projection}{\code{DistributionModel$get_projection()}}
 \item \href{#method-DistributionModel-get_resolution}{\code{DistributionModel$get_resolution()}}
 \item \href{#method-DistributionModel-rm_threshold}{\code{DistributionModel$rm_threshold()}}
@@ -247,7 +248,7 @@ Get specific fit from this Model
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A \code{\link{SpatRaster}} object with the prediction.
+A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the prediction.
 }
 }
 \if{html}{\out{<hr>}}
@@ -277,7 +278,7 @@ Set new fit for this Model.
 \describe{
 \item{\code{x}}{The name of the new fit.}
 
-\item{\code{value}}{The \code{\link{SpatRaster}} layer (or model) to be inserted.}
+\item{\code{value}}{The \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer (or model) to be inserted.}
 }
 \if{html}{\out{</div>}}
 }
@@ -322,6 +323,19 @@ List all rasters in object
 
 \subsection{Returns}{
 A \code{\link{vector}} with \code{\link{logical}} flags for the various objects.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DistributionModel-has_prediction"></a>}}
+\if{latex}{\out{\hypertarget{method-DistributionModel-has_prediction}{}}}
+\subsection{Method \code{has_prediction()}}{
+Has a gridded prediction been made?
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DistributionModel$has_prediction()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{logical}} flag.
 }
 }
 \if{html}{\out{<hr>}}
@@ -385,7 +399,7 @@ Or the relative total using the sumof values.
 }
 
 \subsection{Returns}{
-Returns a \code{\link{SpatRaster}}.
+Returns a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -407,7 +421,7 @@ Get centroids of prediction layers
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Returns a \code{\link{sf}} object.
+Returns a \code{\link[sf:sf]{sf::sf}} object.
 }
 }
 \if{html}{\out{<hr>}}

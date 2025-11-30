@@ -256,8 +256,8 @@ built_formula_inla <- function(model, id, x, settings){
 
 #' Calculate area of each voronoi polygon in a INLA mesh
 #'
-#' @param mesh [`inla.mesh`] mesh object.
-#' @param region.poly A supplied [`region.poly`] object.
+#' @param mesh A \code{"inla.mesh"} mesh object.
+#' @param region.poly A supplied \code{"region.poly"} object.
 #' @param variant A character to which type of area calculation (Default: \code{'gpc'}).
 #' @param relative Should the total amount of area converted to relatives (Default: \code{FALSE}).
 #'
@@ -377,7 +377,7 @@ mesh_area = function(mesh, region.poly = NULL, variant = 'gpc', relative = FALSE
 
 #' Mesh to polygon script
 #'
-#' @param mesh [`inla.mesh`] mesh object.
+#' @param mesh A \code{"inla.mesh"} mesh object.
 #'
 #' @returns A [`sf`] object.
 #'
@@ -416,7 +416,7 @@ mesh_as_sf <- function(mesh) {
 
 #' Extract boundary points from mesh
 #'
-#' @param mesh A [`inla.mesh`] object.
+#' @param mesh A \code{"inla.mesh"} object.
 #'
 #' @keywords utils
 #'
@@ -435,8 +435,8 @@ mesh_boundary <- function(mesh){
 #' @description
 #' **Work in progress* Creating a physical barrier model for INLA
 #'
-#' @param mesh A [`inla.mesh`] object.
-#' @param region.poly A [`SpatialPolygons`] object.
+#' @param mesh A \code{"inla.mesh"} object.
+#' @param region.poly A \code{"SpatialPolygons"} object.
 #'
 #' @source https://www.sciencedirect.com/science/article/pii/S221167531830099X
 #'
@@ -481,7 +481,7 @@ mesh_barrier <- function(mesh, region.poly){
 
 #' Query if a point is inside the mesh boundary
 #'
-#' @param mesh A [`inla.mesh`] object.
+#' @param mesh A code{"inla.mesh"} object.
 #' @param coords Either a two-column [`data.frame`] or [`matrix`] of coordinates.
 #' Alternatively a [`Spatial`] or [`sf`] object from which coordinates can be extracted.
 #'

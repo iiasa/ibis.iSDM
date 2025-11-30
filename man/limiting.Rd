@@ -19,7 +19,7 @@ factors are to be identified.}
 A \code{terra} object of the most important variable for a given grid cell.
 }
 \description{
-Calculates a \code{\link{SpatRaster}} of locally limiting factors from a
+Calculates a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} of locally limiting factors from a
 given projected model. To calculate this first the \code{\link{spartial}} effect of
 each individual covariate in the model is calculated.
 

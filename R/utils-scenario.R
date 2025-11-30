@@ -745,7 +745,7 @@ summarise_change <- function(scenario){
 #'
 #' @description This is a
 #'
-#' @param obj A ['stars'] object to be clipped and cropped.
+#' @param obj A [`stars`] object to be clipped and cropped.
 #'
 #' @keywords scenario
 #'
@@ -861,8 +861,8 @@ st_minsize <- function(obj, value, unit = "km2",  establishment_step = FALSE){
 #' @description The reprojection of WGS84 currently fails due to some unforeseen
 #' bug. This function is meant to reproject back the layer.
 #'
-#' @param obj A ['stars'] object to be clipped and cropped.
-#' @param template A ['SpatRaster'] or ['sf'] object to which the object should
+#' @param obj A [`stars`] object to be clipped and cropped.
+#' @param template A [`SpatRaster`] or [`sf`] object to which the object should
 #' be projected.
 #' @param use_gdalutils (Deprecated) [`logical`] on to use gdalutils hack around.
 #'

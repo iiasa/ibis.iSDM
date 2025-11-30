@@ -68,6 +68,7 @@ reference:
         - priors
         - pseudoabs_settings
         - train
+        - calibrate
 
   - title: Add or modify data and parameters
     desc: >

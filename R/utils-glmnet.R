@@ -62,7 +62,7 @@ built_formula_glmnet <- function(obj, vars){
 
 #' Default regularization constant
 #'
-#' @description This function was taken from the [`maxnet`] R-package to get
+#' @description This function was taken from the \code{"maxnet"} R-package to get
 #' some more informed default lambda values for the regularization.
 #'
 #' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for background).
@@ -170,7 +170,7 @@ determine_lambda <- function(obj){
 #' Summarize cross-validated glmnet model
 #'
 #' @description This helper function summarizes the coefficients from a glmnet
-#' model. The optimal lambda is determined through the [`determine_lambda`]
+#' model. The optimal lambda is determined through the `determine_lambda()`
 #' function.
 #'
 #' @param obj An object created with \code{'cv.glmnet'}.

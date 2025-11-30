@@ -26,7 +26,7 @@ calibrate(
 \arguments{
 \item{mod}{A \code{\link{BiodiversityDistribution}} object.}
 
-\item{point}{A \code{\link{sf}} object containing observational data used for model training.}
+\item{point}{A \code{\link[sf:sf]{sf::sf}} object containing observational data used for model training.}
 
 \item{field_occurrence}{A \code{\link{character}} location of biodiversity point records (Default: \code{'observed'}).}
 
@@ -46,7 +46,7 @@ or a new of observational records against which the model should be calibrated
 against. See details for more information.
 }
 \details{
-The function \code{calibrate} is used to re-calibrate a fitted model in an engine.
+The function \code{calibrate()} is used to re-calibrate a fitted model in an engine.
 This is often also known as "tuning" a model. The function takes a fitted model object
 and a set of parameters, and uses the data to find the best set of parameters.
 }

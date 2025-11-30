@@ -30,6 +30,7 @@ Basic object for engine, all other engines inherit from here.
 \item \href{#method-Engine-list_data}{\code{Engine$list_data()}}
 \item \href{#method-Engine-set_data}{\code{Engine$set_data()}}
 \item \href{#method-Engine-get_self}{\code{Engine$get_self()}}
+\item \href{#method-Engine-calibrate}{\code{Engine$calibrate()}}
 \item \href{#method-Engine-clone}{\code{Engine$clone()}}
 }
 }
@@ -160,6 +161,19 @@ Dummy function to get self object
 
 \subsection{Returns}{
 This object
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Engine-calibrate"></a>}}
+\if{latex}{\out{\hypertarget{method-Engine-calibrate}{}}}
+\subsection{Method \code{calibrate()}}{
+Dummy function for calibration
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Engine$calibrate()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+Invisible
 }
 }
 \if{html}{\out{<hr>}}

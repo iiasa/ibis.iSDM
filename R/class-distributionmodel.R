@@ -546,6 +546,18 @@ DistributionModel <- R6::R6Class(
     },
 
     #' @description
+    #' Has a gridded prediction been made?
+    #' @return A [`logical`] flag.
+    has_prediction = function(){
+      rl <- self$show_rasters()
+      if(length(grep('prediction',rl))>0){
+        return( TRUE )
+      } else {
+        return( FALSE )
+      }
+    },
+
+    #' @description
     #' Get projection of the background.
     #' @return A geographic projection
     get_projection = function(){

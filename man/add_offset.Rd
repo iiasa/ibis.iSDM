@@ -15,7 +15,7 @@ add_offset(x, layer, add = TRUE)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+\item{layer}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the range for the target
 feature.}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
@@ -35,7 +35,7 @@ spatial-explicit layers.
 }
 \details{
 This function allows to set any specific offset to a regression
-model. The offset has to be provided as spatial \code{\link{SpatRaster}} object. This
+model. The offset has to be provided as spatial \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object. This
 function simply adds the layer to a \code{\link[=distribution]{distribution()}} object.
 \strong{Note that any transformation of the offset (such as \code{log}) has do be done externally!}
 

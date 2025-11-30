@@ -24,7 +24,7 @@ is_comparable_raster <- function(x, y) {
 
 #' Donversion function from SpatRaster to RasterLayer
 #'
-#' @description As a consequence of switching to [terra] from [raster], there
+#' @description As a consequence of switching to [`terra`] from \code{"raster"}, there
 #' might be situations where it is necessary to convert between them. This
 #' function does the job.
 #'
@@ -115,8 +115,8 @@ terra_to_sf <- function(input, dissolve = TRUE, dummy = NULL){
 #'
 #' @description Verify if the extents of two spatial objects intersect or not.
 #'
-#' @param x [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
-#' @param y [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
+#' @param x [`SpatRaster-class`] or [`sf::sf()`] object.
+#' @param y [`SpatRaster-class`] or [`sf::sf()`] object.
 #'
 #' @return [`logical`].
 #'
@@ -127,8 +127,8 @@ terra_to_sf <- function(input, dissolve = TRUE, dummy = NULL){
 #' @keywords internal
 intersecting_extents <- function(x, y) {
   assertthat::assert_that(
-    inherits(x, c("SpatRaster", "Spatial", "sf")),
-    inherits(y, c("SpatRaster", "Spatial", "sf")))
+    inherits(x, c("SpatRaster", "sf")),
+    inherits(y, c("SpatRaster", "sf")))
   isTRUE(sf::st_intersects(
     terra::ext(x) |> vect() |> sf::st_as_sf(),
     terra::ext(y) |> vect() |> sf::st_as_sf(),
@@ -480,10 +480,10 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 
 #' Expand an extent by a certain number
 #'
-#' @param e An [`extent`] object.
+#' @param e An [`terra::ext()`] object.
 #' @param f [`numeric`] value to increase the extent (Default: \code{0.1}).
 #'
-#' @return Returns the unified total [`extent`] object.
+#' @return Returns the unified total [`terra::ext()`] object.
 #'
 #' @keywords utils
 #'
@@ -535,7 +535,7 @@ rename_geometry <- function(g, name){
 #' @description This function tries to guess the coordinate field and converts a
 #' data.frame to a simple feature.
 #'
-#' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
+#' @param df A [`data.frame`], [`tibble::tibble()`] or [`sf`] object.
 #' @param geom_name A [`character`] indicating the name of the geometry column
 #' (Default: \code{'geometry'}).
 #'
@@ -761,8 +761,7 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #' @description Calculate the dimensions of an extent (either an extent object or
 #' four-element vector in the right order), either in projected or spherical space.
 #'
-#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`],
-#' [`Spatial*`] or [`sf`] object.
+#' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`] or [`sf`] object.
 #' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
 #' @param output_unit [`character`] determining the units. Allowed is 'm' and km' (Default: \code{'km'}).
 #'
@@ -772,7 +771,7 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #'
 #' @keywords internal
 extent_dimensions <- function(ex, lonlat = terra::is.lonlat(ex), output_unit = 'km') {
-  assertthat::assert_that(inherits(ex, 'SpatExtent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'SpatRaster') || inherits(ex, 'Spatial'),
+  assertthat::assert_that(inherits(ex, 'SpatExtent') || inherits(ex, 'numeric') || inherits(ex, 'sf') || inherits(ex, 'SpatRaster'),
                           is.logical(lonlat),
                           is.character(output_unit) && output_unit %in% c('m','km'))
   # Coerce to vector if necessary

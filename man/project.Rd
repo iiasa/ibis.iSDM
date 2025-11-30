@@ -50,7 +50,7 @@ applied. Currently supported is \code{`loess`}.}
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
-\item{env}{An optional \code{\link{SpatRaster}} or \code{\link{data.frame}} object for prediction.
+\item{env}{An optional \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link{data.frame}} object for prediction.
 Ignored unless a \code{\link{DistributionModel}} object is supplied (Default: \code{NULL}).}
 
 \item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further

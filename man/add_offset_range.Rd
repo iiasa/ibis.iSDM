@@ -39,7 +39,7 @@ add_offset_range(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} object with the range for the target
+\item{layer}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the range for the target
 feature.}
 
 \item{distance_max}{A \code{\link{numeric}} threshold on the maximum distance beyond
@@ -69,11 +69,11 @@ proposed by Merow et al. 2017.}
 \item{field_occurrence}{A \code{\link{numeric}} or \code{\link{character}} location of
 biodiversity point records.}
 
-\item{fraction}{An optional \code{\link{SpatRaster}} object that is multiplied with
+\item{fraction}{An optional \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object that is multiplied with
 digitized raster layer. Can be used to for example to remove or reduce the
 expected value (Default: \code{NULL}).}
 
-\item{point}{An optional \code{\link{sf}} layer with points or \code{\link{logical}} argument. In
+\item{point}{An optional \code{\link[sf:sf]{sf::sf}} layer with points or \code{\link{logical}} argument. In
 the case of the latter the point data is ignored (Default: \code{FALSE}).}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
@@ -94,7 +94,7 @@ This tries to fit a 5-parameter logistic function to estimate the distance
 from the range (Merow et al. 2017).
 }
 \details{
-The output created by this function creates a \code{\link{SpatRaster}} to be
+The output created by this function creates a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} to be
 added to a provided distribution object. Offsets in regression models are
 likelihood specific as they are added directly to the overall estimate of
 \code{`y^hat`}.

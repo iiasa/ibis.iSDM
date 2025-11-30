@@ -39,7 +39,7 @@ Default (\code{FALSE}) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
 
-\item{layer}{A \code{\link{SpatRaster}} layer describing alternative latent effects to be used instead
+\item{layer}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer describing alternative latent effects to be used instead
 if \code{"reuse_latent"} is set to \code{FALSE}.}
 
 \item{reuse_latent}{A \code{\link{logical}} flag on whether any latent effects found

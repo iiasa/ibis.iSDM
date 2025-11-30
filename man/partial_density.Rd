@@ -21,7 +21,7 @@ a \code{\link{vector}} of length \code{1} or \code{2}.}
 \item{...}{Other engine specific parameters.}
 }
 \value{
-A \code{\link{ggplot2}} object showing the marginal response in light of the data.
+A \code{\link[ggplot2:ggplot2-package]{ggplot2::ggplot2}} object showing the marginal response in light of the data.
 }
 \description{
 Based on a fitted model, plot the density of observations over

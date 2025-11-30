@@ -233,9 +233,9 @@ factor_to_numeric <- function(x) {
 #' Guess time to Posix
 #'
 #' @description This little wrapper converts and ensures that a vector of time
-#' objects are in POSIXct format.
+#' objects are in \code{"POSIXct"} format.
 #'
-#' @param vec A [`vector`] with [`numeric`] or [`Posixct`] data
+#' @param vec A [`vector`] with [`numeric`] or [`POSIXct`] data
 #'
 #' @keywords utils
 #'
@@ -310,7 +310,7 @@ thresholdval <- function(x, knot, sense = "gte") {
 #' Rescale vector to a new range
 #'
 #' @description
-#' This function uses the [scales] R-package by default to rescale
+#' This function uses the \code{"scales"} R-package by default to rescale
 #' a given numeric value to a new range from \code{0} to \code{1}.
 #' Alternatively the calculation could be done as \code{x/max(x)}.
 #'
@@ -403,7 +403,7 @@ sanitize_names <- function(names){
 #' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species
 #' and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity
 #' Information Facility, Copenhagen.
-#' @source [`bioGeo`] package code served as inspiration
+#' @source \code{"bioGeo"} package code served as inspiration.
 #'
 #' @keywords utils
 #'
@@ -463,10 +463,10 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
 #' grid, by, depending on the type, either counting the number of observations
 #' per grid cell or aggregating them via a sum.
 #'
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
+#' @param df A [`sf`], [`data.frame`] or [`tibble::tibble()`] object containing point data.
 #' @param template A [`SpatRaster`] object that is aligned with the predictors.
 #' @param field_occurrence A [`character`] name of the column containing the presence
-#' information (Default: \code{observed}).
+#' information (Default: \code{"observed"}).
 #'
 #' @returns A [`sf`] object with the newly aggregated points.
 #'

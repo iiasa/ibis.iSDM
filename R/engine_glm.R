@@ -339,14 +339,7 @@ engine_glm <- function(x,
     )
     if(inherits(fit_glm, "try-error")) cli::cli_abort("Model failed to converge with provided input data!")
     if( (settings$get('optim_hyperparam')) ){
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green',
-                                                                'Running step-wise AIC selection for glm!')
-      suppressWarnings(
-        fit_glm <- stats::step(fit_glm,
-                             direction = "backward",
-                             trace = ifelse(getOption('ibis.setupmessages', default = TRUE),1,0)
-                             )
-      )
+      if(getOption('ibis.setupmessages', default = TRUE)) cli::cli_alert_warning("This function is deprecated. Use `calibrate()`")
     }
 
     # --- #
@@ -645,7 +638,9 @@ engine_glm <- function(x,
     }, overwrite = TRUE)
 
     #### Calibrate the model ----
-    obj$set("public", "calibrate", function(newdata = NULL, verbose = getOption('ibis.setupmessages', default = TRUE), ...){
+    obj$set("public", "calibrate",
+            function(newdata = NULL,
+                     verbose = getOption('ibis.setupmessages', default = TRUE), ...){
       # Get best object
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(obj)
@@ -666,10 +661,10 @@ engine_glm <- function(x,
                            trace = ifelse(verbose,1,0)
         )
       )
-
+      return(fit)
     }, overwrite = TRUE)
 
-    # Engine-specific projection function
+    #### Engine-specific projection function ####
     obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
       assertthat::assert_that("model" %in% names(self),
                               nrow(newdata) > 0,

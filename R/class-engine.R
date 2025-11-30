@@ -93,6 +93,13 @@ Engine <- R6::R6Class(
     #' @return This object
     get_self = function(){
       return( self )
+    },
+
+    #' @description
+    #' Dummy function for calibration
+    #' @return Invisible
+    calibrate = function(){
+      invisible(self)
     }
   ),
 

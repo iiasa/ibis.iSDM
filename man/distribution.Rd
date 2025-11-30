@@ -32,9 +32,9 @@ distribution(
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
-\code{\link{SpatRaster}} or \code{\link{sf}} object.}
+\code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object.}
 
-\item{limits}{A \code{\link{SpatRaster}}, \code{\link{sf}} or \code{\link{stars}} object that limits the prediction
+\item{limits}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, \code{\link[sf:sf]{sf::sf}} or \code{\link{stars}} object that limits the prediction
 surface when intersected with input data (Default: \code{NULL}). In case of a
 \code{\link{stars}} object the first factorized time entry is taken.}
 
