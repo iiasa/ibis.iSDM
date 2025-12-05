@@ -747,6 +747,12 @@ engine_breg <- function(x,
       return(rd)
     },overwrite = TRUE)
 
+    # Calibration dummy
+    obj$set("public", "calibrate", function(newdata = NULL){
+      # Calibration not supported for this model, thus returning to default
+      cli::cli_abort("Calibration not supported for engine!")
+    }, overwrite = TRUE)
+
     # Engine-specific projection function
     obj$set("public", "project", function(newdata, type = NULL, layer = "mean"){
       assertthat::assert_that("model" %in% names(self),

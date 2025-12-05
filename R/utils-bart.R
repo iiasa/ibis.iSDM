@@ -87,6 +87,82 @@ varimp.bart <- function(model){
   return(var.df)
 }
 
+#' Calibrate hyperparameters for bart models
+#'
+#' @description
+#' This function helps with calibrating hyperparameters for `dbarts` models.
+#'
+#' @details
+#' This is more an internal function that calibrates hyperparameters for
+#' `dbarts` models. It is not meant to be run outside the `train()` and respective
+#' `calibrate()` calls.
+#'
+#' @param equation A [`formula`] object for inference and prediction.
+#' @param data A [`data.frame`] with all relevant data for model training.
+#' @param off A [`vector`] with the offset value for inference.
+#' @param dc A [`dbarts`] control object.
+#' @param params A [`list`] with parameters to optimize over.
+#'
+#' @returns A [`list`] with respective best parameter values.
+#'
+#' @keywords internal
+#' @noRd
+.calibrate_bart <- function(equation, data, off, dc, params){
+  assertthat::assert_that(
+    is.formula(equation),
+    is.data.frame(data),
+    inherits(dc, "dbartsControl"),
+    is.list(params),
+    msg = "Input parameters missing..."
+  )
+
+  # Check for correct params formatting
+  assertthat::assert_that(
+    utils::hasName(params, "k"),
+    utils::hasName(params, "base"),
+    utils::hasName(params, "power"),
+    msg = "Parameters to optimize over not correctly set."
+  )
+
+  # Convert factor to numeric as otherwise this does not work
+  data$observed <- factor_to_numeric(data$observed)
+
+  # Use of xbart to cross-validate
+  cv_bart <- try({
+      dbarts::xbart(
+      formula = equation, data = data,
+      n.samples = round( nrow(data) * 0.1 ), # Draw posterior samples (10% of dataset)
+      n.test = 5, # Number of folds
+      method = "k-fold",
+      n.reps = 4L, # For replications
+      control = dc,
+      offset = off,
+      loss = ifelse(is.factor(data$observed), "log", "rmse"),
+      n.trees = dc@n.trees,
+      k = params[['k']], # Prior for node-mean SD
+      power = params[['power']], # Prior growth probability
+      base = params[['base']], # Tree growth probability
+      drop = TRUE, # Drop those with only one record
+      n.threads = dc@n.threads,
+      verbose = settings$get('verbose')
+    )
+  },silent = TRUE)
+  if(inherits(cv_bart, "try-error")) return(NULL)
+
+  # An array of dimensions n.reps * length(n.trees) * length(k) * length(power) * length(base)
+  # Convert to data.frame
+  cv_bart <- as.data.frame.table(cv_bart)
+  best <- which.min(cv_bart$Freq) # Get the setting with lowest loss/error
+
+  out <- list(
+    k = as.numeric( as.character(cv_bart$k[best]) ),
+    power = as.numeric( as.character(cv_bart$power[best]) ),
+    base = as.numeric( as.character(cv_bart$base[best]) )
+  )
+
+  return(out)
+}
+
 #' Prediction with `dbarts` package for bart models
 #'
 #' @description Helper function to create a prediction with [engine_bart] fitted

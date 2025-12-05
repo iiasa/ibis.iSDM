@@ -166,6 +166,7 @@ engine_bart <- function(x,
                                    template = bg,
                                    settings = model$biodiversity[[1]]$pseudoabsence_settings)
       if(inherits(presabs, 'sf')) presabs <- presabs |> sf::st_drop_geometry()
+
       # Sample environmental points for absence only points
       abs <- subset(presabs, observed == 0)
       # Re-extract environmental information for absence points
@@ -385,7 +386,7 @@ engine_bart <- function(x,
     # --- #
     # Parameter tuning #
     if(settings$get('optim_hyperparam')){
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','green','Starting hyperparameters search.')
+      if(getOption('ibis.setupmessages', default = TRUE)) cli::cli_alert_warning("Deprecated, Use the `calibrate()` function for tuning...")
 
       cv_bart <- dbarts::xbart(
         formula = equation, data = data,
@@ -521,7 +522,8 @@ engine_bart <- function(x,
     }
     # Compute end of computation time
     settings$set('end.time', Sys.time())
-    # Also append boosting control option to settings
+    # Also append control option to settings
+    settings$set("dc", dc)
     for(entry in methods::slotNames(dc)) settings$set(entry, methods::slot(dc,entry))
     for(entry in names(params)) settings$set(entry, params[[entry]])
 
@@ -612,6 +614,88 @@ engine_bart <- function(x,
       cofs$Sigma <- NA
       names(cofs) <- c("Feature", "Weights")
       return(cofs)
+    },overwrite = TRUE)
+
+    # Calibration function
+    obj$set("public", "calibrate", function(newdata = NULL,
+                                            k = c(1, 2, 4),
+                                            power = c(1.5, 2),
+                                            base = c(0.75, 0.8, 0.95),
+                                            verbose = getOption('ibis.setupmessages',
+                                                                default = TRUE), ...){
+      # Get best object
+      fit <- self$get_data("fit_best")
+      if(is.Waiver(fit)) return(obj)
+      settings <- self$settings
+      dc <- settings$get("dc")
+
+      params <- list(k = k, power = power, base = base)
+
+      # Get formula and data
+      equation <- self$get_equation()
+      if(is.null(newdata)){
+        data <- cbind(self$model$biodiversity[[1]]$predictors,
+                      data.frame(observed = self$model$biodiversity[[1]]$observations[,'observed', drop = TRUE]) )
+      } else {
+        data <- newdata
+      }
+
+      # Specify splitprobs depending on whether priors have been set
+      if( !is.Waiver(settings$get("priors")) ){
+        splitprobs <- settings$get("priors")
+        # make sure to only include probs of current model
+        splitprobs <- splitprobs[names(splitprobs) %in% self$model$biodiversity[[1]]$predictors_names]
+      } else { splitprobs = NULL }
+
+      # Get offset
+      off <- self$model$biodiversity[[1]]$offset[,"spatial_offset"]
+      if(is.null(off)) off <- 0.0
+      # Weights
+      w <- self$model$biodiversity[[1]]$expect # The expected weight
+
+      # Calibrate
+      cv <- .calibrate_bart(equation, data, off, dc, params)
+
+      # Refit the model
+      if(is.factor(data$observed)){
+        fit_bart <- dbarts::bart(y.train = data[,'observed'],
+                                 x.train = data[,self$model$biodiversity[[1]]$predictors_names],
+                                 # To make partial plots faster
+                                 keeptrees = dc@keepTrees,
+                                 keepevery = 10,
+                                 # weights = w,
+                                 binaryOffset = off,
+                                 # Hyper parameters
+                                 k = cv[['k']], power = cv[['power']], base = cv[['base']],
+                                 splitprobs = splitprobs,
+                                 ntree = dc@n.trees,
+                                 nthread = dc@n.threads,
+                                 nchain = dc@n.chains,
+                                 nskip = dc@n.burn,
+                                 verbose = settings$get('verbose')
+        )
+      } else {
+        fit_bart <- dbarts::bart(y.train = data[,'observed'],
+                                 x.train = data[,self$model$biodiversity[[1]]$predictors_names],
+                                 # To make partial plots faster
+                                 keeptrees = dc@keepTrees,
+                                 keepevery = 10,
+                                 weights = w,
+                                 ntree = dc@n.trees,
+                                 # Hyper parameters
+                                 k = cv[['k']], power = cv[['power']], base = cv[['base']],
+                                 splitprobs = splitprobs,
+                                 nthread = dc@n.threads,
+                                 nchain = dc@n.chains,
+                                 nskip = dc@n.burn,
+                                 verbose = settings$get('verbose')
+        )
+      }
+
+      # Return the new fit
+      return(fit_bart)
+
+
     },overwrite = TRUE)
 
     # Engine-specific projection function

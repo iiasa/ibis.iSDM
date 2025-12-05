@@ -637,7 +637,7 @@ engine_glm <- function(x,
       return(cofs)
     }, overwrite = TRUE)
 
-    #### Calibrate the model ----
+    #### Calibration model ----
     obj$set("public", "calibrate",
             function(newdata = NULL,
                      verbose = getOption('ibis.setupmessages', default = TRUE), ...){

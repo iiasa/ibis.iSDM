@@ -109,6 +109,7 @@ methods::setMethod(
       # Remake a projection
       if (verbose) cli::cli_alert_info("Recreating model projection...")
       ras <- modc$project(newdata = modc$model$predictors)
+      if(terra::nlyr(ras)==1) names(ras) <- "mean" # Assume mean prediction
       modc$set_data('prediction', ras)
     }
 
