@@ -24,7 +24,8 @@ is_comparable_raster <- function(x, y) {
 
 #' Donversion function from SpatRaster to RasterLayer
 #'
-#' @description As a consequence of switching to [terra] from [raster], there
+#' @description As a consequence of switching to [terra] from the legacy
+#' \code{"raster"}, there
 #' might be situations where it is necessary to convert between them. This
 #' function does the job.
 #'
@@ -115,8 +116,8 @@ terra_to_sf <- function(input, dissolve = TRUE, dummy = NULL){
 #'
 #' @description Verify if the extents of two spatial objects intersect or not.
 #'
-#' @param x [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
-#' @param y [`SpatRaster-class`], [`Spatial-class`] or [`sf::sf()`] object.
+#' @param x [`SpatRaster-class`], \code{"Spatial-class"} or [`sf::sf()`] object.
+#' @param y [`SpatRaster-class`], \code{"Spatial-class"} or [`sf::sf()`] object.
 #'
 #' @return [`logical`].
 #'
@@ -480,10 +481,10 @@ bbox2wkt <- function(minx=NA, miny=NA, maxx=NA, maxy=NA, bbox=NULL){
 
 #' Expand an extent by a certain number
 #'
-#' @param e An [`extent`] object.
+#' @param e A object returned [`terra::ext`] object.
 #' @param f [`numeric`] value to increase the extent (Default: \code{0.1}).
 #'
-#' @return Returns the unified total [`extent`] object.
+#' @return Returns the unified total [`terra::ext`] object.
 #'
 #' @keywords utils
 #'
@@ -535,7 +536,7 @@ rename_geometry <- function(g, name){
 #' @description This function tries to guess the coordinate field and converts a
 #' data.frame to a simple feature.
 #'
-#' @param df A [`data.frame`], [`tibble`] or [`sf`] object.
+#' @param df A [`data.frame`], [`tibble::tibble`] or [`sf`] object.
 #' @param geom_name A [`character`] indicating the name of the geometry column
 #' (Default: \code{'geometry'}).
 #'
@@ -762,7 +763,7 @@ polygon_to_points <- function(poly, template, field_occurrence ) {
 #' four-element vector in the right order), either in projected or spherical space.
 #'
 #' @param ex Either a [`vector`], a [`SpatExtent`] or alternatively a [`SpatRaster`],
-#' [`Spatial*`] or [`sf`] object.
+#' \code{"Spatial*"} or [`sf`] object.
 #' @param lonlat A [`logical`] indication whether the extent is WGS 84 projection (Default: \code{TRUE}).
 #' @param output_unit [`character`] determining the units. Allowed is 'm' and km' (Default: \code{'km'}).
 #'
@@ -1679,6 +1680,10 @@ thin_observations <- function(data, background, env = NULL, method = "random", r
 
     # make sure name is known
     names(env) <- "bias"
+
+    # Raise warning if the minimum of the bias layer is lower than 0
+    if(terra::global(env, "min", na.rm = TRUE)[,1] < 0)
+      cli::cli_abort("Bias layer has negative values. Please normalize prior to thinning.")
 
     # Now extract
     ex <- cbind(id = 1:nrow(coords),

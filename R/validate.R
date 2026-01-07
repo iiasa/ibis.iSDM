@@ -52,7 +52,7 @@
 #'
 #' @note If you use the Boyce Index, please cite the original Hirzel et al. (2006) paper.
 #'
-#' @returns Return a tidy [`tibble`] with validation results.
+#' @returns Return a tidy [`tibble::tibble`] with validation results.
 #'
 #' @keywords train
 #'

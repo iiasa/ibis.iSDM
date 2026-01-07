@@ -15,7 +15,7 @@ add_constraint_boundary(mod, layer, ...)
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{layer}{A \code{\link{SpatRaster}} or \code{\link{sf}} object with the same extent as the
+\item{layer}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object with the same extent as the
 model background. Has to be binary and is used for a posthoc masking of
 projected grid cells.}
 

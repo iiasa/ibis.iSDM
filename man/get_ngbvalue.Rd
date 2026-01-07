@@ -14,7 +14,7 @@ get_ngbvalue(
 )
 }
 \arguments{
-\item{coords}{A \code{\link{matrix}}, \code{\link{data.frame}} or \code{\link{sf}} object.}
+\item{coords}{A \code{\link{matrix}}, \code{\link{data.frame}} or \code{\link[sf:sf]{sf::sf}} object.}
 
 \item{env}{A \code{\link{data.frame}} object with the predictors.}
 
@@ -39,7 +39,7 @@ on provided data.frames.
 \strong{Note that despite being parallized this function can be rather slow for large data volumes of data!}
 }
 \details{
-Nearest neighbour matching is done via the \link{geodist} R-package (\code{geodist::geodist}).
+Nearest neighbour matching is done via the \link[geodist:geodist]{geodist::geodist} R-package (\code{geodist::geodist}).
 }
 \note{
 If multiple values are of equal distance during the nearest neighbour check,

@@ -30,7 +30,7 @@ pseudoabs_settings(
 )
 }
 \arguments{
-\item{background}{A \code{\link{SpatRaster}} or \code{\link{sf}} object over which background
+\item{background}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object over which background
 points can be sampled. Default is \code{NULL} (Default) and the background
 is then added when the sampling is first called.}
 
@@ -54,11 +54,11 @@ units of the projection (e.g. \code{m} or \code{°}). Only used when \code{metho
 outside (Default) or inside a minimum convex polygon or range provided the
 respective method is chosen (parameter \code{method = "mcp"} or \code{method = "range"}).}
 
-\item{layer}{A \code{\link{sf}} or \code{\link{SpatRaster}} (in the case of method \code{'zones'})
+\item{layer}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} (in the case of method \code{'zones'})
 object indicating the range of a species. Only used with \code{method = "range"}
 or \code{method = "zones"} (Default: \code{NULL}).}
 
-\item{bias}{A \code{\link{SpatRaster}} with the same extent and projection and background.
+\item{bias}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} with the same extent and projection and background.
 Absence points will be preferentially sampled in areas with higher (!) bias. (Default: \code{NULL}).}
 
 \item{...}{Any other settings to be added to the pseudoabs settings.}
@@ -72,7 +72,7 @@ absence points for Binomial (Bernoulli really) distributed responses
 \code{'background'} points. For more details read Renner et al. (2015).
 
 The function \code{'add_pseudoabsence'} allows to add absence points to any
-\code{\link{sf}} object. See \strong{Details} for additional parameter description and
+\code{\link[sf:sf]{sf::sf}} object. See \strong{Details} for additional parameter description and
 examples on how to 'turn' a presence-only dataset into a
 presence-(pseudo-)absence.
 }
@@ -91,13 +91,13 @@ minimum convex polygon.
 \item \code{'range'} Absence points are created either inside or outside a provided additional
 layer that indicates for example a range of species (controlled through
 parameter \code{inside}).
-\item \code{'zones'} A ratified (e.g. of type \link{factor}) \code{\link{SpatRaster}} layer depicting zones from which absence
+\item \code{'zones'} A ratified (e.g. of type \link{factor}) \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer depicting zones from which absence
 points are to be sampled. This method checks which points fall within which
 zones and then samples absence points either within or outside these zones
 exclusively. Both \code{'layer'} and \code{'inside'} have to be set for this
 option.
 \item \code{'target'} Make use of a target background for sampling absence points.
-Here a \code{\link{SpatRaster}} object has to be provided through the parameter \code{'layer'}.
+Here a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object has to be provided through the parameter \code{'layer'}.
 Absence points are then sampled exclusively within the target areas for grid
 cells with non-zero values.
 }

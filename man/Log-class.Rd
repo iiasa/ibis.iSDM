@@ -5,7 +5,7 @@
 \alias{Log}
 \title{Log prototype.}
 \description{
-Basic \code{\link{R6}} object for Log, any Log inherit from here
+Basic \code{\link[R6:R6Class]{R6::R6}} object for Log, any Log inherit from here
 }
 \keyword{classes}
 \section{Public fields}{

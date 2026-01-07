@@ -247,7 +247,7 @@ Get specific fit from this Model
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A \code{\link{SpatRaster}} object with the prediction.
+A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the prediction.
 }
 }
 \if{html}{\out{<hr>}}
@@ -277,7 +277,7 @@ Set new fit for this Model.
 \describe{
 \item{\code{x}}{The name of the new fit.}
 
-\item{\code{value}}{The \code{\link{SpatRaster}} layer (or model) to be inserted.}
+\item{\code{value}}{The \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer (or model) to be inserted.}
 }
 \if{html}{\out{</div>}}
 }
@@ -385,7 +385,7 @@ Or the relative total using the sumof values.
 }
 
 \subsection{Returns}{
-Returns a \code{\link{SpatRaster}}.
+Returns a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -407,7 +407,7 @@ Get centroids of prediction layers
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Returns a \code{\link{sf}} object.
+Returns a \code{\link[sf:sf]{sf::sf}} object.
 }
 }
 \if{html}{\out{<hr>}}

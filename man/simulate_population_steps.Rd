@@ -35,13 +35,13 @@ names equivalent to the vital stages that are to be estimated.}
 
 \item{replicates}{A \code{\link{numeric}} vector of the number of replicates (Default: \code{1}).}
 
-\item{carrying_capacity}{Either \code{\link{SpatRaster}} or a \code{\link{numeric}} estimate of the
+\item{carrying_capacity}{Either \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or a \code{\link{numeric}} estimate of the
 maximum carrying capacity, e.g. how many adult individual are likely to occur
 per grid cell. If set to \code{\link{numeric}}, then carrying capacity is estimated up
 to a maximum set (\emph{Note: a more clever way would be to use a species-area relationship
 for scaling. This is not yet implemented}).}
 
-\item{initial}{A \code{\link{SpatRaster}} giving the initial population size. If not
+\item{initial}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} giving the initial population size. If not
 provided, then initial populations are guessed (see details) from the projected
 suitability rasters (Default: \code{NULL}).}
 
@@ -83,7 +83,7 @@ The \emph{steps} package has multiple options for simulating species population 
 not all possible options are represented in this wrapper.
 
 Furthermore, the package still makes use of the \code{raster} package for much
-of its internal data processing. Since \emph{ibis.iSDM} switched to \link{terra} a while
+of its internal data processing. Since \emph{ibis.iSDM} switched to \link[terra:terra-package]{terra::terra} a while
 ago, there can be efficiency problems as layers need to be translated between
 packages.
 }

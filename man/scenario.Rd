@@ -12,7 +12,7 @@ scenario(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
 \arguments{
 \item{fit}{A \code{\link{BiodiversityDistribution}} object containing a trained model.}
 
-\item{limits}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the projection
+\item{limits}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object that limits the projection
 surface when intersected with the prediction data (Default: \code{NULL}).
 This can for instance be set as an expert-delineated constrain to limit spatial
 projections.}

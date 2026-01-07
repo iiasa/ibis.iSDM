@@ -59,7 +59,7 @@ to be added.}
 \item{value}{A \code{\link{numeric}} value specifying
 the specific threshold for scenarios (Default: \code{NULL} grabs the value from \code{obj}).}
 
-\item{point}{A \code{\link{sf}} object containing observational data used for model training.}
+\item{point}{A \code{\link[sf:sf]{sf::sf}} object containing observational data used for model training.}
 
 \item{field_occurrence}{A \code{\link{character}} location of biodiversity point records.}
 
@@ -72,7 +72,7 @@ Also see Muscatello et al. (2021).}
 \item{...}{Any other parameter. Used to fetch value if set somehow.}
 }
 \value{
-A \link{SpatRaster} if a \link{SpatRaster} object as input. Otherwise the threshold
+A \link[terra:SpatRaster-class]{terra::SpatRaster} if a \link[terra:SpatRaster-class]{terra::SpatRaster} object as input. Otherwise the threshold
 is added to the respective \code{\link{DistributionModel}} or \code{\link{BiodiversityScenario}} object.
 }
 \description{
@@ -82,8 +82,8 @@ discrete representations of where suitable habitat might or might not exist.
 This so called \emph{threshold'ing} can be done in various ways which are further
 described in the details.
 
-In case a \code{\link{SpatRaster}} is provided as input in this function for
-\code{obj}, it is furthermore necessary to provide a \code{\link{sf}} object for
+In case a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} is provided as input in this function for
+\code{obj}, it is furthermore necessary to provide a \code{\link[sf:sf]{sf::sf}} object for
 validation as there is no \code{\link{DistributionModel}} to read this information
 from.
 

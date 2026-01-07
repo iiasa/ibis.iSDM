@@ -7,7 +7,7 @@
 predictor_filter(env, keep = NULL, method = "pearson", ...)
 }
 \arguments{
-\item{env}{A \code{\link{SpatRaster}} or alternatively \code{\link{data.frame}} or
+\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or alternatively \code{\link{data.frame}} or
 \code{\link{matrix}} with extracted environmental covariates for a given species.}
 
 \item{keep}{A \code{\link{vector}} with variables to keep regardless. These are usually

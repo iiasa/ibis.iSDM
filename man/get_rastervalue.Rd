@@ -7,9 +7,9 @@
 get_rastervalue(coords, env, ngb_fill = TRUE, rm.na = FALSE)
 }
 \arguments{
-\item{coords}{A \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link{sf}} object.}
+\item{coords}{A \code{\link{data.frame}}, \code{\link{matrix}} or \code{\link[sf:sf]{sf::sf}} object.}
 
-\item{env}{A \code{\link{SpatRaster}} object with the provided predictors.}
+\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the provided predictors.}
 
 \item{ngb_fill}{\code{\link{logical}} on whether cells should be interpolated from
 neighbouring values.}
@@ -23,7 +23,7 @@ data point.
 }
 \description{
 This function simply extracts the values from a provided
-\code{\link{SpatRaster}}, \code{\link{SpatRasterDataset}} or \code{\link{SpatRasterCollection}} object. For
+\code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, \code{\link[terra:SpatRaster-class]{terra::SpatRasterDataset}} or \code{\link[terra:SpatRaster-class]{terra::SpatRasterCollection}} object. For
 points where or \code{NA} values were extracted a small buffer is applied to try and
 obtain the remaining values.
 }

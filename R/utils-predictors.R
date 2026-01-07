@@ -1070,7 +1070,7 @@ makeHinge <- function(v, n, nknots = 4, cutoffs = NULL){
 #' than a certain knot are set to \code{0}, while the remainder is set to
 #' \code{1}.
 #'
-#' @param v A [`Raster`] object.
+#' @param v A [`SpatRaster`] object.
 #' @param n A [`character`] describing the name of the variable. Used as basis
 #' for new names.
 #' @param nknots The number of knots to be used for the transformation (Default: \code{4}).

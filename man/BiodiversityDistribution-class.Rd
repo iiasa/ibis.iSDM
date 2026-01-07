@@ -5,8 +5,8 @@
 \alias{BiodiversityDistribution}
 \title{Biodiversity Distribution master class}
 \description{
-Base \code{\link{R6}} class for any biodiversity distribution objects.
-Serves as container that supplies data and functions to other \code{\link{R6}}
+Base \code{\link[R6:R6Class]{R6::R6}} class for any biodiversity distribution objects.
+Serves as container that supplies data and functions to other \code{\link[R6:R6Class]{R6::R6}}
 classes. Generally stores all objects and parameters added to a model.
 }
 \details{
@@ -44,9 +44,9 @@ names(x)
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{background}}{A \code{\link{SpatRaster}} or \code{\link{sf}} object delineating the modelling extent.}
+\item{\code{background}}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object delineating the modelling extent.}
 
-\item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
+\item{\code{limits}}{An optional \code{\link[sf:sf]{sf::sf}} object on potential extrapolation limits}
 
 \item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDatasetCollection}} object.}
 
@@ -128,9 +128,9 @@ Initializes the object and creates an BiodiversityDataset by default.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{background}}{A \code{\link{SpatRaster}} or \code{\link{sf}} object delineating the modelling extent.}
+\item{\code{background}}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object delineating the modelling extent.}
 
-\item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
+\item{\code{limits}}{An optional \code{\link[sf:sf]{sf::sf}} object on potential extrapolation limits}
 
 \item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDatasetCollection}} object.}
 
@@ -449,7 +449,7 @@ Specify new offsets.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A new \code{\link{SpatRaster}} object to be used as offset.}
+\item{\code{x}}{A new \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object to be used as offset.}
 }
 \if{html}{\out{</div>}}
 }
@@ -530,7 +530,7 @@ Set new bias control
 \describe{
 \item{\code{type}}{A \code{\link{character}} with the type of control object.}
 
-\item{\code{x}}{A new bias control object. Expecting a \code{\link{SpatRaster}} object.}
+\item{\code{x}}{A new bias control object. Expecting a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object.}
 
 \item{\code{method}}{The method used to create the object.}
 

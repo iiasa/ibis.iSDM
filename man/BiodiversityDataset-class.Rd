@@ -27,7 +27,7 @@ BiodiversityDataset prototype description
 
 \item{\code{field_occurrence}}{A \code{\link{character}} with the name of the column name containing observations.}
 
-\item{\code{data}}{Contains the observational data in \code{\link{sf}} format.}
+\item{\code{data}}{Contains the observational data in \code{\link[sf:sf]{sf::sf}} format.}
 
 \item{\code{use_intercept}}{A \code{\link{logical}} flag on whether intercepts are included for this dataset.}
 
@@ -96,7 +96,7 @@ Initializes the object and creates an empty list
 
 \item{\code{field_occurrence}}{A \code{\link{character}} with the name of the column name containing observations.}
 
-\item{\code{data}}{Contains the observational data in \code{\link{sf}} format.}
+\item{\code{data}}{Contains the observational data in \code{\link[sf:sf]{sf::sf}} format.}
 
 \item{\code{use_intercept}}{A \code{\link{logical}} flag on whether intercepts are included for this dataset.}
 
@@ -249,7 +249,7 @@ Get data from the object
 }
 
 \subsection{Returns}{
-A \code{\link{sf}} object with the data
+A \code{\link[sf:sf]{sf::sf}} object with the data
 }
 }
 \if{html}{\out{<hr>}}

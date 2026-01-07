@@ -22,7 +22,7 @@ iteration steps (or within year migration steps). For adaptability
 constraints this parameter specifies the extent (in units of standard
 deviation) to which extrapolations should be performed.}
 
-\item{resistance}{A \code{\link{SpatRaster}} object describing a resistance surface or
+\item{resistance}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object describing a resistance surface or
 barrier for use in connectivity constrains (Default: \code{NULL}).}
 
 \item{...}{passed on parameters. See also the specific methods for adding

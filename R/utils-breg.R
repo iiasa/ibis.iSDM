@@ -78,7 +78,7 @@ built_formula_breg <- function(model, obj, vars){
 #' @param family A [`character`] object giving either `poisson` or `binomial`.
 #' @param exposure A [`numeric`] vector giving the exposure for `poisson` family priors.
 #'
-#' @returns A [`SpikeSlabPriorBase`] object for use with a [`Boom`] engine
+#' @returns A [`SpikeSlabPriorBase`] object for use with a BREG engine
 #'   trained model
 #'
 #' @keywords utils

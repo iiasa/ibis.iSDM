@@ -15,7 +15,7 @@ predictor_derivate(
 )
 }
 \arguments{
-\item{env}{A \code{\link{SpatRaster}} object.}
+\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object.}
 
 \item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed in any
 way (Options: \code{'none'}, \code{'quadratic'}, \code{'hinge'},
@@ -34,7 +34,7 @@ empty (in this case option has to be set).}
 \item{...}{other options (Non specified).}
 }
 \value{
-Returns the derived adjusted \code{\link{SpatRaster}} objects of identical resolution.
+Returns the derived adjusted \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} objects of identical resolution.
 }
 \description{
 This function creates derivatives of existing covariates and

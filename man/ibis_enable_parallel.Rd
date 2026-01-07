@@ -16,6 +16,6 @@ enabled across the package.
 For enabling prediction support beyond sequential prediction see the \code{\link{ibis_future}} function.
 }
 \seealso{
-\link{future}, \link{ibis_future}
+\link[future:future]{future::future}, \link{ibis_future}
 }
 \keyword{misc}
