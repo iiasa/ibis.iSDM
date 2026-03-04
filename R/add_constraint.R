@@ -3,13 +3,13 @@ NULL
 
 #' Add a constraint to an existing \code{scenario}
 #'
-#' @description This function adds a constrain to a
+#' @description This function adds a constraint to a
 #' [`BiodiversityScenario-class`] object to constrain (future) projections.
-#' These constrains can for instance be constraints on a possible dispersal
+#' These constraints can for instance be constraints on a possible dispersal
 #' distance, connectivity between identified patches or limitations on species
 #' adaptability.
 #'
-#' **Most constrains require pre-calculated thresholds to present in the [`BiodiversityScenario-class`] object!**
+#' **Most constraints require pre-calculated thresholds to be present in the [`BiodiversityScenario-class`] object!**
 #'
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
 #' @param method A [`character`] indicating the type of constraints to be added
@@ -28,7 +28,7 @@ NULL
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 #' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 #'
-#' A comprehensive overview of the benefits of including dispersal constrains in
+#' A comprehensive overview of the benefits of including dispersal constraints in
 #' species distribution models can be found in Bateman et al. (2013).
 #'
 #' **Connectivity**:
@@ -170,10 +170,10 @@ methods::setMethod(
 #' * \code{kissmig} - Applies the kissmig stochastic dispersal model. Requires \code{`kissmig`} package. Applied at each modelling time step.
 #' * \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 #'
-#' A comprehensive overview of the benefits of including dispersal constrains in
+#' A comprehensive overview of the benefits of including dispersal constraints in
 #' species distribution models can be found in Bateman et al. (2013).
 #'
-#' The following additional parameters can bet set:
+#' The following additional parameters can be set:
 #' * \code{pext}: [`numeric`] indicator for \code{`kissmig`} of the probability a
 #' colonized cell becomes uncolonised, i.e., the species gets locally extinct
 #' (Default: \code{0.1}).
@@ -233,14 +233,14 @@ methods::setMethod(
     if(method == "sdd_fixed"){
       # Short-distance dispersal (Fixed)
       assertthat::assert_that(
-        is.numeric(value), msg = "Fixed short distance dispersal needs an annual mean disperal distance value."
+        is.numeric(value), msg = "Fixed short distance dispersal needs an annual mean dispersal distance value."
       )
       cr[['dispersal']] <- list(method = method,
                                 params = c("mean_dispersal_distance" = value))
     } else if(method == "sdd_nexpkernel") {
       # Negative exponential kernel
       assertthat::assert_that(
-        is.numeric(value), msg = "Short distance negative exponential kernal dispersal needs an annual mean disperal distance value."
+        is.numeric(value), msg = "Short distance negative exponential kernel dispersal needs an annual mean dispersal distance value."
       )
       cr[['dispersal']] <- list(method = method,
                                 params = c("mean_dispersal_distance" = value))
@@ -306,7 +306,7 @@ methods::setMethod(
   # Check for small lon-lat values
   if(terra::is.lonlat(baseline_threshold)){
     if(value < 1){
-      cli::cli_alert_warning('Very small average dispersal vlaue provided. Check that they are in unit m!')
+      cli::cli_alert_warning('Very small average dispersal value provided. Check that they are in unit m!')
     }
   }
 
@@ -372,7 +372,7 @@ methods::setMethod(
   # Check for small lon-lat values
   if(terra::is.lonlat(baseline_threshold)){
     if(value < 1){
-      message('Very small average dispersal vlaue provided. Check that they are in unit m!')
+      message('Very small average dispersal value provided. Check that they are in unit m!')
     }
   }
 

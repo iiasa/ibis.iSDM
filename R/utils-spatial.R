@@ -22,7 +22,7 @@ is_comparable_raster <- function(x, y) {
   }
 }
 
-#' Donversion function from SpatRaster to RasterLayer
+#' Conversion function from SpatRaster to RasterLayer
 #'
 #' @description As a consequence of switching to [terra] from the legacy
 #' \code{"raster"}, there

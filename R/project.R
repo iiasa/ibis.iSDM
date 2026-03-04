@@ -8,13 +8,13 @@ NULL
 #' supplied (future) covariates. Supplied predictors are usually
 #' spatial-temporal predictors which should be prepared via [`add_predictors()`]
 #' (e.g. transformations and derivates) in the same way as they have been during
-#' the initial modelling with [`distribution()`]. Any constrains specified in
+#' the initial modelling with [`distribution()`]. Any constraints specified in
 #' the scenario object are applied during the projection.
 #'
 #' @param x A [`BiodiversityScenario`] object with set predictors. Note that some
 #' constrains such as \code{MigClim} can still simulate future change without projections.
 #' Alternatively a [`DistributionModel`] object can be supplied if other scenario
-#' functions are not needed. In this case provide a \code{env} parameter value.
+#' functions are not needed. In this case provide an \code{env} parameter value.
 #' @param date_interpolation A [`character`] on whether dates should be interpolated.
 #' Options include \code{"none"} (Default), \code{"annual"}, \code{"monthly"}, \code{"daily"}.
 #' @param stabilize A [`logical`] value indicating whether the suitability projection
@@ -58,12 +58,12 @@ NULL
 #'
 #' Finally this function also allows temporal stabilization across prediction
 #' steps via enabling the parameter \code{stabilize} and checking the
-#' \code{stablize_method} argument. Stabilization can for instance be helpful in
+#' \code{stabilize_method} argument. Stabilization can for instance be helpful in
 #' situations where environmental variables are quite dynamic, but changes in
 #' projected suitability are not expected to abruptly increase or decrease. It
 #' is thus a way to smoothen out outliers from the projection. Options are so
 #' far for instance \code{'loess'} which fits a [`loess()`] model per pixel and
-#' time step. This is conducted at the very of the processing steps and any
+#' time step. This is conducted at the very end of the processing steps and any
 #' thresholds will be recalculated afterwards.
 #'
 #' @returns Saves [`stars`] objects of the obtained predictions in mod.

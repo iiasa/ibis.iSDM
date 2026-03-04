@@ -71,7 +71,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables and types are supplied for STAN
+#' Helper function when multiple variables and types are supplied for Stan priors
 #'
 
 #' @description This is a helper function to specify several [STANPrior] with

@@ -65,7 +65,7 @@ relative to any other datasets. By default set to \code{1} if only one
 dataset is added. A \code{\link{vector}} is also supported but must be of the same
 length as \code{"polpa"}.}
 
-\item{simulate}{Simulate poipa points within its boundaries. Result are
+\item{simulate}{Simulate poipa points within its boundaries. Results are
 passed to \code{\link{add_biodiversity_poipa}} (Default: \code{FALSE}).}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by
@@ -75,7 +75,7 @@ simulation.}
 for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling.
-Can be set to either. \code{'random'} or \code{'regular'}, the latter
+Can be set to either \code{'random'} or \code{'regular'}, the latter
 requiring a raster supplied in the \code{'simulate_weights'} parameter.}
 
 \item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
@@ -101,8 +101,8 @@ each area outside the polygon is where the species is absent.
 }
 \details{
 The default approach for polygon data is to sample presence-absence
-points across the region of the polygons. This function thus adds as a
-wrapper to \code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}} as presence-only points are created
+points across the region of the polygons. This function thus acts as a
+wrapper to \code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}} as presence-absence points are created
 by the model. Note if the polygon is used directly in the modelling the
 link between covariates and polygonal data is established by regular
 sampling of points within the polygon and is thus equivalent to simulating

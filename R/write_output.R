@@ -68,7 +68,7 @@ methods::setMethod(
         if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
           writeGeoTiff(file = mod, fname = fname, dt = dt)
         } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
-          writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
+          writeNetCDF(file = mod, fname = fname, varName = names(mod), dt = dt)
         } else {
           cli::cli_abort("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
         }
@@ -119,7 +119,7 @@ methods::setMethod(
     if(tools::file_ext(fname) %in% c('tif', 'TIF')) {
       writeGeoTiff(file = mod, fname = fname, dt = dt)
     } else if(tools::file_ext(fname) %in% c('nc', 'NC', 'ncdf', 'NCDF')){
-      writeNetCDF(file = mode, fname = fname, varName = names(mod), dt = dt)
+      writeNetCDF(file = mod, fname = fname, varName = names(mod), dt = dt)
     } else {
       cli::cli_abort("Output type could not be determined. Currently only geoTIFF and netCDF are supported.")
     }

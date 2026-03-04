@@ -3,7 +3,7 @@
 \name{INLAPriors}
 \alias{INLAPriors}
 \alias{INLAPriors,vector,character-method}
-\title{Helper function when multiple variables and types are supplied for INLA}
+\title{Helper function when multiple variables and types are supplied for INLA priors}
 \usage{
 INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 

@@ -6,8 +6,8 @@
 #'
 #' The effect is estimated as that variable most responsible for decreasing
 #' suitability at that cell. The decrease in suitability is calculated, for each
-#' predictor in turn, relative to thesuitability that would be achieved if that
-#' predictor took the value equal to the mean The predictor associated with the
+#' predictor in turn, relative to the suitability that would be achieved if that
+#' predictor took the value equal to the mean. The predictor associated with the
 #' largest decrease in suitability is the most limiting factor.
 #'
 #' @param mod A fitted \code{'DistributionModel'} object from which limited

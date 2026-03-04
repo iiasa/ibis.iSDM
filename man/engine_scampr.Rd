@@ -9,7 +9,7 @@ engine_scampr(x, type = "response", dens = "posterior", maxit = 500, ...)
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{type}{The mode used for creating (posterior or prior) predictions. Either stting
+\item{type}{The mode used for creating (posterior or prior) predictions. Either setting
 \code{"link"} or \code{"response"} (Default: \code{"response"}).}
 
 \item{dens}{A \code{\link{character}} on how predictions are made, either from the \code{"posterior"} (Default)

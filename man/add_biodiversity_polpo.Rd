@@ -66,7 +66,7 @@ relative to any other datasets. By default set to \code{1} if only one
 dataset is added. A \code{\link{vector}} is also supported but must be of the same
 length as \code{"polpo"}.}
 
-\item{simulate}{Simulate poipo points within its boundaries. Result are
+\item{simulate}{Simulate poipo points within its boundaries. Results are
 passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE}).}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by
@@ -76,7 +76,7 @@ simulation (Default: \code{100}).}
 for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling.
-Can be set to either. \code{'random'} or \code{'regular'}, the latter
+Can be set to either \code{'random'} or \code{'regular'}, the latter
 requiring a raster supplied in the \code{'simulate_weights'} parameter.}
 
 \item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
@@ -96,12 +96,12 @@ Adds biodiversity data to \link{distribution} object.
 \description{
 This function can be used to add a \code{\link[sf:sf]{sf::sf}} polygon dataset to an
 existing distribution object. Presence-only polygon data is treated
-differential than point data in some engines particular through the way that
+differently than point data in some engines, particularly through the way that
 points are generated.
 }
 \details{
 The default approach for polygon data is to sample presence-only
-points across the region of the polygons. This function thus adds as a
+points across the region of the polygons. This function thus acts as a
 wrapper to \code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}} as presence-only points are created
 by the model. If no points are simulated directly (Default) then the
 polygon is processed by \code{\link[=train]{train()}} by creating regular point data over the

@@ -3,7 +3,7 @@
 \name{GLMNETPriors}
 \alias{GLMNETPriors}
 \alias{GLMNETPriors,character-method}
-\title{Helper function when multiple variables are supplied for a GLMNET prior}
+\title{Helper function when multiple variables are supplied for GLMNET priors}
 \usage{
 GLMNETPriors(variable, hyper = 0, lims = c(-Inf, Inf))
 

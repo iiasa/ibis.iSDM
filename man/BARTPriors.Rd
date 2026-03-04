@@ -3,7 +3,7 @@
 \name{BARTPriors}
 \alias{BARTPriors}
 \alias{BARTPriors,character-method}
-\title{Helper function when multiple variables are supplied for a BART prior}
+\title{Helper function when multiple variables are supplied for BART priors}
 \usage{
 BARTPriors(variable, hyper = 0.75, ...)
 
@@ -13,7 +13,7 @@ BARTPriors(variable, hyper = 0.75, ...)
 \item{variable}{A \code{\link{character}} matched against existing predictors or latent
 effects.}
 
-\item{hyper}{A \code{\link{numeric}} object with a number being \code{>0} and equal to
+\item{hyper}{A \code{\link{numeric}} object with a value between \code{0} and
 \code{1}. Defaults to \code{0.75}.}
 
 \item{...}{Variables passed on to prior object.}

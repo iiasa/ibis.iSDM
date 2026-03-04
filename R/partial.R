@@ -73,7 +73,7 @@ partial.DistributionModel <- function(mod, ...) mod$partial(...)
 
 #' Obtain spatial partial effects of trained model
 #'
-#' @description Similar as [partial] this function calculates a partial response
+#' @description Similar to [partial], this function calculates a partial response
 #' of a trained model for a given variable. Differently from [partial] in space.
 #' However the result is a [`SpatRaster`] showing the spatial magnitude of the
 #' partial response.

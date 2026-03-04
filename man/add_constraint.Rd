@@ -22,13 +22,13 @@ constraints.}
 Adds constraints data to a \code{\link{BiodiversityScenario}} object.
 }
 \description{
-This function adds a constrain to a
+This function adds a constraint to a
 \code{\linkS4class{BiodiversityScenario}} object to constrain (future) projections.
-These constrains can for instance be constraints on a possible dispersal
+These constraints can for instance be constraints on a possible dispersal
 distance, connectivity between identified patches or limitations on species
 adaptability.
 
-\strong{Most constrains require pre-calculated thresholds to present in the \code{\linkS4class{BiodiversityScenario}} object!}
+\strong{Most constraints require pre-calculated thresholds to be present in the \code{\linkS4class{BiodiversityScenario}} object!}
 }
 \details{
 Constraints can be added to scenario objects to increase or decrease
@@ -44,7 +44,7 @@ following options:
 \item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 }
 
-A comprehensive overview of the benefits of including dispersal constrains in
+A comprehensive overview of the benefits of including dispersal constraints in
 species distribution models can be found in Bateman et al. (2013).
 
 \strong{Connectivity}:

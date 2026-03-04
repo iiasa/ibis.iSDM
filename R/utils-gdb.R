@@ -22,7 +22,7 @@ built_formula_gdb <- function(model, id, x, settings){
     inherits(x, "BiodiversityDistribution"),
     inherits(settings, 'Settings'),
     is.character(id) || is.Id(id),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
   # Get object for id
   obj <- model$biodiversity[[id]]

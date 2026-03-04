@@ -38,7 +38,7 @@ there are a range of different definitions, sometimes referring to mechanistic
 SDMs as those that incorporate ecological processes (e.g. demography, dispersal,
 eco-evolutionary principles).
 Yet often, correlative SDMs are also declared "mechanistic" if they somehow incorporate
-a specific constrain or response function towards an environmental variable. For example,
+a specific constraint or response function towards an environmental variable. For example,
 the micro-climatic limits to the persistence of a species [Briscoe et al. 2023](https://doi.org/10.1111/gcb.16557), or the presence of biotic 
 interactions (estimated through a separate SDM of a different species) are also 
 sometimes referred to as limiting mechanisms ([Ohlmann et al. 2023](https://doi.org/10.1016/j.ecolmodel.2023.110424)).
@@ -59,7 +59,7 @@ many of which enable corrections of projected scenarios.
 There are a range of wrappers implemented in *ibis.iSDM* that allow a convenient 
 passing of outputs or parameters to other mechanistic modelling packages. These 
 wrappers support the convenient addition of ecological processes
-such as dispersal to scenarios [data integration](04_biodiversity_projections.html).
+such as dispersal to scenarios (see [biodiversity projections](04_biodiversity_projections.html)).
 Or they enable *ibis.iSDM* outputs to directly become inputs to further simulations.
 In case key parameters are not available, package users are encouraged to check 
 out the various options in the `add_constraint()` function.
@@ -170,7 +170,7 @@ sc1 <- sc |>
                            type = "DIS", # Final distribution result
                            value = 10, # Number of iteration steps
                            # These parameters are for KISSMig and get passed on
-                           # Probablitiy of local extinction between iterations
+                           # Probability of local extinction between iterations
                            pext = 0.5,
                            # Probability corner cells are colonized.
                            pcor = 0.2
@@ -181,7 +181,7 @@ sc2 <- sc |>
                            type = "DIS", # Final distribution result
                            value = 10, # Number of iteration steps
                            # These parameters are for KISSMig and get passed on
-                           # Probablitiy of local extinction between iterations
+                           # Probability of local extinction between iterations
                            pext = 0.9,
                            # Probability corner cells are colonized.
                            pcor = 0.1
@@ -210,8 +210,8 @@ Unfortunately is currently not available on CRAN anymore (stand September 2023),
 possibly because of lack of maintenance or missing dependency. The package can 
 still be downloaded from github however ([https://github.com/robinengler/MigClim/](https://github.com/robinengler/MigClim/)).
 
-Assuming the user is able to install the MigClim package with all it's dependencies
-(some of which have also disappared from CRAN), it can be run in *ibis.iSDM* as follows:
+Assuming the user is able to install the MigClim package with all its dependencies
+(some of which have also disappeared from CRAN), it can be run in *ibis.iSDM* as follows:
 
 ```{r MigClim, eval=FALSE}
 prj <- scenario(fit) |> 

@@ -295,7 +295,7 @@ methods::setMethod(
 #'
 #' @description This function can be used to add a [`sf`] polygon dataset to an
 #' existing distribution object. Presence-only polygon data is treated
-#' differential than point data in some engines particular through the way that
+#' differently than point data in some engines, particularly through the way that
 #' points are generated.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
@@ -312,14 +312,14 @@ methods::setMethod(
 #' relative to any other datasets. By default set to \code{1} if only one
 #' dataset is added. A [`vector`] is also supported but must be of the same
 #' length as \code{"polpo"}.
-#' @param simulate Simulate poipo points within its boundaries. Result are
+#' @param simulate Simulate poipo points within its boundaries. Results are
 #' passed to [`add_biodiversity_poipo`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by
 #' simulation (Default: \code{100}).
 #' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference
 #' for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling.
-#' Can be set to either. \code{'random'} or \code{'regular'}, the latter
+#' Can be set to either \code{'random'} or \code{'regular'}, the latter
 #' requiring a raster supplied in the \code{'simulate_weights'} parameter.
 #' @param separate_intercept A [`logical`] value stating whether a separate
 #' intercept is to be added in shared likelihood models for engines
@@ -330,7 +330,7 @@ methods::setMethod(
 #' @param ... Other parameters passed down.
 #'
 #' @details The default approach for polygon data is to sample presence-only
-#' points across the region of the polygons. This function thus adds as a
+#' points across the region of the polygons. This function thus acts as a
 #' wrapper to [`add_biodiversity_poipo()`] as presence-only points are created
 #' by the model. If no points are simulated directly (Default) then the
 #' polygon is processed by [`train()`] by creating regular point data over the
@@ -505,14 +505,14 @@ methods::setMethod(
 #' relative to any other datasets. By default set to \code{1} if only one
 #' dataset is added. A [`vector`] is also supported but must be of the same
 #' length as \code{"polpa"}.
-#' @param simulate Simulate poipa points within its boundaries. Result are
+#' @param simulate Simulate poipa points within its boundaries. Results are
 #' passed to [`add_biodiversity_poipa`] (Default: \code{FALSE}).
 #' @param simulate_points A [`numeric`] number of points to be created by
 #' simulation.
 #' @param simulate_bias A [`SpatRaster`] layer describing an eventual preference
 #' for simulation (Default: \code{NULL}).
 #' @param simulate_strategy A [`character`] stating the strategy for sampling.
-#' Can be set to either. \code{'random'} or \code{'regular'}, the latter
+#' Can be set to either \code{'random'} or \code{'regular'}, the latter
 #' requiring a raster supplied in the \code{'simulate_weights'} parameter.
 #' @param separate_intercept A [`logical`] value stating whether a separate
 #' intercept is to be added in shared likelihood models for engines
@@ -524,8 +524,8 @@ methods::setMethod(
 #' @param ... Other parameters passed down.
 #'
 #' @details The default approach for polygon data is to sample presence-absence
-#' points across the region of the polygons. This function thus adds as a
-#' wrapper to [`add_biodiversity_poipa()`] as presence-only points are created
+#' points across the region of the polygons. This function thus acts as a
+#' wrapper to [`add_biodiversity_poipa()`] as presence-absence points are created
 #' by the model. Note if the polygon is used directly in the modelling the
 #' link between covariates and polygonal data is established by regular
 #' sampling of points within the polygon and is thus equivalent to simulating

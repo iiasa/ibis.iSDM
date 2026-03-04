@@ -16,7 +16,7 @@ rm_control(x, type)
 Can be missing.}
 }
 \description{
-This function allows to remove set control obtions from an existing \link{distribution}
+This function allows to remove set control options from an existing \link{distribution}
 object.
 }
 \examples{

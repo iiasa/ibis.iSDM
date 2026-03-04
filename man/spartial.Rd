@@ -32,7 +32,7 @@ for example created from a raster file (Default: \code{NULL}).}
 A \link[terra:SpatRaster-class]{terra::SpatRaster} containing the mapped partial response of the variable.
 }
 \description{
-Similar as \link{partial} this function calculates a partial response
+Similar to \link{partial}, this function calculates a partial response
 of a trained model for a given variable. Differently from \link{partial} in space.
 However the result is a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} showing the spatial magnitude of the
 partial response.

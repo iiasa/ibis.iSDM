@@ -68,7 +68,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables are supplied for XGBOOST
+#' Helper function when multiple variables are supplied for XGBoost priors
 
 #' @description This is a helper function to specify several [XGBPrior] with the
 #' same hyper-parameters, but different variables.

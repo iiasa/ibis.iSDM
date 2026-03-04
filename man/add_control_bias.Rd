@@ -82,7 +82,7 @@ See also details for some explanations.
 }
 \details{
 In the case of \code{"proximity"} weights are assigned to each point, placing
-higher weight on points further away and with less overlap. Weights are are
+higher weight on points further away and with less overlap. Weights are
 assigned up to a maximum of distance which can be provided by the user
 (parameter \code{"maxdist"}). This distance is ideally informed by some
 knowledge of the species to be modelled (e.g., maximum dispersal distance).

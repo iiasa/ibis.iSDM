@@ -14,7 +14,7 @@ NULL
 #'
 #' @param variable A [`character`] matched against existing predictors or latent
 #' effects.
-#' @param hyper A [`numeric`] object with a number being \code{>0} and equal to
+#' @param hyper A [`numeric`] object with a value between \code{0} and
 #' \code{1}. Defaults to \code{0.75}.
 #' @param ... Variables passed on to prior object.
 #'
@@ -73,7 +73,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables are supplied for a BART prior
+#' Helper function when multiple variables are supplied for BART priors
 #'
 #' @description This is a helper function to specify several [BARTPrior] objects
 #' with the same hyper-parameters, but different variables.

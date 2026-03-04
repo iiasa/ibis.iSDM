@@ -3,7 +3,7 @@
 \name{BREGPriors}
 \alias{BREGPriors}
 \alias{BREGPriors,character-method}
-\title{Helper function when multiple variables are supplied for a BREG prior}
+\title{Helper function when multiple variables are supplied for BREG priors}
 \usage{
 BREGPriors(variable, hyper = NULL, ip = NULL)
 

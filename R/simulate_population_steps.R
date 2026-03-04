@@ -157,7 +157,7 @@ methods::setMethod(
 #' This function does the actual computation using the provided objects
 #' from the projection.
 #'
-#' @param proj A [`SpatRaster`] object with multple timeslots
+#' @param proj A [`SpatRaster`] object with multiple timeslots
 #' @param scenario_simulations A [`list`] with provided settings
 #' @returns A [`SpatRaster`] object of the same length as proj.
 #'

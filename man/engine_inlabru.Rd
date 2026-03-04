@@ -77,18 +77,22 @@ needs to be provided to the \code{"optional_mesh"} parameter. Otherwise the
 mesh will be created based on best guesses of the data spread. A good mesh
 needs to have triangles as regular as possible in size and shape:
 equilateral.
-
-\link{*} \code{"max.edge"}: The largest allowed triangle edge length, must be in
-the same scale units as the coordinates Lower bounds affect the density of
-triangles \link{*} \code{"offset"}: The automatic extension distance of the mesh
+\itemize{
+\item \code{"max.edge"}: The largest allowed triangle edge length, must be in
+the same scale units as the coordinates. Lower bounds affect the density of
+triangles.
+\item \code{"offset"}: The automatic extension distance of the mesh.
 If positive: same scale units. If negative, interpreted as a factor relative
-to the approximate data diameter i.e., a value of -0.10 will add a 10\% of the
-data diameter as outer extension. \link{*} \code{"cutoff"}: The minimum allowed
+to the approximate data diameter, i.e., a value of -0.10 will add a 10\% of the
+data diameter as outer extension.
+\item \code{"cutoff"}: The minimum allowed
 distance between points, it means that points at a closer distance than the
-supplied value are replaced by a single vertex. it is critical when there are
+supplied value are replaced by a single vertex. It is critical when there are
 some points very close to each other, either for point locations or in the
-domain boundary. \link{*} \code{"proj_stepsize"}: The stepsize for spatial
+domain boundary.
+\item \code{"proj_stepsize"}: The stepsize for spatial
 predictions, which affects the spatial grain of any outputs created.
+}
 
 Priors can be set via \link{INLAPrior}.
 }

@@ -3,7 +3,7 @@
 \name{add_constraint_MigClim}
 \alias{add_constraint_MigClim}
 \alias{add_constraint_MigClim,BiodiversityScenario-method}
-\title{Add constrains to the modelled distribution projection using the MigClim
+\title{Add constraints to the modelled distribution projection using the MigClim
 approach}
 \usage{
 add_constraint_MigClim(
@@ -75,13 +75,13 @@ the probability of a cell producing propagules.}
 \item{dtmp}{A \code{\link{character}} to a folder where temporary files are to be created.}
 }
 \value{
-Adds a MigClim onstrain to a \code{\link{BiodiversityScenario}} object.
+Adds a MigClim constraint to a \code{\link{BiodiversityScenario}} object.
 }
 \description{
-This function adds constrain as defined by the MigClim approach
+This function adds a constraint as defined by the MigClim approach
 (Engler et al. 2013) to a \code{\linkS4class{BiodiversityScenario}} object to
 constrain future projections. For a detailed description of MigClim, please
-the respective reference and the UserGuide. \strong{The default parameters chosen
+see the respective reference and the UserGuide. \strong{The default parameters chosen
 here are suggestions.}
 }
 \details{

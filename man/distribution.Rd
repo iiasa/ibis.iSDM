@@ -96,9 +96,9 @@ The following objects can be stored:
 the added biodiversity data.
 \item \code{object$engine} An \code{"engine"} object (e.g. \code{\link[=engine_inlabru]{engine_inlabru()}})
 with function depended on the added engine.
-\item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictions.
+\item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictors.
 \item \code{object$priors} A \code{\link{PriorList}} object with all specified priors.
-\item \code{object$log} A \code{\link{Log}} object that captures.
+\item \code{object$log} A \code{\link{Log}} object that captures messages.
 }
 
 Useful high-level functions to address those objects are for instance:

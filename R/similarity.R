@@ -267,7 +267,7 @@ methods::setMethod(
 #' @param refdat A numerical [`matrix`] or [`data.frame`]. The reference values
 #' of variables organized in columns.
 #'
-#' @note: The code is adapted from Bell & Schlaepfer 2015
+#' @note The code is adapted from Bell & Schlaepfer 2015
 #' (available at \url{https://github.com/bellland/SDM.Virtual.Species_Bell.Schlaepfer})
 #' which was based on a comment by Matthew Bayly made at
 #' \url{https://pvanb.wordpress.com/2014/05/13/a-new-method-and-tool-exdet-to-evaluate-novelty-environmental-conditions/}.

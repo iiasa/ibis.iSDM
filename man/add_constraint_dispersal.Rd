@@ -44,10 +44,10 @@ where \eqn{a} is the mean dispersal distance (in m) divided by 2.
 \item \code{migclim} - Applies the dispersal algorithm MigClim to the modelled objects. Requires \code{"MigClim"} package.
 }
 
-A comprehensive overview of the benefits of including dispersal constrains in
+A comprehensive overview of the benefits of including dispersal constraints in
 species distribution models can be found in Bateman et al. (2013).
 
-The following additional parameters can bet set:
+The following additional parameters can be set:
 \itemize{
 \item \code{pext}: \code{\link{numeric}} indicator for \code{`kissmig`} of the probability a
 colonized cell becomes uncolonised, i.e., the species gets locally extinct

@@ -71,7 +71,7 @@ options("ibis.setupmessages" = FALSE)
 ```
 
 
-Creating a model in the `ibis.iSDM` package is relatively straight forward which we demonstrate here with some of testdata that come with the package. These data show the distribution of a simulated forest-associated species for northern Europe. There are also some test predictors available for modelling. 
+Creating a model in the `ibis.iSDM` package is relatively straightforward which we demonstrate here with some of testdata that come with the package. These data show the distribution of a simulated forest-associated species for northern Europe. There are also some test predictors available for modelling. 
 So first lets load the data:
 
 ```{r Load data, message=FALSE}
@@ -92,7 +92,7 @@ For our example model we are going to use 'Integrated Nested Laplace approximati
 
 Now lets build a simple model object. In this case we make use of presence-only biodiversity records (`add_biodiversity_poipo`). Any presence-only records added to an object created through `distribution()` are by default modelled as intensity $\lambda$ through an inhomogeneous Poisson point process model (PPM), where the Number of Individuals $N$ is integrated as relative rate of occurrence per unit area: $N_i \sim Poisson(\lambda_i|A_i)$. Here $\lambda$ can then be estimated by relating it to environmental covariates $log(\lambda_i) = \alpha + \beta(x_i)$, where $i$ is a grid cell. 
 
-It is inhomogeneous since the $lambda$ varies over the whole sampling extent. In the context of species distribution modelling PPMs are structurally similar to the popular Maxent modelling framework (see [Renner & Warton 2013](https://onlinelibrary.wiley.com/doi/10.1111/j.1541-0420.2012.01824.x) and [Renner et al. 2015](http://doi.wiley.com/10.1111/2041-210X.12352). Critically, presence-only records can only give an indication of a biased sampling and thus sampling bias has to be taken somehow into account, either through careful data preparation, apriori thinning or model-based control by including covariates $\sigma_i$ that might explain this sampling bias.
+It is inhomogeneous since the $\lambda$ varies over the whole sampling extent. In the context of species distribution modelling PPMs are structurally similar to the popular Maxent modelling framework (see [Renner & Warton 2013](https://onlinelibrary.wiley.com/doi/10.1111/j.1541-0420.2012.01824.x) and [Renner et al. 2015](http://doi.wiley.com/10.1111/2041-210X.12352). Critically, presence-only records can only give an indication of a biased sampling and thus sampling bias has to be taken somehow into account, either through careful data preparation, a priori thinning or model-based control by including covariates $\sigma_i$ that might explain this sampling bias.
 
 ```{r INLA}
 
@@ -200,7 +200,7 @@ plot(s[[1]], col = rainbow(10), main = "Marginal effect of forest on the relativ
 
 ```
 
-It is common practice in species distribution modelling that resulting predictions are *thresholded*, e.g. that an abstraction of the continious prediction is created that separates the background into areas where the environment supporting a species is presumably suitable or non-suitable. Threshold can be used in ibis.iSDM via the `threshold()` functions suppling either a fitted model, a RasterLayer or a Scenario object.
+It is common practice in species distribution modelling that resulting predictions are *thresholded*, e.g. that an abstraction of the continuous prediction is created that separates the background into areas where the environment supporting a species is presumably suitable or non-suitable. Thresholds can be used in ibis.iSDM via the `threshold()` function supplying either a fitted model, a RasterLayer or a Scenario object.
 
 ```{r Example for model-based thresholding, fig.width = w, fig.height = h}
 
@@ -224,7 +224,7 @@ fit$plot_threshold()
 
 ### Validation of model predictions
 
-The ibis.iSDM package provides a convenience function to obtain validation results for the fitted models. Validation can be done both for continious and discrete predictions, where the latter requires a computed threshold fits (see above).
+The ibis.iSDM package provides a convenience function to obtain validation results for the fitted models. Validation can be done both for continuous and discrete predictions, where the latter requires a computed threshold fits (see above).
 
 Here we will 'validate' the fitted model using the data used for model fitting. For any scientific paper we recommend to implement a cross-validation scheme to obtain withheld data or use independently gathered data.
 
@@ -242,15 +242,63 @@ validate(fit, method = "disc")
 Validating integrated SDMs, particular those fitted with multiple likelihoods is challenging and something that has not yet fully been explored in the scientific literature. For example strong priors can substantially improve by modifying the response functions in the model, but are challenging to validate if the validation data has similar biases as the training data.
 One way such SDMs can be validated is through spatial block validation, where however care needs to be taken on which datasets are part of which block.
 
+### Checking a fitted model for common issues
+
+The `check()` function runs a series of automated diagnostics on model objects, including checks for model convergence, coefficient existence, outlier predictions, and data sufficiency. It is good practice to run `check()` on both the distribution object before fitting and the fitted model object afterwards.
+
+```{r Check model diagnostics}
+# Check the fitted model for common issues
+check(fit)
+
+# It is also possible to check the distribution object before training
+check(mod)
+```
+
+### Environmental similarity assessment
+
+When projecting a fitted model to new areas or time periods, it is important to assess whether the environmental conditions fall within the range of the training data. The `similarity()` function computes either the Multivariate Environmental Similarity Surface (MESS) or the multivariate combination novelty index (NT2) to identify areas of environmental extrapolation.
+
+```{r Environmental similarity, fig.width = w, fig.height = h}
+# Calculate MESS (Multivariate Environmental Similarity Surface)
+sim <- similarity(fit, method = "mess", plot = TRUE)
+
+# The result contains similarity values per variable and an overall summary
+names(sim)
+```
+
+### Identifying locally limiting factors
+
+Understanding *which* environmental variable most limits the predicted suitability at each location can provide ecological insight. The `limiting()` function computes, for each grid cell, which predictor is most responsible for decreasing suitability relative to the mean environmental conditions.
+
+```{r Limiting factors, fig.width = w, fig.height = h}
+# Identify the most limiting factor at each grid cell
+lim <- limiting(fit, plot = TRUE)
+```
+
+### Saving and loading fitted models
+
+Fitted models can be saved to disk and reloaded later using `write_model()` and `load_model()`. This is useful for sharing results or resuming work without refitting. Spatial predictions can also be exported as GeoTIFF or NetCDF via `write_output()`.
+
+```{r Save and load models, eval = FALSE}
+# Save the fitted model as an RDS file
+write_model(fit, fname = "my_fitted_model.rds")
+
+# Load it again later
+fit_reloaded <- load_model("my_fitted_model.rds")
+
+# Save the prediction raster as a GeoTIFF
+write_output(fit, fname = "prediction_output.tif", type = "gtif")
+```
+
 ### Constrain a model in prediction space
 
 Species distribution models quite often extrapolate to areas in which the species are unlikely to persist and thus are more likely to predict false presences than false absences. This "overprediction" can be caused by multiple factors from true biological constraints (e.g. dispersal), to the used algorithm trying to be clever by overfitting towards complex relationships (In the machine learning literature this problem is commonly known as the **bias vs variance** tradeoff).
 
-One option to counter this to some extent in SDMs is to add spatial constraints or `spatial latent effects`. The underlying assumption here is that distances in geographic space can to some extent approximate unknown or unquantified factors that determine a species range. Other options for constrains is to integrate additional data sources and add parameter constraints (see [`integrate_data`] vignette).
+One option to counter this to some extent in SDMs is to add spatial constraints or `spatial latent effects`. The underlying assumption here is that distances in geographic space can to some extent approximate unknown or unquantified factors that determine a species range. Other options for constraints is to integrate additional data sources and add parameter constraints (see [`integrate_data`] vignette).
 
 Currently the `ibis.iSDM` package supports the addition of only spatial latent effects via `add_latent_spatial()`. See the help file for more information. Note that not every spatial term accounts for spatial autocorrelation, some simply add the distance between observations as predictor (thus assuming that much of the spatial pattern can be explained by commonalities in the sampling process).
 
-```{r Train models with spatial constrains, fig.width = w, fig.height = h}
+```{r Train models with spatial constraints, fig.width = w, fig.height = h}
 # Here we are going to use the xgboost algorithm instead and set as engine below.
 # We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.
 
@@ -297,7 +345,7 @@ This approach can be particular suitable for current and future projections at l
 x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_species, field_occurrence = 'Observed', name = 'Virtual points') |>
   add_predictors(predictors, transform = 'scale', derivates = "none") |>
-  # Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors
+  # Since we are adding the koeppen layer as zonal layer, we discard it from the predictors
   rm_predictors("koeppen_50km") |> 
   add_limits_extrapolation(layer = predictors$koeppen_50km, method = "zones") |> 
   engine_xgboost(iter = 3000, learning_rate = 0.01)

@@ -23,7 +23,7 @@ NULL
 #' \code{"link"}, \code{"response"} or \code{"class"} (Default: \code{"response"}).
 #' @param ... Other variables or control parameters
 #'
-#' @details: This package requires the \code{"mboost"} R-package to be
+#' @details This engine requires the \code{"mboost"} R-package to be
 #' installed. It is in philosophy somewhat related to the [engine_xgboost] and
 #' \code{"XGBoost"} R-package, however providing some additional desirable
 #' features that make estimation quicker and particularly useful for spatial

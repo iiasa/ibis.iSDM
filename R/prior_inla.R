@@ -107,7 +107,7 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables and types are supplied for INLA
+#' Helper function when multiple variables and types are supplied for INLA priors
 #'
 #' @description This is a helper function to specify several [INLAPrior] objects
 #' with the same hyper-parameters, but different variables.

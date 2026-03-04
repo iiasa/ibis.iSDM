@@ -22,7 +22,7 @@ built_formula_inla <- function(model, id, x, settings){
     assertthat::has_name(model, "predictors_names"),
     inherits(x, "BiodiversityDistribution"),
     inherits(settings, 'Settings'),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
 
   # check if all intercepts are identical

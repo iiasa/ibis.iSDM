@@ -30,8 +30,8 @@ Renders \link{DistributionModel} to HTML
 }
 \details{
 Renders a HTML file with several summaries of a trained \link{DistributionModel}.
-The file paths must be an HTML file ending. The functions creates a temporary
-Rmd file that gets renders as a HTML using the \code{file} argument.
+The file paths must be an HTML file ending. The function creates a temporary
+Rmd file that gets rendered as HTML using the \code{file} argument.
 }
 \examples{
 \dontrun{

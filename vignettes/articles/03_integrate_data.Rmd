@@ -28,11 +28,11 @@ One of the key ambitions of the `ibis.iSDM` R-package is to provide a comprehens
 
 * to correct for certain biases (spatial, environmental) in the primary dataset, taking advantage of different types of biodiversity sampling schemes.
 * nudge data-driven algorithms towards estimates that are informed by domain knowledge (through offsets or priors) rather than letting the algorithm making naive uniformly distributed guesses.
-* to provide a more wholesome estimate of the distribution of a species distribution by relying on multiple sources of evidence. Particular when there are multiple surveys that complement each other.
+* to provide a more comprehensive estimate of the distribution of a species distribution by relying on multiple sources of evidence. Particular when there are multiple surveys that complement each other.
 
 There are thus multiple types of integration and we recommend to have a look at [Fletcher et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710) and [Isaac et al. (2020)](https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551) for an overview.
 
-The [Package comparison page](05_package_comparison.html) and the examples below provide some insight into what is currently possible with regards to data integration in the ibis.iSDM R-package. Additional methods, priors and engines are planned.
+The [Package comparison page](07_package_comparison.html) and the examples below provide some insight into what is currently possible with regards to data integration in the ibis.iSDM R-package. Additional methods, priors and engines are planned.
 Of course it is equally possible to 'integrate' not only observational data and parameters, but link entire models with ibis.iSDM outputs. More on this in the scenario help page.
 
 ```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
@@ -104,7 +104,7 @@ basemodel <- distribution(background) |>
 
 ## Integration through predictors
 
-The most simple way of integrating prior observations into species distribution models is to add them as covariate. This is based on the assumption that for instance an expert-drawn range map can be useful in predicting where species exist might or might not find suitable habitat (see for instance [Domisch et al. 2016](http://doi.wiley.com/10.1111/ecog.01925)). A benefit of this approach is that predictors can be easily added to all kinds of `engines` in the ibis.ISDM package and also used for scenarios.
+The most simple way of integrating prior observations into species distribution models is to add them as covariate. This is based on the assumption that for instance an expert-drawn range map can be useful in predicting where species exist might or might not find suitable habitat (see for instance [Domisch et al. 2016](http://doi.wiley.com/10.1111/ecog.01925)). A benefit of this approach is that predictors can be easily added to all kinds of `engines` in the ibis.iSDM package and also used for scenarios.
 
 ```{r Add range as predictor, eval = TRUE}
 
@@ -159,6 +159,48 @@ plot(mod1)
 ```
 
 There are other ways to add offsets to the model object, either directly (`add_offset()`) as an externally calculated RasterLayer for instance with the "BossMaps" R-package, to calculate as range (`add_offset_range()`) or elevation (`add_offset_elevation()`) offset, or also as biased offset (`add_offset_bias()`) in which case the offset is removed from the prediction.
+
+---
+
+## Integration through bias control
+
+Sampling bias is a ubiquitous problem in presence-only biodiversity data, where observations are often clustered near roads, cities, or popular natural sites. The `add_control_bias()` function allows you to specify a covariate that accounts for this spatial bias and partial it out of the prediction. The `bias_value` parameter sets the value at which the bias covariate is held constant during prediction (e.g., `0` to represent minimal bias).
+
+```{r Bias control, eval = TRUE, fig.width = w, fig.height = h}
+# Load a human modification index layer as proxy for sampling bias
+bias_layer <- terra::rast(system.file("extdata/predictors/hmi_mean_50km.tif",
+                                       package = "ibis.iSDM", mustWork = TRUE))
+
+# Train a model with bias control
+mod_bias <- distribution(background) |> 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
+      add_biodiversity_poipo(virtual_species, field_occurrence = "Observed") |> 
+      # Add bias control: partial out the human modification index during prediction
+      add_control_bias(layer = bias_layer, bias_value = 0) |> 
+      engine_glmnet() |> 
+      train(runname = "Prediction with bias control", only_linear = TRUE)
+
+plot(mod_bias)
+```
+
+---
+
+## Integration through Ensemble of Small Models (ESM)
+
+When there are very few observations relative to the number of predictors, fitting a full model can lead to overfitting. The Ensemble of Small Models (ESM) approach ([Breiner et al. 2015](https://doi.org/10.1111/2041-210X.12403)) addresses this by fitting many bivariate models (one per pair of predictors) and then combining them into an ensemble. This can be enabled via `add_control_esm()`.
+
+```{r ESM, eval = TRUE, fig.width = w, fig.height = h}
+# Train a model using the ESM approach
+mod_esm <- distribution(background) |> 
+      add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
+      add_biodiversity_poipo(virtual_species, field_occurrence = "Observed") |> 
+      # Enable ESM: each bivariate model is trained separately and ensembled
+      add_control_esm() |> 
+      engine_glmnet() |> 
+      train(runname = "ESM prediction", only_linear = TRUE)
+
+plot(mod_esm)
+```
 
 ---
 
@@ -325,7 +367,7 @@ where $Y$ is the presence-absence of an record (usually a standardized survey) a
 
 The Joint likelihood is then estimated by multiplying the two likelihoods from above $\prod_{l}^{L} f(l)$, where $L$ is an individual likelihood, with $\beta_{k}$ being shared parameters between the two likelihoods. This works if we assume that $cloglog(p_i) \approx log(\lambda(i))$. Equally it is also possible to add shared latent spatial effects such as Gaussian fields (approximated through a stochastic partial differential equation (SPDE)) to the model, assuming that there are shared factors - or biases - affecting all datasets.
 
-See the [Engine comparison](04_engine_comparison.html) for an overview on which engines support which level of integration.
+See the [Engine comparison](06_engine_comparison.html) for an overview on which engines support which level of integration.
 
 ```{r, warning=FALSE, message=FALSE}
 

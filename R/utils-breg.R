@@ -23,7 +23,7 @@ built_formula_breg <- function(model, obj, vars){
     assertthat::has_name(obj, "observations"),
     assertthat::has_name(obj, "equation"),
     assertthat::has_name(obj, "predictors_names"),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
 
   # If variables are set, respecify formula
