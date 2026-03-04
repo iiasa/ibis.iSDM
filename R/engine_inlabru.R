@@ -506,8 +506,8 @@ engine_inlabru <- function(x,
       lhl[[j]] <- lh
     }
 
-    # List of likelihoods
-    self$set_data("likelihoods", inlabru::like_list(lhl) )
+    # List of likelihoods (store as plain list for compatibility with latest inlabru)
+    self$set_data("likelihoods", lhl)
 
     # --- #
     # Defining the component function

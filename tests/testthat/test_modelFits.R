@@ -120,7 +120,6 @@ test_that('Add further tests for model fits', {
 
   # ----------- #
   # Partial stuff
-  skip_if_not_installed("pdp")
   pp <- partial(mod, x.var = "bio19_mean_50km",plot = FALSE)
   expect_s3_class(pp, "data.frame")
 

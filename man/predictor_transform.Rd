@@ -34,7 +34,7 @@ option \code{'norm'}. Effectively applies their value range for rescaling. (Defa
 \item{method}{As \code{'option'} for more intuitive method setting. Can be left
 empty (in this case option has to be set).}
 
-\item{...}{other options (Non specified).}
+\item{...}{Currrently not implemented (Non specified).}
 }
 \value{
 Returns a adjusted \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object of identical resolution.

@@ -3,6 +3,7 @@
 #### New features
 * Implementation of small ensemble of models for linear engines (`add_control_esm()`) #141
 * Raise informative error if bias layer has negative values. #148
+* Update `engine_xgboost()` to work with latest development build and remove [pdp] as dependency #149
 
 #### Minor improvements and bug fixes
 

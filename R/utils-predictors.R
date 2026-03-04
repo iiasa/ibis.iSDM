@@ -23,7 +23,7 @@
 #' @param state A [`matrix`] with one value per variable (column) providing either a ( `stats::mean()`, `stats::sd()` )
 #' for each variable in \code{env} for option \code{'scale'} or a range of minimum and maximum values for
 #' option \code{'norm'}. Effectively applies their value range for rescaling. (Default: \code{NULL}).
-#' @param ... other options (Non specified).
+#' @param ... Currrently not implemented (Non specified).
 #' @details Available options are:
 #' * \code{'none'} The original layer(s) are returned.
 #' * \code{'scale'} This run the [`scale()`] function with default settings
@@ -91,9 +91,9 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
       msg = "Supplied state variable needs to be in a matrix with variables being columns and statistical moments being rows!"
     )
     # Reruns
-    assertthat::assert_that( all(colnames(state) %in% names(env)),
-                             all(colnames(state) == names(env)),
-                             msg = "Provided state estimates need to be present for all variables and in the same order!")
+    assertthat::assert_that(all(colnames(state) %in% names(env)),
+                            all(colnames(state) == names(env)),
+                            msg = "Provided state estimates need to be present for all variables and in the same order!")
   }
 
   # If stars see if we can convert it to a stack

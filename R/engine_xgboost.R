@@ -498,6 +498,8 @@ engine_xgboost <- function(x,
 
     # Get parameters control
     params <- self$get_data('params')
+    assertthat::assert_that(is.list(params))
+
     # Check only linear and reset to linear booster then
     if(settings$get("only_linear")) params$booster <- "gblinear" else params$booster <- "gbtree"
     # Check that link function and objective is changed if needed
@@ -577,7 +579,7 @@ engine_xgboost <- function(x,
         }
 
         suppressMessages(
-          test_xgb <- xgboost::xgboost(
+          test_xgb <- xgboost::xgb.train(
             params = test_params,
             data = df_train,
             nrounds = 100,
@@ -619,13 +621,12 @@ engine_xgboost <- function(x,
     }
     # Fit the model.
     # watchlist <- list(train = df_train,test = df_test)
-    fit_xgb <- xgboost::xgboost(
+    fit_xgb <- xgboost::xgb.train(
       params = params,
       data = df_train,
       # watchlist = watchlist,
       nrounds = nrounds,
       verbose = ifelse(verbose, 1, 0),
-      early_stopping_rounds = min(nrounds, ceiling(nrounds*.25)),
       print_every_n = 100
     )
     # --- #
@@ -665,7 +666,7 @@ engine_xgboost <- function(x,
                            newdata = NULL, plot = TRUE, type = "response"){
       assertthat::assert_that(is.character(x.var) || is.null(x.var))
       if(!is.null(constant)) message("Constant is ignored for xgboost!")
-      check_package("pdp")
+      # variable_length = 100; values = NULL; newdata = NULL; plot = TRUE; type = "response"
 
       # Settings
       settings <- self$settings
@@ -677,24 +678,30 @@ engine_xgboost <- function(x,
       type <- match.arg(type, c("link", "response"), several.ok = FALSE)
       settings$set("type", type)
 
+      # Match x.var to argument
+      if(is.null(x.var)){
+        x.var <- model$predictors_names
+      } else {
+        x.var <- match.arg(x.var, model$predictors_names, several.ok = TRUE)
+      }
+
       df <- model$biodiversity[[length( model$biodiversity )]]$predictors
-      df <- subset(df, select = mod$feature_names)
+      df <- subset(df, select = model$biodiversity[[1]]$predictors_names)
+      # Ensure all columns are numeric (factors should already be exploded during training)
+      fac_cols <- vapply(df, is.factor, logical(1))
+      if(any(fac_cols)){
+        for(fc in names(df)[fac_cols]){
+          df[[fc]] <- as.numeric(as.character(df[[fc]]))
+        }
+      }
       if(!is.null(newdata)){
         newdata <- subset(newdata, select = names(df))
         assertthat::assert_that(nrow(newdata)>1,ncol(newdata)>1,
                                 all(names(df) %in% names(newdata)))
       }
 
-      # Match x.var to argument
-      if(is.null(x.var)){
-        x.var <- colnames(df)
-      } else {
-        x.var <- match.arg(x.var, mod$feature_names, several.ok = TRUE)
-      }
-
-      # Calculate range of predictors
-      rr <- sapply(df[, names(df) %in% model$predictors_types$predictors[model$predictors_types$type=="numeric"]],
-                   function(x) range(x, na.rm = TRUE)) |> as.data.frame()
+      # Calculate range of predictors (only for numeric columns)
+      rr <- apply(df, 2, function(x) range(as.numeric(x), na.rm = TRUE)) |> as.data.frame()
 
       if(is.null(newdata)){
         # if values are set, make sure that they cover the data.frame
@@ -707,7 +714,7 @@ engine_xgboost <- function(x,
             df2[[var]] <- mean(df[[var]], na.rm = TRUE)
           }
           df2 <- df2 |> as.data.frame()
-          df2 <- df2[, mod$feature_names]
+          df2 <- df2[, x.var, drop = FALSE]
         } else {
           df2 <- list()
           for(i in x.var) {
@@ -726,28 +733,27 @@ engine_xgboost <- function(x,
       } else of <- new_waiver()
 
       # Inverse link function
-      ilf <- switch (settings$get('type'),
+      ilf <- switch(settings$get('type'),
                      "link" = NULL,
-                     "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
-                                         exp, logistic)
+                     "response" = if(model$biodiversity[[1]]$family == 'poisson') exp else logistic
       )
+
+      # Prediction function for xgboost
+      xgb_predict_fun <- function(object, newdata) {
+        dm <- xgboost::xgb.DMatrix(data = data.matrix(newdata))
+        as.numeric(predict(object, dm))
+      }
 
       pp <- data.frame()
       pb <- progress::progress_bar$new(total = length(x.var))
       for(v in x.var){
-        if(!is.Waiver(of)){
-          # Predict with offset
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                             plot = FALSE, rug = TRUE,
-                             inv.link = ilf,
-                             newoffset = of, train = df)
-        } else {
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2, ice = FALSE, center = FALSE,
-                             plot = FALSE, rug = TRUE,
-                             inv.link = ilf,
-                             train = df)
-        }
-        p1 <- p1[,c(v, "yhat")]
+        # New wrapper specified in utils
+        p1 <- compute_partial_dependence(
+          object = mod, pred.var = v, pred.grid = df2, train = df,
+          predict_fun = xgb_predict_fun,
+          inv.link = ilf,
+          offset = if(!is.Waiver(of)) of else NULL
+        )
         names(p1) <- c("partial_effect", "mean")
         p1 <- cbind(variable = v, p1)
         pp <- rbind(pp, p1)
@@ -777,37 +783,33 @@ engine_xgboost <- function(x,
       mod <- self$get_data('fit_best')
       model <- self$model
       settings <- self$settings
-      x.var <- match.arg(x.var, model$predictors_names, several.ok = FALSE)
+      # Feature names from the model (xgboost 3.x no longer stores feature_names on the booster)
+      fn <- model$predictors_names
+      x.var <- match.arg(x.var, fn, several.ok = FALSE)
 
-      # Get predictor
-      df <- subset(model$predictors, select = mod$feature_names)
-      # Convert all non x.vars to the mean
+      # Get predictor data (subset to training features only)
+      df <- subset(model$predictors, select = fn)
+      assertthat::assert_that(is.data.frame(df), ncol(df) > 0,
+                              msg = "Could not obtain predictor data from model.")
 
       # Make template of target variable(s)
       template <- model_to_background(model)
 
-      # Set all variables other the target variable to constant
+      # Set all variables other than the target variable to constant
       if(!is.null(constant)){
-        #   # Calculate mean
-        #   # FIXME: for factor use mode!
-        #   constant <- apply(df, 2, function(x) mean(x, na.rm=T))
-        #   for(v in mod$feature_names){
-        #     if(v %notin% names(df) ) next()
-        #     if(v %in% x.var) next()
-        #     df[!is.na(df[v]),v] <- as.numeric( constant[v] )
-        #   }
-        # } else {
-        df[!is.na(df[,x.var]), mod$feature_names[ mod$feature_names %notin% x.var]] <- constant
+        other_vars <- fn[fn %notin% x.var]
+        df[!is.na(df[,x.var]), other_vars] <- constant
       }
-      df <- xgboost::xgb.DMatrix(data = as.matrix(df))
 
-      # Spartial prediction contributions Setting predcontrib = TRUE
-      # allows to calculate contributions of each feature to individual
-      # predictions. For "gblinear" booster, feature contributions are
-      # simply linear terms (feature_beta * feature_value). For "gbtree"
-      # booster, feature contributions are SHAP values
+      # Convert to properly aligned numeric matrix for xgb.DMatrix
+      dm <- xgboost::xgb.DMatrix(data = data.matrix(df))
+
+      # Spatial prediction contributions: predcontrib = TRUE calculates
+      # contributions of each feature to individual predictions.
+      # For "gblinear" booster, these are linear terms (beta * value).
+      # For "gbtree" booster, these are SHAP values.
       pp <- predict(object = mod,
-                    newdata = df,
+                    newdata = dm,
                     predcontrib = TRUE) |>
         as.data.frame()
       # Get only target variable
@@ -844,10 +846,12 @@ engine_xgboost <- function(x,
       settings <- self$settings
 
       if(!inherits(newdata, "xgb.DMatrix")){
+        # Feature names from the model (xgboost 3.x no longer stores feature_names on the booster)
+        fn <- model$predictors_names
         assertthat::assert_that(
-          all( mod$feature_names %in% colnames(newdata) )
+          all( fn %in% colnames(newdata) )
         )
-        newdata <- subset(newdata, select = mod$feature_names)
+        newdata <- subset(newdata, select = fn)
 
         # Clamp?
         if( settings$get("clamp") ) newdata <- clamp_predictions(model, newdata)
@@ -861,7 +865,7 @@ engine_xgboost <- function(x,
             newdata[,settings$get('bias_variable')[i]] <- settings$get('bias_value')[i]
           }
         }
-        newdata <- xgboost::xgb.DMatrix(as.matrix(newdata))
+        newdata <- xgboost::xgb.DMatrix(data.matrix(newdata))
       } else {cli::cli_abort("Not implemented. Supply a data.frame as newdata!")}
 
       # Make a prediction
@@ -897,9 +901,11 @@ engine_xgboost <- function(x,
     obj$set("public", "has_converged", function(){
       fit <- self$get_data("fit_best")
       if(is.Waiver(fit)) return(FALSE)
-      # Get evaluation log
-      evl <- fit$evaluation_log
-      if(fit$best_iteration >= (nrow(evl)-(nrow(evl)*.01))) return(FALSE)
+      # Get evaluation log if existing
+      if(utils::hasName(fit, "evaluation_log")){
+        evl <- fit$evaluation_log
+        if(fit$best_iteration >= (nrow(evl)-(nrow(evl)*.01))) return(FALSE)
+      }
       return(TRUE)
     },overwrite = TRUE)
 
@@ -913,8 +919,8 @@ engine_xgboost <- function(x,
       # Get residuals
       model <- self$model
       pred <- model$biodiversity[[length(model$biodiversity)]]
-      predf <- pred$predictors |> subset(select = obj$feature_names)
-      newdata <- xgboost::xgb.DMatrix(as.matrix(predf))
+      predf <- pred$predictors |> subset(select = model$predictors_names)
+      newdata <- xgboost::xgb.DMatrix(data.matrix(predf))
 
       fn <- predict(obj, newdata,type = "class")
       return(fn)

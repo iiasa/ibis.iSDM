@@ -197,7 +197,7 @@ methods::setMethod(
 #' @param fname A [`character`] stating the output destination.
 #' @param dt The datatype to be written (Default: *Float64*).
 #' @param varNA The nodata value to be used (Default: \code{-9999}).
-#' @param ... Other options.
+#' @param ... Any other options passed to [`terra::writeRaster`].
 #'
 #' @keywords utils
 #'

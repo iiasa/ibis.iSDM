@@ -660,7 +660,7 @@ BiodiversityScenario <- R6::R6Class(
                            totchange_loss_km2 = sum(change[change < 0]))
         out <- out |> dplyr::left_join(o, by = "band")
 
-        if(relative == TRUE){
+        if(relative){
           # Finally calculate relative change to baseline (first entry) for all entries where this is possible
           relChange <- function(v, fac = 100) (((v- v[1]) / v[1]) * fac)
           out <- subset(out, select = c("band", "area_km2", "totarea_km2"))

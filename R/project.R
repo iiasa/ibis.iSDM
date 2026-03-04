@@ -659,7 +659,7 @@ methods::setMethod(
             x <- 1:x.length
             p <- suppressWarnings( stats::loess(y ~ x, span = s,
                                                 data.frame(x = x, y = y)) )
-            if (smooth == TRUE) {
+            if (smooth) {
               y <- stats::predict(p, x)
             } else {
               na.idx <- which(is.na(y))

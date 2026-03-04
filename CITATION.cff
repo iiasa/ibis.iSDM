@@ -765,19 +765,6 @@ references:
   year: '2026'
   doi: 10.32614/CRAN.package.progress
 - type: software
-  title: pdp
-  abstract: 'pdp: Partial Dependence Plots'
-  notes: Suggests
-  url: http://bgreenwell.github.io/pdp/
-  repository: https://CRAN.R-project.org/package=pdp
-  authors:
-  - family-names: Greenwell
-    given-names: Brandon M.
-    email: greenwell.brandon@gmail.com
-    orcid: https://orcid.org/0000-0002-8120-0084
-  year: '2026'
-  doi: 10.32614/CRAN.package.pdp
-- type: software
   title: rmarkdown
   abstract: 'rmarkdown: Dynamic Documents for R'
   notes: Suggests

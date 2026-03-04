@@ -58,7 +58,7 @@ of the independent observations. Identical to \code{"point_column"}}
 \item{...}{Other parameters that are passed on. Currently unused.}
 }
 \value{
-Return a tidy \code{\link{tibble}} with validation results.
+Return a tidy \code{\link[tibble:tibble]{tibble::tibble}} with validation results.
 }
 \description{
 This function conducts a model evaluation based on either on the

@@ -407,7 +407,7 @@ methods::setMethod(
         HS[length(HS)] <- HS[length(HS)] - 1  #Correction of the 'trick' to deal with closed interval
         HS <- HS[to.keep] # exlude the NaN
 
-        if (PEplot == TRUE) {
+        if (PEplot) {
           plot(
             HS,
             f,

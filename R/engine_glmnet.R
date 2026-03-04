@@ -653,33 +653,29 @@ engine_glmnet <- function(x,
         of <- model$offset$spatial_offset
       } else of <- new_waiver()
 
-      # HACK: Overwrite lambda to make sure pdp uses it.
-      mod$lambda.1se <- determine_lambda(mod)
+      # Determine the best lambda value
+      best_lambda <- determine_lambda(mod)
       # Inverse link function
       ilf <- switch (settings$get('type'),
                      "link" = NULL,
-                     "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
-                                         exp, logistic)
+                     "response" = if(model$biodiversity[[1]]$family == 'poisson') exp else logistic
       )
+
+      # Prediction function for glmnet (link scale)
+      glmnet_predict_fun <- function(object, newdata) {
+        as.numeric(predict(object, newdata = newdata,
+                           s = best_lambda, type = "link"))
+      }
 
       pp <- data.frame()
       pb <- progress::progress_bar$new(total = length(x.var))
       for(v in x.var){
-        if(!is.Waiver(of)){
-          # Predict with offset
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                             ice = FALSE, center = FALSE,
-                             type = "regression", newoffset = of,
-                             inv.link = ilf,
-                             plot = FALSE, rug = TRUE, train = df)
-        } else {
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                             ice = FALSE, center = FALSE,
-                             type = "regression", inv.link = ilf,
-                             plot = FALSE, rug = TRUE, train = df
-          )
-        }
-        p1 <- p1[, c(v, "yhat")]
+        p1 <- compute_partial_dependence(
+          object = mod, pred.var = v, pred.grid = df2, train = df,
+          predict_fun = glmnet_predict_fun,
+          inv.link = ilf,
+          offset = if(!is.Waiver(of)) of else NULL
+        )
         names(p1) <- c("partial_effect", "mean")
         p1 <- cbind(variable = v, p1)
         pp <- rbind(pp, p1)
