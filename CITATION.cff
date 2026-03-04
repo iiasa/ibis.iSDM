@@ -809,6 +809,24 @@ references:
   year: '2026'
   doi: 10.32614/CRAN.package.rmarkdown
 - type: software
+  title: scales
+  abstract: 'scales: Scale Functions for Visualization'
+  notes: Suggests
+  url: https://scales.r-lib.org
+  repository: https://CRAN.R-project.org/package=scales
+  authors:
+  - family-names: Wickham
+    given-names: Hadley
+    email: hadley@posit.co
+  - family-names: Pedersen
+    given-names: Thomas Lin
+    email: thomas.pedersen@posit.co
+    orcid: https://orcid.org/0000-0002-5147-4711
+  - family-names: Seidel
+    given-names: Dana
+  year: '2026'
+  doi: 10.32614/CRAN.package.scales
+- type: software
   title: kissmig
   abstract: 'kissmig: a Keep It Simple Species Migration Model'
   notes: Suggests
@@ -877,7 +895,7 @@ references:
   authors:
   - family-names: Gabry
     given-names: Jonah
-    email: jsg2201@columbia.edu
+    email: jgabry@gmail.com
   - family-names: Goodrich
     given-names: Ben
     email: benjamin.goodrich@columbia.edu
