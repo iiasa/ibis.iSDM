@@ -492,7 +492,7 @@ test_that('Train a distribution model with bart', {
 
 # ---- #
 # Train a full distribution model with inlabru
-test_that('Train a distribution model with INLABRU', {
+test_that('Train a distribution model with inlabru', {
 
   skip_if_not_installed('inlabru')
   skip_if_not_installed('INLA')

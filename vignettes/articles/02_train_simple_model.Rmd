@@ -242,18 +242,6 @@ validate(fit, method = "disc")
 Validating integrated SDMs, particular those fitted with multiple likelihoods is challenging and something that has not yet fully been explored in the scientific literature. For example strong priors can substantially improve by modifying the response functions in the model, but are challenging to validate if the validation data has similar biases as the training data.
 One way such SDMs can be validated is through spatial block validation, where however care needs to be taken on which datasets are part of which block.
 
-### Checking a fitted model for common issues
-
-The `check()` function runs a series of automated diagnostics on model objects, including checks for model convergence, coefficient existence, outlier predictions, and data sufficiency. It is good practice to run `check()` on both the distribution object before fitting and the fitted model object afterwards.
-
-```{r Check model diagnostics}
-# Check the fitted model for common issues
-check(fit)
-
-# It is also possible to check the distribution object before training
-check(mod)
-```
-
 ### Environmental similarity assessment
 
 When projecting a fitted model to new areas or time periods, it is important to assess whether the environmental conditions fall within the range of the training data. The `similarity()` function computes either the Multivariate Environmental Similarity Surface (MESS) or the multivariate combination novelty index (NT2) to identify areas of environmental extrapolation.
