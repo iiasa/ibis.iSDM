@@ -246,21 +246,14 @@ One way such SDMs can be validated is through spatial block validation, where ho
 
 When projecting a fitted model to new areas or time periods, it is important to assess whether the environmental conditions fall within the range of the training data. The `similarity()` function computes either the Multivariate Environmental Similarity Surface (MESS) or the multivariate combination novelty index (NT2) to identify areas of environmental extrapolation.
 
+Note that this is executed on the model object.
+
 ```{r Environmental similarity, fig.width = w, fig.height = h}
 # Calculate MESS (Multivariate Environmental Similarity Surface)
-sim <- similarity(fit, method = "mess", plot = TRUE)
+sim <- similarity(mod, method = "mess", plot = FALSE)
 
-# The result contains similarity values per variable and an overall summary
-names(sim)
-```
-
-### Identifying locally limiting factors
-
-Understanding *which* environmental variable most limits the predicted suitability at each location can provide ecological insight. The `limiting()` function computes, for each grid cell, which predictor is most responsible for decreasing suitability relative to the mean environmental conditions.
-
-```{r Limiting factors, fig.width = w, fig.height = h}
-# Identify the most limiting factor at each grid cell
-lim <- limiting(fit, plot = TRUE)
+plot(sim, main = c("MESS similarity surface",
+                   "Most dissimilar", "Most similar", "Extrapolation risk"))
 ```
 
 ### Saving and loading fitted models
