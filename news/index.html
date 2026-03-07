@@ -48,6 +48,13 @@
 <div class="section level5">
 <h5 id="new-features-0-1-7">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-7"></a></h5>
 <ul><li>Implementation of small ensemble of models for linear engines (<code><a href="../reference/add_control_esm.html">add_control_esm()</a></code>) <a href="https://github.com/iiasa/ibis.iSDM/issues/141" class="external-link">#141</a></li>
+<li>Raise informative error if bias layer has negative values. <a href="https://github.com/iiasa/ibis.iSDM/issues/148" class="external-link">#148</a></li>
+<li>Update <code><a href="../reference/engine_xgboost.html">engine_xgboost()</a></code> to work with latest development build and remove [pdp] as dependency <a href="https://github.com/iiasa/ibis.iSDM/issues/149" class="external-link">#149</a></li>
+<li>Improvement of document grammar and readability. Few more vignette examples based on latest development.</li>
+<li>
+<span class="emoji" data-emoji="bug">🐛</span> Fixing of <code><a href="../reference/engine_inlabru.html">engine_inlabru()</a></code> to work with latest version <a href="https://github.com/iiasa/ibis.iSDM/issues/150" class="external-link">#150</a> <a href="https://github.com/iiasa/ibis.iSDM/issues/145" class="external-link">#145</a></li>
+<li>
+<span class="emoji" data-emoji="bug">🐛</span> Fixes to <code><a href="../reference/add_control_bias.html">add_control_bias()</a></code> to have it working again.</li>
 </ul></div>
 <div class="section level5">
 <h5 id="minor-improvements-and-bug-fixes-0-1-7">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-1-7"></a></h5>
@@ -343,7 +350,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

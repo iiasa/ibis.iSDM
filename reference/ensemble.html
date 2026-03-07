@@ -125,7 +125,7 @@ differences in model complexity.</p>
 
 
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Provided <code><a href="DistributionModel-class.html">DistributionModel</a></code> or <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> objects.</p></dd>
+<dd><p>Provided <code><a href="DistributionModel-class.html">DistributionModel</a></code> or <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> objects.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -163,7 +163,7 @@ the range between the lowest and highest value (<code>"range"</code>).</p></dd>
 
 
 <dt id="arg-point">point<a class="anchor" aria-label="anchor" href="#arg-point"></a></dt>
-<dd><p>A <code>sf</code> object containing observational data used for model training. Used
+<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object containing observational data used for model training. Used
 for method <code>'superlearner'</code> only (Default: <code>NULL</code>).</p></dd>
 
 
@@ -179,7 +179,7 @@ applies and works for <code><a href="DistributionModel-class.html">DistributionM
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object containing the ensemble of the provided
+    <p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object containing the ensemble of the provided
 predictions specified by <code>method</code> and a coefficient of variation
 across all models.</p>
     </div>
@@ -244,7 +244,7 @@ study with reproducible code. Ecological Monographs, 92(1), e01486.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

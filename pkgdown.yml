@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   articles/01_data_preparationhelpers: 01_data_preparationhelpers.html
@@ -11,7 +11,7 @@ articles:
   articles/07_package_comparison: 07_package_comparison.html
   articles/08_frequently-asked-questions: 08_frequently-asked-questions.html
   articles/contributing: contributing.html
-last_built: 2025-06-19T20:44Z
+last_built: 2026-03-07T08:27Z
 urls:
   reference: https://iiasa.github.io/ibis.iSDM/reference
   article: https://iiasa.github.io/ibis.iSDM/articles

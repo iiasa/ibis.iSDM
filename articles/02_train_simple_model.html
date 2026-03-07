@@ -72,7 +72,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2025-06-19</h4>
+            <h4 data-toc-skip class="date">2026-03-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/02_train_simple_model.Rmd" class="external-link"><code>vignettes/articles/02_train_simple_model.Rmd</code></a></small>
       <div class="d-none name"><code>02_train_simple_model.Rmd</code></div>
@@ -122,7 +122,7 @@ each with their own modelling approaches.</p></li>
 <span><span class="co"># Don't print out as many messages</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"ibis.setupmessages"</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>Creating a model in the <code>ibis.iSDM</code> package is relatively
-straight forward which we demonstrate here with some of testdata that
+straightforward which we demonstrate here with some of testdata that
 come with the package. These data show the distribution of a simulated
 forest-associated species for northern Europe. There are also some test
 predictors available for modelling. So first lets load the data:</p>
@@ -171,14 +171,14 @@ where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
 is a grid cell.</p>
 <p>It is inhomogeneous since the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>m</mi><mi>b</mi><mi>d</mi><mi>a</mi></mrow><annotation encoding="application/x-tex">lambda</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
 varies over the whole sampling extent. In the context of species
 distribution modelling PPMs are structurally similar to the popular
 Maxent modelling framework (see <a href="https://onlinelibrary.wiley.com/doi/10.1111/j.1541-0420.2012.01824.x" class="external-link">Renner
 &amp; Warton 2013</a> and <a href="http://doi.wiley.com/10.1111/2041-210X.12352" class="external-link">Renner et
 al. 2015</a>. Critically, presence-only records can only give an
 indication of a biased sampling and thus sampling bias has to be taken
-somehow into account, either through careful data preparation, apriori
+somehow into account, either through careful data preparation, a priori
 thinning or model-based control by including covariates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
 that might explain this sampling bias.</p>
@@ -247,7 +247,7 @@ the data added to this object.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Make visualization of the contained biodiversity data</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod</span><span class="op">$</span><span class="va">biodiversity</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/unnamed-chunk-3-1.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Other options to explore</span></span>
@@ -318,7 +318,7 @@ plot through the package used to fit the model.</li>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot the mean of the posterior predictions</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Plot%20the%20model%20output-1.png" width="960" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/Plot%20the%20model%20output-1.png" class="r-plt" alt="" width="960" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Print out some summary statistics</span></span>
@@ -327,39 +327,39 @@ plot through the package used to fit the model.</li>
 <span><span class="co">#&gt;   variable               mean     sd     q05     q50    q95    mode   kld</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Intercept           -<span style="color: #BB0000;">2.45</span>   0.127  -<span style="color: #BB0000;">2.66</span>   -<span style="color: #BB0000;">2.45</span>   -<span style="color: #BB0000;">2.24</span>  -<span style="color: #BB0000;">2.45</span>       0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> bio01_mean_50km     -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">8</span> 0.178  -<span style="color: #BB0000;">0.332</span>  -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">8</span>  0.252 -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">8</span>     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> bio03_mean_50km     -<span style="color: #BB0000;">0.478</span>  0.162  -<span style="color: #BB0000;">0.745</span>  -<span style="color: #BB0000;">0.478</span>  -<span style="color: #BB0000;">0.211</span> -<span style="color: #BB0000;">0.478</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> bio01_mean_50km     -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">0</span> 0.178  -<span style="color: #BB0000;">0.331</span>  -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">0</span>  0.253 -<span style="color: #BB0000;">0.039</span><span style="color: #BB0000; text-decoration: underline;">0</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> bio03_mean_50km     -<span style="color: #BB0000;">0.478</span>  0.162  -<span style="color: #BB0000;">0.745</span>  -<span style="color: #BB0000;">0.478</span>  -<span style="color: #BB0000;">0.212</span> -<span style="color: #BB0000;">0.478</span>      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> bio19_mean_50km      0.483  0.114   0.295   0.483   0.671  0.483      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> CLC3_112_mean_50km   0.441  0.066<span style="text-decoration: underline;">7</span>  0.331   0.441   0.551  0.441      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> CLC3_112_mean_50km   0.441  0.066<span style="text-decoration: underline;">7</span>  0.331   0.441   0.550  0.441      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> CLC3_132_mean_50km   0.082<span style="text-decoration: underline;">9</span> 0.065<span style="text-decoration: underline;">1</span> -<span style="color: #BB0000;">0.024</span><span style="color: #BB0000; text-decoration: underline;">2</span>  0.082<span style="text-decoration: underline;">9</span>  0.190  0.082<span style="text-decoration: underline;">9</span>     0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> CLC3_211_mean_50km   0.921  0.105   0.748   0.921   1.09   0.921      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> CLC3_211_mean_50km   0.920  0.105   0.748   0.920   1.09   0.920      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> CLC3_312_mean_50km   1.07   0.089<span style="text-decoration: underline;">0</span>  0.926   1.07    1.22   1.07       0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> elevation_mean_50km  0.045<span style="text-decoration: underline;">8</span> 0.114  -<span style="color: #BB0000;">0.142</span>   0.045<span style="text-decoration: underline;">8</span>  0.234  0.045<span style="text-decoration: underline;">8</span>     0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> elevation_mean_50km  0.045<span style="text-decoration: underline;">9</span> 0.114  -<span style="color: #BB0000;">0.142</span>   0.045<span style="text-decoration: underline;">9</span>  0.234  0.045<span style="text-decoration: underline;">9</span>     0</span></span>
 <span></span>
 <span><span class="co"># Show the default effect plot from inlabru</span></span>
 <span><span class="fu"><a href="../reference/effects.html">effects</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Calculating partial dependence plots...</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Plot%20the%20model%20output-2.png" width="960" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/Plot%20the%20model%20output-2.png" class="r-plt" alt="" width="960" style="display: block; margin: auto;"></p>
 <p>See the reference and help pages for further options including
 calculating a <code><a href="../reference/threshold.html">threshold()</a></code>, <code><a href="../reference/partial.html">partial()</a></code> or
 <code><a href="../reference/similarity.html">similarity()</a></code> estimate of the used data.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># To calculate a partial effect for a given variable</span></span>
 <span><span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial.html">partial</a></span><span class="op">(</span><span class="va">fit</span>, x.var <span class="op">=</span> <span class="st">"CLC3_312_mean_50km"</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/partial%20effect-1.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/partial%20effect-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The object o contains the data underlying this figure</span></span>
 <span></span>
 <span><span class="co"># Similarly the partial effect can be visualized spatially as 'spartial'</span></span>
 <span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spartial.html">spartial</a></span><span class="op">(</span><span class="va">fit</span>, x.var <span class="op">=</span> <span class="st">"CLC3_312_mean_50km"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">s</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">rainbow</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Marginal effect of forest on the relative reporting rate"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/partial%20effect-2.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/partial%20effect-2.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <p>It is common practice in species distribution modelling that
 resulting predictions are <em>thresholded</em>, e.g. that an abstraction
-of the continious prediction is created that separates the background
+of the continuous prediction is created that separates the background
 into areas where the environment supporting a species is presumably
-suitable or non-suitable. Threshold can be used in ibis.iSDM via the
-<code><a href="../reference/threshold.html">threshold()</a></code> functions suppling either a fitted model, a
+suitable or non-suitable. Thresholds can be used in ibis.iSDM via the
+<code><a href="../reference/threshold.html">threshold()</a></code> function supplying either a fitted model, a
 RasterLayer or a Scenario object.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -377,14 +377,14 @@ RasterLayer or a Scenario object.</p>
 <span></span>
 <span><span class="co"># There is also a convenient plotting function</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">plot_threshold</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Example%20for%20model-based%20thresholding-1.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/Example%20for%20model-based%20thresholding-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># It is also possible to use truncated thresholds, which removes non-suitable areas</span></span>
 <span><span class="co"># while retaining those that are suitable. These are then normalized to a range of [0-1]</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"normalize"</span><span class="op">)</span></span>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">plot_threshold</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Example%20for%20model-based%20thresholding-2.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/Example%20for%20model-based%20thresholding-2.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <p><strong>For more options for any of the functions please see the help
 pages!</strong></p>
 </div>
@@ -393,7 +393,7 @@ pages!</strong></p>
 </h3>
 <p>The ibis.iSDM package provides a convenience function to obtain
 validation results for the fitted models. Validation can be done both
-for continious and discrete predictions, where the latter requires a
+for continuous and discrete predictions, where the latter requires a
 computed threshold fits (see above).</p>
 <p>Here we will ‘validate’ the fitted model using the data used for
 model fitting. For any scientific paper we recommend to implement a
@@ -404,21 +404,21 @@ gathered data.</p>
 <span><span class="va">fit</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"cont"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                modelid                 name     method</span></span>
-<span><span class="co">#&gt; 1 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 2 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 3 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 4 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 5 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 6 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 7 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
-<span><span class="co">#&gt; 8 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 1 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 2 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 3 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 4 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 5 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 6 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 7 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
+<span><span class="co">#&gt; 8 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous</span></span>
 <span><span class="co">#&gt;       metric       value</span></span>
 <span><span class="co">#&gt; 1          n 208.0000000</span></span>
 <span><span class="co">#&gt; 2         r2        -Inf</span></span>
-<span><span class="co">#&gt; 3       rmse   0.6097053</span></span>
-<span><span class="co">#&gt; 4        mae   0.5318358</span></span>
-<span><span class="co">#&gt; 5       mape   0.5318358</span></span>
-<span><span class="co">#&gt; 6    logloss   1.4553861</span></span>
+<span><span class="co">#&gt; 3       rmse   0.6096147</span></span>
+<span><span class="co">#&gt; 4        mae   0.5306671</span></span>
+<span><span class="co">#&gt; 5       mape   0.5306671</span></span>
+<span><span class="co">#&gt; 6    logloss   1.4546661</span></span>
 <span><span class="co">#&gt; 7   normgini         NaN</span></span>
 <span><span class="co">#&gt; 8 cont.boyce          NA</span></span>
 <span></span>
@@ -426,33 +426,33 @@ gathered data.</p>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/threshold.html">threshold</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"percentile"</span>, value <span class="op">=</span> <span class="fl">0.5</span>, format <span class="op">=</span> <span class="st">"binary"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/validate.html">validate</a></span><span class="op">(</span><span class="va">fit</span>, method <span class="op">=</span> <span class="st">"disc"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                                 modelid                 name   method</span></span>
-<span><span class="co">#&gt; 1  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 2  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 3  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 4  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 5  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 6  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 7  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 8  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 9  cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 10 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 11 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 12 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
-<span><span class="co">#&gt; 13 cb453c74-6985-42f8-ab1b-3b0e83456543 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 1  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 2  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 3  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 4  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 5  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 6  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 7  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 8  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 9  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 10 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 11 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 12 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
+<span><span class="co">#&gt; 13 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete</span></span>
 <span><span class="co">#&gt;                 metric       value</span></span>
-<span><span class="co">#&gt; 1                    n 597.0000000</span></span>
-<span><span class="co">#&gt; 2                  auc   0.6857326</span></span>
-<span><span class="co">#&gt; 3     overall.accuracy   0.7420436</span></span>
-<span><span class="co">#&gt; 4  true.presence.ratio   0.4031008</span></span>
-<span><span class="co">#&gt; 5            precision   0.6753247</span></span>
+<span><span class="co">#&gt; 1                    n 602.0000000</span></span>
+<span><span class="co">#&gt; 2                  auc   0.6941624</span></span>
+<span><span class="co">#&gt; 3     overall.accuracy   0.7541528</span></span>
+<span><span class="co">#&gt; 4  true.presence.ratio   0.4126984</span></span>
+<span><span class="co">#&gt; 5            precision   0.7027027</span></span>
 <span><span class="co">#&gt; 6          sensitivity   0.5000000</span></span>
-<span><span class="co">#&gt; 7          specificity   0.8714653</span></span>
-<span><span class="co">#&gt; 8                  tss   0.3714653</span></span>
-<span><span class="co">#&gt; 9                   f1   0.5745856</span></span>
-<span><span class="co">#&gt; 10             logloss   6.2747617</span></span>
-<span><span class="co">#&gt; 11   expected.accuracy   0.5733834</span></span>
-<span><span class="co">#&gt; 12               kappa   0.3953436</span></span>
-<span><span class="co">#&gt; 13         brier.score   0.2579564</span></span></code></pre></div>
+<span><span class="co">#&gt; 7          specificity   0.8883249</span></span>
+<span><span class="co">#&gt; 8                  tss   0.3883249</span></span>
+<span><span class="co">#&gt; 9                   f1   0.5842697</span></span>
+<span><span class="co">#&gt; 10             logloss   6.2126790</span></span>
+<span><span class="co">#&gt; 11   expected.accuracy   0.5785256</span></span>
+<span><span class="co">#&gt; 12               kappa   0.4166972</span></span>
+<span><span class="co">#&gt; 13         brier.score   0.2458472</span></span></code></pre></div>
 <p>Validating integrated SDMs, particular those fitted with multiple
 likelihoods is challenging and something that has not yet fully been
 explored in the scientific literature. For example strong priors can
@@ -461,6 +461,42 @@ but are challenging to validate if the validation data has similar
 biases as the training data. One way such SDMs can be validated is
 through spatial block validation, where however care needs to be taken
 on which datasets are part of which block.</p>
+</div>
+<div class="section level3">
+<h3 id="environmental-similarity-assessment">Environmental similarity assessment<a class="anchor" aria-label="anchor" href="#environmental-similarity-assessment"></a>
+</h3>
+<p>When projecting a fitted model to new areas or time periods, it is
+important to assess whether the environmental conditions fall within the
+range of the training data. The <code><a href="../reference/similarity.html">similarity()</a></code> function
+computes either the Multivariate Environmental Similarity Surface (MESS)
+or the multivariate combination novelty index (NT2) to identify areas of
+environmental extrapolation.</p>
+<p>Note that this is executed on the model object.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Calculate MESS (Multivariate Environmental Similarity Surface)</span></span>
+<span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/similarity.html">similarity</a></span><span class="op">(</span><span class="va">mod</span>, method <span class="op">=</span> <span class="st">"mess"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">sim</span>, main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MESS similarity surface"</span>,</span>
+<span>                   <span class="st">"Most dissimilar"</span>, <span class="st">"Most similar"</span>, <span class="st">"Extrapolation risk"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="02_train_simple_model_files/figure-html/Environmental%20similarity-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
+</div>
+<div class="section level3">
+<h3 id="saving-and-loading-fitted-models">Saving and loading fitted models<a class="anchor" aria-label="anchor" href="#saving-and-loading-fitted-models"></a>
+</h3>
+<p>Fitted models can be saved to disk and reloaded later using
+<code><a href="../reference/write_model.html">write_model()</a></code> and <code><a href="../reference/load_model.html">load_model()</a></code>. This is useful
+for sharing results or resuming work without refitting. Spatial
+predictions can also be exported as GeoTIFF or NetCDF via
+<code><a href="../reference/write_output.html">write_output()</a></code>.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Save the fitted model as an RDS file</span></span>
+<span><span class="fu"><a href="../reference/write_model.html">write_model</a></span><span class="op">(</span><span class="va">fit</span>, fname <span class="op">=</span> <span class="st">"my_fitted_model.rds"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Load it again later</span></span>
+<span><span class="va">fit_reloaded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_model.html">load_model</a></span><span class="op">(</span><span class="st">"my_fitted_model.rds"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Save the prediction raster as a GeoTIFF</span></span>
+<span><span class="fu"><a href="../reference/write_output.html">write_output</a></span><span class="op">(</span><span class="va">fit</span>, fname <span class="op">=</span> <span class="st">"prediction_output.tif"</span>, type <span class="op">=</span> <span class="st">"gtif"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="constrain-a-model-in-prediction-space">Constrain a model in prediction space<a class="anchor" aria-label="anchor" href="#constrain-a-model-in-prediction-space"></a>
@@ -476,7 +512,7 @@ commonly known as the <strong>bias vs variance</strong> tradeoff).</p>
 constraints or <code>spatial latent effects</code>. The underlying
 assumption here is that distances in geographic space can to some extent
 approximate unknown or unquantified factors that determine a species
-range. Other options for constrains is to integrate additional data
+range. Other options for constraints is to integrate additional data
 sources and add parameter constraints (see [<code>integrate_data</code>]
 vignette).</p>
 <p>Currently the <code>ibis.iSDM</code> package supports the addition of
@@ -486,7 +522,7 @@ accounts for spatial autocorrelation, some simply add the distance
 between observations as predictor (thus assuming that much of the
 spatial pattern can be explained by commonalities in the sampling
 process).</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Here we are going to use the xgboost algorithm instead and set as engine below.</span></span>
 <span><span class="co"># We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.</span></span>
 <span></span>
@@ -515,13 +551,13 @@ process).</p>
 <span></span>
 <span><span class="co"># Compare both</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">background</span>, main <span class="op">=</span> <span class="st">"Biodiversity data"</span><span class="op">)</span>; <span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">virtual_species</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, add <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constraints-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_null</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-2.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constraints-2.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_dist</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constrains-3.png" width="528" style="display: block; margin: auto;">
+<p><img src="02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constraints-3.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;">
 Another option for constraining a prediction is to place concrete limits
 on the prediction surface. This can be done by adding a
 <code>factor</code> zone layer to the distribution object. Internally,
@@ -533,7 +569,7 @@ assumes that it is rather unlikely that species distributions shift to
 different biomes entirely, for instance because of dispersal or
 eco-evolutionary constraints. <strong>Note that this approach
 effectively also limits the prediction background / output!</strong></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create again a distribution object, but this time with limits (use the Köppen-geiger layer from above)</span></span>
 <span><span class="co"># The zones layer must be a factor layer (e.g. is.factor(layer) )</span></span>
 <span></span>
@@ -542,7 +578,7 @@ effectively also limits the prediction background / output!</strong></p>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">'Observed'</span>, name <span class="op">=</span> <span class="st">'Virtual points'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'scale'</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="co"># Since we are adding the koeppen layer as zonal layer, we disgard it from the predictors</span></span>
+<span>  <span class="co"># Since we are adding the koeppen layer as zonal layer, we discard it from the predictors</span></span>
 <span>  <span class="fu"><a href="../reference/rm_predictors.html">rm_predictors</a></span><span class="op">(</span><span class="st">"koeppen_50km"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/add_limits_extrapolation.html">add_limits_extrapolation</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">predictors</span><span class="op">$</span><span class="va">koeppen_50km</span>, method <span class="op">=</span> <span class="st">"zones"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/engine_xgboost.html">engine_xgboost</a></span><span class="op">(</span>iter <span class="op">=</span> <span class="fl">3000</span>, learning_rate <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span>
@@ -552,7 +588,7 @@ effectively also limits the prediction background / output!</strong></p>
 <span></span>
 <span><span class="co"># Compare the output</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_limited</span><span class="op">)</span></span></code></pre></div>
-<p><img src="02_train_simple_model_files/figure-html/Prediction%20limits-1.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="02_train_simple_model_files/figure-html/Prediction%20limits-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -565,7 +601,7 @@ effectively also limits the prediction background / output!</strong></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

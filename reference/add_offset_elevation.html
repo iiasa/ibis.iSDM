@@ -71,7 +71,7 @@ Supporting materials script.</p>
 
 
 <dt id="arg-elev">elev<a class="anchor" aria-label="anchor" href="#arg-elev"></a></dt>
-<dd><p>A <code>SpatRaster</code> with the elevation for a given background.</p></dd>
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> with the elevation for a given background.</p></dd>
 
 
 <dt id="arg-pref">pref<a class="anchor" aria-label="anchor" href="#arg-pref"></a></dt>
@@ -100,7 +100,7 @@ one (Default: <code>TRUE</code>).</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Specifically this functions calculates a continuous decay and
 decreasing probability of a species to occur from elevation limits. It
-requires a <code>SpatRaster</code> with elevation information. A generalized logistic
+requires a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> with elevation information. A generalized logistic
 transform (aka Richard's curve) is used to calculate decay from the suitable
 elevational areas, with the <code>"rate"</code> parameter allowing to vary the
 steepness of decline.</p>
@@ -122,10 +122,10 @@ https://doi.org/10.1111/geb.12453</p></li>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other offset:
-<code><a href="add_offset.html">add_offset</a>()</code>,
-<code><a href="add_offset_bias.html">add_offset_bias</a>()</code>,
-<code><a href="add_offset_range.html">add_offset_range</a>()</code>,
-<code><a href="rm_offset.html">rm_offset</a>()</code></p></div>
+<code><a href="add_offset.html">add_offset()</a></code>,
+<code><a href="add_offset_bias.html">add_offset_bias()</a></code>,
+<code><a href="add_offset_range.html">add_offset_range()</a></code>,
+<code><a href="rm_offset.html">rm_offset()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -146,7 +146,7 @@ https://doi.org/10.1111/geb.12453</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

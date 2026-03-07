@@ -136,17 +136,19 @@ best to let this parameter be determined deterministically (Default: <code>NULL<
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Regularized regressions are effectively GLMs that are fitted with
 ridge, lasso or elastic-net regularization. Which of them is chosen is
-critical dependent on the alpha value: <a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> For <code>alpha</code> equal to <code>0</code>
+critically dependent on the alpha value:</p><ul><li><p>For <code>alpha</code> equal to <code>0</code>
 a ridge regularization is used. Ridge regularization has the property that it
 doesn't remove variables entirely, but instead sets their coefficients to
-<code>0</code>. <a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> For <code>alpha</code> equal to <code>1</code> a lasso regularization is
+<code>0</code>.</p></li>
+<li><p>For <code>alpha</code> equal to <code>1</code> a lasso regularization is
 used. Lassos tend to remove those coefficients fully from the final model
-that do not improve the loss function. <a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> For <code>alpha</code> values between
-<code>0</code> and <code>1</code> a elastic-net regularization is used, which is
+that do not improve the loss function.</p></li>
+<li><p>For <code>alpha</code> values between
+<code>0</code> and <code>1</code> an elastic-net regularization is used, which is
 essentially a combination of the two. The optimal lambda parameter can be
 determined via cross-validation. For this option set <code>"varsel"</code> in
-<code><a href="train.html">train()</a></code> to <code>"reg"</code>.</p>
-    </div>
+<code><a href="train.html">train()</a></code> to <code>"reg"</code>.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
 
@@ -162,15 +164,15 @@ for presence-only data. The Annals of Applied Statistics 7, 1917–1939</p></li>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other engine:
-<code><a href="engine_bart.html">engine_bart</a>()</code>,
-<code><a href="engine_breg.html">engine_breg</a>()</code>,
-<code><a href="engine_gdb.html">engine_gdb</a>()</code>,
-<code><a href="engine_glm.html">engine_glm</a>()</code>,
-<code><a href="engine_inla.html">engine_inla</a>()</code>,
-<code><a href="engine_inlabru.html">engine_inlabru</a>()</code>,
-<code><a href="engine_scampr.html">engine_scampr</a>()</code>,
-<code><a href="engine_stan.html">engine_stan</a>()</code>,
-<code><a href="engine_xgboost.html">engine_xgboost</a>()</code></p></div>
+<code><a href="engine_bart.html">engine_bart()</a></code>,
+<code><a href="engine_breg.html">engine_breg()</a></code>,
+<code><a href="engine_gdb.html">engine_gdb()</a></code>,
+<code><a href="engine_glm.html">engine_glm()</a></code>,
+<code><a href="engine_inla.html">engine_inla()</a></code>,
+<code><a href="engine_inlabru.html">engine_inlabru()</a></code>,
+<code><a href="engine_scampr.html">engine_scampr()</a></code>,
+<code><a href="engine_stan.html">engine_stan()</a></code>,
+<code><a href="engine_xgboost.html">engine_xgboost()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -191,7 +193,7 @@ for presence-only data. The Annals of Applied Statistics 7, 1917–1939</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -113,7 +113,7 @@ names equivalent to the vital stages that are to be estimated.</p></dd>
 
 
 <dt id="arg-carrying-capacity">carrying_capacity<a class="anchor" aria-label="anchor" href="#arg-carrying-capacity"></a></dt>
-<dd><p>Either <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or a <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the
+<dd><p>Either <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> or a <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the
 maximum carrying capacity, e.g. how many adult individual are likely to occur
 per grid cell. If set to <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code>, then carrying capacity is estimated up
 to a maximum set (<em>Note: a more clever way would be to use a species-area relationship
@@ -121,7 +121,7 @@ for scaling. This is not yet implemented</em>).</p></dd>
 
 
 <dt id="arg-initial">initial<a class="anchor" aria-label="anchor" href="#arg-initial"></a></dt>
-<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> giving the initial population size. If not
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> giving the initial population size. If not
 provided, then initial populations are guessed (see details) from the projected
 suitability rasters (Default: <code>NULL</code>).</p></dd>
 
@@ -160,7 +160,7 @@ different parameters is highly encouraged!</p>
     <p>The <em>steps</em> package has multiple options for simulating species population and
 not all possible options are represented in this wrapper.</p>
 <p>Furthermore, the package still makes use of the <code>raster</code> package for much
-of its internal data processing. Since <em>ibis.iSDM</em> switched to <a href="https://rspatial.github.io/terra/reference/terra-package.html" class="external-link">terra</a> a while
+of its internal data processing. Since <em>ibis.iSDM</em> switched to <a href="https://rspatial.github.io/terra/reference/terra-package.html" class="external-link">terra::terra</a> a while
 ago, there can be efficiency problems as layers need to be translated between
 packages.</p>
     </div>
@@ -175,14 +175,14 @@ temporally explicit population simulations. Methods in Ecology and Evolution,
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other constraint:
-<code><a href="add_constraint.html">add_constraint</a>()</code>,
-<code><a href="add_constraint_MigClim.html">add_constraint_MigClim</a>()</code>,
-<code><a href="add_constraint_adaptability.html">add_constraint_adaptability</a>()</code>,
-<code><a href="add_constraint_boundary.html">add_constraint_boundary</a>()</code>,
-<code><a href="add_constraint_connectivity.html">add_constraint_connectivity</a>()</code>,
-<code><a href="add_constraint_dispersal.html">add_constraint_dispersal</a>()</code>,
-<code><a href="add_constraint_minsize.html">add_constraint_minsize</a>()</code>,
-<code><a href="add_constraint_threshold.html">add_constraint_threshold</a>()</code></p></div>
+<code><a href="add_constraint.html">add_constraint()</a></code>,
+<code><a href="add_constraint_MigClim.html">add_constraint_MigClim()</a></code>,
+<code><a href="add_constraint_adaptability.html">add_constraint_adaptability()</a></code>,
+<code><a href="add_constraint_boundary.html">add_constraint_boundary()</a></code>,
+<code><a href="add_constraint_connectivity.html">add_constraint_connectivity()</a></code>,
+<code><a href="add_constraint_dispersal.html">add_constraint_dispersal()</a></code>,
+<code><a href="add_constraint_minsize.html">add_constraint_minsize()</a></code>,
+<code><a href="add_constraint_threshold.html">add_constraint_threshold()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -215,7 +215,7 @@ temporally explicit population simulations. Methods in Ecology and Evolution,
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

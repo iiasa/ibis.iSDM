@@ -113,7 +113,7 @@ from the range (Merow et al. 2017).</p>
 
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
-<dd><p>A <code>sf</code> or <code>SpatRaster</code> object with the range for the target
+<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> or <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object with the range for the target
 feature.</p></dd>
 
 
@@ -157,13 +157,13 @@ biodiversity point records.</p></dd>
 
 
 <dt id="arg-fraction">fraction<a class="anchor" aria-label="anchor" href="#arg-fraction"></a></dt>
-<dd><p>An optional <code>SpatRaster</code> object that is multiplied with
+<dd><p>An optional <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object that is multiplied with
 digitized raster layer. Can be used to for example to remove or reduce the
 expected value (Default: <code>NULL</code>).</p></dd>
 
 
 <dt id="arg-point">point<a class="anchor" aria-label="anchor" href="#arg-point"></a></dt>
-<dd><p>An optional <code>sf</code> layer with points or <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> argument. In
+<dd><p>An optional <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> layer with points or <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> argument. In
 the case of the latter the point data is ignored (Default: <code>FALSE</code>).</p></dd>
 
 
@@ -179,7 +179,7 @@ one (Default: <code>TRUE</code>).</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The output created by this function creates a <code>SpatRaster</code> to be
+    <p>The output created by this function creates a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> to be
 added to a provided distribution object. Offsets in regression models are
 likelihood specific as they are added directly to the overall estimate of
 <code>`y^hat`</code>.</p>
@@ -202,10 +202,10 @@ https://doi.org/10.1111/geb.12453</p></li>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code>"bossMaps"</code></p>
 <p>Other offset:
-<code><a href="add_offset.html">add_offset</a>()</code>,
-<code><a href="add_offset_bias.html">add_offset_bias</a>()</code>,
-<code><a href="add_offset_elevation.html">add_offset_elevation</a>()</code>,
-<code><a href="rm_offset.html">rm_offset</a>()</code></p></div>
+<code><a href="add_offset.html">add_offset()</a></code>,
+<code><a href="add_offset_bias.html">add_offset_bias()</a></code>,
+<code><a href="add_offset_elevation.html">add_offset_elevation()</a></code>,
+<code><a href="rm_offset.html">rm_offset()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -232,7 +232,7 @@ https://doi.org/10.1111/geb.12453</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

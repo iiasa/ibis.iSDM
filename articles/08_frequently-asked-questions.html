@@ -72,7 +72,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2025-06-19</h4>
+            <h4 data-toc-skip class="date">2026-03-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/08_frequently-asked-questions.Rmd" class="external-link"><code>vignettes/articles/08_frequently-asked-questions.Rmd</code></a></small>
       <div class="d-none name"><code>08_frequently-asked-questions.Rmd</code></div>
@@ -314,8 +314,8 @@ them.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">offset1</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">offset2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">offset1</span><span class="op">*</span><span class="va">offset2</span><span class="op">)</span></span></code></pre></div>
 <p>Internally all provided offsets to model object are combined via
-simple addition together. This thus requires that users transform them
-aprior (for instance log transform) before adding them to the
+simple addition together. This This thus requires that users transform
+them a priori (for instance log transform) before adding them to the
 estimation.</p>
 </details>
 </div>
@@ -338,7 +338,7 @@ can be done via</li>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span><span class="st">"ibis.setupmessages"</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </details><details><summary><b> How can I make use of cross-validation in <code>ibis.iSDM</code>
 ?</b>
-</summary><p>Cross-validation has been deliberatly not integrated into package.
+</summary><p>Cross-validation has been deliberately not integrated into package.
 Users who would like to make use of cross-validation techniques thus
 need to set up their own external modelling routines. Reason is that
 with the multiple types of integration in this package, the construction
@@ -436,7 +436,7 @@ performance is also to plot the evaluation log and
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Requires a fitted model</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="st">"fit_best"</span><span class="op">)</span><span class="op">$</span><span class="va">evaluation_log</span><span class="op">)</span></span></code></pre></div>
-</details><details><summary><b>I am predicting over a large area, is there a way to parallize the
+</details><details><summary><b> I am predicting over a large area, is there a way to parallelize the
 computation?</b>
 </summary><p>Yes and no. Generally, the computation speed is handled by the
 respective engine and not every engine supports for example
@@ -459,7 +459,7 @@ speed improvements</strong></p>
 <p>Now most prediction should make use of the specified future plan.
 This counts for both initial model predictions and projections.</p>
 <p>If you aim to parallelize over a range of species instead, it might
-be more worthhile to rather parallize the iteration and not the
+be more worthwhile to rather parallelize the iteration and not the
 prediction.</p>
 </details>
 </div>
@@ -478,7 +478,7 @@ different sources of evidence in their modelling.</p>
 biodiversity datasets. Unfortunately only the
 [<code><a href="../reference/engine_inla.html">engine_inla()</a></code>], [<code><a href="../reference/engine_inlabru.html">engine_inlabru()</a></code>] and
 [<code><a href="../reference/engine_stan.html">engine_stan()</a></code>] support fully integrated multiple
-likelihood models. A full overview can be found in the <a href="04_engine_comparison.html">Engine comparison</a> table. All other
+likelihood models. A full overview can be found in the <a href="06_engine_comparison.html">Engine comparison</a> table. All other
 [<code>engines</code>] combine multiple datasets by running separate
 models in sequence where the order is determined by the sequence the
 datasets were added to the model. Within the <code><a href="../reference/train.html">train()</a></code>
@@ -526,7 +526,7 @@ Remember the <a href="https://en.wikipedia.org/wiki/Garbage_in,_garbage_out" cla
 principle</a>.</li>
 </ul></details><details><summary><b>My model keeps crashing, what can I do?</b>
 </summary>
-Sorry to hear and unless the model or input data are grossely
+Sorry to hear and unless the model or input data are grossly
 misspecified, this should not happen. Consider changing the input
 covariates. Often scaling the covariates (see
 <code><a href="../reference/add_predictors.html">add_predictors()</a></code>) can help with model convergence.
@@ -598,7 +598,7 @@ as such. To read them in:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

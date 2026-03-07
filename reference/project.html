@@ -4,13 +4,13 @@ project the model stored in a BiodiversityScenario object to newly
 supplied (future) covariates. Supplied predictors are usually
 spatial-temporal predictors which should be prepared via add_predictors()
 (e.g. transformations and derivates) in the same way as they have been during
-the initial modelling with distribution(). Any constrains specified in
+the initial modelling with distribution(). Any constraints specified in
 the scenario object are applied during the projection."><meta property="og:description" content="Equivalent to train, this function acts as a wrapper to
 project the model stored in a BiodiversityScenario object to newly
 supplied (future) covariates. Supplied predictors are usually
 spatial-temporal predictors which should be prepared via add_predictors()
 (e.g. transformations and derivates) in the same way as they have been during
-the initial modelling with distribution(). Any constrains specified in
+the initial modelling with distribution(). Any constraints specified in
 the scenario object are applied during the projection."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -62,7 +62,7 @@ project the model stored in a <code><a href="BiodiversityScenario-class.html">Bi
 supplied (future) covariates. Supplied predictors are usually
 spatial-temporal predictors which should be prepared via <code><a href="add_predictors.html">add_predictors()</a></code>
 (e.g. transformations and derivates) in the same way as they have been during
-the initial modelling with <code><a href="distribution.html">distribution()</a></code>. Any constrains specified in
+the initial modelling with <code><a href="distribution.html">distribution()</a></code>. Any constraints specified in
 the scenario object are applied during the projection.</p>
     </div>
 
@@ -102,7 +102,7 @@ the scenario object are applied during the projection.</p>
 <dd><p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with set predictors. Note that some
 constrains such as <code>MigClim</code> can still simulate future change without projections.
 Alternatively a <code><a href="DistributionModel-class.html">DistributionModel</a></code> object can be supplied if other scenario
-functions are not needed. In this case provide a <code>env</code> parameter value.</p></dd>
+functions are not needed. In this case provide an <code>env</code> parameter value.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -129,7 +129,7 @@ applied. Currently supported is <code>`loess`</code>.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>An optional <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> object for prediction.
+<dd><p>An optional <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> or <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> object for prediction.
 Ignored unless a <code><a href="DistributionModel-class.html">DistributionModel</a></code> object is supplied (Default: <code>NULL</code>).</p></dd>
 
 
@@ -169,12 +169,12 @@ package, which can be provided via <code><a href="simulate_population_steps.html
 values will then be added to the outputs.</p>
 <p>Finally this function also allows temporal stabilization across prediction
 steps via enabling the parameter <code>stabilize</code> and checking the
-<code>stablize_method</code> argument. Stabilization can for instance be helpful in
+<code>stabilize_method</code> argument. Stabilization can for instance be helpful in
 situations where environmental variables are quite dynamic, but changes in
 projected suitability are not expected to abruptly increase or decrease. It
 is thus a way to smoothen out outliers from the projection. Options are so
 far for instance <code>'loess'</code> which fits a <code><a href="https://rdrr.io/r/stats/loess.html" class="external-link">loess()</a></code> model per pixel and
-time step. This is conducted at the very of the processing steps and any
+time step. This is conducted at the very end of the processing steps and any
 thresholds will be recalculated afterwards.</p>
     </div>
     <div class="section level2">
@@ -209,7 +209,7 @@ thresholds will be recalculated afterwards.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

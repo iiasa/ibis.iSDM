@@ -83,7 +83,7 @@ spatial-explicit layers.</p>
 
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
-<dd><p>A <code>sf</code> or <code>SpatRaster</code> object with the range for the target
+<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> or <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object with the range for the target
 feature.</p></dd>
 
 
@@ -100,7 +100,7 @@ one (Default: <code>TRUE</code>).</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function allows to set any specific offset to a regression
-model. The offset has to be provided as spatial <code>SpatRaster</code> object. This
+model. The offset has to be provided as spatial <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object. This
 function simply adds the layer to a <code><a href="distribution.html">distribution()</a></code> object.
 <strong>Note that any transformation of the offset (such as <code>log</code>) has do be done externally!</strong></p>
 <p>If the layer is range and requires additional formatting, consider using the
@@ -124,10 +124,10 @@ information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other offset:
-<code><a href="add_offset_bias.html">add_offset_bias</a>()</code>,
-<code><a href="add_offset_elevation.html">add_offset_elevation</a>()</code>,
-<code><a href="add_offset_range.html">add_offset_range</a>()</code>,
-<code><a href="rm_offset.html">rm_offset</a>()</code></p></div>
+<code><a href="add_offset_bias.html">add_offset_bias()</a></code>,
+<code><a href="add_offset_elevation.html">add_offset_elevation()</a></code>,
+<code><a href="add_offset_range.html">add_offset_range()</a></code>,
+<code><a href="rm_offset.html">rm_offset()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -149,7 +149,7 @@ information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

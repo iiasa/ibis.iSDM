@@ -72,7 +72,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2025-06-19</h4>
+            <h4 data-toc-skip class="date">2026-03-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/01_data_preparationhelpers.Rmd" class="external-link"><code>vignettes/articles/01_data_preparationhelpers.Rmd</code></a></small>
       <div class="d-none name"><code>01_data_preparationhelpers.Rmd</code></div>
@@ -82,15 +82,15 @@ Jung</h4>
     
 <p>The first step with any species distribution modelling (SDM) is to
 collect and prepare the necessary input data and parameters for the
-modelling. Predictors or (environomental) covariates need to be
-acquired, in many cases formatted, for example through masking and
-reprojections, and standardized. Similarly, Biodiversity data are
-usually collected through independent field survey or from available
-databases such as GBIF. In particular for the <code>ibis.iSDM</code>
-package it can furthermore be useful to collect any other information
-available for a biodiversity feature (e.g. species, habitat, …) in
-question. Such as for example broad delineation of an expert range or
-parameters related to the habitat preference of a species.</p>
+modelling. Predictors or (environmental) covariates need to be acquired,
+in many cases formatted, for example through masking and reprojections,
+and standardized. Similarly, Biodiversity data are usually collected
+through independent field survey or from available databases such as
+GBIF. In particular for the <code>ibis.iSDM</code> package it can
+furthermore be useful to collect any other information available for a
+biodiversity feature (e.g. species, habitat, …) in question. Such as for
+example broad delineation of an expert range or parameters related to
+the habitat preference of a species.</p>
 <p>Preparing input data for the <code>ibis.iSDM</code> package requires
 a modest understanding of modern geospatial R-packages, such as
 <code>sf</code>, <code>terra</code> and <code>stars</code>. If such
@@ -115,10 +115,10 @@ the form of presence-only or presence-absence data, which can be
 available in a range of different formats from points to polygons.</p>
 <p>There are a range of <a href="https://linkinghub.elsevier.com/retrieve/pii/S0304380022003404" class="external-link">existing
 tools</a> that assist modellers in preparing and cleaning input data
-(for instance of biases). This vignette does intend to give an overview
-of the options. Rather it highlights the few functions that have been
-created specifically for the <code>ibis.iSDM</code> package and that
-might help in some situations.</p>
+(for instance of biases). This vignette does not intend to give an
+overview of the options. Rather it highlights the few functions that
+have been created specifically for the <code>ibis.iSDM</code> package
+and that might help in some situations.</p>
 <div class="section level3">
 <h3 id="adding-pseudo-absence-points-to-presence-only-data">Adding pseudo-absence points to presence-only data<a class="anchor" aria-label="anchor" href="#adding-pseudo-absence-points-to-presence-only-data"></a>
 </h3>
@@ -141,7 +141,7 @@ scale from 0 to 1) and also faster to fit as model.</p>
 <span><span class="co"># Add a range </span></span>
 <span><span class="va">virtual_range</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">'extdata/input_data.gpkg'</span>, package<span class="op">=</span><span class="st">'ibis.iSDM'</span><span class="op">)</span>, <span class="st">'range'</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Adding pseudo-absence data in the <code>ibis.iSDM package</code>
-works by first specifiying a <em>Pseudoabsence options</em> object that
+works by first specifying a <em>Pseudoabsence options</em> object that
 contains parameters how many and where pseudo-absences are to be
 sampled. The respective function for this is called
 <code><a href="../reference/pseudoabs_settings.html">pseudoabs_settings()</a></code>. Further details on the available
@@ -149,7 +149,7 @@ options here (there are many) can be found in the help file. By default
 the packages uses a random sampling of absence points and the settings
 for this can be queried here
 <code>ibis_options()$ibis.pseudoabsence</code>.</p>
-<p>After such options have been defined, pseudoa-absence data can be
+<p>After such options have been defined, pseudo-absence data can be
 added to any point dataset via <code><a href="../reference/add_pseudoabsence.html">add_pseudoabsence()</a></code>.</p>
 <p>Example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -170,7 +170,7 @@ added to any point dataset via <code><a href="../reference/add_pseudoabsence.htm
 <span>                            settings <span class="op">=</span> <span class="va">abs</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point1</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Define%20and%20add%20pseudo-absence%20data-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Define%20and%20add%20pseudo-absence%20data-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># --- #</span></span>
@@ -193,7 +193,7 @@ added to any point dataset via <code><a href="../reference/add_pseudoabsence.htm
 <span>                            settings <span class="op">=</span> <span class="va">abs</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point2</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Define%20and%20add%20pseudo-absence%20data-2.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Define%20and%20add%20pseudo-absence%20data-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="thinning-observations">Thinning observations<a class="anchor" aria-label="anchor" href="#thinning-observations"></a>
@@ -221,7 +221,7 @@ discards data!</strong></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## We use the data loaded in above</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">virtual_species</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Original data"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Thinning-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Thinning-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Random thinning. Note the messages of number of thinned points</span></span>
@@ -235,7 +235,7 @@ discards data!</strong></p>
 <span><span class="co">#&gt; Number of retained records: 175</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point1</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Random thinning"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Thinning-2.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Thinning-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Another way: Use environmental thinning to retain enough points</span></span>
@@ -253,7 +253,7 @@ discards data!</strong></p>
 <span><span class="co">#&gt; Number of retained records: 26</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">point2</span><span class="op">[</span><span class="st">'Observed'</span><span class="op">]</span>, main <span class="op">=</span> <span class="st">"Environmentally stratified data"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Thinning-3.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Thinning-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <hr>
 </div>
 </div>
@@ -279,10 +279,10 @@ the input data (which needs to be undertaken using the
 <h3 id="transforming-predictors">Transforming predictors<a class="anchor" aria-label="anchor" href="#transforming-predictors"></a>
 </h3>
 <p>For better model convergence it usually makes sense to bring all
-predictors to a common unit, for example by noramlizing or scaling them.
+predictors to a common unit, for example by normalizing or scaling them.
 The <code>ibis.iSDM</code> package has a convenience function that can
 be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
-<p><strong>NOTE: This functionality are also available directly in
+<p><strong>NOTE: This functionality is also available directly in
 <code><a href="../reference/add_predictors.html">add_predictors()</a></code> as parameter!</strong></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Let's take a simple layer for an example</span></span>
@@ -295,11 +295,11 @@ be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">new1</span>, <span class="va">new2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"normalized"</span>, <span class="st">"scaled"</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Another common use case is to windsorize a layer, for example by removing</span></span>
-<span><span class="co"># top outliers form a prediction.</span></span>
+<span><span class="co"># top outliers from a prediction.</span></span>
 <span><span class="co"># Here the values are capped to a defined percentile</span></span>
 <span><span class="va">new3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/predictor_transform.html">predictor_transform</a></span><span class="op">(</span><span class="va">layer</span>, option <span class="op">=</span> <span class="st">"windsor"</span>,</span>
 <span>                            <span class="co"># Clamp the upper values to the 90% percentile</span></span>
@@ -308,7 +308,7 @@ be applied to any <code>terra</code> ‘SpatRaster’ object.</p>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">new3</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"windsorized"</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-2.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Transform%20predictors-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <p>Other options for transformation are also available and are listed in
 the methods file.</p>
 </div>
@@ -327,7 +327,7 @@ convenience function that can be applied to any <code>terra</code>
 ‘SpatRaster’ object to create such additional derivates for a model.
 Note that this creates (in some cases substantial) additional
 predictors.</p>
-<p><strong>NOTE: This functionality are also available directly in
+<p><strong>NOTE: This functionality is also available directly in
 <code><a href="../reference/add_predictors.html">add_predictors()</a></code> as parameter!</strong></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Let's take a simple layer for an example</span></span>
@@ -339,7 +339,7 @@ predictors.</p>
 <span><span class="va">new</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">layer</span>, <span class="va">new1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"quadratic"</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Create some hinge transformations</span></span>
@@ -348,7 +348,7 @@ predictors.</p>
 <span>                            nknots <span class="op">=</span> <span class="fl">4</span> </span>
 <span>                           <span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span> <span class="va">new2</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-2.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># What does this do precisely?</span></span>
@@ -357,16 +357,16 @@ predictors.</p>
 <span>                  <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/values.html" class="external-link">values</a></span><span class="op">(</span><span class="va">new2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"First hinge of ndvi"</span>, xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-3.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">3</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"Second hinge of ndvi"</span>,xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-4.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">4</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"Third hinge of ndvi"</span>, xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-5.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">ndvi_mean_50km</span>, <span class="va">df</span><span class="op">[</span>,<span class="fl">5</span><span class="op">]</span>, ylab <span class="op">=</span> <span class="st">"Fourth hinge of ndvi"</span>,xlab <span class="op">=</span> <span class="st">"NDVI"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-6.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <p>More fine-tuned control can also be achieved by creating specific
 interactions among variables, for example if one expects climate to
 interact with forest cover.</p>
@@ -377,7 +377,7 @@ interact with forest cover.</p>
 <span>                          int_variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio01_mean_50km"</span>, <span class="st">"CLC3_312_mean_50km"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">new</span>, main <span class="op">=</span> <span class="st">"Interaction variable"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/Derivate%20interaction-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/Derivate%20interaction-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="spatially-summarize-predictor-data">Spatially summarize predictor data<a class="anchor" aria-label="anchor" href="#spatially-summarize-predictor-data"></a>
@@ -451,11 +451,11 @@ preparation.</p>
 <span></span>
 <span><span class="co"># Now all the predictors have identical coverage of NA values</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">new</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Or assess like this</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="op">!</span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summarize-generics.html" class="external-link">noNA</a></span><span class="op">(</span><span class="va">new</span><span class="op">$</span><span class="va">aspect_mean_50km</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Missing observations"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-2.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <hr>
 </div>
 </div>
@@ -488,8 +488,8 @@ within <code><a href="../reference/project.html">project()</a></code>.</p>
 <span></span>
 <span><span class="co"># The predictors are here only available every 10 years</span></span>
 <span><span class="fu">stars</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/stars/reference/st_dimensions.html" class="external-link">st_get_dimension_values</a></span><span class="op">(</span><span class="va">pred_future</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Units: [days since 1970-1-1]</span></span>
-<span><span class="co">#&gt; [1] 16436 20089 23741 27394 31046 34699 38351 42004 45656</span></span>
+<span><span class="co">#&gt; [1] "2015-01-01" "2025-01-01" "2035-01-01" "2045-01-01" "2055-01-01"</span></span>
+<span><span class="co">#&gt; [6] "2065-01-01" "2075-01-01" "2085-01-01" "2095-01-01"</span></span>
 <span></span>
 <span><span class="co"># --- #</span></span>
 <span><span class="co"># The ibis.iSDM contains here a function to make interpolation among timesteps,</span></span>
@@ -557,7 +557,7 @@ the same helper function.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

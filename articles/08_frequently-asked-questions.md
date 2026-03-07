@@ -1,0 +1,602 @@
+# Frequently Asked Questions (FAQ)
+
+## Frequently Asked Questions (FAQ)
+
+This document contains a series of frequently asked questions when using
+the `ibis.iSDM` package and is a work in progress.
+
+### Data and model preparation
+
+**What are the necessary data preparation steps for `ibis.iSDM` ?**
+
+The `ibis.iSDM` R-package can handle most standard spatial formats in R
+(such as vector or raster formats) and works predominantly with the
+\[`sf`\], \[`SpatRaster`\] and \[`stars`\] packages to do much of the
+formatting and processing work. When adding \[`biodiversity`\] and
+\[`predictor`\] variables to a
+[`distribution()`](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
+object a number of default validity checks and alignments are commonly
+conducted, for instance ensuring that provided points align in
+geographic projection.
+
+To ease up the modelling and to avoid any unfortunate errors or crashes,
+ideally ensure the following steps are taken:
+
+- A `'background'` layer describing the modelling extent is provided
+  directly as \[`sf`\] `'POLYGON'` or `'MULTIPOLYGON'` object and covers
+  all biodiversity and predictor data.
+- All provided data are in the same geographic projection.
+- Biodiversity data is provided in \[`sf`\] format and covers the
+  `'background'` bounding box. Furthermore each biodiversity dataset has
+  a set `"field_occurrence"` field with numeric values.
+- is appropriately formatted (see also below).
+
+**Important:** For environmental predictors it becomes important to
+ensure that nodata values are appropriately handled. Unfortunately many
+of the implemented \[`engines`\] can not handle nodata values well, thus
+it is necessary during the pre-processing to remove any rows of
+covariate extraction where at least one variable has missing data. For
+instance by assinging a constant to `NA` values:
+
+``` r
+predictors[is.na(predictors)] <- 0
+```
+
+**I have presence-only data (GBIF and co). How can I model the
+probability of occurrence?**
+
+Technically, it is impossible to estimate a probability of occurrence
+just with presence-only data (such as commonly available from databases
+like GBIF). What people normally do is to add so called pseudo-absence
+(often in excessive numbers) over the entire background to their data,
+approximating the probability of occurrence by assuming that detection
+probability is uniform over the landscape (see [Merow et
+al. 2013](https://onlinelibrary.wiley.com/doi/full/10.1111/j.1600-0587.2013.07872.x)).
+
+The `ibis.iSDM` package follows the design principle that all data types
+(e.g. presence-only or presence-absence records) should be modelled with
+the least amount of assumptions possible. For presence-only records the
+default way of estimating any kind of responses or habitat suitability
+is to estimate such data following a Poisson-Process modelling approach.
+However, it is possible to add these pseudo-absence points to a
+presence-only dataset as follows:
+
+``` r
+virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
+# This takes the default pseudo-absence options created when loading the Ibis package.
+virtual_points <- add_pseudoabsence(virtual_points, field_occurrence = "Observed")
+# Check that absence points are present
+unique(virtual_points$Observed)
+```
+
+Also see the
+[`add_pseudoabsence()`](https://iiasa.github.io/ibis.iSDM/reference/add_pseudoabsence.md)
+and
+[`pseudoabs_settings()`](https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.md)
+help pages for more settings and also the first article on this website.
+For example it is possible to define pseudo-absence sampling in specific
+spatial formats, such as sampling within or outside a minimum convex
+polygon (MCP) of all presence points or within a certain buffer.
+
+**The package seem to have many suggested dependencies. Is there a way
+to install them all?**
+
+Yes, the ibis.iSDM package uses a range of different functionalities
+from other, existing packages and if these functions are required for a
+specific purpose, the packages in question should be installed.
+
+An easy convenience functions to install all packages is
+[`ibis_dependencies()`](https://iiasa.github.io/ibis.iSDM/reference/ibis_dependencies.md)
+which installs all the packages listed in
+`getOption("ibis.dependencies")`.
+
+### Model setup
+
+**Is it possible to transform input predictors before model fitting?**
+
+Yes, in many instances it is desirable to transform input predictors to
+a new range or to remove extreme values from the predictors. For example
+the popular \[`maxnet`\] R-package for Maximum entropy estimation of
+species distribution modelling often transforms the variables via
+quadratic, hinge or threshold transformations. Although this can also
+(and preferably should) be done before setting up a model, there are
+options available to transform the predictors when they are added to the
+model. See the help page of
+\[[`add_predictors()`](https://iiasa.github.io/ibis.iSDM/reference/add_predictors.md)\]
+for examples and descriptions.
+
+**Is there a way to limit my predictions to only certain regions in the
+extent?**
+
+Yes, this can be a desirable outcome during the modelling. For instance
+one can make - in the absence of better information on dispersal
+constrain (see \[`add_constrain_dispersal`\]) - the assumption that
+certain species can only disperse within a given ecoregion and not
+beyond. See for instance the method section of [Wessels, Merow and
+Trisos
+(2021)](https://link.springer.com/article/10.1007/s10113-021-01755-5#Sec2).
+
+To do this directly with the `ibis.iSDM` R-package, one has to specify
+the limit of projection to the
+\[[`distribution()`](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)\]
+object. In this context the zones extent over the whole background (and
+have the same extent and spatial scale). The prediction will however be
+limited only to those zones where supplied biodiversity observations
+fall in.
+
+``` r
+# Where zone is a provided raster
+mod <- distribution(background, limits = zone) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_gdb() |>  
+  train()
+plot(mod)
+
+# Alternatively one can also create such limits based on a minimum convex polygon
+# of the provided data. Here we create a non-buffered MCP across all points used
+# in species_data to constrain the prediction.
+mod <- distribution(background, limits_method = "mcp", mcp_buffer = 0) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_gdb() |>  
+  train()
+plot(mod)
+```
+
+There is further a dedicated function
+(\[`create_zonaloccurrence_mask()`\]) to help set up such zones, either
+by taking existing categorical raster datasets or by constructing
+buffers around existing presence records (which could for example
+reflect assumed maximum dispersal distances).
+
+**How exactly do I add a prior to a model ?**
+
+The `ibis.iSDM` R-package allows to users to add prior information on
+parameters to any model to be estimated. These priors have to be added
+as engine-specific priors and their format depends on the engine in
+question (see specific help pages for more information). A prior can
+generally be define via a combination of `ENGINENAME` + `Prior` and has
+to be wrapped in a `PriorList` to be used in the estimation.
+
+Example:
+
+``` r
+# We have prior information that 'Forest' is important for a species
+# In this case and for the INLA engine we define normal prior on the mean and precision
+p <- INLAPrior(variable = "Forest",type = "normal",hyper = c(2, 10))
+# This is then wrapped in a PriorList
+pp <- priors(p)
+print( pp )
+
+# We can specify multiple priors of course
+p <- list(
+  INLAPrior(variable = "Forest",type = "normal",hyper = c(2, 10)),
+  INLAPrior(variable = "Cropland",type = "normal",hyper = c(0, 1))
+)
+pp <- priors(pp)
+
+# And can now added to the model
+mod <- distribution(background, limits = zone) |>  
+  add_biodiversity_poipo(species_data) |>  
+  add_predictors(covariates) |>  
+  add_priors(priors = pp)
+  engine_inlabru()
+```
+
+Multiple priors for an Engine can be defined in a `PriorList`. Whenever
+a prior for the same variable is set again, it overwrites the previous
+value.
+
+**How can I control pseudo-absence sampling, for instance with targeted
+sampling?**
+
+A great number of SDM literature suggests that altering how the
+background / pseudo-absence points are created, can greatly affect model
+outcomes (see
+[`add_pseudoabsence()`](https://iiasa.github.io/ibis.iSDM/reference/add_pseudoabsence.md)
+for references). In the `ibis.iSDM` R-package there are options
+available to modify how pseudo-absence points are created. By default
+the package creates at least 10 000 points or at least 25% of the
+presence-points (what ever is larger). To change the default
+pseudo-absence sampling settings, there are two options. Either change
+the global default settings for pseudo-absence sampling or by adding
+these settings to the `add_biodiversity` function.
+
+To overwrite the global settings, do the following:
+
+``` r
+# Define new settings with greater number of background points
+ss <- pseudoabs_settings(background = NULL, nrpoints =  1e6)
+# Overwrite the default settings
+options("ibis.pseudoabsence" = ss)
+```
+
+Alternatively one could think of specifying specific pseudo-absence
+sampling information to one biodiversity dataset specifically:
+
+``` r
+# Define absence layer with biased background to sample from
+ss <- pseudoabs_settings(background = NULL, bias = bias_layer)
+
+# Assuming background and point data exists
+x <- distribution(background) |>  
+  add_biodiversity_poipo(points, pseudoabsence_settings = ss)
+```
+
+**What are the options for parallelization in `ibis.iSDM`?**
+
+Most code in the `ibis.iSDM` R-package is by default already
+parallelized and many computationally-intensive operations should be
+making use of all cores (if you can find an example where this is not
+the case, please raise an issue). The number of cores is generally being
+decided by the option `"ibis.nthread"` in
+\[[`ibis_options()`](https://iiasa.github.io/ibis.iSDM/reference/ibis_options.md)\].
+
+In most cases, parallelized code will be run via the \[`parallel`\] and
+\[`doParallel`\] packages, although there is some code in its infancy to
+support the \[`future`\] parallelization approaches as well, offering
+greater flexibility. See the function \[`ibis_future`\] for more
+information also on the use.
+
+The typical use case is thus to run separate models (via
+[`train()`](https://iiasa.github.io/ibis.iSDM/reference/train.md)) in a
+loop or scheduler of a High-Performance-Computer. Users should be
+careful in the case of shared resources, e.g. don’t parallelize such
+operations on the same machine. If there is a need to parallelize
+multiple models on the same instance, it is suggested to disable the
+`'ibis.runparallel'` option.
+
+``` r
+# Check ibis options if set
+ibis_options()
+options('ibis.runparallel' = FALSE) # Set to FALSE
+```
+
+**Can I add multiple offsets to a `distribution()` object ?**
+
+Yes. The
+[`add_offset()`](https://iiasa.github.io/ibis.iSDM/reference/add_offset.md)
+and
+[`add_offset_range()`](https://iiasa.github.io/ibis.iSDM/reference/add_offset_range.md)
+functions allows to specify a spatial explicit offset term which is then
+added to the regression model in question. An offset is generally just a
+coefficient set to a specific value. To get more than one offset, one
+just needs to combine the different provided offsets in a way that is
+consistent to get that fixed value (see
+[here](https://stats.stackexchange.com/questions/250528/is-it-possible-to-use-two-offsets)
+for reference. This can be done either by summing them as transformed
+value (discouraged as it can be errorprone) or by simply multiplying
+them.
+
+``` r
+offset1 <- runif(10)
+offset2 <- runif(10)
+# Identical
+log(offset1) + log(offset2)
+log(offset1*offset2)
+```
+
+Internally all provided offsets to model object are combined via simple
+addition together. This This thus requires that users transform them a
+priori (for instance log transform) before adding them to the
+estimation.
+
+### Fitting and Scenarios
+
+**There are too many messages. How can I run `ibis.iSDM` less verbosely
+?**
+
+There are two options that can be enabled to reduce the number of
+messages:
+
+- By setting the parameter `verbose` in
+  [`train()`](https://iiasa.github.io/ibis.iSDM/reference/train.md) to
+  `FALSE` all messages created by the respective engine are suppressed.
+- Setting the parameter `ibis.setupmessages` to `FALSE` suppresses all
+  other package related message. This can be done via
+
+``` r
+options("ibis.setupmessages" = FALSE)
+```
+
+**How can I make use of cross-validation in `ibis.iSDM` ?**
+
+Cross-validation has been deliberately not integrated into package.
+Users who would like to make use of cross-validation techniques thus
+need to set up their own external modelling routines. Reason is that
+with the multiple types of integration in this package, the construction
+of (independent) testing datasets is not as trivial (considering for
+example offsets, priors or multiple datasets).
+
+**Why are there 2 INLA engines and which one should I use ?**
+
+In the `ibis.iSDM` R-package there are two engines that makes use of the
+INLA framework, namely \[`engine_inla`\] and \[`engine_inlabru`\]. When
+the package author started developing this package, the
+\[`engine_inlabru`\] did not yet support multiple likelihoods and thus
+this was implemented directly. Predictions from \[`engine_inla`\] and
+\[`engine_inlabru`\] should be identical, although the latter does not
+infer the predictions directly, instead simulating from the posterior.
+This simulation is particularly helpful for creating (future)
+projections as otherwise a new model would need to be fitted for every
+newdata object.
+
+Users are advised to use \[`engine_inlabru`\] by **default** in most
+cases and only use \[`engine_inla`\] if predictions look uncertain.
+
+**I am concerned about extrapolation during prediction. What options do
+I have?**
+
+When creating predictive models such as SDMs it is often a concern to
+not predict to a variable range outside the environmental conditions for
+which a model was trained. The `ibis.iSDM` package supports variable
+‘clamping’ of its predictions similar as the popular Maxent model,
+however for each \[`engine`\]. Clamping can be enabled by setting the
+parameter `clamp` in \[`train`\] to `TRUE`. This restricts any spatial
+(or spatial-temporal) projections to the combined `range` of predictor
+variables observed for each of the training localities.
+
+Similar functionalities are also available separately during scenario
+projections by setting adaptability constraints (see
+\[`add_constraint_adaptability`\] or \[`add_constraint_boundary`\]).
+
+**I am using (too) many predictors in my model. What options do I have
+?**
+
+Having too many predictors in a SDM can be a cause of substantial
+over-parametrization and subsequently overfitting (e.g. the model is
+reproducing the data it was trained with rather than projecting into
+areas unknown).
+
+It is recommended to (a) either use an engine with very strong
+regularization, such as for example \[`engine_glmnet`\] or
+\[`engine_gdb`\], (b) train a model with caution and have a minimum
+number of observations (arbitrary rule of thumb, have at least 10
+observations for each additional predictor included), (c) make use of
+pre-estimation removal of predictor, such for example through variable
+importance criteria or colinearity. See code below for an example.
+
+``` r
+# Prior to model fitting, remove highly collinear predictors through a pearson correlation assessment
+mod <- distribution(background) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_glmnet() |>  
+  train(filter_predictors = "pearson")
+
+# Alternatively use a RandomForest estimator to remove the least important variables
+mod <- distribution(background) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_glmnet() |>  
+  train(filter_predictors = "RF")
+```
+
+**Where can I find predictions created by `train` ?**
+
+After a `distribution` model has been trained and if the
+`inference_only` parameter in
+[`train()`](https://iiasa.github.io/ibis.iSDM/reference/train.md) has
+been set to `FALSE` (Default), the outputs of the prediction be found in
+the created object as a `SpatRaster`. By default all engines will
+produce a `SpatRaster` object with at least one band called “mean” which
+is the average prediction by the engine. This is also the result
+returned when the created model object is plotted.
+
+In addition, for Bayesian Engines other bands quantifying the posterior
+predictive uncertainty might be available and can be plotted as well.
+The raster can also be saved a spatial GeoTiff to a given filename using
+the
+[`write_output()`](https://iiasa.github.io/ibis.iSDM/reference/write_output.md)
+function.
+
+**Example:**
+
+``` r
+mod <- distribution(background) |>  
+  add_biodiversity_poipo(species_data) |>  
+  engine_inlabru() |>  
+  train()
+# To plot 
+plot(mod, "mean")
+plot(mod, "sd")
+
+# To get the layer
+mod$get_data("prediction")
+
+# To save the output layer as floating point geoTiff
+write_output(mod, "myoutput.tif", type = "gtif", dt = "FLT4S")
+```
+
+**Predictions from `engine_xgboost` look pixelated?**
+
+This is usually due to either the number of rounds for estimation being
+too low or the learning_rate being to high. Try out different options in
+the parameters of the engine. A good way to check the performance is
+also to plot the evaluation log and **logloss**.
+
+``` r
+# Requires a fitted model
+plot(fit$get_data("fit_best")$evaluation_log)
+```
+
+**I am predicting over a large area, is there a way to parallelize the
+computation?**
+
+Yes and no. Generally, the computation speed is handled by the
+respective engine and not every engine supports for example
+multi-threaded computations. However, the most computationally demanding
+steps in the package is usually the spatial prediction and there are
+some functionalities to ‘tile’ up the data over which predictions are
+made.
+
+This is using the R \[`future`\] package for asynchronous projections.
+
+**Note: This won’t usually improve things for small models/covariates as
+the overhead of setting up a model negates any speed improvements**
+
+To set this up, simply execute the following
+
+``` r
+# Set parallel option
+ibis_enable_parallel() # Enable parallel processing in general
+ibis_set_threads(4) # 4 Threads
+ibis_set_strategy("multisession") # R multi-session
+ibis_future() # Set up a future plan
+```
+
+Now most prediction should make use of the specified future plan. This
+counts for both initial model predictions and projections.
+
+If you aim to parallelize over a range of species instead, it might be
+more worthwhile to rather parallelize the iteration and not the
+prediction.
+
+### Model troubleshooting
+
+**How exactly does the model integration work and how does it differ
+among engines?**
+
+There are various forms of integration from a simple approach of adding
+\[`ensembles`\], \[`priors`\] or \[`offsets`\] to fully integrated
+multiple likelihood models (see [Fletcher et
+al. 2019](https://doi.org/10.1002/ecy.2710)). Thus, users have a range
+of possibilities to combine different sources of evidence in their
+modelling.
+
+With regards to how different \[`engines`\] treat multiple biodiversity
+datasets. Unfortunately only the
+\[[`engine_inla()`](https://iiasa.github.io/ibis.iSDM/reference/engine_inla.md)\],
+\[[`engine_inlabru()`](https://iiasa.github.io/ibis.iSDM/reference/engine_inlabru.md)\]
+and
+\[[`engine_stan()`](https://iiasa.github.io/ibis.iSDM/reference/engine_stan.md)\]
+support fully integrated multiple likelihood models. A full overview can
+be found in the [Engine
+comparison](https://iiasa.github.io/ibis.iSDM/articles/06_engine_comparison.md)
+table. All other \[`engines`\] combine multiple datasets by running
+separate models in sequence where the order is determined by the
+sequence the datasets were added to the model. Within the
+[`train()`](https://iiasa.github.io/ibis.iSDM/reference/train.md)
+function, users have the option of specifying how previous predictions
+should be handled through the \[`method_integration`\] parameter. For
+example predictions from one model could be added as predictors or
+offset to the next. Or the coefficients from one model can be used to
+create starting priors for the next model.
+
+**What can I do when my model outputs with presence-only data seem
+odd?**
+
+By default, presence only biodiversity data is modelled as point-process
+model (PPM, see [Renner et
+al. 2015](http://doi.wiley.com/10.1111/2041-210X.12352)). Similar as
+Maximum Entropy models these models can be quite sensitive to biased
+input, which is common for most non-structured biodiversity observations
+where presence points tend to be clustered in urban or easily accessible
+areas. To avoid predictions being biased towards those covariates, there
+are a number of things that can potentially be done here.
+
+- Modify the targeted background sampling for better control of
+  background points. This can be for instance done via the
+  [`add_pseudoabsence()`](https://iiasa.github.io/ibis.iSDM/reference/add_pseudoabsence.md)
+  and
+  [`pseudoabs_settings()`](https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.md)
+  methods. See the respective help files.
+- Make use of spatial thinning approaches. See for instance
+  [Aiello-Lammers et
+  al. 2015](https://onlinelibrary.wiley.com/doi/full/10.1111/ecog.01132)
+  and [Steen et
+  al. 2021](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.13525).
+  Note however that spatial thinning does remove data points, affecting
+  for instance any `poisson` distributed models (PPMs) in the process.
+  The`ibis.iSDM` package has some functionality for spatial thinning
+  implemented in the
+  [`thin_observations()`](https://iiasa.github.io/ibis.iSDM/reference/thin_observations.md)
+  function.
+- Partial out a biased variable during the prediction. The
+  [`add_control_bias()`](https://iiasa.github.io/ibis.iSDM/reference/add_control_bias.md)
+  function can be used to specify a value that needs to be partialed out
+  in the model. There a `bias_value` has to be specified and this can be
+  set for instance to `0` or an amount assumed to be equivalent to
+  minimal bias.
+- Consider setting the \[`clamp`\] parameter in
+  [`train()`](https://iiasa.github.io/ibis.iSDM/reference/train.md) to
+  `TRUE`.
+- Add a spatial offset to account for the bias as introduced in [Merow
+  et al. 2016](http://doi.wiley.com/10.1111/geb.12453). This can be done
+  via the
+  [`add_offset_bias()`](https://iiasa.github.io/ibis.iSDM/reference/add_offset_bias.md)
+  function and requires preparation of a bias layer in advance.
+- Apply more rigorous filtering and bias control to the input data. In
+  the end no correction can replace good data preparation and cleaning.
+  Remember the [GIGO
+  principle](https://en.wikipedia.org/wiki/Garbage_in,_garbage_out).
+
+**My model keeps crashing, what can I do?**
+
+Sorry to hear and unless the model or input data are grossly
+misspecified, this should not happen. Consider changing the input
+covariates. Often scaling the covariates (see
+[`add_predictors()`](https://iiasa.github.io/ibis.iSDM/reference/add_predictors.md))
+can help with model convergence. Similarly if the use of discrete
+variables (e.g. \``factor` predictors) results in errors, consider
+setting the parameter “explode_factors” to TRUE in
+[`add_predictors()`](https://iiasa.github.io/ibis.iSDM/reference/add_predictors.md).
+This will create additional covariates for every factor level. Please
+report an [issue](https://github.com/iiasa/ibis.iSDM/issues) with the
+concrete error message, your R session information (call
+[`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html)) and
+preferably some example data and code.
+
+### Any other questions and issues
+
+**Can I transform the prediction output to a suitability index?**
+
+Often it is easier to communicate an index of suitability (scale
+\[0-1\]) to stakeholders and policy, which can in principle be derived
+from *ibis.iSDM* output. Especially when using Poisson Process models to
+infer the suitability of a given area, the units can be hard to
+interpret for non-scientists. An easy way to achieve this has been added
+as a function to each Biodiversity distribution object. See below for an
+example.
+
+``` r
+# Train a model
+fit <- distribution(background) |> 
+  # Presence-absence data
+  add_biodiversity_poipo(my_gbifpoints) |> 
+  add_predictors(predictors) |> 
+  engine_glmnet() |> 
+  train()
+
+# Make a transformed prediction of the suitability layer
+# The output is a normalized prediction surface 
+# created via (x - min) / (max - min) or x/sum(x) respectively
+pred <- fit$calc_suitabilityindex()
+```
+
+**The names of my variables are slightly changing when added to a
+model?**
+
+This is a feature, not a bug ;) Many covariates often come with unusual
+characters and symbols that can not be readily used in equations or in
+queries of tabular data. The
+[`sanitize_names()`](https://iiasa.github.io/ibis.iSDM/reference/sanitize_names.md)
+function cleans those variable names and removes / resets non conform
+symbols.
+
+    # It can be disabled by setting the following option to false at the start of the script.
+    options('ibis.cleannames' = FALSE)
+
+**I saved my scenario outputs, how can I load them again ?**
+
+Particular when multi-dimensional scenarios (e.g. those with more than 1
+variable) are created, it is necessary to also read them in as
+multi-dimensional array. By default and from Version 0.1.3 onwards,
+files with ending ‘nc’ (netcdf) and with multiple variables are stored
+as such. To read them in:
+
+``` r
+library(stars)
+sc <- stars::read_mdim('myscenarioprojection.nc')
+# Split the attribute variable up
+sc <- sc |> split()
+# Check
+sc
+```

@@ -8,23 +8,25 @@ by considering only a subset of observations within the actual distribution),
 in other cases there can also be general barriers or constraints that limit
 any projections (e.g. islands). This limit method adds some of those options
 to a model distribution object. Currently supported methods are:
-* &quot;zones&quot; - This is a wrapper to allow the addition of zones to a
+&quot;zones&quot; - This is a wrapper to allow the addition of zones to a
 distribution model object, similar to what is also possible via distribution().
-Required is a spatial layer that describes a environmental zoning.
-* &quot;mcp&quot; - Rather than using an external or additional layer, this option constraints
+Required is a spatial layer that describes an environmental zoning.
+&quot;mcp&quot; - Rather than using an external or additional layer, this option constrains
 predictions by a certain distance of points in its vicinity. Buffer distances
 have to be in the unit of the projection used and can be configured via
 &quot;mcp_buffer&quot;.
-* &quot;nt2&quot; - Constraints the predictions using the multivariate combination novelty index (NT2)
+&quot;nt2&quot; - Constrains the predictions using the multivariate combination novelty index (NT2)
 following Mesgaran et al. (2014). This method is also available in the similarity()
 function.
-* &quot;mess&quot; - Constraints the predictions using the
+&quot;mess&quot; - Constrains the predictions using the
 Multivariate Environmental Similarity Surfaces (MESS) following Mesgaran et al. (2014).
 This method is also available in the similarity() function.
-* &quot;shape&quot; - This is an implementation of the 'shape' method introduced
+&quot;shape&quot; - This is an implementation of the 'shape' method introduced
 by Velazco et al. (2023). Through a user defined threshold it effectively limits
 model extrapolation so that no projections are made beyond the extent judged as
 defensible and informed by the training observations. Not yet implemented!
+
+
 See also details for further explanations."><meta property="og:description" content="One of the main aims of species distribution models (SDMs) is to project
 in space and time. For projections a common issue is extrapolation as - unconstrained -
 SDMs can indicate areas as suitable which are unlikely to be occupied by species
@@ -34,23 +36,25 @@ by considering only a subset of observations within the actual distribution),
 in other cases there can also be general barriers or constraints that limit
 any projections (e.g. islands). This limit method adds some of those options
 to a model distribution object. Currently supported methods are:
-* &quot;zones&quot; - This is a wrapper to allow the addition of zones to a
+&quot;zones&quot; - This is a wrapper to allow the addition of zones to a
 distribution model object, similar to what is also possible via distribution().
-Required is a spatial layer that describes a environmental zoning.
-* &quot;mcp&quot; - Rather than using an external or additional layer, this option constraints
+Required is a spatial layer that describes an environmental zoning.
+&quot;mcp&quot; - Rather than using an external or additional layer, this option constrains
 predictions by a certain distance of points in its vicinity. Buffer distances
 have to be in the unit of the projection used and can be configured via
 &quot;mcp_buffer&quot;.
-* &quot;nt2&quot; - Constraints the predictions using the multivariate combination novelty index (NT2)
+&quot;nt2&quot; - Constrains the predictions using the multivariate combination novelty index (NT2)
 following Mesgaran et al. (2014). This method is also available in the similarity()
 function.
-* &quot;mess&quot; - Constraints the predictions using the
+&quot;mess&quot; - Constrains the predictions using the
 Multivariate Environmental Similarity Surfaces (MESS) following Mesgaran et al. (2014).
 This method is also available in the similarity() function.
-* &quot;shape&quot; - This is an implementation of the 'shape' method introduced
+&quot;shape&quot; - This is an implementation of the 'shape' method introduced
 by Velazco et al. (2023). Through a user defined threshold it effectively limits
 model extrapolation so that no projections are made beyond the extent judged as
 defensible and informed by the training observations. Not yet implemented!
+
+
 See also details for further explanations."><meta property="og:image" content="https://iiasa.github.io/ibis.iSDM/logo.png"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@Martin_Ecology"><meta name="twitter:site" content="@IIASAVienna"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -105,25 +109,24 @@ be related to an insufficient quantification of the niche (e.g. niche truncation
 by considering only a subset of observations within the actual distribution),
 in other cases there can also be general barriers or constraints that limit
 any projections (e.g. islands). This limit method adds some of those options
-to a model distribution object. Currently supported methods are:</p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"zones"</code> - This is a wrapper to allow the addition of zones to a
+to a model distribution object. Currently supported methods are:</p><ul><li><p><code>"zones"</code> - This is a wrapper to allow the addition of zones to a
 distribution model object, similar to what is also possible via <code><a href="distribution.html">distribution()</a></code>.
-Required is a spatial layer that describes a environmental zoning.</p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"mcp"</code> - Rather than using an external or additional layer, this option constraints
+Required is a spatial layer that describes an environmental zoning.</p></li>
+<li><p><code>"mcp"</code> - Rather than using an external or additional layer, this option constrains
 predictions by a certain distance of points in its vicinity. Buffer distances
 have to be in the unit of the projection used and can be configured via
-<code>"mcp_buffer"</code>.</p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"nt2"</code> - Constraints the predictions using the multivariate combination novelty index (NT2)
+<code>"mcp_buffer"</code>.</p></li>
+<li><p><code>"nt2"</code> - Constrains the predictions using the multivariate combination novelty index (NT2)
 following Mesgaran et al. (2014). This method is also available in the <code><a href="similarity.html">similarity()</a></code>
-function.</p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"mess"</code> - Constraints the predictions using the
+function.</p></li>
+<li><p><code>"mess"</code> - Constrains the predictions using the
 Multivariate Environmental Similarity Surfaces (MESS) following Mesgaran et al. (2014).
-This method is also available in the <code><a href="similarity.html">similarity()</a></code> function.</p>
-<p><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">*</a> <code>"shape"</code> - This is an implementation of the 'shape' method introduced
+This method is also available in the <code><a href="similarity.html">similarity()</a></code> function.</p></li>
+<li><p><code>"shape"</code> - This is an implementation of the 'shape' method introduced
 by Velazco et al. (2023). Through a user defined threshold it effectively limits
 model extrapolation so that no projections are made beyond the extent judged as
-defensible and informed by the training observations. <strong>Not yet implemented!</strong></p>
-<p>See also details for further explanations.</p>
+defensible and informed by the training observations. <strong>Not yet implemented!</strong></p></li>
+</ul><p>See also details for further explanations.</p>
     </div>
 
     <div class="section level2">
@@ -157,7 +160,7 @@ defensible and informed by the training observations. <strong>Not yet implemente
 
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>
-<dd><p>A <code>SpatRaster</code> or <code>sf</code> object that limits the prediction
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> or <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object that limits the prediction
 surface when intersected with input data (Default: <code>NULL</code>).</p></dd>
 
 
@@ -244,7 +247,7 @@ change when projecting species distribution models. Diversity and Distributions 
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

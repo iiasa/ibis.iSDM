@@ -72,7 +72,7 @@
                         <h4 data-toc-skip class="author">Martin
 Jung</h4>
             
-            <h4 data-toc-skip class="date">2025-06-19</h4>
+            <h4 data-toc-skip class="date">2026-03-07</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/iiasa/ibis.iSDM/blob/dev/vignettes/articles/03_integrate_data.Rmd" class="external-link"><code>vignettes/articles/03_integrate_data.Rmd</code></a></small>
       <div class="d-none name"><code>03_integrate_data.Rmd</code></div>
@@ -93,7 +93,7 @@ sampling schemes.</li>
 <li>nudge data-driven algorithms towards estimates that are informed by
 domain knowledge (through offsets or priors) rather than letting the
 algorithm making naive uniformly distributed guesses.</li>
-<li>to provide a more wholesome estimate of the distribution of a
+<li>to provide a more comprehensive estimate of the distribution of a
 species distribution by relying on multiple sources of evidence.
 Particular when there are multiple surveys that complement each
 other.</li>
@@ -102,7 +102,7 @@ other.</li>
 a look at <a href="https://onlinelibrary.wiley.com/doi/abs/10.1002/ecy.2710" class="external-link">Fletcher
 et al. (2019)</a> and <a href="https://linkinghub.elsevier.com/retrieve/pii/S0169534719302551" class="external-link">Isaac
 et al. (2020)</a> for an overview.</p>
-<p>The <a href="05_package_comparison.html">Package comparison page</a>
+<p>The <a href="07_package_comparison.html">Package comparison page</a>
 and the examples below provide some insight into what is currently
 possible with regards to data integration in the ibis.iSDM R-package.
 Additional methods, priors and engines are planned. Of course it is
@@ -164,7 +164,7 @@ assumption that for instance an expert-drawn range map can be useful in
 predicting where species exist might or might not find suitable habitat
 (see for instance <a href="http://doi.wiley.com/10.1111/ecog.01925" class="external-link">Domisch et al. 2016</a>).
 A benefit of this approach is that predictors can be easily added to all
-kinds of <code>engines</code> in the ibis.ISDM package and also used for
+kinds of <code>engines</code> in the ibis.iSDM package and also used for
 scenarios.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
@@ -200,7 +200,7 @@ sea level, this can be added as follows:</p>
 <span></span>
 <span><span class="co"># Plot the threshold for an upper</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span> <span class="va">mod1</span><span class="op">$</span><span class="va">predictors</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"elev_low"</span>, <span class="st">"elev_high"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/add%20elevation%20as%20predictor-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="03_integrate_data_files/figure-html/add%20elevation%20as%20predictor-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -232,7 +232,7 @@ al. (2016)</a>.</p>
 <span>  <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Prediction with range offset"</span>,only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Train%20model%20with%20range%20offset-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="03_integrate_data_files/figure-html/Train%20model%20with%20range%20offset-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <p>There are other ways to add offsets to the model object, either
 directly (<code><a href="../reference/add_offset.html">add_offset()</a></code>) as an externally calculated
 RasterLayer for instance with the “BossMaps” R-package, to calculate as
@@ -240,6 +240,61 @@ range (<code><a href="../reference/add_offset_range.html">add_offset_range()</a>
 (<code><a href="../reference/add_offset_elevation.html">add_offset_elevation()</a></code>) offset, or also as biased offset
 (<code><a href="../reference/add_offset_bias.html">add_offset_bias()</a></code>) in which case the offset is removed
 from the prediction.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="integration-through-bias-control">Integration through bias control<a class="anchor" aria-label="anchor" href="#integration-through-bias-control"></a>
+</h2>
+<p>Sampling bias is a ubiquitous problem in presence-only biodiversity
+data, where observations are often clustered near roads, cities, or
+popular natural sites. The <code><a href="../reference/add_control_bias.html">add_control_bias()</a></code> function
+allows you to specify a covariate that accounts for this spatial bias
+and partial it out of the prediction. The <code>bias_value</code>
+parameter sets the value at which the bias covariate is held constant
+during prediction (e.g., <code>0</code> to represent minimal bias).</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load a human modification index layer as proxy for sampling bias</span></span>
+<span><span class="va">bias_layer</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/predictors/hmi_mean_50km.tif"</span>,</span>
+<span>                                       package <span class="op">=</span> <span class="st">"ibis.iSDM"</span>, mustWork <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Train a model with bias control</span></span>
+<span><span class="va">mod_bias</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="co"># Add bias control: partial out the human modification index during prediction</span></span>
+<span>      <span class="fu"><a href="../reference/add_control_bias.html">add_control_bias</a></span><span class="op">(</span>layer <span class="op">=</span> <span class="va">bias_layer</span>, bias_value <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>      <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"Prediction with bias control"</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_bias</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_integrate_data_files/figure-html/Bias%20control-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="integration-through-ensemble-of-small-models-esm">Integration through Ensemble of Small Models (ESM)<a class="anchor" aria-label="anchor" href="#integration-through-ensemble-of-small-models-esm"></a>
+</h2>
+<p>When there are very few observations relative to the number of
+predictors, fitting a full model can lead to overfitting. The Ensemble
+of Small Models (ESM) approach (<a href="https://doi.org/10.1111/2041-210X.12403" class="external-link">Breiner et al. 2015</a>)
+addresses this by fitting many bivariate models (one per pair of
+predictors) and then combining them into an ensemble. This can be
+enabled via <code><a href="../reference/add_control_esm.html">add_control_esm()</a></code>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Train a model using the ESM approach</span></span>
+<span><span class="va">mod_esm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/add_biodiversity_poipo.html">add_biodiversity_poipo</a></span><span class="op">(</span><span class="va">virtual_species</span>, field_occurrence <span class="op">=</span> <span class="st">"Observed"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="co"># Enable ESM: each bivariate model is trained separately and ensembled</span></span>
+<span>      <span class="fu"><a href="../reference/add_control_esm.html">add_control_esm</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/engine_glmnet.html">engine_glmnet</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>      <span class="fu"><a href="../reference/train.html">train</a></span><span class="op">(</span>runname <span class="op">=</span> <span class="st">"ESM prediction"</span>, only_linear <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Training 28 ESM GLMNET-Engine models with 2 predictors each.</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">[Setup] 2026-03-07 08:29:26.351289 | Replacing currently selected engine.</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Overwriting previously defined engine.</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod_esm</span><span class="op">)</span></span></code></pre></div>
+<p><img src="03_integrate_data_files/figure-html/ESM-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -287,7 +342,7 @@ included in a regularized outcome. For example used in the case of
 <p>Prior specifications are specific to each engine and more information
 can be found on the individual help pages of the <code><a href="../reference/priors.html">priors()</a></code>
 function.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Set a clean base model with biodiversity data</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -308,7 +363,7 @@ function.</p>
 <span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/priors.html">priors</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
 <span><span class="co"># The variables and values in this object can be queried as well</span></span>
 <span><span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 43686d97-d777-4ce8-a3a8-430e93839ff1 </span></span>
+<span><span class="co">#&gt; 62502db6-d55e-4701-aca3-93831eb239a1 </span></span>
 <span><span class="co">#&gt;                 "CLC3_211_mean_50km"</span></span>
 <span></span>
 <span><span class="co"># Priors can then be added via </span></span>
@@ -318,10 +373,10 @@ function.</p>
 <span></span>
 <span><span class="co"># Compare the difference in effects</span></span>
 <span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial.html">partial</a></span><span class="op">(</span><span class="va">mod1</span>, <span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Specification%20of%20priors-1.png" width="528" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p><img src="03_integrate_data_files/figure-html/Specification%20of%20priors-1.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial.html">partial</a></span><span class="op">(</span><span class="va">mod2</span>, <span class="va">pp</span><span class="op">$</span><span class="fu">varnames</span><span class="op">(</span><span class="op">)</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Specification%20of%20priors-2.png" width="528" style="display: block; margin: auto;"></p>
+<p><img src="03_integrate_data_files/figure-html/Specification%20of%20priors-2.png" class="r-plt" alt="" width="528" style="display: block; margin: auto;"></p>
 <p>There is also now a convenience function that allows to extract
 coefficients or weights from an existing model when can then be passed
 to another model or engine (<code><a href="../reference/get_priors.html">get_priors()</a></code>). Only requirement
@@ -339,7 +394,7 @@ across different engines and a variety of data types (in some cases
 requiring normalization given the difference in units and model
 assumptions). (Note that it also possible to create an ensemble of
 partial responses via <code><a href="../reference/ensemble_partial.html">ensemble_partial()</a></code>).</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create and fit two models</span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -358,11 +413,11 @@ partial responses via <code><a href="../reference/ensemble_partial.html">ensembl
 <span></span>
 <span><span class="co"># Show outputs of each model individually and combined</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Model%20ensembles-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p><img src="03_integrate_data_files/figure-html/Model%20ensembles-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Model%20ensembles-2.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p><img src="03_integrate_data_files/figure-html/Model%20ensembles-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Now create an ensemble:</span></span>
 <span><span class="co"># By setting normalize to TRUE we furthermore ensure each prediction</span></span>
@@ -371,7 +426,7 @@ partial responses via <code><a href="../reference/ensemble_partial.html">ensembl
 <span></span>
 <span><span class="co"># The ensemble contains the mean and the coefficient of variation across all objects</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Model%20ensembles-3.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="03_integrate_data_files/figure-html/Model%20ensembles-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -429,7 +484,7 @@ higher value compared to another.</p></li>
 <p><b>Note that for any of these methods (like “predictor” &amp;
 “offset”), models are trained in the sequence at which datasets are
 added!</b></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specification </span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>      <span class="fu"><a href="../reference/add_predictors.html">add_predictors</a></span><span class="op">(</span>env <span class="op">=</span> <span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">"scale"</span>, derivates <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -444,7 +499,7 @@ added!</b></p>
 <span></span>
 <span><span class="co"># The resulting object contains only the final prediction, e.g. that of the presence-absence model</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/Combined%20integration-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="03_integrate_data_files/figure-html/Combined%20integration-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="joint-likelihood-estimation">Joint likelihood estimation<a class="anchor" aria-label="anchor" href="#joint-likelihood-estimation"></a>
@@ -517,9 +572,9 @@ Equally it is also possible to add shared latent spatial effects such as
 Gaussian fields (approximated through a stochastic partial differential
 equation (SPDE)) to the model, assuming that there are shared factors -
 or biases - affecting all datasets.</p>
-<p>See the <a href="04_engine_comparison.html">Engine comparison</a> for
+<p>See the <a href="06_engine_comparison.html">Engine comparison</a> for
 an overview on which engines support which level of integration.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Define a model</span></span>
 <span><span class="va">mod1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/distribution.html">distribution</a></span><span class="op">(</span><span class="va">background</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
@@ -536,8 +591,8 @@ an overview on which engines support which level of integration.</p>
 <span></span>
 <span><span class="co"># The resulting object contains the combined prediction with shared coefficients among datasets.</span></span>
 <span><span class="fu"><a href="../reference/plot.html">plot</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="03_integrate_data_files/figure-html/unnamed-chunk-2-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<p><img src="03_integrate_data_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Note how an overall intercept as well as separate intercepts for each dataset are added.</span></span>
 <span><span class="fu"><a href="../reference/summary.html">summary</a></span><span class="op">(</span><span class="va">mod1</span><span class="op">)</span></span>
@@ -545,16 +600,16 @@ an overview on which engines support which level of integration.</p>
 <span><span class="co">#&gt;    variable                   mean      sd      q05     q50    q95    mode   kld</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Intercept               -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_X9f2dc99b_po… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_X14bdcbef_po… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Intercept_X2ff79cfe_po… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Intercept_f1e04681_poi… -<span style="color: #BB0000;">0.328</span>  25.8    -<span style="color: #BB0000;">42.8</span>    -<span style="color: #BB0000;">0.328</span>  42.1   -<span style="color: #BB0000;">0.328</span>      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> bio01_mean_50km         -<span style="color: #BB0000;">0.109</span>   0.134   -<span style="color: #BB0000;">0.330</span>  -<span style="color: #BB0000;">0.109</span>   0.112 -<span style="color: #BB0000;">0.109</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km         -<span style="color: #BB0000;">0.483</span>   0.121   -<span style="color: #BB0000;">0.682</span>  -<span style="color: #BB0000;">0.483</span>  -<span style="color: #BB0000;">0.284</span> -<span style="color: #BB0000;">0.483</span>      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km          0.473   0.087<span style="text-decoration: underline;">0</span>   0.330   0.473   0.616  0.473      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km       0.407   0.049<span style="text-decoration: underline;">6</span>   0.325   0.407   0.489  0.407      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> bio03_mean_50km         -<span style="color: #BB0000;">0.482</span>   0.121   -<span style="color: #BB0000;">0.681</span>  -<span style="color: #BB0000;">0.482</span>  -<span style="color: #BB0000;">0.283</span> -<span style="color: #BB0000;">0.482</span>      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> bio19_mean_50km          0.472   0.087<span style="text-decoration: underline;">0</span>   0.329   0.472   0.615  0.472      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> CLC3_112_mean_50km       0.407   0.049<span style="text-decoration: underline;">6</span>   0.325   0.407   0.488  0.407      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> CLC3_132_mean_50km       0.062<span style="text-decoration: underline;">0</span>  0.049<span style="text-decoration: underline;">6</span>  -<span style="color: #BB0000;">0.019</span><span style="color: #BB0000; text-decoration: underline;">7</span>  0.062<span style="text-decoration: underline;">0</span>  0.144  0.062<span style="text-decoration: underline;">0</span>     0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> CLC3_211_mean_50km       0.898   0.078<span style="text-decoration: underline;">7</span>   0.768   0.898   1.03   0.898      0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> CLC3_312_mean_50km       0.989   0.066<span style="text-decoration: underline;">0</span>   0.880   0.989   1.10   0.989      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km      0.024<span style="text-decoration: underline;">7</span>  0.085<span style="text-decoration: underline;">2</span>  -<span style="color: #BB0000;">0.116</span>   0.024<span style="text-decoration: underline;">7</span>  0.165  0.024<span style="text-decoration: underline;">7</span>     0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> elevation_mean_50km      0.025<span style="text-decoration: underline;">1</span>  0.085<span style="text-decoration: underline;">2</span>  -<span style="color: #BB0000;">0.115</span>   0.025<span style="text-decoration: underline;">1</span>  0.165  0.025<span style="text-decoration: underline;">1</span>     0</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -568,7 +623,7 @@ an overview on which engines support which level of integration.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

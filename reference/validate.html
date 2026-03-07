@@ -95,7 +95,7 @@ datasets. For validation of integrated models more work is needed.</strong></p>
 
 <dl><dt id="arg-mod">mod<a class="anchor" aria-label="anchor" href="#arg-mod"></a></dt>
 <dd><p>A fitted <code><a href="BiodiversityDistribution-class.html">BiodiversityDistribution</a></code> object with set predictors.
-Alternatively one can also provide directly a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>, however in this
+Alternatively one can also provide directly a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>, however in this
 case the <code>point</code> layer also needs to be provided.</p></dd>
 
 
@@ -110,7 +110,7 @@ depending on the method different metrics can be computed. See Details.</p></dd>
 
 
 <dt id="arg-point">point<a class="anchor" aria-label="anchor" href="#arg-point"></a></dt>
-<dd><p>A <code>sf</code> object with type <code>POINT</code> or <code>MULTIPOINT</code>.</p></dd>
+<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object with type <code>POINT</code> or <code>MULTIPOINT</code>.</p></dd>
 
 
 <dt id="arg-point-column">point_column<a class="anchor" aria-label="anchor" href="#arg-point-column"></a></dt>
@@ -119,7 +119,7 @@ the independent observations. (Default: <code>'observed'</code>).</p></dd>
 
 
 <dt id="arg-field-occurrence">field_occurrence<a class="anchor" aria-label="anchor" href="#arg-field-occurrence"></a></dt>
-<dd><p>(Deprectated) A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> field pointing to the name
+<dd><p>(Deprecated) A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> field pointing to the name
 of the independent observations. Identical to <code>"point_column"</code></p></dd>
 
 
@@ -129,7 +129,7 @@ of the independent observations. Identical to <code>"point_column"</code></p></d
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Return a tidy <code>tibble</code> with validation results.</p>
+    <p>Return a tidy <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a></code> with validation results.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -139,27 +139,42 @@ metrics depending on the output type.</p>
 (where TP stands for true positive, TN for true negative,
 FP the false positive and FN the false negative)
 <strong>Continuous:</strong></p><ul><li><p><code>'n'</code> = Number of observations.</p></li>
-<li><p><code>'rmse'</code> = Root Mean Square Error, $$ \sqrt {\frac{1}{N} \sum_{i=1}^{N} (\hat{y_{i}} - y_{i})^2} $$</p></li>
-<li><p><code>'mae'</code> = Mean Absolute Error, $$ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} $$</p></li>
-<li><p><code>'logloss'</code> = Log loss, TBD</p></li>
-<li><p><code>'normgini'</code> = Normalized Gini index, TBD</p></li>
-<li><p><code>'cont.boyce'</code> = Continuous Boyce index, Ratio of predicted against expected frequency calculated over
-a moving window: $$\frac{P_{i}}{E_{i}}$$, where $$ P_{i} = \frac{p_{i}}{\sum{j=1}^{b} p_{j}} $$ and $$ E_{i} = \frac{a_{i}}{\sum{j=1}^{b} a_{j}} $$</p></li>
+<li><p><code>'rmse'</code> = Root Mean Square Error (RMSE):
+$$RMSE = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (\hat{y}_{i} - y_{i})^2}$$</p></li>
+<li><p><code>'mae'</code> = Mean Absolute Error (MAE):
+$$MAE = \frac{\sum_{i=1}^{N} |y_{i} - x_{i}|}{N}$$</p></li>
+<li><p><code>'logloss'</code> = Log loss.</p></li>
+<li><p><code>'normgini'</code> = Normalized Gini index.</p></li>
+<li><p><code>'cont.boyce'</code> = Continuous Boyce index. Ratio of predicted against
+expected frequency calculated over a moving window:
+$$\frac{P_{i}}{E_{i}}$$
+where \(P_{i} = \frac{p_{i}}{\sum_{j=1}^{b} p_{j}}\) and
+\(E_{i} = \frac{a_{i}}{\sum_{j=1}^{b} a_{j}}\).</p></li>
 </ul><p><strong>Discrete:</strong></p><ul><li><p><code>'n'</code> = Number of observations.</p></li>
-<li><p><code>'auc'</code> = Area under the curve, e.g. the integral of a function relating the True positive rate
-against the false positive rate.</p></li>
-<li><p><code>'overall.accuracy'</code> = Overall Accuracy, Average of all positives,$$ \frac{TP + TN}{n} $$</p></li>
-<li><p><code>'true.presence.ratio'</code> = True presence ratio or Jaccard index, $$ \frac{TP}{TP+TN+FP+FN} $$</p></li>
-<li><p><code>'precision'</code> = Precision, positive detection rate $$ \frac{TP}{TP+FP} $$</p></li>
-<li><p><code>'sensitivity'</code> = Sensitivity, Ratio of True positives against all positives, $$ \frac{TP}{TP+FP} $$</p></li>
-<li><p><code>'specificity'</code> = Specifivity, Ratio of True negatives against all negatives, $$ \frac{TN}{TN+FN} $$</p></li>
-<li><p><code>'tss'</code> = True Skill Statistics, <code>sensitivity + specificity – 1</code>
-* <code>'f1'</code> = F1 Score or Positive predictive value, $$ \frac{2TP}{2TP + FP + FN} $$</p></li>
-<li><p><code>'logloss'</code> = Log loss, TBD</p></li>
-<li><p><code>'expected.accuracy'</code> = Expected Accuracy, $$ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} $$</p></li>
-<li><p><code>'kappa'</code> = Kappa value, $$ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } $$,</p></li>
-<li><p><code>'brier.score'</code> = Brier score, $$ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} $$,
-where $$y_{i}$$ is predicted presence or absence and $$x_{i}$$ an observed.</p></li>
+<li><p><code>'auc'</code> = Area under the curve (AUC), i.e. the integral of a function
+relating the true positive rate against the false positive rate.</p></li>
+<li><p><code>'overall.accuracy'</code> = Overall Accuracy:
+$$Accuracy = \frac{TP + TN}{N}$$</p></li>
+<li><p><code>'true.presence.ratio'</code> = True presence ratio or Jaccard index:
+$$J = \frac{TP}{TP + TN + FP + FN}$$</p></li>
+<li><p><code>'precision'</code> = Precision, positive detection rate:
+$$Precision = \frac{TP}{TP + FP}$$</p></li>
+<li><p><code>'sensitivity'</code> = Sensitivity, ratio of true positives against all positives:
+$$Sensitivity = \frac{TP}{TP + FN}$$</p></li>
+<li><p><code>'specificity'</code> = Specificity, ratio of true negatives against all negatives:
+$$Specificity = \frac{TN}{TN + FP}$$</p></li>
+<li><p><code>'tss'</code> = True Skill Statistic:
+$$TSS = Sensitivity + Specificity - 1$$</p></li>
+<li><p><code>'f1'</code> = F1 Score or positive predictive value:
+$$F1 = \frac{2 \cdot TP}{2 \cdot TP + FP + FN}$$</p></li>
+<li><p><code>'logloss'</code> = Log loss.</p></li>
+<li><p><code>'expected.accuracy'</code> = Expected Accuracy:
+$$EA = \frac{(TP + FP)(TP + FN)}{N^2} + \frac{(TN + FN)(TN + FP)}{N^2}$$</p></li>
+<li><p><code>'kappa'</code> = Cohen's Kappa:
+$$\kappa = \frac{2(TP \cdot TN - FN \cdot FP)}{(TP + FP)(FP + TN) + (TP + FN)(FN + TN)}$$</p></li>
+<li><p><code>'brier.score'</code> = Brier score:
+$$BS = \frac{\sum_{i=1}^{N} (y_{i} - x_{i})^{2}}{N}$$
+where \(y_{i}\) is the predicted and \(x_{i}\) the observed value.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -197,7 +212,7 @@ Ecological modelling, 199(2), 142-152.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
