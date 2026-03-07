@@ -358,21 +358,21 @@ gathered data.
 fit$rm_threshold()
 validate(fit, method = "cont")
 #>                                modelid                 name     method
-#> 1 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 2 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 3 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 4 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 5 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 6 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 7 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
-#> 8 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species continuous
+#> 1 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 2 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 3 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 4 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 5 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 6 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 7 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
+#> 8 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species continuous
 #>       metric       value
 #> 1          n 208.0000000
 #> 2         r2        -Inf
-#> 3       rmse   0.6096147
-#> 4        mae   0.5306671
-#> 5       mape   0.5306671
-#> 6    logloss   1.4546661
+#> 3       rmse   0.6099763
+#> 4        mae   0.5305553
+#> 5       mape   0.5305553
+#> 6    logloss   1.4535117
 #> 7   normgini         NaN
 #> 8 cont.boyce          NA
 
@@ -380,19 +380,19 @@ validate(fit, method = "cont")
 fit <- threshold(fit, method = "percentile", value = 0.5, format = "binary")
 validate(fit, method = "disc")
 #>                                 modelid                 name   method
-#> 1  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 2  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 3  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 4  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 5  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 6  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 7  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 8  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 9  c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 10 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 11 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 12 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
-#> 13 c4f9a84a-1259-4ab1-b169-89b1324b8cf2 Virtual test species discrete
+#> 1  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 2  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 3  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 4  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 5  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 6  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 7  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 8  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 9  be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 10 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 11 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 12 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
+#> 13 be88a9b1-2a4f-41bb-b5fe-ffa89a98dbcb Virtual test species discrete
 #>                 metric       value
 #> 1                    n 602.0000000
 #> 2                  auc   0.6941624

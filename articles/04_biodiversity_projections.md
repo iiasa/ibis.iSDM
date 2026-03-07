@@ -81,7 +81,7 @@ names(pred_current) <- tools::file_path_sans_ext( basename(ll) )
 # Get future predictors
 # These we will load in using the stars package and also ignoring the first time step
 pred_future <- stars::read_stars(ll) |> stars:::slice.stars('Time', 2:86)
-st_crs(pred_future) <- st_crs(4326) # Set projection
+sf::st_crs(pred_future) <- sf::st_crs(4326) # Set projection
 # Rename future predictors to those of current
 names(pred_future) <- names(pred_current)
 

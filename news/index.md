@@ -23,6 +23,8 @@
 - 🐛 Fixes to
   [`add_control_bias()`](https://iiasa.github.io/ibis.iSDM/reference/add_control_bias.md)
   to have it working again.
+- 🐛 Refactor code to avoid importing namespaces
+  [\#95](https://github.com/iiasa/ibis.iSDM/issues/95)
 
 ##### Minor improvements and bug fixes
 

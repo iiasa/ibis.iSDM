@@ -206,7 +206,7 @@ and other classes.
 background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM"))
 # Define model
 x <- distribution(background)
-#> [Setup] 2026-03-07 08:27:53.414305 | Creating distribution object...
+#> [Setup] 2026-03-07 11:16:59.061517 | Creating distribution object...
 x
 #> <Biodiversity distribution model>
 #> Background extent: 
