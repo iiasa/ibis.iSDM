@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/iiasa/ibis.iSDM/blob/v0.1.7/inst/CITATION)
+[`inst/CITATION`](https://github.com/iiasa/ibis.iSDM/blob/dev/inst/CITATION)
 
 Jung, M. (2023). An integrated species distribution modelling framework
 for heterogeneous biodiversity data. Ecological Informatics, 102127.

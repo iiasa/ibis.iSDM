@@ -29,11 +29,11 @@ i <- new_id()
 
 # print id
 print(i)
-#> id: 6c25d4d8-e25a-44a3-be61-aaaebe3c4624
+#> id: 4ecec256-f39e-42e1-a296-dbf33b3a1acc
 
 # convert to character
 as.character(i)
-#> [1] "6c25d4d8-e25a-44a3-be61-aaaebe3c4624"
+#> [1] "4ecec256-f39e-42e1-a296-dbf33b3a1acc"
 
 # check if it is an Id object
 is.Id(i)
