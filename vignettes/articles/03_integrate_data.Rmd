@@ -176,7 +176,7 @@ mod_bias <- distribution(background) |>
       add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
       add_biodiversity_poipo(virtual_species, field_occurrence = "Observed") |> 
       # Add bias control: partial out the human modification index during prediction
-      add_control_bias(layer = bias_layer, bias_value = 0) |> 
+      add_control_bias(layer = bias_layer, bias_value = 0) |>
       engine_glmnet() |> 
       train(runname = "Prediction with bias control", only_linear = TRUE)
 

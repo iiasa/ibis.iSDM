@@ -463,8 +463,7 @@ methods::setMethod(
             model[['predictors_names']] <- model$predictors_object$get_names()
             model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
             # Get predictor types
-            lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-            model[['predictors_types']] <- predictor_type(lu)
+            model[['predictors_types']] <- predictor_type(model[['predictors']][model[['predictors_names']]])
           }
         }
       }

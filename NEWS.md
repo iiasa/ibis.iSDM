@@ -6,6 +6,7 @@
 * Update `engine_xgboost()` to work with latest development build and remove [pdp] as dependency #149
 * Improvement of document grammar and readability. Few more vignette examples based on latest development.
 * :bug: Fixing of `engine_inlabru()` to work with latest version #150 #145
+* :bug: Fixes to `add_control_bias()` to have it working again.
 
 #### Minor improvements and bug fixes
 

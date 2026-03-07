@@ -136,6 +136,15 @@ methods::setMethod(
       # Sanitize names if specified
       if(getOption('ibis.cleannames')) names(layer) <- sanitize_names(names(layer))
 
+      # Check that bias layer is not already among the predictors
+      existing_preds <- x$get_predictor_names()
+      if(!is.Waiver(existing_preds) && any(names(layer) %in% existing_preds)){
+        dupl <- names(layer)[names(layer) %in% existing_preds]
+        cli::cli_alert_warning(paste0("Bias layer '", paste(dupl, collapse = "', '"),
+                       "' is already in the set of predictors. ",
+                       "Consider removing it from predictors to avoid duplication."))
+      }
+
       # Now precede depending on method
       if(method == "partial"){
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding bias controlled variable...')
