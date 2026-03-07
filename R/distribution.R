@@ -57,9 +57,9 @@ NULL
 #' the added biodiversity data.
 #' * \code{object$engine} An \code{"engine"} object (e.g. [`engine_inlabru()`])
 #' with function depended on the added engine.
-#' * \code{object$predictors} A [`PredictorDataset`] object with all set predictions.
+#' * \code{object$predictors} A [`PredictorDataset`] object with all set predictors.
 #' * \code{object$priors} A [`PriorList`] object with all specified priors.
-#' * \code{object$log} A [`Log`] object that captures.
+#' * \code{object$log} A [`Log`] object that captures messages.
 #'
 #' Useful high-level functions to address those objects are for instance:
 #' * \code{object$show()} A generic summary of the [`BiodiversityDistribution-class`]

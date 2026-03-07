@@ -5,8 +5,8 @@
 \alias{BiodiversityScenario}
 \title{Class for a biodiversity scenario from a trained model}
 \description{
-Base \code{\link{R6}} class for any biodiversity scenario objects. Serves as
-container that supplies data and functions to other \code{\link{R6}} classes and functions.
+Base \code{\link[R6:R6Class]{R6::R6}} class for any biodiversity scenario objects. Serves as
+container that supplies data and functions to other \code{\link[R6:R6Class]{R6::R6}} classes and functions.
 }
 \note{
 This sets the threshold method internally to \code{'fixed'}.
@@ -35,7 +35,7 @@ This requires set \code{\link{threshold}} prior to projection.
 
 \item{\code{modelid}}{An id of the model used for projection.}
 
-\item{\code{limits}}{A \code{\link{sf}} object used to constraint the prediction.}
+\item{\code{limits}}{A \code{\link[sf:sf]{sf::sf}} object used to constraint the prediction.}
 
 \item{\code{predictors}}{A predictor object for projection.}
 
@@ -155,7 +155,7 @@ Get projection of the projection.
 }
 
 \subsection{Returns}{
-A \code{\link{sf}} object with the geographic projection
+A \code{\link[sf:sf]{sf::sf}} object with the geographic projection
 }
 }
 \if{html}{\out{<hr>}}
@@ -201,7 +201,7 @@ Get provided projection limits if set.
 }
 
 \subsection{Returns}{
-A \code{\link{sf}} object or NULL.
+A \code{\link[sf:sf]{sf::sf}} object or NULL.
 }
 }
 \if{html}{\out{<hr>}}
@@ -638,7 +638,7 @@ Plot relative change between baseline and projected thresholds
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A graphical representation or \code{\link{SpatRaster}}.
+A graphical representation or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -732,7 +732,7 @@ Calculate slopes across the projection
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A \code{\link{SpatRaster}} layer or \code{\link{stars}} object.
+A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer or \code{\link{stars}} object.
 }
 }
 \if{html}{\out{<hr>}}
@@ -776,7 +776,7 @@ Get centroids of projection layers
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-Returns a \code{\link{sf}} object.
+Returns a \code{\link[sf:sf]{sf::sf}} object.
 }
 }
 \if{html}{\out{<hr>}}

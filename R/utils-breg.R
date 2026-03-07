@@ -4,6 +4,8 @@
 #' @param model A [`list()`] object containing the full prepared model data.
 #' @param obj A [`list()`] object containing the prepared model data for a given
 #' biodiversity dataset.
+#' @param vars A [`character()`] vector of variable names to be used in the model.
+#' Can be missing.
 #'
 #' @note Function is not meant to be run outside the train() call.
 #'
@@ -12,23 +14,34 @@
 #' @noRd
 #'
 #' @keywords internal
-built_formula_breg <- function(model, obj){
+built_formula_breg <- function(model, obj, vars){
   assertthat::assert_that(
     is.list(model),
     is.list(obj),
     length(obj) > 0,
+    missing(vars) || all(is.character(vars)),
     assertthat::has_name(obj, "observations"),
     assertthat::has_name(obj, "equation"),
     assertthat::has_name(obj, "predictors_names"),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
+
+  # If variables are set, respecify formula
+  if(!missing(vars)){
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]', 'yellow', 'Use custom model variables')
+    obj$equation <- new_waiver()
+  }
 
   # Default equation found
   if(obj$equation =='<Default>' || is.Waiver(obj$equation)){
     # Construct formula with all variables
     form <- paste( 'observed' , ' ~ ')
-    # Add linear predictors
-    form <- paste(form, paste0(obj$predictors_names, collapse = ' + '))
+    if(missing(vars)){
+      # Add linear predictors
+      form <- paste(form, paste0(obj$predictors_names, collapse = ' + '))
+    } else {
+      form <- paste(form, paste0(vars, collapse = ' + ') )
+    }
     # Convert to formula
     form <- to_formula(form)
   } else{
@@ -65,7 +78,7 @@ built_formula_breg <- function(model, obj){
 #' @param family A [`character`] object giving either `poisson` or `binomial`.
 #' @param exposure A [`numeric`] vector giving the exposure for `poisson` family priors.
 #'
-#' @returns A [`SpikeSlabPriorBase`] object for use with a [`Boom`] engine
+#' @returns A [`SpikeSlabPriorBase`] object for use with a BREG engine
 #'   trained model
 #'
 #' @keywords utils

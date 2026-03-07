@@ -715,15 +715,17 @@ engine_breg <- function(x,
     },overwrite = TRUE)
 
     # Get coefficients from breg
-    obj$set("public", "get_coefficients", function(){
+    obj$set("public", "get_coefficients", function(exclude_intercept = TRUE){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
       cofs <- posterior::summarise_draws(obj$beta)
       cofs <- subset(cofs, select = c("variable", "mean", "sd"))
       names(cofs) <- c("Feature", "Beta", "Sigma")
-      # Remove intercept(s)
-      int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
-      if(length(int)>0) cofs <- cofs[-int,]
+      if(exclude_intercept){
+        # Remove intercept(s)
+        int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+        if(length(int)>0) cofs <- cofs[-int,]
+      }
       return(cofs)
     },overwrite = TRUE)
 

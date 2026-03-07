@@ -38,7 +38,7 @@ validate(
 }
 \arguments{
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors.
-Alternatively one can also provide directly a \code{\link{SpatRaster}}, however in this
+Alternatively one can also provide directly a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, however in this
 case the \code{point} layer also needs to be provided.}
 
 \item{method}{Should the validation be conducted on the continious prediction
@@ -47,18 +47,18 @@ depending on the method different metrics can be computed. See Details.}
 
 \item{layer}{In case multiple layers exist, which one to use? (Default: \code{'mean'}).}
 
-\item{point}{A \code{\link{sf}} object with type \code{POINT} or \code{MULTIPOINT}.}
+\item{point}{A \code{\link[sf:sf]{sf::sf}} object with type \code{POINT} or \code{MULTIPOINT}.}
 
 \item{point_column}{A \code{\link{character}} vector with the name of the column containing
 the independent observations. (Default: \code{'observed'}).}
 
-\item{field_occurrence}{(Deprectated) A \code{\link{character}} field pointing to the name
+\item{field_occurrence}{(Deprecated) A \code{\link{character}} field pointing to the name
 of the independent observations. Identical to \code{"point_column"}}
 
 \item{...}{Other parameters that are passed on. Currently unused.}
 }
 \value{
-Return a tidy \code{\link{tibble}} with validation results.
+Return a tidy \code{\link[tibble:tibble]{tibble::tibble}} with validation results.
 }
 \description{
 This function conducts a model evaluation based on either on the
@@ -75,31 +75,46 @@ FP the false positive and FN the false negative)
 \strong{Continuous:}
 \itemize{
 \item \code{'n'} = Number of observations.
-\item \code{'rmse'} = Root Mean Square Error, \deqn{ \sqrt {\frac{1}{N} \sum_{i=1}^{N} (\hat{y_{i}} - y_{i})^2} }
-\item \code{'mae'} = Mean Absolute Error, \deqn{ \frac{ \sum_{i=1}^{N} y_{i} - x_{i} }{n} }
-\item \code{'logloss'} = Log loss, TBD
-\item \code{'normgini'} = Normalized Gini index, TBD
-\item \code{'cont.boyce'} = Continuous Boyce index, Ratio of predicted against expected frequency calculated over
-a moving window: \deqn{\frac{P_{i}}{E_{i}}}, where \deqn{ P_{i} = \frac{p_{i}}{\sum{j=1}^{b} p_{j}} } and \deqn{ E_{i} = \frac{a_{i}}{\sum{j=1}^{b} a_{j}} }
+\item \code{'rmse'} = Root Mean Square Error (RMSE):
+\deqn{RMSE = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (\hat{y}_{i} - y_{i})^2}}
+\item \code{'mae'} = Mean Absolute Error (MAE):
+\deqn{MAE = \frac{\sum_{i=1}^{N} |y_{i} - x_{i}|}{N}}
+\item \code{'logloss'} = Log loss.
+\item \code{'normgini'} = Normalized Gini index.
+\item \code{'cont.boyce'} = Continuous Boyce index. Ratio of predicted against
+expected frequency calculated over a moving window:
+\deqn{\frac{P_{i}}{E_{i}}}
+where \eqn{P_{i} = \frac{p_{i}}{\sum_{j=1}^{b} p_{j}}} and
+\eqn{E_{i} = \frac{a_{i}}{\sum_{j=1}^{b} a_{j}}}.
 }
 
 \strong{Discrete:}
 \itemize{
 \item \code{'n'} = Number of observations.
-\item \code{'auc'} = Area under the curve, e.g. the integral of a function relating the True positive rate
-against the false positive rate.
-\item \code{'overall.accuracy'} = Overall Accuracy, Average of all positives,\deqn{ \frac{TP + TN}{n} }
-\item \code{'true.presence.ratio'} = True presence ratio or Jaccard index, \deqn{ \frac{TP}{TP+TN+FP+FN} }
-\item \code{'precision'} = Precision, positive detection rate \deqn{ \frac{TP}{TP+FP} }
-\item \code{'sensitivity'} = Sensitivity, Ratio of True positives against all positives, \deqn{ \frac{TP}{TP+FP} }
-\item \code{'specificity'} = Specifivity, Ratio of True negatives against all negatives, \deqn{ \frac{TN}{TN+FN} }
-\item \code{'tss'} = True Skill Statistics, \code{sensitivity + specificity – 1}
-* \code{'f1'} = F1 Score or Positive predictive value, \deqn{ \frac{2TP}{2TP + FP + FN} }
-\item \code{'logloss'} = Log loss, TBD
-\item \code{'expected.accuracy'} = Expected Accuracy, \deqn{ \frac{TP + FP}{N} x \frac{TP + FN}{N} + \frac{TN + FN}{N} x \frac{TN + FP}{N} }
-\item \code{'kappa'} = Kappa value, \deqn{ \frac{2 (TP x TN - FN x FP)}{(TP + FP) x (FP + TN) + (TP + FN) x (FN + TN) } },
-\item \code{'brier.score'} = Brier score, \deqn{ \frac{ \sum_{i=1}^{N} (y_{i} - x_{i})^{2} }{n} },
-where \deqn{y_{i}} is predicted presence or absence and \deqn{x_{i}} an observed.
+\item \code{'auc'} = Area under the curve (AUC), i.e. the integral of a function
+relating the true positive rate against the false positive rate.
+\item \code{'overall.accuracy'} = Overall Accuracy:
+\deqn{Accuracy = \frac{TP + TN}{N}}
+\item \code{'true.presence.ratio'} = True presence ratio or Jaccard index:
+\deqn{J = \frac{TP}{TP + TN + FP + FN}}
+\item \code{'precision'} = Precision, positive detection rate:
+\deqn{Precision = \frac{TP}{TP + FP}}
+\item \code{'sensitivity'} = Sensitivity, ratio of true positives against all positives:
+\deqn{Sensitivity = \frac{TP}{TP + FN}}
+\item \code{'specificity'} = Specificity, ratio of true negatives against all negatives:
+\deqn{Specificity = \frac{TN}{TN + FP}}
+\item \code{'tss'} = True Skill Statistic:
+\deqn{TSS = Sensitivity + Specificity - 1}
+\item \code{'f1'} = F1 Score or positive predictive value:
+\deqn{F1 = \frac{2 \cdot TP}{2 \cdot TP + FP + FN}}
+\item \code{'logloss'} = Log loss.
+\item \code{'expected.accuracy'} = Expected Accuracy:
+\deqn{EA = \frac{(TP + FP)(TP + FN)}{N^2} + \frac{(TN + FN)(TN + FP)}{N^2}}
+\item \code{'kappa'} = Cohen's Kappa:
+\deqn{\kappa = \frac{2(TP \cdot TN - FN \cdot FP)}{(TP + FP)(FP + TN) + (TP + FN)(FN + TN)}}
+\item \code{'brier.score'} = Brier score:
+\deqn{BS = \frac{\sum_{i=1}^{N} (y_{i} - x_{i})^{2}}{N}}
+where \eqn{y_{i}} is the predicted and \eqn{x_{i}} the observed value.
 }
 }
 \note{

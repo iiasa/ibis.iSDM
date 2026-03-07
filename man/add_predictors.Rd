@@ -125,7 +125,7 @@ add_predictors(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{env}{A \code{\link{SpatRaster}}, \code{\link{stars}} or \code{\link{data.frame}} object.}
+\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, \code{\link{stars}} or \code{\link{data.frame}} object.}
 
 \item{names}{A \code{\link{vector}} of character names describing the environmental
 stack in case they should be renamed.}

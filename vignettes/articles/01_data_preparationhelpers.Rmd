@@ -29,7 +29,7 @@ knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
 
 The first step with any species distribution modelling (SDM) is to collect and prepare
 the necessary input data and parameters for the modelling. Predictors or 
-(environomental) covariates need to be acquired, in many cases formatted, 
+(environmental) covariates need to be acquired, in many cases formatted, 
 for example through masking and reprojections, and standardized. Similarly, 
 Biodiversity data are usually collected through independent field survey or from
 available databases such as GBIF. In particular for the `ibis.iSDM` package it
@@ -65,7 +65,7 @@ different formats from points to polygons.
 
 There are a range of [existing tools](https://linkinghub.elsevier.com/retrieve/pii/S0304380022003404) 
 that assist modellers in preparing and cleaning input data (for instance of
-biases). This vignette does intend to give an overview of the options. Rather it
+biases). This vignette does not intend to give an overview of the options. Rather it
 highlights the few functions that have been created specifically for the 
 `ibis.iSDM` package and that might help in some situations.
 
@@ -92,7 +92,7 @@ virtual_range <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibi
 
 ```
 
-Adding pseudo-absence data in the `ibis.iSDM package` works by first specifiying
+Adding pseudo-absence data in the `ibis.iSDM package` works by first specifying
 a *Pseudoabsence options* object that contains parameters how many and where 
 pseudo-absences are to be sampled. The respective function for this is called
 `pseudoabs_settings()`. Further details on the available options here (there are many) can be found in
@@ -100,7 +100,7 @@ the help file.
 By default the packages uses a random sampling of absence points and the 
 settings for this can be queried here `ibis_options()$ibis.pseudoabsence`.
 
-After such options have been defined, pseudoa-absence data can be added to any
+After such options have been defined, pseudo-absence data can be added to any
 point dataset via `add_pseudoabsence()`.
 
 Example:
@@ -224,10 +224,10 @@ predictors <- terra::rast(list.files(system.file("extdata/predictors/", package 
 ### Transforming predictors
 
 For better model convergence it usually makes sense to bring all predictors to a
-common unit, for example by noramlizing or scaling them. The `ibis.iSDM` package
+common unit, for example by normalizing or scaling them. The `ibis.iSDM` package
 has a convenience function that can be applied to any `terra` 'SpatRaster' object.
 
-**NOTE: This functionality are also available directly in `add_predictors()` as parameter!**
+**NOTE: This functionality is also available directly in `add_predictors()` as parameter!**
 
 ```{r Transform predictors}
 # Let's take a simple layer for an example
@@ -242,7 +242,7 @@ names(new) <- c("original", "normalized", "scaled")
 terra::plot( new )
 
 # Another common use case is to windsorize a layer, for example by removing
-# top outliers form a prediction.
+# top outliers from a prediction.
 # Here the values are capped to a defined percentile
 new3 <- predictor_transform(layer, option = "windsor",
                             # Clamp the upper values to the 90% percentile
@@ -270,7 +270,7 @@ The `ibis.iSDM` package has a convenience function that can be applied to any
 `terra` 'SpatRaster' object to create such additional derivates for a model.
 Note that this creates (in some cases substantial) additional predictors.
 
-**NOTE: This functionality are also available directly in `add_predictors()` as parameter!**
+**NOTE: This functionality is also available directly in `add_predictors()` as parameter!**
 
 ```{r Creating derivates of predictors}
 # Let's take a simple layer for an example

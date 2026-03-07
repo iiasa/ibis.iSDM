@@ -34,7 +34,7 @@ BiodiversityDistribution <- R6::R6Class(
     #' @field biodiversity A [`BiodiversityDatasetCollection-class`] object.
     #' @field predictors A [`PredictorDataset-class`] object.
     #' @field priors An optional [`PriorList`] object.
-    #' @field control An optional Control object.
+    #' @field control An optional Control object such as for biases.
     #' @field latentfactors A [`character`] on whether latentfactors are used.
     #' @field offset A [`character`] on whether methods are used.
     #' @field log An optional [`Log-class`] object.
@@ -86,7 +86,8 @@ BiodiversityDistribution <- R6::R6Class(
                     '<Default>', paste0('Priors specified (',self$priors$length(), ')') )
       bv <- ifelse(is.Waiver(self$control), '',
                    paste0( "\n  control:        <", name_atomic(
-                     paste0( self$control$type, " - ", self$control$method)
+                     paste0( sapply(self$control, function(z) z$type), " - ",
+                             sapply(self$control, function(z) z$method))
                    ), ">" ) )
       li <- ifelse(is.Waiver(self$limits), '',
                    paste0( "\n  limits:         <",paste0( self$limits$limits_method,collapse = ", "), ">" ))
@@ -382,42 +383,59 @@ BiodiversityDistribution <- R6::R6Class(
     #' @param type A [`character`] with the type of control object.
     #' @param x A new bias control object. Expecting a [`SpatRaster`] object.
     #' @param method The method used to create the object.
-    #' @param value A bias value as [`numeric`].
+    #' @param value A vector of supplied values. For \code{"bias"} those should be [`numeric`].
     #' @return This object.
     set_control = function(type = "bias", x, method, value){
-      assertthat::assert_that(missing(x) || is.Raster(x),
-                              all(is.numeric(value)))
+      assertthat::assert_that(missing(x) || is.Raster(x))
       # Check type of control
-      type <- match.arg(type, c("bias"), several.ok = FALSE)
+      type <- match.arg(type, c("bias", "train"), several.ok = FALSE)
+
+      # Check empty
+      if(is.Waiver(self$control)) co <- list() else co <- self$control
+
+      if(utils::hasName(co, type)) cli::cli_alert_info("Overwriting existing control of type {type}.")
+
       if(type == "bias"){
         if(missing(x)) {
           assertthat::assert_that(method == "proximity",
+                                  all(is.numeric(value)),
                                   msg = paste0("Supply a layer for method ", method))
           x <- NULL
         }
-        self$control <- list(type = type, layer = x,
-                             method = method, bias_value = value)
-        return(self)
+        co[['bias']] <- list(type = type, layer = x,
+                           method = method, bias_value = value)
+      } else if(type == "train"){
+        co[['train']] <- list(type = type, method = method, value = value)
       }
+      self$control <- co
+      return(self)
     },
 
     #' @description
     #' Get bias control (print name)
     #' @param type A [`character`] with the type of control object.
-    #' @return A [`character`] with the bias object if found.
+    #' @return A [`character`] with the control object if found.
     get_control = function(type = "bias"){
-      # Check type of control
-      type <- match.arg(type, c("bias"), several.ok = FALSE)
-      control <- self$control
-      if(is.Waiver(control)) return( control )
-      if(control$type == "bias" && type == "bias") return( control )
+      return( self$control )
     },
 
     #' @description
     #' Remove bias controls if found.
+    #' @param type A [`character`] with the type of control object.
     #' @return This object.
-    rm_control = function(){
-      self$control <- new_waiver()
+    rm_control = function(type){
+      if(missing(type)){
+        self$control <- new_waiver()
+      } else {
+        co <- self$control
+        if(is.Waiver(co)) return( self ) # Return nothing
+        if(utils::hasName(co, type)){
+          co[[type]] <- NULL
+          if(length(co) == 0) co <- new_waiver() # Set to waiver if empty
+        } else {
+          cli::cli_alert_warning("No control of type {type} found.")
+        }
+      }
       return(self)
     },
 

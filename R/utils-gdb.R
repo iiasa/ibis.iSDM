@@ -22,7 +22,7 @@ built_formula_gdb <- function(model, id, x, settings){
     inherits(x, "BiodiversityDistribution"),
     inherits(settings, 'Settings'),
     is.character(id) || is.Id(id),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
   # Get object for id
   obj <- model$biodiversity[[id]]
@@ -154,7 +154,7 @@ built_formula_gdb <- function(model, id, x, settings){
 #' @param nd A new data.frame with all predictiors used in fit.
 #' @param template A [`SpatRaster`] object that can be used as spatial template.
 #'
-#' @returns A [`RasterLayer`] containing a presence-absence prediction.
+#' @returns A [`SpatRaster`] containing a presence-absence prediction.
 #'
 #' @keywords utils
 #'
@@ -303,7 +303,7 @@ rm_insufficient_covs <- function(model, tr = 5){
 #' @param df The [`data.frame`] for which weights are to be calculated.
 #' @param presence A [`vector`] with the observed species. Has to be in range
 #' \code{0} to \code{Inf}.
-#' @param bg A background [`raster`] layer.
+#' @param bg A background [`SpatRaster`] layer.
 #' @param use_area A [`logical`] on whether area is to be used instead of grid counts.
 #' @param weight A [`numeric`] weight to be used in down-weighted regressions.
 #' @param type Accepting either “Infinitely weighted logistic regression” \code{'IWLR'}

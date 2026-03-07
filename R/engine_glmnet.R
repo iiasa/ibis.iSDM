@@ -31,13 +31,16 @@ NULL
 #'
 #' @details Regularized regressions are effectively GLMs that are fitted with
 #' ridge, lasso or elastic-net regularization. Which of them is chosen is
-#' critical dependent on the alpha value: [*] For \code{alpha} equal to \code{0}
+#' critically dependent on the alpha value:
+#' * For \code{alpha} equal to \code{0}
 #' a ridge regularization is used. Ridge regularization has the property that it
 #' doesn't remove variables entirely, but instead sets their coefficients to
-#' \code{0}. [*] For \code{alpha} equal to \code{1} a lasso regularization is
+#' \code{0}.
+#' * For \code{alpha} equal to \code{1} a lasso regularization is
 #' used. Lassos tend to remove those coefficients fully from the final model
-#' that do not improve the loss function. [*] For \code{alpha} values between
-#' \code{0} and \code{1} a elastic-net regularization is used, which is
+#' that do not improve the loss function.
+#' * For \code{alpha} values between
+#' \code{0} and \code{1} an elastic-net regularization is used, which is
 #' essentially a combination of the two. The optimal lambda parameter can be
 #' determined via cross-validation. For this option set \code{"varsel"} in
 #' `train()` to \code{"reg"}.
@@ -653,33 +656,29 @@ engine_glmnet <- function(x,
         of <- model$offset$spatial_offset
       } else of <- new_waiver()
 
-      # HACK: Overwrite lambda to make sure pdp uses it.
-      mod$lambda.1se <- determine_lambda(mod)
+      # Determine the best lambda value
+      best_lambda <- determine_lambda(mod)
       # Inverse link function
       ilf <- switch (settings$get('type'),
                      "link" = NULL,
-                     "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
-                                         exp, logistic)
+                     "response" = if(model$biodiversity[[1]]$family == 'poisson') exp else logistic
       )
+
+      # Prediction function for glmnet (link scale)
+      glmnet_predict_fun <- function(object, newdata) {
+        as.numeric(predict(object, newdata = newdata,
+                           s = best_lambda, type = "link"))
+      }
 
       pp <- data.frame()
       pb <- progress::progress_bar$new(total = length(x.var))
       for(v in x.var){
-        if(!is.Waiver(of)){
-          # Predict with offset
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                             ice = FALSE, center = FALSE,
-                             type = "regression", newoffset = of,
-                             inv.link = ilf,
-                             plot = FALSE, rug = TRUE, train = df)
-        } else {
-          p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                             ice = FALSE, center = FALSE,
-                             type = "regression", inv.link = ilf,
-                             plot = FALSE, rug = TRUE, train = df
-          )
-        }
-        p1 <- p1[, c(v, "yhat")]
+        p1 <- compute_partial_dependence(
+          object = mod, pred.var = v, pred.grid = df2, train = df,
+          predict_fun = glmnet_predict_fun,
+          inv.link = ilf,
+          offset = if(!is.Waiver(of)) of else NULL
+        )
         names(p1) <- c("partial_effect", "mean")
         p1 <- cbind(variable = v, p1)
         pp <- rbind(pp, p1)
@@ -805,14 +804,16 @@ engine_glmnet <- function(x,
     }, overwrite = TRUE)
 
     # Get coefficients from glmnet
-    obj$set("public", "get_coefficients", function(){
+    obj$set("public", "get_coefficients", function(exclude_intercept = TRUE){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
-      cofs <- tidy_glmnet_summary(obj)
+      cofs <- tidy_glmnet_summary(obj, exclude_intercept = exclude_intercept)
       names(cofs) <- c("Feature", "Beta")
-      # Remove intercept(s)
-      int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
-      if(length(int)>0) cofs <- cofs[-int,]
+      if(exclude_intercept){
+        # Remove intercept(s)
+        int <- grep("Intercept",cofs$Feature,ignore.case = TRUE)
+        if(length(int)>0) cofs <- cofs[-int,]
+      }
       return(cofs)
     },overwrite = TRUE)
 

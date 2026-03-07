@@ -42,16 +42,19 @@ NULL
 #' needs to have triangles as regular as possible in size and shape:
 #' equilateral.
 #'
-#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
-#' the same scale units as the coordinates Lower bounds affect the density of
-#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
+#' * \code{"max.edge"}: The largest allowed triangle edge length, must be in
+#' the same scale units as the coordinates. Lower bounds affect the density of
+#' triangles.
+#' * \code{"offset"}: The automatic extension distance of the mesh.
 #' If positive: same scale units. If negative, interpreted as a factor relative
-#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
-#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
+#' to the approximate data diameter, i.e., a value of -0.10 will add a 10% of the
+#' data diameter as outer extension.
+#' * \code{"cutoff"}: The minimum allowed
 #' distance between points, it means that points at a closer distance than the
-#' supplied value are replaced by a single vertex. it is critical when there are
+#' supplied value are replaced by a single vertex. It is critical when there are
 #' some points very close to each other, either for point locations or in the
-#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
+#' domain boundary.
+#' * \code{"proj_stepsize"}: The stepsize for spatial
 #' predictions, which affects the spatial grain of any outputs created.
 #'
 #' Priors can be set via [INLAPrior].
@@ -140,7 +143,7 @@ engine_inlabru <- function(x,
     if(is.na(mesh$crs) || is.null(mesh$crs)) fmesher::fm_crs(mesh) <- sf::st_crs(x$background)
 
     # Convert the study region
-    region.poly <- methods::as(sf::st_geometry(x$background), "Spatial")
+    region.poly <- sf::st_geometry(x$background)
 
     # Calculate area
     ar <- inlabru::fm_int(mesh)$weight |> as.vector()
@@ -183,8 +186,7 @@ engine_inlabru <- function(x,
     params <- self$get_data("params")
 
     # Convert the study region
-    region.poly <- methods::as(sf::st_geometry(model$background), "Spatial")
-    region.poly$weight <-1
+    region.poly <- sf::st_geometry(model$background)
 
     # Get all coordinates of observations
     locs <- collect_occurrencepoints(model, include_absences = FALSE,
@@ -200,15 +202,16 @@ engine_inlabru <- function(x,
 
     # Try and infer parameter offset
     if(is.null(params$offset)){
+      region_bbox <- sf::st_bbox(region.poly)
       # Check whether the coordinate system is longlat
       if( sf::st_is_longlat(region.poly) ){
         # Specify offset as 1/100 of the boundary distance
-        offset <- c( diff(range(sp::coordinates(region.poly)))*0.01,
-                     diff(range(sp::coordinates(region.poly)))*0.01)
+        offset <- c( (region_bbox["xmax"] - region_bbox["xmin"]) * 0.01,
+                     (region_bbox["ymax"] - region_bbox["ymin"]) * 0.01)
       } else {
         cli::cli_alert_warning("Default offset parameter for mesh likely won't work. Specify!")
-        offset <- c( diff(range(sp::coordinates(region.poly)))*0.01,
-                     diff(range(sp::coordinates(region.poly)))*0.01)
+        offset <- c( (region_bbox["xmax"] - region_bbox["xmin"]) * 0.01,
+                     (region_bbox["ymax"] - region_bbox["ymin"]) * 0.01)
       }
       params$offset <- offset
     }
@@ -378,9 +381,9 @@ engine_inlabru <- function(x,
       d <- get_rastervalue(coords = sf::st_coordinates(ips),
                            env = model$predictors_object$get_data(df = FALSE),
                            rm.na = FALSE)
-      for (cov in model$predictors_names) ips@data[,cov] <- d[,cov]
-      ips@data$Intercept <- 1
-      ips <- subset(ips, stats::complete.cases(ips@data)) # Necessary as some integration points can fall outside land area
+      for (cov in model$predictors_names) ips[[cov]] <- d[,cov]
+      ips$Intercept <- 1
+      ips <- ips[stats::complete.cases(sf::st_drop_geometry(ips)),] # Necessary as some integration points can fall outside land area
       # Return results
       return(ips)
     } else if(mode == 'stack'){
@@ -394,14 +397,12 @@ engine_inlabru <- function(x,
                                           joint = FALSE)
       ips <- cbind(istk$data$data, istk$effects$data) # Combine observations and stack
       ips <- subset(ips, stats::complete.cases(ips[,c("x", "y")])) # Remove NA coordinates
-      # Convert to sp
-      ips <- sp::SpatialPointsDataFrame(coords = ips[,c('x', 'y')],
-                                        data = ips[, names(ips) %notin% c('x','y')],
-                                        proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
-      )
+      # Convert to sf
+      ips <- sf::st_as_sf(ips, coords = c('x', 'y'),
+                          crs = sf::st_crs(self$get_data('mesh')$crs))
       # Select only the predictor names
-      ips <- subset(ips, select = c("observed", "Intercept", "e", model$predictors_names))
-      ips <- subset(ips, stats::complete.cases(ips@data))
+      ips <- ips[, c("observed", "Intercept", "e", model$predictors_names)]
+      ips <- ips[stats::complete.cases(sf::st_drop_geometry(ips)),]
       abs_E <- ips$e; ips$e <- NULL
       # Return list of result
       return(list(ips = ips, E = abs_E))
@@ -428,13 +429,12 @@ engine_inlabru <- function(x,
         data.frame(observed = model$biodiversity[[j]]$observations[['observed']]),
         model$biodiversity[[j]]$predictors
       )
-      # Convert to Spatial points
+      # Convert to sf points
       df <- sf::st_as_sf(df,
                          coords = c('x', 'y'),
-                         # data = df[, names(df) %notin% c('x','y')],
                          crs = sf::st_crs(self$get_data('mesh')$crs)
-      ) |> methods::as("Spatial")
-      assertthat::assert_that(inherits(df, "sf") || inherits(df, "Spatial"))
+      )
+      assertthat::assert_that(inherits(df, "sf"))
 
       # Options for specifying link function of likelihood
       o <- inlabru::bru_options_get()
@@ -467,20 +467,26 @@ engine_inlabru <- function(x,
         # Calculate integration points for PPMs and to estimation data.frame
         ips <- self$calc_integration_points(model, mode = 'stack')
         abs_E = ips$E; ips <- ips$ips
-        assertthat::assert_that(all(colnames(ips) %in% colnames(df)))
-        new <- sp::rbind.SpatialPointsDataFrame(
+        assertthat::assert_that(all(names(ips) %in% names(df)))
+        new <- rbind(
           df[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)],
           ips[,c('observed', 'Intercept', model$biodiversity[[j]]$predictors_names)])
 
+        # Pre-compute weights and E vectors (inlabru >= 2.12 uses NSE on these arguments)
+        lh_formula <- model$biodiversity[[j]]$equation
+        lh_family <- model$biodiversity[[j]]$family
+        lh_weights <- c(w, rep(1, length(abs_E)))
+        lh_E <- c( rep(0, nrow(model$biodiversity[[j]]$predictors) ), abs_E)
+        lh_mesh <- self$get_data('mesh')
+
         # Formulate the likelihood
-        lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
-                            family = model$biodiversity[[j]]$family,
+        lh <- inlabru::like(formula = lh_formula,
+                            family = lh_family,
                             data = new, # Combine presence and absence information
-                            mesh = self$get_data('mesh'),
-                            weights = c(w, rep(1, length(abs_E))),
+                            mesh = lh_mesh,
+                            weights = lh_weights,
                             # expectation vector (area for integration points/nodes and 0 for presences)
-                            E = c( rep(0, nrow(model$biodiversity[[j]]$predictors) ), abs_E), # Combine Exposure variants
-                            # include = include[[i]], # Don't need this as all variables included in equation
+                            E = lh_E,
                             options = o
         )
       } else if(model$biodiversity[[j]]$family == "binomial"){
@@ -489,25 +495,29 @@ engine_inlabru <- function(x,
           o[['control.family']] <- list(link = ifelse(model$biodiversity[[j]]$family=='binomial', 'cloglog', 'default'))
         }
 
+        # Pre-compute arguments (inlabru >= 2.12 uses NSE on these arguments)
+        lh_formula <- model$biodiversity[[j]]$equation
+        lh_family <- model$biodiversity[[j]]$family
+        lh_mesh <- self$get_data('mesh')
+        lh_Ntrials <- rep(1, nrow(model$biodiversity[[j]]$predictors))
+
         # Formulate the likelihood
-        lh <- inlabru::like(formula = model$biodiversity[[j]]$equation,
-                            family = model$biodiversity[[j]]$family,
+        lh <- inlabru::like(formula = lh_formula,
+                            family = lh_family,
                             data = df, # Combine presence and absence information
-                            mesh = self$get_data('mesh'),
+                            mesh = lh_mesh,
                             weights = w,
-                            Ntrials = rep(1, nrow(model$biodiversity[[j]]$predictors) ),
-                            # include = include[[i]], # Don't need this as all variables in equation are included
+                            Ntrials = lh_Ntrials,
                             options = o
         )
-        # MJ 14/70 addition. Manually conversion of likelihood data to sf
-        lh$data <- lh$data |> sf::st_as_sf()
+
       }
       # Add to list
       lhl[[j]] <- lh
     }
 
-    # List of likelihoods
-    self$set_data("likelihoods", inlabru::like_list(lhl) )
+    # List of likelihoods (store as plain list for compatibility with latest inlabru)
+    self$set_data("likelihoods", lhl)
 
     # --- #
     # Defining the component function
@@ -726,9 +736,7 @@ engine_inlabru <- function(x,
         # --- #
         # Base Model #
         fit <- try({
-          inlabru::bru(components = test_form,
-                       likelihoods,
-                       options = o)
+          do.call(inlabru::bru, c(list(components = test_form), likelihoods, list(options = o)))
         },silent = TRUE)
         if("error" %in% names(fit)) {not_found <- FALSE;next()}
 
@@ -751,9 +759,7 @@ engine_inlabru <- function(x,
           new_form <- stats::update.formula(test_form, paste0('~ . - ',vars ))
           ll <- likelihoods
 
-          try({fit <- inlabru::bru(components = new_form,
-                                   ll,
-                                   options = o)
+          try({fit <- do.call(inlabru::bru, c(list(components = new_form), ll, list(options = o)))
           },silent = TRUE)
           if("error" %in% names(fit)){
             results <- rbind(results,
@@ -808,9 +814,7 @@ engine_inlabru <- function(x,
 
     # --- #
     # Fitting bru model
-    fit_bru <- try({inlabru::bru(components = comp,
-                              likelihoods,
-                              options = options)
+    fit_bru <- try({do.call(inlabru::bru, c(list(components = comp), likelihoods, list(options = options)))
     }, silent = FALSE)
     # --- #
 
@@ -966,23 +970,15 @@ engine_inlabru <- function(x,
         }
       }
 
-      # If newdata is not yet a SpatialPixel object, transform
-      # FIXME: This ultimately needs to be removed as we can do perfectly without sp
-      if(!inherits(newdata,'SpatialPixelsDataFrame')){
+      # If newdata is not yet an sf object, transform
+      if(!inherits(newdata, 'sf')){
         assertthat::assert_that(
           assertthat::has_name(newdata,c('x','y'))
         )
-        # Convert predictors to SpatialPixelsDataFrame as required for inlabru
-        suppressWarnings(
-          newdata <- sp::SpatialPointsDataFrame(coords = newdata[,c('x', 'y')],
-                                                data = newdata[, names(newdata) %notin% c('x','y')],
-                                                proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
-          )
-        )
-        newdata <- subset(newdata, stats::complete.cases(newdata@data)) # Remove missing data
-        suppressWarnings(
-          newdata <- methods::as(newdata, 'SpatialPixelsDataFrame')
-        )
+        # Convert predictors to sf as required for inlabru
+        newdata <- sf::st_as_sf(newdata, coords = c('x', 'y'),
+                                crs = sf::st_crs(self$get_data('mesh')$crs))
+        newdata <- newdata[stats::complete.cases(sf::st_drop_geometry(newdata)),] # Remove missing data
       }
       # Check that model variables are in prediction dataset
       assertthat::assert_that(
@@ -1032,15 +1028,27 @@ engine_inlabru <- function(x,
       )
       out$cv <- out$sd / out$mean
       # Get only the predicted variables of interest
+      # Use rasterize with model background as template (sf points may not form a regular grid)
+      bg <- model_to_background(model)
       if(utils::packageVersion("inlabru") <= '2.5.2'){
         # Older version where probs are ignored
-        out <- terra::rast(
-          out[,c("mean","sd","q0.025", "median", "q0.975", "cv")]
+        out <- c(
+          terra::rasterize(out, bg, "mean"),
+          terra::rasterize(out, bg, "sd"),
+          terra::rasterize(out, bg, "q0.025"),
+          terra::rasterize(out, bg, "median"),
+          terra::rasterize(out, bg, "q0.975"),
+          terra::rasterize(out, bg, "cv")
         )
         names(out) <- c("mean","sd","q0.025", "median", "q0.975", "cv")
       } else {
-        out <- terra::rast(
-          out[,c("mean","sd","q0.05", "q0.5", "q0.95", "cv")]
+        out <- c(
+          terra::rasterize(out, bg, "mean"),
+          terra::rasterize(out, bg, "sd"),
+          terra::rasterize(out, bg, "q0.05"),
+          terra::rasterize(out, bg, "q0.5"),
+          terra::rasterize(out, bg, "q0.95"),
+          terra::rasterize(out, bg, "cv")
         )
         names(out) <- c("mean", "sd", "q05", "q50", "q95", "cv")
       }
@@ -1203,21 +1211,17 @@ engine_inlabru <- function(x,
       # Match variable name
       x.var <- match.arg(x.var, mod$names.fixed, several.ok = FALSE)
 
-      # Convert predictors to SpatialPixelsDataFrame as required for inlabru
-      df_partial <- sp::SpatialPointsDataFrame(coords = model$predictors[,c('x', 'y')],
-                                               data = model$predictors[, names(model$predictors) %notin% c('x','y')],
-                                               proj4string = sp::CRS(SRS_string = self$get_data('mesh')$crs)
-      )
-      df_partial <- subset(df_partial, stats::complete.cases(df_partial@data)) # Remove missing data
-      suppressWarnings(
-        df_partial <- methods::as(df_partial, 'SpatialPixelsDataFrame')
-      )
+      # Convert predictors to sf as required for inlabru
+      df_partial <- sf::st_as_sf(model$predictors, coords = c('x', 'y'),
+                                 crs = sf::st_crs(self$get_data('mesh')$crs))
+      df_partial <- df_partial[stats::complete.cases(sf::st_drop_geometry(df_partial)),] # Remove missing data
 
       # Add all others as constant
+      geom_col <- attr(df_partial, "sf_column")
       if(is.null(constant)){
-        for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
+        for(n in names(df_partial)) if(n != x.var && n != geom_col) df_partial[[n]] <- suppressWarnings( mean(model$predictors[[n]], na.rm = TRUE) )
       } else {
-        for(n in names(df_partial)) if(n != x.var) df_partial[[n]] <- constant
+        for(n in names(df_partial)) if(n != x.var && n != geom_col) df_partial[[n]] <- constant
       }
       if(any(model$predictors_types$type=="factor")){
         lvl <- levels(model$predictors[[model$predictors_types$predictors[model$predictors_types$type=="factor"]]])
@@ -1297,7 +1301,7 @@ engine_inlabru <- function(x,
                                                what = "spatial.field1", ...){
       # Get mesh, domain and model
       mesh <- self$get_data("mesh")
-      domain <- methods::as(self$model$background, "Spatial")
+      domain <- self$model$background
       mod <- self$get_data('fit_best')
       type <- match.arg(type, c("response", "predictor"), several.ok = FALSE)
 

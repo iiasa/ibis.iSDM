@@ -44,7 +44,7 @@ logistic regressions are estimated. If the \code{"only_linear"} term in
 providing a non-linear additive inference.
 }
 \details{
-: This package requires the \code{"mboost"} R-package to be
+This engine requires the \code{"mboost"} R-package to be
 installed. It is in philosophy somewhat related to the \link{engine_xgboost} and
 \code{"XGBoost"} R-package, however providing some additional desirable
 features that make estimation quicker and particularly useful for spatial

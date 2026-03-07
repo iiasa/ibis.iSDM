@@ -17,6 +17,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @import terra
 #' @importFrom foreach %do% %dopar%
 #' @importFrom stats effects
 ## usethis namespace: end

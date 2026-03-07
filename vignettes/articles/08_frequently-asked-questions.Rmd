@@ -204,7 +204,7 @@ log(offset1*offset2)
 ```
 
 Internally all provided offsets to model object are combined via simple addition together. This
-thus requires that users transform them aprior (for instance log transform) before adding them to
+This thus requires that users transform them a priori (for instance log transform) before adding them to
 the estimation.
 
 </details>
@@ -231,7 +231,7 @@ options("ibis.setupmessages" = FALSE)
 <summary><b> How can I make use of cross-validation in `ibis.iSDM` ?</b>
 </summary>
 
-Cross-validation has been deliberatly not integrated into package. Users who would like to 
+Cross-validation has been deliberately not integrated into package. Users who would like to 
 make use of cross-validation techniques thus need to set up their own external modelling routines.
 Reason is that with the multiple types of integration in this package, the construction of (independent)
 testing datasets is not as trivial (considering for example offsets, priors or multiple datasets).
@@ -325,7 +325,7 @@ plot(fit$get_data("fit_best")$evaluation_log)
 </details>
 
 <details>
-<summary><b>I am predicting over a large area, is there a way to parallize the computation?</b>
+<summary><b> I am predicting over a large area, is there a way to parallelize the computation?</b>
 </summary>
 
 Yes and no.
@@ -352,8 +352,8 @@ ibis_future() # Set up a future plan
 Now most prediction should make use of the specified future plan. This counts for
 both initial model predictions and projections.
 
-If you aim to parallelize over a range of species instead, it might be more worthhile
-to rather parallize the iteration and not the prediction.
+If you aim to parallelize over a range of species instead, it might be more worthwhile
+to rather parallelize the iteration and not the prediction.
 
 </details>
 
@@ -365,7 +365,7 @@ to rather parallize the iteration and not the prediction.
 </summary>
 There are various forms of integration from a simple approach of adding [`ensembles`], [`priors`] or [`offsets`] to fully integrated multiple likelihood models (see [Fletcher et al. 2019](https://doi.org/10.1002/ecy.2710)). Thus, users have a range of possibilities to combine different sources of evidence in their modelling.
 
-With regards to how different [`engines`] treat multiple biodiversity datasets. Unfortunately only the [`engine_inla()`], [`engine_inlabru()`] and [`engine_stan()`] support fully integrated multiple likelihood models. A full overview can be found in the [Engine comparison](04_engine_comparison.html) table. All other [`engines`] combine multiple datasets by running separate models in sequence where the order is determined by the sequence the datasets were added to the model. Within the `train()` function, users have the option of specifying how previous predictions should be handled through the [`method_integration`] parameter. For example predictions from one model could be added as predictors or offset to the next. Or the coefficients from one model can be used to create starting priors for the next model.
+With regards to how different [`engines`] treat multiple biodiversity datasets. Unfortunately only the [`engine_inla()`], [`engine_inlabru()`] and [`engine_stan()`] support fully integrated multiple likelihood models. A full overview can be found in the [Engine comparison](06_engine_comparison.html) table. All other [`engines`] combine multiple datasets by running separate models in sequence where the order is determined by the sequence the datasets were added to the model. Within the `train()` function, users have the option of specifying how previous predictions should be handled through the [`method_integration`] parameter. For example predictions from one model could be added as predictors or offset to the next. Or the coefficients from one model can be used to create starting priors for the next model.
 
 </details>
 
@@ -385,7 +385,7 @@ By default, presence only biodiversity data is modelled as point-process model (
 <details>
 <summary><b>My model keeps crashing, what can I do?</b>
 </summary>
-Sorry to hear and unless the model or input data are grossely misspecified, this should not happen. Consider changing the input covariates. Often scaling the covariates (see `add_predictors()`) can help with model convergence. Similarly if the use of discrete variables (e.g. ``factor` predictors) results in errors, consider setting the parameter "explode_factors" to TRUE in `add_predictors()`. This will create additional covariates for every factor level.
+Sorry to hear and unless the model or input data are grossly misspecified, this should not happen. Consider changing the input covariates. Often scaling the covariates (see `add_predictors()`) can help with model convergence. Similarly if the use of discrete variables (e.g. ``factor` predictors) results in errors, consider setting the parameter "explode_factors" to TRUE in `add_predictors()`. This will create additional covariates for every factor level.
 Please report an [issue](https://github.com/iiasa/ibis.iSDM/issues) with the concrete error message, your R session information (call `sessionInfo()`) and preferably some example data and code.
 </details>
 

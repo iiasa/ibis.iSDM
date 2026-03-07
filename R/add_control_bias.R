@@ -45,7 +45,7 @@
 #'
 #' @details
 #' In the case of \code{"proximity"} weights are assigned to each point, placing
-#' higher weight on points further away and with less overlap. Weights are are
+#' higher weight on points further away and with less overlap. Weights are
 #' assigned up to a maximum of distance which can be provided by the user
 #' (parameter \code{"maxdist"}). This distance is ideally informed by some
 #' knowledge of the species to be modelled (e.g., maximum dispersal distance).
@@ -162,10 +162,12 @@ methods::setMethod(
 
 #' Remove control from an existing distribution object
 #'
-#' @description This function allows to remove set control obtions from an existing [distribution]
+#' @description This function allows to remove set control options from an existing [distribution]
 #' object.
 #'
 #' @param x [distribution] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param type A [`character`] vector describing the type of control to be removed.
+#' Can be missing.
 #'
 #' @family control
 #' @seealso [add_control_bias()]
@@ -187,18 +189,20 @@ NULL
 methods::setGeneric(
   "rm_control",
   signature = methods::signature("x"),
-  function(x) standardGeneric("rm_control"))
+  function(x, type) standardGeneric("rm_control"))
 
 #' @rdname rm_control
 methods::setMethod(
   "rm_control",
   methods::signature(x = "BiodiversityDistribution"),
-  function(x) {
-    assertthat::assert_that(inherits(x, "BiodiversityDistribution") )
+  function(x, type) {
+    assertthat::assert_that(inherits(x, "BiodiversityDistribution"),
+                            missing(type) || is.character(type)
+    )
     # Make a deep copy
     y <- x$clone(deep = TRUE)
 
-    y <- y$rm_control()
+    y <- y$rm_control(type)
     # Return x without control
     return(y)
   }

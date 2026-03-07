@@ -35,7 +35,7 @@ project.DistributionModel(x, ...)
 \item{x}{A \code{\link{BiodiversityScenario}} object with set predictors. Note that some
 constrains such as \code{MigClim} can still simulate future change without projections.
 Alternatively a \code{\link{DistributionModel}} object can be supplied if other scenario
-functions are not needed. In this case provide a \code{env} parameter value.}
+functions are not needed. In this case provide an \code{env} parameter value.}
 
 \item{...}{passed on parameters.}
 
@@ -50,7 +50,7 @@ applied. Currently supported is \code{`loess`}.}
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
-\item{env}{An optional \code{\link{SpatRaster}} or \code{\link{data.frame}} object for prediction.
+\item{env}{An optional \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link{data.frame}} object for prediction.
 Ignored unless a \code{\link{DistributionModel}} object is supplied (Default: \code{NULL}).}
 
 \item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further
@@ -65,7 +65,7 @@ project the model stored in a \code{\linkS4class{BiodiversityScenario}} object t
 supplied (future) covariates. Supplied predictors are usually
 spatial-temporal predictors which should be prepared via \code{\link[=add_predictors]{add_predictors()}}
 (e.g. transformations and derivates) in the same way as they have been during
-the initial modelling with \code{\link[=distribution]{distribution()}}. Any constrains specified in
+the initial modelling with \code{\link[=distribution]{distribution()}}. Any constraints specified in
 the scenario object are applied during the projection.
 }
 \details{
@@ -100,12 +100,12 @@ values will then be added to the outputs.
 
 Finally this function also allows temporal stabilization across prediction
 steps via enabling the parameter \code{stabilize} and checking the
-\code{stablize_method} argument. Stabilization can for instance be helpful in
+\code{stabilize_method} argument. Stabilization can for instance be helpful in
 situations where environmental variables are quite dynamic, but changes in
 projected suitability are not expected to abruptly increase or decrease. It
 is thus a way to smoothen out outliers from the projection. Options are so
 far for instance \code{'loess'} which fits a \code{\link[=loess]{loess()}} model per pixel and
-time step. This is conducted at the very of the processing steps and any
+time step. This is conducted at the very end of the processing steps and any
 thresholds will be recalculated afterwards.
 }
 \examples{

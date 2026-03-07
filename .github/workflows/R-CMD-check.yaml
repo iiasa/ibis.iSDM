@@ -65,7 +65,6 @@ jobs:
             any::rcmdcheck,
             any::glmnet,
             any::glmnetUtils,
-            any::pdp,
             stan-dev/cmdstanr,
             ElliotDovers/scampr,
             any::igraph,

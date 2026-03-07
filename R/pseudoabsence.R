@@ -155,7 +155,7 @@ methods::setMethod(
 #' targeted background sampling or by sampling them within/outside a given
 #' range.
 #'
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
+#' @param df A [`sf`], [`data.frame`] or [`tibble::tibble`] object containing point data.
 #' @param field_occurrence A [`character`] name of the column containing the presence
 #' information (Default: \code{observed}).
 #' @param template A [`SpatRaster`] object that is aligned with the predictors

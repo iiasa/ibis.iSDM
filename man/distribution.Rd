@@ -32,9 +32,9 @@ distribution(
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
-\code{\link{SpatRaster}} or \code{\link{sf}} object.}
+\code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object.}
 
-\item{limits}{A \code{\link{SpatRaster}}, \code{\link{sf}} or \code{\link{stars}} object that limits the prediction
+\item{limits}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, \code{\link[sf:sf]{sf::sf}} or \code{\link{stars}} object that limits the prediction
 surface when intersected with input data (Default: \code{NULL}). In case of a
 \code{\link{stars}} object the first factorized time entry is taken.}
 
@@ -96,9 +96,9 @@ The following objects can be stored:
 the added biodiversity data.
 \item \code{object$engine} An \code{"engine"} object (e.g. \code{\link[=engine_inlabru]{engine_inlabru()}})
 with function depended on the added engine.
-\item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictions.
+\item \code{object$predictors} A \code{\link{PredictorDataset}} object with all set predictors.
 \item \code{object$priors} A \code{\link{PriorList}} object with all specified priors.
-\item \code{object$log} A \code{\link{Log}} object that captures.
+\item \code{object$log} A \code{\link{Log}} object that captures messages.
 }
 
 Useful high-level functions to address those objects are for instance:

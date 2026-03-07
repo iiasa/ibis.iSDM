@@ -57,14 +57,14 @@ test_that('Testing parallel setup', {
 
   # --- #
   # Now define a plan
-  ibis_future()
+  suppressWarnings(ibis_future())
 
   expect_no_error(
     fit2 <- train(x, "test", inference_only = FALSE)
   )
 
   # Try with multi-session
-  ibis_future(strategy = "multisession")
+  suppressWarnings(ibis_future(strategy = "multisession"))
 
   expect_no_error(
     fit3 <- train(x, "test", inference_only = FALSE)

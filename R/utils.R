@@ -1,7 +1,7 @@
 #' Inverse of in call for convenience
 #'
 #' @description
-#' Calculates the set of entries not present in the second vector
+#' Calculates the set of entries not present in the second vector.
 #'
 #' @param a First [`vector`] object.
 #' @param b Second [`vector`] object.
@@ -235,7 +235,7 @@ factor_to_numeric <- function(x) {
 #' @description This little wrapper converts and ensures that a vector of time
 #' objects are in POSIXct format.
 #'
-#' @param vec A [`vector`] with [`numeric`] or [`Posixct`] data
+#' @param vec A [`vector`] with [`numeric`] or [`POSIXct`] data
 #'
 #' @keywords utils
 #'
@@ -310,14 +310,14 @@ thresholdval <- function(x, knot, sense = "gte") {
 #' Rescale vector to a new range
 #'
 #' @description
-#' This function uses the [scales] R-package by default to rescale
+#' This function uses the [`scales`] R-package by default to rescale
 #' a given numeric value to a new range from \code{0} to \code{1}.
 #' Alternatively the calculation could be done as \code{x/max(x)}.
 #'
 #' @param v A [`vector`] of [`numeric`] estimates to be normalized.
 #' @param method A [`character`] on which option to applied.
 #'
-#' @returns A [`vector`] of rescaled numerisanitized [`character`].
+#' @returns A [`vector`] of rescaled numeric values.
 #' @keywords utils, internal
 #'
 #' @noRd
@@ -403,7 +403,7 @@ sanitize_names <- function(names){
 #' * Chapman, A.D. (2005) Principles and Methods of Data Cleaning - Primary Species
 #' and Species- Occurrence Data, version 1.0. Report for the Global Biodiversity
 #' Information Facility, Copenhagen.
-#' @source [`bioGeo`] package code served as inspiration
+#' @source Inspired by the \code{"bioGeo"} package code.
 #'
 #' @keywords utils
 #'
@@ -463,7 +463,7 @@ rm_outlier_revjack <- function(vals, procedure = "missing"){
 #' grid, by, depending on the type, either counting the number of observations
 #' per grid cell or aggregating them via a sum.
 #'
-#' @param df A [`sf`], [`data.frame`] or [`tibble`] object containing point data.
+#' @param df A [`sf`], [`data.frame`] or [`tibble::tibble`] object containing point data.
 #' @param template A [`SpatRaster`] object that is aligned with the predictors.
 #' @param field_occurrence A [`character`] name of the column containing the presence
 #' information (Default: \code{observed}).
@@ -607,5 +607,95 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
       )
     }
   }
+
   return(locs)
+}
+
+#' Compute partial dependence for a fitted model
+#'
+#' @description Computes the marginal effect of a predictor variable by
+#' averaging model predictions across the training data while varying the focal
+#' variable over a grid. 
+#'
+#' @param object A fitted model object.
+#' @param pred.var A \code{character} name of the predictor variable.
+#' @param pred.grid A \code{data.frame} containing the grid values for the
+#' variables (must include a column named \code{pred.var}).
+#' @param train A \code{data.frame} of training data used to fit the model.
+#' @param predict_fun A \code{function(object, newdata)} that returns a numeric
+#' vector of predictions on the link scale.
+#' @param inv.link An optional inverse link \code{function} to transform
+#' predictions to the response scale before averaging. Default is \code{NULL}.
+#' @param offset An optional numeric vector of offsets (one per row in
+#' \code{train}) to add to predictions on the link scale. Default is
+#' \code{NULL}.
+#'
+#' @returns A \code{data.frame} with columns named after \code{pred.var} and
+#' \code{"yhat"}.
+#'
+#' @noRd
+#' @keywords internal
+compute_partial_dependence <- function(object, pred.var, pred.grid, train,
+                                       predict_fun, inv.link = NULL,
+                                       offset = NULL) {
+  assertthat::assert_that(
+    is.character(pred.var), length(pred.var) == 1,
+    is.data.frame(pred.grid), is.data.frame(train),
+    is.function(predict_fun),
+    pred.var %in% names(train),
+    msg = paste0("pred.var '", pred.var, "' not found in training data columns.")
+  )
+
+  grid_vals <- pred.grid[[pred.var]]
+  assertthat::assert_that(!is.null(grid_vals),
+                          msg = paste0("pred.grid must contain column '", pred.var, "'"))
+
+  # Check for factor columns in the training data and convert to numeric
+
+  # (e.g. dummy-encoded 0/1 factor indicators should be numeric)
+  fac_cols <- vapply(train, is.factor, logical(1))
+  if (any(fac_cols)) {
+    warning("Factor columns detected in training data for partial dependence: ",
+            paste(names(train)[fac_cols], collapse = ", "),
+            ". Converting to numeric.")
+    for (fc in names(train)[fac_cols]) {
+      train[[fc]] <- as.numeric(as.character(train[[fc]]))
+    }
+  }
+
+  # Ensure grid values are of compatible type
+  if (is.factor(grid_vals)) {
+    grid_vals <- as.numeric(as.character(grid_vals))
+  }
+
+  results <- numeric(length(grid_vals))
+  for (i in seq_along(grid_vals)) {
+    # Replace the focal variable in the training data with the current grid value
+    train_mod <- train
+    train_mod[[pred.var]] <- grid_vals[i]
+
+    # Get predictions on the link scale
+    preds <- predict_fun(object, train_mod)
+    assertthat::assert_that(
+      is.numeric(preds), length(preds) == nrow(train),
+      msg = "predict_fun must return a numeric vector of length nrow(train)."
+    )
+
+    # Add offset on the link scale if provided
+    if (!is.null(offset)) {
+      preds <- preds + offset
+    }
+
+    # Apply inverse link function if provided
+    if (!is.null(inv.link)) {
+      preds <- inv.link(preds)
+    }
+
+    # Average across training observations (Friedman's PDP)
+    results[i] <- mean(preds, na.rm = TRUE)
+  }
+
+  out <- data.frame(grid_vals, results)
+  names(out) <- c(pred.var, "yhat")
+  return(out)
 }

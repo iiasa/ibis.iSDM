@@ -3,7 +3,7 @@
 \name{STANPriors}
 \alias{STANPriors}
 \alias{STANPriors,vector,character-method}
-\title{Helper function when multiple variables and types are supplied for STAN}
+\title{Helper function when multiple variables and types are supplied for Stan priors}
 \usage{
 STANPriors(variables, type, hyper = c(0, 2), ...)
 

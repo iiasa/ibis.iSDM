@@ -1,13 +1,13 @@
 #' @include class-biodiversityscenario.R
 NULL
 
-#' Add constrains to the modelled distribution projection using the MigClim
+#' Add constraints to the modelled distribution projection using the MigClim
 #' approach
 #'
-#' @description This function adds constrain as defined by the MigClim approach
+#' @description This function adds a constraint as defined by the MigClim approach
 #' (Engler et al. 2013) to a [`BiodiversityScenario-class`] object to
 #' constrain future projections. For a detailed description of MigClim, please
-#' the respective reference and the UserGuide. **The default parameters chosen
+#' see the respective reference and the UserGuide. **The default parameters chosen
 #' here are suggestions.**
 #'
 #' @param mod A [`BiodiversityScenario`] object with specified predictors.
@@ -41,7 +41,7 @@ NULL
 #'
 #' @details The barrier parameter is defined through \code{"add_barrier"}.
 #'
-#' @returns Adds a MigClim onstrain to a [`BiodiversityScenario`] object.
+#' @returns Adds a MigClim constraint to a [`BiodiversityScenario`] object.
 #'
 #' @references
 #' * Engler R., Hordijk W. and Guisan A. The MIGCLIM R package – seamless integration of
@@ -132,7 +132,7 @@ methods::setMethod(
     params[["hsMap"]] <- file.path(dtmp,"SuitabilityProjection") # The basename to be used. Each projection will have an incremental number added here
 
     # Habitat suitability threshold data
-    # Set to 0 for continous and to 1-1000 for binary (pick 750 as default)
+    # Set to 0 for continuous and to 1-1000 for binary (pick 750 as default)
     params[["rcThreshold"]] <- match.arg(rcThresholdMode, choices = c("binary", "continuous"), several.ok = FALSE)
 
     # Dispersal steps

@@ -16,6 +16,6 @@ Invisible
 Small helper function to respecify the number of threads for parallel processing.
 }
 \seealso{
-\link{future}
+\link[future:future]{future::future}
 }
 \keyword{misc}

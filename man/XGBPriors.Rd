@@ -3,7 +3,7 @@
 \name{XGBPriors}
 \alias{XGBPriors}
 \alias{XGBPriors,character-method}
-\title{Helper function when multiple variables are supplied for XGBOOST}
+\title{Helper function when multiple variables are supplied for XGBoost priors}
 \usage{
 XGBPriors(variable, hyper = "increasing", ...)
 

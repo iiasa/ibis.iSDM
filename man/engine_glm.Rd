@@ -21,16 +21,16 @@ process (Default: \code{NULL}).}
 An \link{Engine}.
 }
 \description{
-This engine implements a basic generalized linear modle (GLM) for creating
+This engine implements a basic generalized linear model (GLM) for creating
 species distribution models. The main purpose of this engine is to support
 a basic, dependency-free method for inference and projection that can be used
 within the package for examples and vignettes. That being said, the engine is
 fully functional as any other engine.
 
-The basic implementation of GLMs here is part of a general class oflinear models
+The basic implementation of GLMs here is part of a general class of linear models
 and has - with exception of offsets - only minimal options to integrate other
 sources of information such as priors or joint integration. The general
-recommendation is to \code{\link[=engine_glmnet]{engine_glmnet()}} instead for regularization support.
+recommendation is to use \code{\link[=engine_glmnet]{engine_glmnet()}} instead for regularization support.
 However basic GLMs can in some cases be useful for quick projections or
 for \code{\link[=ensemble]{ensemble()}} of small models (a practice common for rare species).
 }

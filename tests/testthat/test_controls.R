@@ -89,13 +89,19 @@ test_that('Test controls and limits', {
                    varsel = "none", verbose = FALSE)
     )
   )
-  expect_length( x$get_control(), 4 )
+  expect_true(utils::hasName(x$get_control(),"bias"))
   settings <- mod$settings
   expect_equal(settings$get("bias_variable"), "hmi_mean_50km")
 
   # Remove control
   y <- x |> rm_control()
-  expect_length(x$get_control(), 4)
+  expect_true(utils::hasName(x$get_control(),"bias"))
   expect_length(y$get_control(), 0)
+
+  # --- #
+  # Add esm control
+  x <- x$rm_control()
+  x <- x |> add_control_esm(n_covs = 2)
+  expect_true(utils::hasName(x$get_control(),"train"))
 })
 

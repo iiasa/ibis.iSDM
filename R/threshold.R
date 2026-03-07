@@ -46,11 +46,9 @@
 #' \code{"modEvA"} package to be installed.
 #' * \code{'F1score'} = Determines the optimal F1score (also known as Sorensen
 #' similarity). Requires the \code{"modEvA"} package to be installed.
-#' * \code{'F1score'} = Determines the optimal sensitivity of presence records.
-#' Requires the \code{"modEvA"} package to be installed.
 #' * \code{'Sensitivity'} = Determines the optimal sensitivity of presence records.
 #' Requires the \code{"modEvA"} package to be installed.
-#' * \code{'Specificity'} = Determines the optimal sensitivity of presence records.
+#' * \code{'Specificity'} = Determines the optimal specificity of presence records.
 #' Requires the \code{"modEvA"} package to be installed.
 #' * \code{'AUC'} = Determines the optimal AUC of presence records. Requires the
 #' \code{"modEvA"} package to be installed.

@@ -46,7 +46,7 @@ add_biodiversity_polpo(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{polpo}{A \code{\link{sf}} polygon object of presence-only occurrences.}
+\item{polpo}{A \code{\link[sf:sf]{sf::sf}} polygon object of presence-only occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -66,17 +66,17 @@ relative to any other datasets. By default set to \code{1} if only one
 dataset is added. A \code{\link{vector}} is also supported but must be of the same
 length as \code{"polpo"}.}
 
-\item{simulate}{Simulate poipo points within its boundaries. Result are
+\item{simulate}{Simulate poipo points within its boundaries. Results are
 passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE}).}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by
 simulation (Default: \code{100}).}
 
-\item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference
+\item{simulate_bias}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer describing an eventual preference
 for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling.
-Can be set to either. \code{'random'} or \code{'regular'}, the latter
+Can be set to either \code{'random'} or \code{'regular'}, the latter
 requiring a raster supplied in the \code{'simulate_weights'} parameter.}
 
 \item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
@@ -94,14 +94,14 @@ intercept is to be added in shared likelihood models for engines
 Adds biodiversity data to \link{distribution} object.
 }
 \description{
-This function can be used to add a \code{\link{sf}} polygon dataset to an
+This function can be used to add a \code{\link[sf:sf]{sf::sf}} polygon dataset to an
 existing distribution object. Presence-only polygon data is treated
-differential than point data in some engines particular through the way that
+differently than point data in some engines, particularly through the way that
 points are generated.
 }
 \details{
 The default approach for polygon data is to sample presence-only
-points across the region of the polygons. This function thus adds as a
+points across the region of the polygons. This function thus acts as a
 wrapper to \code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}} as presence-only points are created
 by the model. If no points are simulated directly (Default) then the
 polygon is processed by \code{\link[=train]{train()}} by creating regular point data over the

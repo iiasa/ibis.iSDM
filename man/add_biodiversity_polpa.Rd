@@ -46,7 +46,7 @@ add_biodiversity_polpa(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{polpa}{A \code{\link{sf}} polygon object of presence-absence occurrences.}
+\item{polpa}{A \code{\link[sf:sf]{sf::sf}} polygon object of presence-absence occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -65,17 +65,17 @@ relative to any other datasets. By default set to \code{1} if only one
 dataset is added. A \code{\link{vector}} is also supported but must be of the same
 length as \code{"polpa"}.}
 
-\item{simulate}{Simulate poipa points within its boundaries. Result are
+\item{simulate}{Simulate poipa points within its boundaries. Results are
 passed to \code{\link{add_biodiversity_poipa}} (Default: \code{FALSE}).}
 
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by
 simulation.}
 
-\item{simulate_bias}{A \code{\link{SpatRaster}} layer describing an eventual preference
+\item{simulate_bias}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer describing an eventual preference
 for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling.
-Can be set to either. \code{'random'} or \code{'regular'}, the latter
+Can be set to either \code{'random'} or \code{'regular'}, the latter
 requiring a raster supplied in the \code{'simulate_weights'} parameter.}
 
 \item{separate_intercept}{A \code{\link{logical}} value stating whether a separate
@@ -94,15 +94,15 @@ intercept is to be added in shared likelihood models for engines
 Adds biodiversity data to \link{distribution} object.
 }
 \description{
-This function can be used to add a \code{\link{sf}} polygon dataset to an
+This function can be used to add a \code{\link[sf:sf]{sf::sf}} polygon dataset to an
 existing distribution object. Presence-absence polygon data assumes that each
 area within the polygon can be treated as 'presence' for the species, while
 each area outside the polygon is where the species is absent.
 }
 \details{
 The default approach for polygon data is to sample presence-absence
-points across the region of the polygons. This function thus adds as a
-wrapper to \code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}} as presence-only points are created
+points across the region of the polygons. This function thus acts as a
+wrapper to \code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}} as presence-absence points are created
 by the model. Note if the polygon is used directly in the modelling the
 link between covariates and polygonal data is established by regular
 sampling of points within the polygon and is thus equivalent to simulating

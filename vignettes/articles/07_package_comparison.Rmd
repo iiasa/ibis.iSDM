@@ -29,7 +29,7 @@ Thus overall, the idea package is in part trying to bring some innovation to the
 
 A Non exhaustive list acknowledging other SDM packages in R and how they compare to `ibis.iSDM` is provided here:
 
--   [hSDM](https://github.com/ghislainv/hSDM) -&gt; Bayesian framework for hierachical and mixed models. Fast, but little flexibility with regards to weights, offsets and different datatypes.
+-   [hSDM](https://github.com/ghislainv/hSDM) -&gt; Bayesian framework for hierarchical and mixed models. Fast, but little flexibility with regards to weights, offsets and different datatypes.
 -   [multispeciesPP](https://github.com/wfithian/multispeciesPP) -&gt;
     Package that allows integrated SDMs, however it has not been further developed since a few years and key gaps remain particular with regards to different modelling approaches.
 -   [inlabru](https://github.com/inlabru-org/inlabru) -&gt; Package

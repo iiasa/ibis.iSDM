@@ -12,7 +12,7 @@ to_formula <- function(formula){
   if(!is.null(formula)) {
     formula = stats::as.formula(formula)
   } else {
-    # Asign a new waiver object
+    # Assign a new waiver object
     formula = new_waiver()
   }
   return(formula)
@@ -62,12 +62,12 @@ logistic <- function(a){
 #' the expert knowledge. The equation associated to this logistic curve is
 #'
 #' \deqn{W(x) = u - \frac{u - l}{\left(1 + e^{-r(x-k)}\right)^{1/s}}}{W(x) = u -
-#' (u - l)/((1 + exp(-r(x-k)))^(1/s))}. where eqn{u} and eqn{l} are the upper
-#' and lower asymptotes of the logistic curve, eqn{r} is a rate that gives
-#' flexibility to the curve from a sharpe step to a flat surface and eqn{s} is a
-#' measure of skewness that adjust the symmetry of the decay on the edge of the
-#' expert map. As for eqn{k}, it shifts the curve inside or outside the expert
-#' map. Finally, eqn{x} is the provided vector.
+#' (u - l)/((1 + exp(-r(x-k)))^(1/s))}. where \eqn{u} and \eqn{l} are the upper
+#' and lower asymptotes of the logistic curve, \eqn{r} is a rate that gives
+#' flexibility to the curve from a sharp step to a flat surface and \eqn{s} is a
+#' measure of skewness that adjusts the symmetry of the decay on the edge of the
+#' expert map. As for \eqn{k}, it shifts the curve inside or outside the expert
+#' map. Finally, \eqn{x} is the provided vector.
 #'
 #' @param x A [`numeric`] vector or any other input (e.g. [`SpatRaster`]) that can
 #' be used in the Richard's function.

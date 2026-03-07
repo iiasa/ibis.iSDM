@@ -3,7 +3,7 @@
 #' @description Not always is there enough data or sufficient information to
 #' robustly infer the suitable habitat or niche of a species. As many SDM
 #' algorithms are essentially regression models, similar assumptions about model
-#' convergence, homogeneity of residuals and inferrence usually apply (although
+#' convergence, homogeneity of residuals and inference usually apply (although
 #' often ignored). This function simply checks the respective input object for
 #' common issues or mistakes.
 #'
@@ -22,7 +22,7 @@
 #' - Check model convergence
 #' - Check if model is found
 #' - Check if coefficients exist
-#' - Check if there are unusal outliers in prediction (using 10median absolute deviation)
+#' - Check if there are unusual outliers in prediction (using 10 median absolute deviation)
 #' - Check if threshold is larger than layer
 #'
 #' * [`BiodiversityScenario`]

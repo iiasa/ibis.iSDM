@@ -20,7 +20,7 @@ This class describes the PredictorDataset and is used to store covariates within
 \describe{
 \item{\code{id}}{The id for this collection as \code{\link{character}}.}
 
-\item{\code{data}}{A predictor dataset usually as \code{\link{SpatRaster}}.}
+\item{\code{data}}{A predictor dataset usually as \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}.}
 
 \item{\code{name}}{A name for this object.}
 
@@ -76,7 +76,7 @@ Initializes the object and creates an empty list
 \describe{
 \item{\code{id}}{The id for this collection as \code{\link{character}}.}
 
-\item{\code{data}}{A predictor dataset usually as \code{\link{SpatRaster}}.}
+\item{\code{data}}{A predictor dataset usually as \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}.}
 
 \item{\code{transformed}}{A \code{\link{logical}} flag if predictors have been transformed. Assume not.}
 
@@ -181,7 +181,7 @@ Get a specific dataset
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A \code{\link{SpatRaster}} or \code{\link{data.frame}}.
+A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link{data.frame}}.
 }
 }
 \if{html}{\out{<hr>}}
@@ -255,7 +255,7 @@ Utility function to clip the predictor dataset by another dataset
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{pol}}{A \code{\link{sf}} object used for cropping the data.}
+\item{\code{pol}}{A \code{\link[sf:sf]{sf::sf}} object used for cropping the data.}
 
 \item{\code{apply_time}}{A \code{\link{logical}} flag indicating if time should be acknowledged in cropping.}
 }
@@ -306,7 +306,7 @@ Add a new Predictor dataset to this collection
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{value}}{A new \code{\link{SpatRaster}} or \code{\link{stars}} object.}
+\item{\code{value}}{A new \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link{stars}} object.}
 }
 \if{html}{\out{</div>}}
 }

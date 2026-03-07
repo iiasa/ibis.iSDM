@@ -192,7 +192,6 @@ methods::setMethod(
       if (getOption('ibis.setupmessages', default = TRUE) && x$show_biodiversity_length() > 2) {
         myLog('[Setup]','yellow','Using more than two biodiversity datasets is experimental.')
       }
-
     }
 
     # Messenger
@@ -221,6 +220,22 @@ methods::setMethod(
 
     # Load control
     control <- x$get_control()
+
+    # Check linear for esm train
+    if(is.Waiver(x$get_control())){
+      if(utils::hasName(control,"train")){
+        # For ESM based training, only linear training supported!
+        if(!only_linear){
+          cli::cli_alert_warning("Only linear training supported for ESM based training. Setting to TRUE.")
+          only_linear <- TRUE
+        }
+        # Check engines
+        if(x$get_engine() %notin% c("<GLM>", "<GLMNET>", "<BREG>")){
+          # Abort
+          cli::cli_abort("Only GLM, GLMNET and BREG engines support ESM based training so far.")
+        }
+      }
+    }
 
     # Set up logging if specified
     if(!is.Waiver(x$log)) x$log$open()
@@ -435,8 +450,8 @@ methods::setMethod(
 
     # Setting up variable bias control if method == partial
     if(!is.Waiver( control )){
-      if(control$type == "bias"){
-        bias <- control
+      if(utils::hasName(control, "bias")){
+        bias <- control$bias
         if(bias$method == "partial"){
           if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding bias variable using partial control.')
           settings$set("bias_variable", names(bias$layer) )
@@ -448,8 +463,7 @@ methods::setMethod(
             model[['predictors_names']] <- model$predictors_object$get_names()
             model[['predictors']] <- model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
             # Get predictor types
-            lu <- sapply(model[['predictors']][model[['predictors_names']]], is.factor)
-            model[['predictors_types']] <- predictor_type(lu)
+            model[['predictors_types']] <- predictor_type(model[['predictors']][model[['predictors_names']]])
           }
         }
       }
@@ -686,8 +700,8 @@ methods::setMethod(
 
     # Add proximity weights if relevant option is found
     if(!is.Waiver( control )){
-      if(control$type == "bias"){
-        bias <- control
+      if(utils::hasName(control, "bias")){
+        bias <- control$bias
         if(bias$method == "proximity"){
           if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding proximity bias weights to points.')
           assertthat::assert_that(length(model$biodiversity)==1,
@@ -911,6 +925,42 @@ methods::setMethod(
     )
     #### Engine specific code starts below ####
     # --------------------------------------------------------------------- #
+    # Outsourced prep functions to reduce redundancy across engines.
+    # This small helper function is called for most engines
+    .prepare_model <- function(x, model, id){
+      # Remove those not part of the modelling
+      model2 <- model
+      model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+
+      # Work around for cases with non-spatial predictors
+      if(x$predictors$is_spatial()){
+        # remove unused predictors
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
+        pred_prs <- model$predictors_object$get_names()
+        model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
+        model2$predictors_names <- pred_tmp
+        model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
+        # make sure all in same order
+        model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
+        model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
+        if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
+          model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+        }
+      }
+
+      # remove unused priors
+      if(!is.Waiver(model$priors)) {
+        model2$priors <- model$priors$clone(deep = TRUE)
+        ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+        if (length(ids_rm) == model2$priors$length()) {
+          model2$priors <- new_waiver()
+        } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
+          for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+        }
+      }
+      # Return the prepared model
+      return( model2 )
+    }
 
     # Number of dataset types, families and ids
     types <- as.character( sapply( model$biodiversity, function(x) x$type ) )
@@ -1465,57 +1515,123 @@ methods::setMethod(
       # For each formula, process in sequence
       for(id in ids){
 
-        model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
+        if( utils::hasName(control, "train") ){
+          # Get number of variable combinations
+          n_comb <- control[['train']]$value[['n_covs']]
+          vars <- utils::combn(model$predictors_names, n_comb)
 
-        # Remove those not part of the modelling
-        model2 <- model
-        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+          cli::cli_inform("Training {ncol(vars)} ESM {x$engine$get_class()} models with {n_comb} predictors each.")
+          pb <- progress::progress_bar$new(total = ncol(vars), format = "Training ESMs [:bar] :percent eta: :eta")
+          out_esm <- list()
+          for(cn in 1:ncol(vars)){
+            pb$tick()
 
-        # Work around for cases with non-spatial predictors
-        if(x$predictors$is_spatial()){
-          # remove unused predictors
-          pred_tmp <- model2$biodiversity[[1]]$predictors_names
-          pred_prs <- model$predictors_object$get_names()
-          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-          model2$predictors_names <- pred_tmp
-          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-          # make sure all in same order
-          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+            # Prepare the model settings
+            model2 <- .prepare_model(x, model, id)
+            # Overwrite the model equation
+            model2$biodiversity[[id]]$equation <- suppressMessages(
+              built_formula_breg(model, model2$biodiversity[[id]],
+                                 vars = vars[, cn])
+            )
+
+            # Run the engine setup script
+            model2 <- suppressMessages(
+              x$engine$setup(model2, settings)
+            )
+
+            # Now train the model and create a predicted distribution model
+            settings2 <- settings
+            if(id != ids[length(ids)]){
+              # For predictors and offsets
+              settings2$set('inference_only', FALSE)
+            } else {
+              settings2$set('inference_only', inference_only)
+            }
+
+            # train model and save outputs
+            out <- suppressMessages(
+              x$engine$train(model2, settings2)
+            )
+            out_esm[[cn]] <- out
+            rm(out)
           }
-        }
+          rm(vars, n_comb)
 
-        # remove unused priors
-        if(!is.Waiver(model$priors)) {
-          model2$priors <- model$priors$clone(deep = TRUE)
-          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
-          if (length(ids_rm) == model2$priors$length()) {
-            model2$priors <- new_waiver()
-          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
-            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          # Now ensemble together
+          if(!settings$get('inference_only')){
+            outp <- ensemble(out_esm, method = "mean")
+            names(outp) <- c("mean", "cv")
           }
-        }
+          # Get the coefficients
+          outc <- dplyr::bind_rows(lapply(out_esm, function(z) z$get_coefficients(exclude_intercept = FALSE)))
+          # Aggregate by feature
+          outc <- dplyr::group_by(outc, Feature) %>%
+            # Average all values
+            dplyr::summarise(Beta = mean(Beta, na.rm = TRUE), .groups = "drop") |>
+            # Named vector
+            dplyr::pull(Beta, name = Feature)
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
+          # Refit GLM model with all coefficients
+          model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
 
-        # Now train the model and create a predicted distribution model
-        settings2 <- settings
-        if(id != ids[length(ids)] && method_integration == "prior") {
-          # No need to make predictions if we use priors only
-          settings2$set('inference_only', TRUE)
-        } else if(id != ids[length(ids)]){
-          # For predictors and offsets
-          settings2$set('inference_only', FALSE)
+          # Prepare model object
+          model2 <- .prepare_model(x, model, id)
+
+          # Default GLM engine
+          x <- x |> engine_glm()
+          if(getOption('ibis.setupmessages', default = TRUE)) {
+            cli::cli_inform("Using {x$engine$get_class()} for final ESM model.")
+          }
+
+          # Run the engine setup script
+          model2 <- x$engine$setup(model2, settings)
+
+          # Now train the model and create a predicted distribution model
+          settings2 <- settings
+          if(id != ids[length(ids)]){
+            # For predictors and offsets
+            settings2$set('inference_only', FALSE)
+          } else {
+            settings2$set('inference_only', inference_only)
+          }
+
+          # train model and save outputs
+          out <- suppressMessages({
+            x$engine$train(model2, settings2)
+          })
+          # Overwrite both model and prediction
+          out <- out$set_data("fit_best",
+                              overwrite_glm_coefficients(out$get_model(), outc)
+          )
+          out <- out$set_data("prediction", outp)
+
+          try({rm(out_esm, outc, outp)}, silent = TRUE) # cleanup
         } else {
-          settings2$set('inference_only', inference_only)
-        }
+          # Prepare model formula
+          model$biodiversity[[id]]$equation <- built_formula_breg(model, model$biodiversity[[id]] )
 
-        # train model and save outputs
-        out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
+          # Prepare model object
+          model2 <- .prepare_model(x, model, id)
+
+          # Run the engine setup script
+          model2 <- x$engine$setup(model2, settings)
+
+          # Now train the model and create a predicted distribution model
+          settings2 <- settings
+          if(id != ids[length(ids)] && method_integration == "prior") {
+            # No need to make predictions if we use priors only
+            settings2$set('inference_only', TRUE)
+          } else if(id != ids[length(ids)]){
+            # For predictors and offsets
+            settings2$set('inference_only', FALSE)
+          } else {
+            settings2$set('inference_only', inference_only)
+          }
+
+          # train model and save outputs
+          out <- x$engine$train(model2, settings2)
+          rm(model2, settings2)
+        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1596,57 +1712,126 @@ methods::setMethod(
       # For each formula, process in sequence
       for(id in ids){
 
-        model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
+        # In case it is an ensemble of small models
+        if( utils::hasName(control, "train") ){
+          # Get number of variable combinations
+          n_comb <- control[['train']]$value[['n_covs']]
+          vars <- utils::combn(model$predictors_names, n_comb)
 
-        # Remove those not part of the modelling
-        model2 <- model
-        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+          cli::cli_inform("Training {ncol(vars)} ESM {x$engine$get_class()} models with {n_comb} predictors each.")
+          pb <- progress::progress_bar$new(total = ncol(vars), format = "Training ESMs [:bar] :percent eta: :eta")
+          out_esm <- list()
+          for(cn in 1:ncol(vars)){
+            pb$tick()
 
-        # Work around for cases with non-spatial predictors
-        if(x$predictors$is_spatial()){
-          # remove unused predictors
-          pred_tmp <- model2$biodiversity[[id]]$predictors_names
-          pred_prs <- model$predictors_object$get_names()
-          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-          model2$predictors_names <- pred_tmp
-          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-          # make sure all in same order
-          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+            # Prepare the model settings
+            model2 <- .prepare_model(x, model, id)
+
+            # Overwrite the model equation
+            model2$biodiversity[[id]]$equation <- suppressMessages(
+              built_formula_glmnet(model2$biodiversity[[id]], vars = vars[, cn])
+            )
+
+            # Run the engine setup script
+            model2 <- suppressMessages(
+              x$engine$setup(model2, settings)
+            )
+
+            # Now train the model and create a predicted distribution model
+            settings2 <- settings
+            settings2$set('verbose', FALSE) # Be a bit more silent
+            if(id != ids[length(ids)]){
+              # For predictors and offsets
+              settings2$set('inference_only', FALSE)
+            } else {
+              settings2$set('inference_only', inference_only)
+            }
+
+            # train model and save outputs
+            out <- suppressMessages(
+              x$engine$train(model2, settings2)
+            )
+            out_esm[[cn]] <- out
+            rm(out)
           }
-        }
+          try({ rm(vars, n_comb) }, silent = TRUE) # cleanup
 
-        # remove unused priors
-        if(!is.Waiver(model$priors)) {
-          model2$priors <- model$priors$clone(deep = TRUE)
-          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
-          if (length(ids_rm) == model2$priors$length()) {
-            model2$priors <- new_waiver()
-          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
-            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          # Now ensemble together
+          if(!settings$get('inference_only')){
+            outp <- ensemble(out_esm, method = "mean") # Default ensemble method
+            names(outp) <- c("mean", "cv")
           }
+          # Get the coefficients
+          outc <- dplyr::bind_rows(lapply(out_esm, function(z) z$get_coefficients(exclude_intercept = FALSE)))
+          # Aggregate by feature
+          outc <- dplyr::group_by(outc, Feature) %>%
+            # Average all values
+            dplyr::summarise(Beta = mean(Beta, na.rm = TRUE), .groups = "drop") |>
+            # Named vector
+            dplyr::pull(Beta, name = Feature)
+
+          # Refit GLM model with all coefficients
+          model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
+
+          # Prepare model object
+          model2 <- .prepare_model(x, model, id)
+
+          # Default GLM engine
+          x <- x |> engine_glm()
+          if(getOption('ibis.setupmessages', default = TRUE)) {
+            cli::cli_inform("Using {x$engine$get_class()} for final ESM model.")
+          }
+
+          # Run the engine setup script
+          model2 <- x$engine$setup(model2, settings)
+
+          # Now train the model and create a predicted distribution model
+          settings2 <- settings
+          if(id != ids[length(ids)]){
+            # For predictors and offsets
+            settings2$set('inference_only', FALSE)
+          } else {
+            settings2$set('inference_only', inference_only)
+          }
+
+          # train model and save outputs
+          out <- suppressMessages({
+            x$engine$train(model2, settings2)
+          })
+          # Overwrite both model and prediction
+          out <- out$set_data("fit_best",
+                              overwrite_glm_coefficients(out$get_model(), outc)
+          )
+          out <- out$set_data("prediction", outp)
+
+          try({rm(out_esm, outc, outp)}, silent = TRUE) # cleanup
+        }  else {
+
+          model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
+
+          # Prepare model object
+          model2 <- .prepare_model(x, model, id)
+
+          # Run the engine setup script
+          model2 <- x$engine$setup(model2, settings)
+
+          # Now train the model and create a predicted distribution model
+          settings2 <- settings
+          if(id != ids[length(ids)] && method_integration == "prior") {
+            # No need to make predictions if we use priors only
+            settings2$set('inference_only', TRUE)
+          } else if(id != ids[length(ids)]){
+            # For predictors and offsets
+            settings2$set('inference_only', FALSE)
+          } else {
+            settings2$set('inference_only', inference_only)
+          }
+
+          # train model and save outputs
+          out <- x$engine$train(model2, settings2)
+          rm(model2, settings2)
+
         }
-
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
-
-        # Now train the model and create a predicted distribution model
-        settings2 <- settings
-        if(id != ids[length(ids)] && method_integration == "prior") {
-          # No need to make predictions if we use priors only
-          settings2$set('inference_only', TRUE)
-        } else if(id != ids[length(ids)]){
-          # For predictors and offsets
-          settings2$set('inference_only', FALSE)
-        } else {
-          settings2$set('inference_only', inference_only)
-        }
-
-        # train model and save outputs
-        out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){
@@ -1723,60 +1908,121 @@ methods::setMethod(
     # ----------------------------------------------------------- #
     } else if (x$engine$get_class() == "GLM-Engine" ){
 
-      if(method_integration == "prior") warning("Priors not supported for GLM!")
+      if(method_integration == "prior") cli::cli_alert_warning("Priors not supported for GLM!")
 
       # For each formula, process in sequence
       for(id in ids){
 
-        # We use the same function as for glmnet here
-        model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
+        # In case it is an ensemble of small models
+        if( utils::hasName(control, "train") ){
+          # Get number of variable combinations
+          n_comb <- control[['train']]$value[['n_covs']]
+          vars <- utils::combn(model$predictors_names, n_comb)
 
-        # Remove those not part of the modelling
-        model2 <- model
-        model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+          cli::cli_inform("Training {ncol(vars)} ESM {x$engine$get_class()} models with {n_comb} predictors each.")
+          pb <- progress::progress_bar$new(total = ncol(vars), format = "Training ESMs [:bar] :percent eta: :eta")
+          out_esm <- list()
+          for(cn in 1:ncol(vars)){
+            pb$tick()
 
-        # Work around for cases with non-spatial predictors
-        if(x$predictors$is_spatial()){
-          # remove unused predictors
-          pred_tmp <- model2$biodiversity[[1]]$predictors_names
-          pred_prs <- model$predictors_object$get_names()
-          model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
-          model2$predictors_names <- pred_tmp
-          model2$predictors_types <- model2$predictors_types[model2$predictors_type$predictors %in% pred_tmp, ]
-          # make sure all in same order
-          model2$predictors_types <- model2$predictors_types[match(model2$predictors_names, model2$predictors_types$predictors), ]
-          model2$predictors <- dplyr::select(model2$predictors, dplyr::any_of(c("x", "y", pred_tmp)))
-          if (length(pred_prs[!pred_prs %in% pred_tmp]) > 0){
-            model2$predictors_object$rm_data(pred_prs[!pred_prs %in% pred_tmp])
+            # Prepare the model settings
+            model2 <- .prepare_model(x, model, id)
+
+            # Overwrite the model equation
+            model2$biodiversity[[id]]$equation <- suppressMessages(
+              built_formula_glmnet(model2$biodiversity[[id]], vars = vars[, cn])
+            )
+
+            # Run the engine setup script
+            model2 <- suppressMessages(
+              x$engine$setup(model2, settings)
+            )
+
+            # Now train the model and create a predicted distribution model
+            settings2 <- settings
+            if(id != ids[length(ids)]){
+              # For predictors and offsets
+              settings2$set('inference_only', FALSE)
+            } else {
+              settings2$set('inference_only', inference_only)
+            }
+
+            # train model and save outputs
+            out <- suppressMessages(
+              x$engine$train(model2, settings2)
+            )
+            out_esm[[cn]] <- out
+            rm(out)
           }
-        }
+          rm(vars, n_comb)
 
-        # remove unused priors
-        if(!is.Waiver(model$priors)) {
-          model2$priors <- model$priors$clone(deep = TRUE)
-          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
-          if (length(ids_rm) == model2$priors$length()) {
-            model2$priors <- new_waiver()
-          } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
-            for (i in 1:length(ids_rm)) model2$priors$rm(ids_rm[[i]])
+          # Now ensemble together
+          if(!settings$get('inference_only')){
+            outp <- ensemble(out_esm, method = "mean")
+            names(outp) <- c("mean", "cv")
           }
-        }
+          # Get the coefficients
+          outc <- dplyr::bind_rows(lapply(out_esm, function(z) z$get_coefficients(exclude_intercept = FALSE)))
+          # Aggregate by feature
+          outc <- dplyr::group_by(outc, Feature) %>%
+            # Average all values
+            dplyr::summarise(Beta = mean(Beta, na.rm = TRUE), .groups = "drop") |>
+            # Named vector
+            dplyr::pull(Beta, name = Feature)
 
-        # Run the engine setup script
-        model2 <- x$engine$setup(model2, settings)
+          # Refit GLM model with all coefficients
+          model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
 
-        # Now train the model and create a predicted distribution model
-        settings2 <- settings
-        if(id != ids[length(ids)]){
-          # For predictors and offsets
-          settings2$set('inference_only', FALSE)
+          # Prepare model object
+          model2 <- .prepare_model(x, model, id)
+
+          # Run the engine setup script
+          model2 <- x$engine$setup(model2, settings)
+
+          # Now train the model and create a predicted distribution model
+          settings2 <- settings
+          if(id != ids[length(ids)]){
+            # For predictors and offsets
+            settings2$set('inference_only', FALSE)
+          } else {
+            settings2$set('inference_only', inference_only)
+          }
+
+          # train model and save outputs
+          out <- suppressMessages({
+            x$engine$train(model2, settings2)
+          })
+          # Overwrite both model and prediction
+          out <- out$set_data("fit_best",
+                       overwrite_glm_coefficients(out$get_model(), outc)
+                       )
+          out <- out$set_data("prediction", outp)
+
+          try({rm(out_esm, outc, outp)}, silent = TRUE) # cleanup
         } else {
-          settings2$set('inference_only', inference_only)
-        }
+          # Non-ESM model
+          # We use the same function as for glmnet here
+          model$biodiversity[[id]]$equation <- built_formula_glmnet( model$biodiversity[[id]] )
 
-        # train model and save outputs
-        out <- x$engine$train(model2, settings2)
-        rm(model2, settings2)
+          # Prepare model object
+          model2 <- .prepare_model(x, model, id)
+
+          # Run the engine setup script
+          model2 <- x$engine$setup(model2, settings)
+
+          # Now train the model and create a predicted distribution model
+          settings2 <- settings
+          if(id != ids[length(ids)]){
+            # For predictors and offsets
+            settings2$set('inference_only', FALSE)
+          } else {
+            settings2$set('inference_only', inference_only)
+          }
+
+          # train model and save outputs
+          out <- x$engine$train(model2, settings2)
+          rm(model2, settings2)
+        }
 
         # Add Prediction of model to next object if multiple are supplied
         if(length(ids)>1 && id != ids[length(ids)]){

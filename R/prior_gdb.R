@@ -69,9 +69,9 @@ methods::setMethod(
   }
 )
 
-#' Helper function when multiple variables are supplied for a GDB prior
+#' Helper function when multiple variables are supplied for GDB priors
 #'
-#' @description This is a helper function to specify several [GLMNETPrior] with
+#' @description This is a helper function to specify several [GDBPrior] with
 #' the same hyper-parameters, but different variables.
 #'
 #' @inheritParams GDBPrior

@@ -4,9 +4,9 @@ NULL
 #' Use INLA as engine
 #'
 #' @description Allows a full Bayesian analysis of linear and additive models
-#' using Integrated Nested Laplace approximation. Engine has been largely
-#' superceded by the [`engine_inlabru`] package and users are advised to us this
-#' one, unless specific options are required.
+#' using Integrated Nested Laplace Approximation (INLA). This engine has been largely
+#' superseded by the [`engine_inlabru`] engine and users are advised to use that
+#' one instead, unless specific options are required.
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param optional_mesh A directly supplied \code{"INLA"} mesh (Default:
@@ -52,16 +52,19 @@ NULL
 #' needs to have triangles as regular as possible in size and shape:
 #' equilateral.
 #'
-#' [*] \code{"max.edge"}: The largest allowed triangle edge length, must be in
-#' the same scale units as the coordinates Lower bounds affect the density of
-#' triangles [*] \code{"offset"}: The automatic extension distance of the mesh
+#' * \code{"max.edge"}: The largest allowed triangle edge length, must be in
+#' the same scale units as the coordinates. Lower bounds affect the density of
+#' triangles.
+#' * \code{"offset"}: The automatic extension distance of the mesh.
 #' If positive: same scale units. If negative, interpreted as a factor relative
-#' to the approximate data diameter i.e., a value of -0.10 will add a 10% of the
-#' data diameter as outer extension. [*] \code{"cutoff"}: The minimum allowed
+#' to the approximate data diameter, i.e., a value of -0.10 will add a 10% of the
+#' data diameter as outer extension.
+#' * \code{"cutoff"}: The minimum allowed
 #' distance between points, it means that points at a closer distance than the
-#' supplied value are replaced by a single vertex. it is critical when there are
+#' supplied value are replaced by a single vertex. It is critical when there are
 #' some points very close to each other, either for point locations or in the
-#' domain boundary. [*] \code{"proj_stepsize"}: The stepsize for spatial
+#' domain boundary.
+#' * \code{"proj_stepsize"}: The stepsize for spatial
 #' predictions, which affects the spatial grain of any outputs created.
 #'
 #' Priors can be set via [INLAPrior].

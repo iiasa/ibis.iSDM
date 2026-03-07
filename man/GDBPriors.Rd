@@ -3,7 +3,7 @@
 \name{GDBPriors}
 \alias{GDBPriors}
 \alias{GDBPriors,character-method}
-\title{Helper function when multiple variables are supplied for a GDB prior}
+\title{Helper function when multiple variables are supplied for GDB priors}
 \usage{
 GDBPriors(variable, hyper = "increasing", ...)
 
@@ -19,7 +19,7 @@ options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'co
 \item{...}{Variables passed on to prior object.}
 }
 \description{
-This is a helper function to specify several \link{GLMNETPrior} with
+This is a helper function to specify several \link{GDBPrior} with
 the same hyper-parameters, but different variables.
 }
 \seealso{

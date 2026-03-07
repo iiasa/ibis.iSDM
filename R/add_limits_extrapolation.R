@@ -10,24 +10,24 @@
 #' any projections (e.g. islands). This limit method adds some of those options
 #' to a model distribution object. Currently supported methods are:
 #'
-#' [*] \code{"zones"} - This is a wrapper to allow the addition of zones to a
+#' * \code{"zones"} - This is a wrapper to allow the addition of zones to a
 #' distribution model object, similar to what is also possible via [distribution()].
-#' Required is a spatial layer that describes a environmental zoning.
+#' Required is a spatial layer that describes an environmental zoning.
 #'
-#' [*] \code{"mcp"} - Rather than using an external or additional layer, this option constraints
+#' * \code{"mcp"} - Rather than using an external or additional layer, this option constrains
 #' predictions by a certain distance of points in its vicinity. Buffer distances
 #' have to be in the unit of the projection used and can be configured via
 #' \code{"mcp_buffer"}.
 #'
-#' [*] \code{"nt2"} - Constraints the predictions using the multivariate combination novelty index (NT2)
+#' * \code{"nt2"} - Constrains the predictions using the multivariate combination novelty index (NT2)
 #' following Mesgaran et al. (2014). This method is also available in the [similarity()]
 #' function.
 #'
-#' [*] \code{"mess"} - Constraints the predictions using the
+#' * \code{"mess"} - Constrains the predictions using the
 #' Multivariate Environmental Similarity Surfaces (MESS) following Mesgaran et al. (2014).
 #' This method is also available in the [similarity()] function.
 #'
-#' [*] \code{"shape"} - This is an implementation of the 'shape' method introduced
+#' * \code{"shape"} - This is an implementation of the 'shape' method introduced
 #' by Velazco et al. (2023). Through a user defined threshold it effectively limits
 #' model extrapolation so that no projections are made beyond the extent judged as
 #' defensible and informed by the training observations. **Not yet implemented!**

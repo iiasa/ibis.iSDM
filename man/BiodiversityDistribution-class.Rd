@@ -5,8 +5,8 @@
 \alias{BiodiversityDistribution}
 \title{Biodiversity Distribution master class}
 \description{
-Base \code{\link{R6}} class for any biodiversity distribution objects.
-Serves as container that supplies data and functions to other \code{\link{R6}}
+Base \code{\link[R6:R6Class]{R6::R6}} class for any biodiversity distribution objects.
+Serves as container that supplies data and functions to other \code{\link[R6:R6Class]{R6::R6}}
 classes. Generally stores all objects and parameters added to a model.
 }
 \details{
@@ -44,9 +44,9 @@ names(x)
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{background}}{A \code{\link{SpatRaster}} or \code{\link{sf}} object delineating the modelling extent.}
+\item{\code{background}}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object delineating the modelling extent.}
 
-\item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
+\item{\code{limits}}{An optional \code{\link[sf:sf]{sf::sf}} object on potential extrapolation limits}
 
 \item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDatasetCollection}} object.}
 
@@ -54,7 +54,7 @@ names(x)
 
 \item{\code{priors}}{An optional \code{\link{PriorList}} object.}
 
-\item{\code{control}}{An optional Control object.}
+\item{\code{control}}{An optional Control object such as for biases.}
 
 \item{\code{latentfactors}}{A \code{\link{character}} on whether latentfactors are used.}
 
@@ -128,9 +128,9 @@ Initializes the object and creates an BiodiversityDataset by default.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{background}}{A \code{\link{SpatRaster}} or \code{\link{sf}} object delineating the modelling extent.}
+\item{\code{background}}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object delineating the modelling extent.}
 
-\item{\code{limits}}{An optional \code{\link{sf}} object on potential extrapolation limits}
+\item{\code{limits}}{An optional \code{\link[sf:sf]{sf::sf}} object on potential extrapolation limits}
 
 \item{\code{biodiversity}}{A \code{\linkS4class{BiodiversityDatasetCollection}} object.}
 
@@ -449,7 +449,7 @@ Specify new offsets.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{A new \code{\link{SpatRaster}} object to be used as offset.}
+\item{\code{x}}{A new \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object to be used as offset.}
 }
 \if{html}{\out{</div>}}
 }
@@ -530,11 +530,11 @@ Set new bias control
 \describe{
 \item{\code{type}}{A \code{\link{character}} with the type of control object.}
 
-\item{\code{x}}{A new bias control object. Expecting a \code{\link{SpatRaster}} object.}
+\item{\code{x}}{A new bias control object. Expecting a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object.}
 
 \item{\code{method}}{The method used to create the object.}
 
-\item{\code{value}}{A bias value as \code{\link{numeric}}.}
+\item{\code{value}}{A vector of supplied values. For \code{"bias"} those should be \code{\link{numeric}}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -559,7 +559,7 @@ Get bias control (print name)
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-A \code{\link{character}} with the bias object if found.
+A \code{\link{character}} with the control object if found.
 }
 }
 \if{html}{\out{<hr>}}
@@ -568,9 +568,16 @@ A \code{\link{character}} with the bias object if found.
 \subsection{Method \code{rm_control()}}{
 Remove bias controls if found.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_control()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityDistribution$rm_control(type)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{A \code{\link{character}} with the type of control object.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 This object.
 }

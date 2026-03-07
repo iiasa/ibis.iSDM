@@ -9,7 +9,7 @@ if (!methods::isClass("Waiver")) methods::setOldClass("Waiver")
 #' `new_waiver()`, this means that `NULL` objects can be a valid setting. The
 #' use of a "waiver" object was inspired by the `ggplot2` and `prioritizr` package.
 #'
-#' @return Object of class `Waiver`.
+#' @returns Object of class `Waiver`.
 #'
 #' @keywords misc
 #'

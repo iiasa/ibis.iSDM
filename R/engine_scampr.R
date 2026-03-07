@@ -27,7 +27,7 @@ NULL
 #' * Presence-absence models in SCAMPR currently only support cloglog link functions!
 #'
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
-#' @param type The mode used for creating (posterior or prior) predictions. Either stting
+#' @param type The mode used for creating (posterior or prior) predictions. Either setting
 #' \code{"link"} or \code{"response"} (Default: \code{"response"}).
 #' @param dens A [`character`] on how predictions are made, either from the \code{"posterior"} (Default)
 #' or \code{"prior"}.

@@ -4,6 +4,8 @@
 #'
 #' @param obj A [`list()`] object containing the prepared model data for a given
 #' biodiversity dataset.
+#' @param vars A [`character()`] vector of variable names to be used in the model.
+#' Can be missing.
 #'
 #' @note Function is not meant to be run outside the train() call.
 #'
@@ -12,26 +14,37 @@
 #' @noRd
 #'
 #' @keywords internal
-built_formula_glmnet <- function(obj){
+built_formula_glmnet <- function(obj, vars){
   assertthat::assert_that(
     is.list(obj),
     length(obj) > 0,
+    missing(vars) || all(is.character(vars)),
     assertthat::has_name(obj, "observations"),
     assertthat::has_name(obj, "equation"),
     assertthat::has_name(obj, "predictors_names"),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
+
+  # If variables are set, respecify formula
+  if(!missing(vars)){
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]', 'yellow', 'Use custom model variables')
+    obj$equation <- new_waiver()
+  }
 
   # Default equation found
   if(obj$equation =='<Default>' || is.Waiver(obj$equation)){
     # Construct formula with all variables
     form <- paste0('observed', ifelse(obj$family=='poisson', '/w', ''), ' ~ ')
     # Add linear predictors
-    form <- paste(form, paste0(obj$predictors_names, collapse = ' + '))
+    if(missing(vars)){
+      form <- paste(form, paste0(obj$predictors_names, collapse = ' + '))
+    } else {
+      form <- paste(form, paste0(vars, collapse = ' + ') )
+    }
     # Convert to formula
     form <- to_formula(form)
   } else{
-    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','yellow','Use custom model equation')
+    if(getOption('ibis.setupmessages', default = TRUE) && missing(vars)) myLog('[Estimation]','yellow','Use custom model equation')
     form <- to_formula(obj$equation)
     # If response is missing, add manually
     if(attr(stats::terms(form), "response")==0) form <- stats::update.formula(form, "observed ~ .")
@@ -49,7 +62,7 @@ built_formula_glmnet <- function(obj){
 
 #' Default regularization constant
 #'
-#' @description This function was taken from the [`maxnet`] R-package to get
+#' @description This function was taken from the \code{"maxnet"} R-package to get
 #' some more informed default lambda values for the regularization.
 #'
 #' @param p A [`vector`] of \code{1} (for presence) or \code{0} (for background).
@@ -157,17 +170,19 @@ determine_lambda <- function(obj){
 #' Summarize cross-validated glmnet model
 #'
 #' @description This helper function summarizes the coefficients from a glmnet
-#' model. The optimal lambda is determined through the [`determine_lambda`]
+#' model. The optimal lambda is determined through the internal \code{"determine_lambda"}
 #' function.
 #'
 #' @param obj An object created with \code{'cv.glmnet'}.
+#' @param exclude_intercept A [`logical()`] value indicating whether the intercept
+#' should be excluded from the summary (Default: `TRUE`).
 #'
 #' @keywords utils
 #'
 #' @noRd
 #'
 #' @keywords internal
-tidy_glmnet_summary <- function(obj){
+tidy_glmnet_summary <- function(obj, exclude_intercept = exclude_intercept){
   assertthat::assert_that(
     inherits(obj, "cv.glmnet") || inherits(obj, "cva.glmnet")
   )
@@ -205,15 +220,18 @@ tidy_glmnet_summary <- function(obj){
 #' model.
 #'
 #' @param obj An object created with [stats::glm.fit()]
+#' @param exclude_intercept A [`logical()`] value indicating whether the intercept
+#' should be excluded from the summary (Default: `TRUE`).
 #'
 #' @keywords utils
 #'
 #' @noRd
 #'
 #' @keywords internal
-tidy_glm_summary <- function(obj){
+tidy_glm_summary <- function(obj, exclude_intercept = TRUE){
   assertthat::assert_that(
-    inherits(obj, 'glm')
+    inherits(obj, 'glm'),
+    is.logical(exclude_intercept)
   )
 
   # Summarize
@@ -222,10 +240,54 @@ tidy_glm_summary <- function(obj){
     tibble::rownames_to_column(var = "variable")
 
   # Remove intercept
-  int <- grep("Intercept",ms$variable,ignore.case = TRUE)
-  if(length(int)>0) ms <- ms[-int,]
+  if(exclude_intercept){
+    int <- grep("Intercept",ms$variable,ignore.case = TRUE)
+    if(length(int)>0) ms <- ms[-int,]
+  }
 
   # Rename the estimate and std.error column
   ms <- ms |> dplyr::rename(mean = "Estimate", se = "Std. Error")
   return(ms)
 }
+
+#' Overwrite Coefficients of a glm Model
+#'
+#' This function replaces the coefficients of a fitted glm object with
+#' user-specified values and updates associated components (linear predictors,
+#' fitted values, and residuals) to remain consistent.
+#'
+#' @param obj An object created with [stats::glm.fit()]
+#' @param new_coefs A named numeric vector of new coefficients. Names must match the original coefficients.
+#'
+#' @return A glm object with updated coefficients and downstream quantities.
+#'
+#' @keywords internal
+#' @examples
+#' \dontrun{
+#' fit <- stats::glm(vs ~ mpg + hp, data = mtcars, family = binomial())
+#' new_coefs <- c("(Intercept)" = -2, "mpg" = 0.1, "hp" = -0.02)
+#' updated_fit <- overwrite_glm_coefficients(fit, new_coefs)
+#' }
+#' @noRd
+overwrite_glm_coefficients <- function(obj, new_coefs) {
+  # Check input
+  if (!inherits(obj, "glm")) stop("model must be a glm object")
+  if (!is.numeric(new_coefs) || is.null(names(new_coefs))) stop("new_coefs must be a named numeric vector.")
+  if (!all(names(names(new_coefs) %in% stats::coef(obj)))) stop("new_coefs must be in original coefficient names.")
+
+  # Overwrite coefficients
+  ind <- which(names(stats::coef(obj)) %in% names(new_coefs))
+  obj$coefficients <- new_coefs[names(stats::coef(obj))[ind]]  # ensure correct order
+
+  # Recompute dependent quantities
+  X <- stats::model.matrix(obj)[,ind]
+  eta <- as.numeric(X %*% obj$coefficients[ind])
+  mu <- obj$family$linkinv(eta)
+
+  obj$linear.predictors <- eta
+  obj$fitted.values <- mu
+  obj$residuals <- obj$y - mu
+
+  return(obj)
+}
+

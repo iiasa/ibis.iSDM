@@ -31,7 +31,7 @@ i.e. coefficients are penalized equally and then informed by an intersection
 of any absence information with the covariates. In contrast a variable with
 penalty.factor equal to \code{0} is not penalized at all.
 
-In addition, it is possible to specifiy a lower and upper limit for specific
+In addition, it is possible to specify a lower and upper limit for specific
 coefficients, which constrain them to a certain range. By default those
 ranges are set to \code{-Inf} and \code{Inf} respectively, but can be reset
 to a specific value range by altering \code{"lims"} (see examples).

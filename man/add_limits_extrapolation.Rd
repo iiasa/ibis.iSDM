@@ -26,7 +26,7 @@ add_limits_extrapolation(
 \arguments{
 \item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link{SpatRaster}} or \code{\link{sf}} object that limits the prediction
+\item{layer}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object that limits the prediction
 surface when intersected with input data (Default: \code{NULL}).}
 
 \item{method}{A \code{\link{character}} vector describing the method used for controlling
@@ -57,28 +57,25 @@ by considering only a subset of observations within the actual distribution),
 in other cases there can also be general barriers or constraints that limit
 any projections (e.g. islands). This limit method adds some of those options
 to a model distribution object. Currently supported methods are:
-
-\link{*} \code{"zones"} - This is a wrapper to allow the addition of zones to a
+\itemize{
+\item \code{"zones"} - This is a wrapper to allow the addition of zones to a
 distribution model object, similar to what is also possible via \code{\link[=distribution]{distribution()}}.
-Required is a spatial layer that describes a environmental zoning.
-
-\link{*} \code{"mcp"} - Rather than using an external or additional layer, this option constraints
+Required is a spatial layer that describes an environmental zoning.
+\item \code{"mcp"} - Rather than using an external or additional layer, this option constrains
 predictions by a certain distance of points in its vicinity. Buffer distances
 have to be in the unit of the projection used and can be configured via
 \code{"mcp_buffer"}.
-
-\link{*} \code{"nt2"} - Constraints the predictions using the multivariate combination novelty index (NT2)
+\item \code{"nt2"} - Constrains the predictions using the multivariate combination novelty index (NT2)
 following Mesgaran et al. (2014). This method is also available in the \code{\link[=similarity]{similarity()}}
 function.
-
-\link{*} \code{"mess"} - Constraints the predictions using the
+\item \code{"mess"} - Constrains the predictions using the
 Multivariate Environmental Similarity Surfaces (MESS) following Mesgaran et al. (2014).
 This method is also available in the \code{\link[=similarity]{similarity()}} function.
-
-\link{*} \code{"shape"} - This is an implementation of the 'shape' method introduced
+\item \code{"shape"} - This is an implementation of the 'shape' method introduced
 by Velazco et al. (2023). Through a user defined threshold it effectively limits
 model extrapolation so that no projections are made beyond the extent judged as
 defensible and informed by the training observations. \strong{Not yet implemented!}
+}
 
 See also details for further explanations.
 }

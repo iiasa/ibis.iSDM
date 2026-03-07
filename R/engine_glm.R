@@ -4,16 +4,16 @@ NULL
 #' Engine for Generalized linear models (GLM)
 #'
 #' @description
-#' This engine implements a basic generalized linear modle (GLM) for creating
+#' This engine implements a basic generalized linear model (GLM) for creating
 #' species distribution models. The main purpose of this engine is to support
 #' a basic, dependency-free method for inference and projection that can be used
 #' within the package for examples and vignettes. That being said, the engine is
 #' fully functional as any other engine.
 #'
-#' The basic implementation of GLMs here is part of a general class oflinear models
+#' The basic implementation of GLMs here is part of a general class of linear models
 #' and has - with exception of offsets - only minimal options to integrate other
 #' sources of information such as priors or joint integration. The general
-#' recommendation is to [engine_glmnet()] instead for regularization support.
+#' recommendation is to use [engine_glmnet()] instead for regularization support.
 #' However basic GLMs can in some cases be useful for quick projections or
 #' for [ensemble()] of small models (a practice common for rare species).
 #'
@@ -508,28 +508,23 @@ engine_glm <- function(x,
               # Inverse link function
               ilf <- switch (settings$get('type'),
                              "link" = NULL,
-                             "response" = ifelse(model$biodiversity[[1]]$family=='poisson',
-                                                 exp, logistic)
+                             "response" = if(model$biodiversity[[1]]$family == 'poisson') exp else logistic
               )
+
+              # Prediction function for GLM (link scale)
+              glm_predict_fun <- function(object, newdata) {
+                as.numeric(predict(object, newdata = newdata, type = "link"))
+              }
 
               pp <- data.frame()
               pb <- progress::progress_bar$new(total = length(x.var))
               for(v in x.var){
-                if(!is.Waiver(of)){
-                  # Predict with offset
-                  p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                                     ice = FALSE, center = FALSE,
-                                     type = "regression", newoffset = of,
-                                     inv.link = ilf,
-                                     plot = FALSE, rug = TRUE, train = df)
-                } else {
-                  p1 <- pdp::partial(mod, pred.var = v, pred.grid = df2,
-                                     ice = FALSE, center = FALSE,
-                                     type = "regression", inv.link = ilf,
-                                     plot = FALSE, rug = TRUE, train = df
-                  )
-                }
-                p1 <- p1[, c(v, "yhat")]
+                p1 <- compute_partial_dependence(
+                  object = mod, pred.var = v, pred.grid = df2, train = df,
+                  predict_fun = glm_predict_fun,
+                  inv.link = ilf,
+                  offset = if(!is.Waiver(of)) of else NULL
+                )
                 names(p1) <- c("partial_effect", "mean")
                 p1 <- cbind(variable = v, p1)
                 pp <- rbind(pp, p1)
@@ -635,11 +630,11 @@ engine_glm <- function(x,
       return(rd)
     }, overwrite = TRUE)
 
-    # Get coefficients from glmnet
-    obj$set("public", "get_coefficients", function(){
+    # Get coefficients from model
+    obj$set("public", "get_coefficients", function(exclude_intercept = TRUE){
       # Returns a vector of the coefficients with direction/importance
       obj <- self$get_data("fit_best")
-      cofs <- tidy_glm_summary(obj)
+      cofs <- tidy_glm_summary(obj, exclude_intercept = exclude_intercept)
       names(cofs)[1:2] <- c("Feature", "Beta")
       return(cofs)
     }, overwrite = TRUE)

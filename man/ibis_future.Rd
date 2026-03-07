@@ -12,12 +12,12 @@ ibis_future(
 )
 }
 \arguments{
-\item{plan_exists}{A \code{\link{logical}} check on whether an existing \code{\link{future}} plan exists (Default: \code{FALSE}).}
+\item{plan_exists}{A \code{\link{logical}} check on whether an existing \code{\link[future:future]{future::future}} plan exists (Default: \code{FALSE}).}
 
 \item{cores}{A \code{\link{numeric}} number stating the number of cores to use.}
 
 \item{strategy}{A \code{\link{character}} denoting the strategy to be used for future.
-See help of \code{\link{future}} for options. (Default: \code{"multisession"}).}
+See help of \code{\link[future:future]{future::future}} for options. (Default: \code{"multisession"}).}
 
 \item{workers}{An optional list of remote machines or workers, e.g. \code{"c(remote.server.org)"}.
 Alternatively a \code{"cluster"} object can be provided.}
@@ -42,7 +42,7 @@ Currently supported strategies are:
 }
 }
 \note{
-The \code{'plan'} set by \link{future} exists after the function has been executed.
+The \code{'plan'} set by \link[future:future]{future::future} exists after the function has been executed.
 
 If the aim is to parallize across many species, this is better done in a scripted solution.
 Make sure not to parallize predictions within existing clusters to avoid out-of-memory
@@ -56,6 +56,6 @@ ibis_future(cores = 4, strategy = "multisession")
 
 }
 \seealso{
-\link{future}
+\link[future:future]{future::future}
 }
 \keyword{misc}

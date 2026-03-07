@@ -19,15 +19,15 @@ built_formula_bart <- function(obj){
     assertthat::has_name(obj, "observations"),
     assertthat::has_name(obj, "equation"),
     assertthat::has_name(obj, "predictors_names"),
-    msg = "Error in model object. This function is not meant to be called outside ouf train()."
+    msg = "Error in model object. This function is not meant to be called outside of train()."
   )
 
   # Default equation found
   if(is.Waiver(obj$equation) || obj$equation == '<Default>'){
     # Construct formula with all variables
-    form <- paste( 'observed' ,
-                   ifelse(obj$family=='poisson', '/w', ''), '~ ',
-                   paste(obj$predictors_names, collapse = " + "))
+    form <- paste('observed' ,
+                  ifelse(obj$family=='poisson', '/w', ''), '~ ',
+                  paste(obj$predictors_names, collapse = " + "))
     # Convert to formula
     form <- to_formula(form)
   } else {
@@ -63,7 +63,7 @@ built_formula_bart <- function(obj){
 #'
 #' @keywords internal
 varimp.bart <- function(model){
-  assertthat::assert_that(class(model) == 'bart',
+  assertthat::assert_that(inherits(model, 'bart'),
                           ("fit" %in% names(model)),
                           msg = 'Model not correctly specified or keeptrees set to FALSE.' )
 
@@ -83,7 +83,7 @@ varimp.bart <- function(model){
     missing.df <- data.frame(names = missing, varimp = 0)
     var.df <- rbind(var.df, missing.df)
   }
-  var.df <- var.df[order(var.df$varimp,decreasing = TRUE),]
+  var.df <- var.df[order(var.df$varimp, decreasing = TRUE),]
   return(var.df)
 }
 
@@ -362,7 +362,7 @@ bart_partial_space <- function(model, envs, x.var = NULL, equal = FALSE, smooth 
   # No x.vars chosen, take all variables
   if (is.null(x.var)) raw <- model$fit$data@x else raw <- model$fit$data@x[, x.var]
 
-  if (equal == TRUE) {
+  if (equal) {
     if (!is.null(x.var) && length(x.var) == 1) {
       minmax <- data.frame(mins = min(raw), maxs = max(raw))
     }
@@ -401,7 +401,7 @@ bart_partial_space <- function(model, envs, x.var = NULL, equal = FALSE, smooth 
       dfbin <- data.frame(pd$fd[[i]])
       colnames(dfbin) <- c(0, 1)
       dfbin <- reshape2::melt(dfbin)
-      if (transform == TRUE) {
+      if (transform) {
         dfbin$value <- stats::pnorm(dfbin$value)
       }
       # FIXME: To replace with base::aggregate to get rid of dplyr dependency

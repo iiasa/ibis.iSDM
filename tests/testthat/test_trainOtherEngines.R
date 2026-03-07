@@ -2,12 +2,10 @@
 test_that('Train a distribution model with XGboost', {
 
   skip_if_not_installed('xgboost')
-  skip_if_not_installed('pdp')
 
   skip_on_cran()
 
   suppressWarnings( requireNamespace('xgboost', quietly = TRUE) )
-  suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
   # Set to verbose
   options("ibis.setupmessages" = FALSE)
@@ -62,8 +60,16 @@ test_that('Train a distribution model with XGboost', {
   expect_s3_class(mod$get_centroid(), "sf")
   expect_s3_class(tr$get_centroid(), "sf")
 
+  # Do priors work
+  pp <- priors(XGBPrior("CLC3_132_mean_50km", hyper = "positive")) # Always retain positive Forest
+  expect_no_error(
+    suppressWarnings(
+      mod2 <- x |> add_priors(pp) |> train(only_linear = FALSE, verbose = TRUE)
+    )
+  )
+
   # Some partial calculations
-  expect_no_error(ex <- partial(mod, x.var = "CLC3_132_mean_50km"))
+  expect_no_error(ex <- partial(mod2, x.var = "CLC3_132_mean_50km"))
   expect_s3_class(ex, 'data.frame')
 
   # Spartial
@@ -292,12 +298,10 @@ test_that('Train a distribution model with GDB', {
 test_that('Train a distribution model with glmnet', {
 
   skip_if_not_installed('glmnet')
-  skip_if_not_installed('pdp')
 
   skip_on_cran()
 
   suppressWarnings( requireNamespace('glmnet', quietly = TRUE) )
-  suppressWarnings( requireNamespace('pdp', quietly = TRUE) )
 
   # Set to verbose
   options("ibis.setupmessages" = FALSE)
@@ -488,7 +492,7 @@ test_that('Train a distribution model with bart', {
 
 # ---- #
 # Train a full distribution model with inlabru
-test_that('Train a distribution model with INLABRU', {
+test_that('Train a distribution model with inlabru', {
 
   skip_if_not_installed('inlabru')
   skip_if_not_installed('INLA')
