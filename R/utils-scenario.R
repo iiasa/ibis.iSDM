@@ -970,7 +970,7 @@ calculate_range_centre <- function(layer, spatial = TRUE) {
     )
     # Calculate area-weighted centre
     r_wt <- terra::cellSize(layer, unit = "km")
-    values(r_wt)[is.na(values(layer))] <- NA
+    terra::values(r_wt)[is.na(terra::values(layer))] <- NA
 
     # Make a spatial point layer
     spdf <- terra::as.points( c(layer, r_wt)) |> sf::st_as_sf()

@@ -86,8 +86,6 @@ NULL
 #'         project()
 #' }
 #'
-#' @import terra
-#'
 #' @name project
 NULL
 

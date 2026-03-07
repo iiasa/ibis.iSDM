@@ -131,8 +131,8 @@ intersecting_extents <- function(x, y) {
     inherits(x, c("SpatRaster", "Spatial", "sf")),
     inherits(y, c("SpatRaster", "Spatial", "sf")))
   isTRUE(sf::st_intersects(
-    terra::ext(x) |> vect() |> sf::st_as_sf(),
-    terra::ext(y) |> vect() |> sf::st_as_sf(),
+    terra::ext(x) |> terra::vect() |> sf::st_as_sf(),
+    terra::ext(y) |> terra::vect() |> sf::st_as_sf(),
     sparse = FALSE)[[1]])
 }
 
