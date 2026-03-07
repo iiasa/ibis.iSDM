@@ -290,19 +290,19 @@ BiodiversityDatasetCollection <- R6::R6Class(
       # Adding the other elements
       for(dataset in names(cols)){
 
-        if('Polygon - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data(dataset))[cols[[dataset]]], fill = 'lightblue', alpha = .35 )
+        if('Polygon - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = sf::st_as_sf(self$get_data(dataset))[cols[[dataset]]], fill = 'lightblue', alpha = .35 )
 
         if('Polygon - Presence absence' == self$get_types()[dataset] ){
-          dd <- st_as_sf(self$get_data(dataset))[cols[[dataset]]]
+          dd <- sf::st_as_sf(self$get_data(dataset))[cols[[dataset]]]
           dd[[cols[[dataset]]]] <- factor(dd[[cols[[dataset]]]])
           g <- g + ggplot2::geom_sf(data = dd, fill = 'lightgreen', alpha = .35 )
         }
 
-        if('Point - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = st_as_sf(self$get_data(dataset))[cols[[dataset]]],
+        if('Point - Presence only' == self$get_types()[dataset] ) g <- g + ggplot2::geom_sf(data = sf::st_as_sf(self$get_data(dataset))[cols[[dataset]]],
                                                                                             colour = 'grey20', alpha = .5 )
 
         if('Point - Presence absence' == self$get_types()[dataset] ){
-          dd <- st_as_sf(self$get_data(dataset))[cols[[dataset]]]
+          dd <- sf::st_as_sf(self$get_data(dataset))[cols[[dataset]]]
           dd[[cols[[dataset]]]] <- factor(dd[[cols[[dataset]]]])
           dd$observed <- dd[[cols[[dataset]]]]
           g <- g + ggplot2::geom_sf(data = dd, ggplot2::aes(colour = observed) )
