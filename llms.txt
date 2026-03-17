@@ -31,9 +31,6 @@ remotes::install_github("IIASA/ibis.iSDM")
 See relevant [reference site](https://iiasa.github.io/ibis.iSDM/) and
 [articles](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.html).
 
-Note that the package is in active development and parameters of some
-functions might change.
-
 **Citation:**
 
 Jung, Martin. 2023. “An Integrated Species Distribution Modelling

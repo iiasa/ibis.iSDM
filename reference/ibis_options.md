@@ -72,7 +72,7 @@ ibis_options()
 #> [1] FALSE
 #> 
 #> $ibis.seed
-#> [1] 12353
+#> [1] 14388
 #> 
 #> $ibis.setupmessages
 #> [1] TRUE

@@ -1,12 +1,24 @@
 # Changelog
 
-## ibis.iSDM 0.1.7 (current dev branch)
+## ibis.iSDM 0.1.8 (current dev branch)
+
+##### New features
+
+##### Minor improvements and bug fixes
+
+- Replacement of the `st_kde` function with an internal implementation
+  of kernel density estimation in c++
+
+## ibis.iSDM 0.1.7
 
 ##### New features
 
 - Implementation of small ensemble of models for linear engines
   ([`add_control_esm()`](https://iiasa.github.io/ibis.iSDM/reference/add_control_esm.md))
   [\#141](https://github.com/iiasa/ibis.iSDM/issues/141)
+
+##### Minor improvements and bug fixes
+
 - Raise informative error if bias layer has negative values.
   [\#148](https://github.com/iiasa/ibis.iSDM/issues/148)
 - Update
@@ -25,8 +37,6 @@
   to have it working again.
 - 🐛 Refactor code to avoid importing namespaces
   [\#95](https://github.com/iiasa/ibis.iSDM/issues/95)
-
-##### Minor improvements and bug fixes
 
 ## ibis.iSDM 0.1.6
 

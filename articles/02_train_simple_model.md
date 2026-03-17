@@ -227,6 +227,13 @@ fit <- train(mod,
              aggregate_observations = FALSE, # Don't aggregate point counts per grid cell
              verbose = FALSE # Don't be chatty
              )
+#> Warning: `like()` was deprecated in inlabru 2.12.0.
+#> ℹ Please use `bru_obs()` instead.
+#> ℹ The deprecated feature was likely used in the ibis.iSDM package.
+#>   Please report the issue at <https://github.com/iiasa/ibis.iSDM/issues>.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 ```
 
 ### Summarizing and plotting the fitted distribution object
@@ -358,21 +365,21 @@ gathered data.
 fit$rm_threshold()
 validate(fit, method = "cont")
 #>                                modelid                 name     method
-#> 1 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 2 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 3 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 4 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 5 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 6 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 7 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
-#> 8 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species continuous
+#> 1 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 2 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 3 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 4 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 5 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 6 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 7 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
+#> 8 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species continuous
 #>       metric       value
 #> 1          n 208.0000000
 #> 2         r2        -Inf
-#> 3       rmse   0.6103052
-#> 4        mae   0.5329316
-#> 5       mape   0.5329316
-#> 6    logloss   1.4568300
+#> 3       rmse   0.6087846
+#> 4        mae   0.5307992
+#> 5       mape   0.5307992
+#> 6    logloss   1.4533008
 #> 7   normgini         NaN
 #> 8 cont.boyce          NA
 
@@ -380,33 +387,33 @@ validate(fit, method = "cont")
 fit <- threshold(fit, method = "percentile", value = 0.5, format = "binary")
 validate(fit, method = "disc")
 #>                                 modelid                 name   method
-#> 1  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 2  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 3  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 4  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 5  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 6  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 7  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 8  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 9  bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 10 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 11 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 12 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
-#> 13 bfcb9088-6b40-4450-8cca-73e97a851697 Virtual test species discrete
+#> 1  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 2  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 3  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 4  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 5  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 6  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 7  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 8  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 9  1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 10 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 11 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 12 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
+#> 13 1d150143-0af7-4f86-937d-48e552ad7c3b Virtual test species discrete
 #>                 metric       value
 #> 1                    n 602.0000000
-#> 2                  auc   0.6928934
-#> 3     overall.accuracy   0.7524917
-#> 4  true.presence.ratio   0.4110672
-#> 5            precision   0.6979866
+#> 2                  auc   0.6941624
+#> 3     overall.accuracy   0.7541528
+#> 4  true.presence.ratio   0.4126984
+#> 5            precision   0.7027027
 #> 6          sensitivity   0.5000000
-#> 7          specificity   0.8857868
-#> 8                  tss   0.3857868
-#> 9                   f1   0.5826331
-#> 10             logloss   6.2143401
-#> 11   expected.accuracy   0.5780124
-#> 12               kappa   0.4134702
-#> 13         brier.score   0.2475083
+#> 7          specificity   0.8883249
+#> 8                  tss   0.3883249
+#> 9                   f1   0.5842697
+#> 10             logloss   6.2126790
+#> 11   expected.accuracy   0.5785256
+#> 12               kappa   0.4166972
+#> 13         brier.score   0.2458472
 ```
 
 Validating integrated SDMs, particular those fitted with multiple

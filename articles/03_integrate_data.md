@@ -238,7 +238,7 @@ mod_esm <- distribution(background) |>
       engine_glmnet() |> 
       train(runname = "ESM prediction", only_linear = TRUE)
 #> Training 28 ESM GLMNET-Engine models with 2 predictors each.
-#> [Setup] 2026-03-07 12:05:52.11971 | Replacing currently selected engine.
+#> [Setup] 2026-03-17 21:04:38.10844 | Replacing currently selected engine.
 #> 
 #> ! Overwriting previously defined engine.
 
@@ -303,6 +303,13 @@ x <- distribution(background) |>
 
 # Make a first model
 mod1 <- train(x, only_linear = TRUE)
+#> Warning: `like()` was deprecated in inlabru 2.12.0.
+#> ℹ Please use `bru_obs()` instead.
+#> ℹ The deprecated feature was likely used in the ibis.iSDM package.
+#>   Please report the issue at <https://github.com/iiasa/ibis.iSDM/issues>.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 
 # Now assume we now that the species occurs more likely in intensively farmed land. 
 # We can use this information to construct a prior for the linear coefficient.
@@ -314,7 +321,7 @@ p <- INLAPrior(variable = "CLC3_211_mean_50km",
 pp <- priors(p)
 # The variables and values in this object can be queried as well
 pp$varnames()
-#> 48c1bc35-be78-44b8-8b35-147f5dbd8d1b 
+#> 5fae39cc-63bb-4b3e-a7f7-2baf08d6239f 
 #>                 "CLC3_211_mean_50km"
 
 # Priors can then be added via 
@@ -556,8 +563,8 @@ summary(mod1)
 #>    variable                   mean      sd      q05     q50    q95    mode   kld
 #>    <chr>                     <dbl>   <dbl>    <dbl>   <dbl>  <dbl>   <dbl> <dbl>
 #>  1 Intercept               -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
-#>  2 Intercept_X38b2c1ec_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
-#>  3 Intercept_X62cda09c_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
+#>  2 Intercept_X276291f6_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
+#>  3 Intercept_X2f987b94_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
 #>  4 bio01_mean_50km         -0.109   0.134   -0.330  -0.109   0.112 -0.109      0
 #>  5 bio03_mean_50km         -0.482   0.121   -0.681  -0.482  -0.283 -0.482      0
 #>  6 bio19_mean_50km          0.472   0.0870   0.329   0.472   0.615  0.472      0
