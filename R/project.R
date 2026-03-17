@@ -856,7 +856,8 @@ methods::setMethod(
     # Now predict
     out <- try({ x$project(newdata = env, layer = layer) })
     if(inherits(out, 'try-error')){
-      cli::cli_alert_danger(paste0("Projection failed: ", conditionMessage(attr(out, 'condition'))))
+      err_msg <- if(!is.null(attr(out, 'condition'))) conditionMessage(attr(out, 'condition')) else as.character(out)
+      cli::cli_alert_danger(paste0("Projection failed: ", err_msg))
       warning(paste0("Projection error details: ", as.character(out)))
       return(template)
     }

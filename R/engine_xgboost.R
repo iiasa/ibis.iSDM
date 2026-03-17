@@ -926,7 +926,12 @@ engine_xgboost <- function(x,
       if(nrow(newdata)==nrow(model$predictors)){
         prediction <- try({model_to_background(model)}, silent = TRUE)
         prediction[] <- pred_xgb
-        mask_tmp <- sum(terra::rast(newdata_copy, crs = terra::crs(prediction)))
+        # Create mask using only numeric columns to avoid issues with factor/character columns
+        mask_df <- newdata_copy[, intersect(c("x", "y", fn), colnames(newdata_copy))]
+        for(mc in names(mask_df)){
+          if(!is.numeric(mask_df[[mc]])) mask_df[[mc]] <- as.numeric(as.factor(mask_df[[mc]]))
+        }
+        mask_tmp <- sum(terra::rast(mask_df, crs = terra::crs(prediction)))
         prediction <- terra::mask(prediction, mask_tmp) # make sure to only use nonNA cells
       } else {
         assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),

@@ -423,6 +423,13 @@ raster_to_stars <- function(obj){
   terra::time(obj) <- times
   # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
 
+  # Convert all factors to integer first to avoid issues during stars conversion
+  if(any(terra::is.factor(obj))){
+    for(fi in which(terra::is.factor(obj))){
+      obj[[fi]] <- terra::as.int(obj[[fi]])
+    }
+  }
+
   # Convert to stars step by step
   # HACKY: But seems to be the most robust way?
   new_env <- list()
@@ -430,13 +437,7 @@ raster_to_stars <- function(obj){
     oo <- subset(obj, i)
     # Check if times are unique
     if(length(unique(times))==1) terra::time(oo) <- NULL
-    # Factor conversion is buggy in stars thus convert to integer first
-    if(is.factor(oo)){
-      oo <- terra::as.int(oo) # Convert to numeric first
-      suppressWarnings(  o <- stars::st_as_stars(oo) )
-    } else {
-      suppressWarnings(  o <- stars::st_as_stars(oo) )
-    }
+    suppressWarnings(  o <- stars::st_as_stars(oo) )
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
 
@@ -448,6 +449,13 @@ raster_to_stars <- function(obj){
     new_env[[ paste0(names(oo),times[i]) ]] <- o
   }
 
+  # Ensure all stars objects have consistent dimensions before merging
+  if(length(new_env) > 1){
+    ref_dims <- stars::st_dimensions(new_env[[1]])
+    for(j in 2:length(new_env)){
+      stars::st_dimensions(new_env[[j]]) <- ref_dims
+    }
+  }
   new_env <- do.call(c, new_env)
   # :fire: Rename just to be sure
   names(new_env) <- unique( names(obj) )
