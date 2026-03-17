@@ -342,9 +342,21 @@ methods::setMethod(
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
 
-    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "cell", "time",
-                                            unlist(int_pred_names, use.names = FALSE),
-                                            mod_pred_names)))
+    expected_cols <- c("x", "y", "cell", "time",
+                       unlist(int_pred_names, use.names = FALSE),
+                       mod_pred_names)
+    missing_cols <- expected_cols[!expected_cols %in% colnames(df)]
+    if(length(missing_cols) > 0){
+      # Filter out structural columns (cell is optional) from warning
+      missing_preds <- missing_cols[!missing_cols %in% c("cell")]
+      if(length(missing_preds) > 0){
+        warning(paste0("Model predictors missing from scenario data: ",
+                       paste(missing_preds, collapse = ", "),
+                       ". Available columns: ",
+                       paste(colnames(df), collapse = ", ")))
+      }
+    }
+    df <- dplyr::select(df, dplyr::any_of(expected_cols))
 
     df$time <- to_POSIXct(df$time)
     # Convert all units classes to numeric or character to avoid problems
@@ -415,6 +427,13 @@ methods::setMethod(
 
       # Project suitability
       pred_tmp <- c("x", "y", fit$model$predictors_names)
+      # Warn if any expected predictors are missing from the data
+      missing_step_preds <- pred_tmp[!pred_tmp %in% colnames(nd)]
+      if(length(missing_step_preds) > 0){
+        warning(paste0("Predictors missing during projection step ",
+                       as.character(step), ": ",
+                       paste(missing_step_preds, collapse = ", ")))
+      }
       out <- fit$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)), layer = layer)
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
       if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
@@ -792,11 +811,26 @@ methods::setMethod(
       names(env) <- nn
     }
 
-    # Check that all predictor names are present
+    # Check that all predictor names are present and warn about mismatches
+    missing_preds <- co[!co %in% names(env)]
+    if(length(missing_preds) > 0){
+      warning(paste0("Model predictors missing from projection environment: ",
+                     paste(missing_preds, collapse = ", "),
+                     ". Available: ", paste(names(env), collapse = ", ")))
+    }
     assertthat::assert_that(
       all(co %in% names(env)),
-      msg = "Not all coefficients are found in the fitted model..."
+      msg = paste0("Not all model predictors found in the projection data. Missing: ",
+                   paste(co[!co %in% names(env)], collapse = ", "))
     )
+
+    # Also check consistency between biodiversity predictor names and model-level names
+    model_pn <- model$predictors_names
+    if(!is.null(model_pn) && !identical(sort(co), sort(model_pn))){
+      warning(paste0("Inconsistency between biodiversity predictor names and model predictor names. ",
+                     "biodiversity: [", paste(co, collapse = ", "), "] vs model: [",
+                     paste(model_pn, collapse = ", "), "]"))
+    }
 
     # Make a template
     if(is.Raster(env)) {
@@ -822,7 +856,8 @@ methods::setMethod(
     # Now predict
     out <- try({ x$project(newdata = env, layer = layer) })
     if(inherits(out, 'try-error')){
-      cli::cli_alert_danger("Projection failed! Returning emptyraster gracefully")
+      cli::cli_alert_danger(paste0("Projection failed: ", conditionMessage(attr(out, 'condition'))))
+      warning(paste0("Projection error details: ", as.character(out)))
       return(template)
     }
     names(out) <- paste0("suitability", "_", layer)

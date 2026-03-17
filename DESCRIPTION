@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.1.7
+Version: 0.1.8
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -30,6 +30,7 @@ Encoding: UTF-8
 Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     R6 (>= 2.5.0),
+    Rcpp,
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
     future (>= 1.23.0),
@@ -53,6 +54,8 @@ Imports:
     uuid,
     cli (>= 3.6.0),
     utils
+LinkingTo:
+    Rcpp
 Depends:
     R (>= 4.1.0)
 Suggests:
@@ -93,6 +96,7 @@ Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Collate: 
+    'RcppExports.R'
     'waiver.R'
     'class-biodiversitydataset.R'
     'class-biodiversitydistribution.R'

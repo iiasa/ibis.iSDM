@@ -31,18 +31,40 @@ test_that('Train a distribution model with XGboost', {
   expect_no_error( check(x) )
 
   # Train the model
-  suppressWarnings(
-    mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
-                 varsel = "none", verbose = FALSE)
+  expect_no_error(
+    suppressWarnings(
+      mod <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
+                   varsel = "none", verbose = FALSE)
+    )
   )
 
   # Run a check (should work without errors at least)
   expect_no_error( suppressMessages( check(mod) ) )
 
+  # Also check with factor variable
+  # One of them (Köppen) is a factor, we will now convert this to a true factor variable
+  predictors$koeppen_50km <- terra::as.factor(predictors$koeppen_50km)
+  x <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+    add_predictors(predictors, transform = 'none',derivates = 'none') |>
+    engine_xgboost(iter = 100)
+  # Train again
+  expect_no_error(
+    suppressWarnings(
+      mod2 <- train(x, "test", inference_only = FALSE, only_linear = TRUE,
+                   varsel = "none", verbose = FALSE)
+    )
+  )
+  # ---- #
+
   # Expect summary
   expect_s3_class(summary(mod), "data.frame")
   expect_s3_class(mod$show_duration(), "difftime")
   expect_equal(length(mod$show_rasters()), 1) # Now predictions found
+
+  # --- #
+  # Project
+  expect_s4_class(project(mod, predictors), "SpatRaster")
 
   # --- #
   # Some checks

@@ -31,18 +31,27 @@ test_that('Add further tests for model fits', {
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
     engine_glm()
 
-  # Train 2 model
+  # Train 2 models
   suppressWarnings(
     mod <- train(x |> add_biodiversity_poipa(train_data, field_occurrence = 'Observed',
                                              name = 'Virtual points',docheck = F),
-                 "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+                 "test", inference_only = FALSE, only_linear = TRUE, filter_predictors = "none", verbose = FALSE)
   )
   suppressWarnings(
     mod_poipo <- train(x |> add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed',
                                                    name = 'Virtual points',docheck = F),
-                 "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+                 "test", inference_only = FALSE, only_linear = TRUE,filter_predictors = "none", verbose = FALSE)
   )
   expect_s4_class(mod$get_data(), "SpatRaster")
+
+  # Check for latent spatial constraints
+  expect_false(mod$has_latent())
+  expect_no_error(
+    mod_lat <- train(x |> add_biodiversity_poipa(train_data, field_occurrence = 'Observed',
+                                                 name = 'Virtual points',docheck = F) |>
+                       add_latent_spatial(method = "kde"),
+                     inference_only = FALSE)
+  )
 
   # Threshold with independent data
   suppressMessages(
