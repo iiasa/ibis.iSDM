@@ -8,7 +8,7 @@ message: 'To cite package "ibis.iSDM" in publications use:'
 type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
-version: 0.1.7
+version: 0.1.8
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -47,6 +47,7 @@ contact:
 keywords:
 - bayesian
 - biodiversity
+- ecology
 - integrated-framework
 - poisson-process
 - scenarios
@@ -78,6 +79,41 @@ references:
   year: '2026'
   doi: 10.32614/CRAN.package.R6
   version: '>= 2.5.0'
+- type: software
+  title: Rcpp
+  abstract: 'Rcpp: Seamless R and C++ Integration'
+  notes: Imports
+  url: https://www.rcpp.org
+  repository: https://CRAN.R-project.org/package=Rcpp
+  authors:
+  - family-names: Eddelbuettel
+    given-names: Dirk
+    email: edd@debian.org
+    orcid: https://orcid.org/0000-0001-6419-907X
+  - family-names: Francois
+    given-names: Romain
+    orcid: https://orcid.org/0000-0002-2444-4226
+  - family-names: Allaire
+    given-names: JJ
+    orcid: https://orcid.org/0000-0003-0174-9868
+  - family-names: Ushey
+    given-names: Kevin
+    orcid: https://orcid.org/0000-0003-2880-7407
+  - family-names: Kou
+    given-names: Qiang
+    orcid: https://orcid.org/0000-0001-6786-5453
+  - family-names: Russell
+    given-names: Nathan
+  - family-names: Ucar
+    given-names: Iñaki
+    orcid: https://orcid.org/0000-0001-6403-5550
+  - family-names: Bates
+    given-names: Doug
+    orcid: https://orcid.org/0000-0001-8316-9503
+  - family-names: Chambers
+    given-names: John
+  year: '2026'
+  doi: 10.32614/CRAN.package.Rcpp
 - type: software
   title: assertthat
   abstract: 'assertthat: Easy Pre and Post Assertions'
@@ -368,6 +404,12 @@ references:
     given-names: Robert J.
     email: r.hijmans@gmail.com
     orcid: https://orcid.org/0000-0001-5872-2872
+  - family-names: Brown
+    given-names: Andrew
+    orcid: https://orcid.org/0000-0002-4565-533X
+  - family-names: Barbosa
+    given-names: Márcia
+    orcid: https://orcid.org/0000-0001-8972-7713
   year: '2026'
   doi: 10.32614/CRAN.package.terra
   version: '>= 1.8-28'
