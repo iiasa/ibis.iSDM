@@ -217,7 +217,7 @@ test_that('Modify scenario objects', {
   sc <- sc |> add_predictors(future_dummy)
 
   # Add constraint
-  sc |> add_constraint(method = 'sdd_nexp', value = 1e3)
+  sc |> add_constraint(method = 'nexp', value = 1e3)
   expect_s3_class(sc$get_constraints(), 'Waiver')
   # Try and add the same constraint. By default this should replace the previous one
   sc <- sc |> add_constraint(method = 'sdd_nexp', value = 1e3)

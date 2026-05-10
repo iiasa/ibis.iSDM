@@ -455,10 +455,9 @@ engine_glmnet <- function(x,
                                 lower.limits = lowlim,
                                 upper.limits = upplim,
                                 standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                                maxit = (10^5)*2, # Increase the maximum number of passes for lambda
                                 parallel = getOption("ibis.runparallel"),
-                                trace.it = settings$get("verbose"),
-                                nfolds = 10  # number of folds for cross-validation
+                                nfolds = 10,  # number of folds for cross-validation
+                                control = list(maxit = (10^5)*2, trace.it = as.integer(settings$get("verbose")))
         )
       },silent = FALSE)
     } else {
@@ -475,10 +474,9 @@ engine_glmnet <- function(x,
                                lower.limits = lowlim,
                                upper.limits = upplim,
                                standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                               maxit = (10^5)*2, # Increase the maximum number of passes for lambda
                                parallel = getOption("ibis.runparallel"),
-                               trace.it = settings$get("verbose"),
-                               nfolds = 10  # number of folds for cross-validation
+                               nfolds = 10,  # number of folds for cross-validation
+                               control = list(maxit = (10^5)*2, trace.it = as.integer(settings$get("verbose")))
         )
       },silent = FALSE)
     }

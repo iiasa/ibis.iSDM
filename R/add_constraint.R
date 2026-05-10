@@ -108,6 +108,9 @@ methods::setMethod(
       !is.Waiver(mod$get_predictors()),
       is.character(method)
     )
+    # Normalize common shorthand aliases before matching
+    method <- switch(method, "sdd_fix" = "sdd_fixed", "sdd_nexp" = "sdd_nexpkernel",
+                     "nexp" = "sdd_nexpkernel", "nexpkernel" = "sdd_nexpkernel", method)
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
@@ -211,6 +214,8 @@ methods::setMethod(
       is.null(value) || is.numeric(value),
       is.null(type) || is.character(type)
     )
+    method <- switch(method, "sdd_fix" = "sdd_fixed", "sdd_nexp" = "sdd_nexpkernel",
+                     "nexp" = "sdd_nexpkernel", "nexpkernel" = "sdd_nexpkernel", method)
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim"), several.ok = FALSE)
@@ -233,14 +238,14 @@ methods::setMethod(
     if(method == "sdd_fixed"){
       # Short-distance dispersal (Fixed)
       assertthat::assert_that(
-        is.numeric(value), msg = "Fixed short distance dispersal needs an annual mean dispersal distance value."
+        is.numeric(value), msg = "Fixed short distance dispersal needs a per-step dispersal distance value."
       )
       cr[['dispersal']] <- list(method = method,
                                 params = c("mean_dispersal_distance" = value))
     } else if(method == "sdd_nexpkernel") {
       # Negative exponential kernel
       assertthat::assert_that(
-        is.numeric(value), msg = "Short distance negative exponential kernel dispersal needs an annual mean dispersal distance value."
+        is.numeric(value), msg = "Short distance negative exponential kernel dispersal needs a per-step dispersal distance value."
       )
       cr[['dispersal']] <- list(method = method,
                                 params = c("mean_dispersal_distance" = value))
@@ -303,13 +308,6 @@ methods::setMethod(
     is.null(resistance) || is.Raster(resistance)
   )
 
-  # Check for small lon-lat values
-  if(terra::is.lonlat(baseline_threshold)){
-    if(value < 1){
-      cli::cli_alert_warning('Very small average dispersal value provided. Check that they are in unit m!')
-    }
-  }
-
   # Check that baseline threshold raster is binomial
   if(length(unique(baseline_threshold)[,1])==1){
     # Try and add no-data and see if that helps
@@ -325,12 +323,16 @@ methods::setMethod(
     resistance <- 2
     baseline_threshold <- terra::mask(baseline_threshold, resistance)
   }
-  # Grow baseline raster by the amount of value at max
-  # Furthermore divide by value to get a normalized distance
+
+  # Warn if value looks like wrong units (gridDist returns meters)
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1) cli::cli_alert_warning('Very small dispersal value provided. Check that units are in m, not degrees!')
+    else if(value > 1e7) cli::cli_alert_warning('Very large dispersal value provided. Check that units are in m, not km!')
+  }
+
+  # Constrain expansion to cells that fall within the previous thresholded range.
   dis <- terra::gridDist(baseline_threshold, target = 1)
-  ras_dis <- terra::clamp(dis, lower = 0, upper = value) / value
-  # Invert
-  ras_dis <- abs(ras_dis - 1)
+  ras_dis <- terra::ifel(dis <= value, 1, 0)
 
   # Now multiply the net suitability projection with this mask
   # Thus removing any grid cells outside
@@ -369,13 +371,6 @@ methods::setMethod(
                              msg = "Baseline map for nexp kernel has less than 2 values?")
   }
 
-  # Check for small lon-lat values
-  if(terra::is.lonlat(baseline_threshold)){
-    if(value < 1){
-      message('Very small average dispersal value provided. Check that they are in unit m!')
-    }
-  }
-
   # Set resistance layer to 0 if set to zero.
   if(is.Raster(resistance)){
     baseline_threshold[resistance == 1] <- 2
@@ -384,18 +379,21 @@ methods::setMethod(
     baseline_threshold <- terra::mask(baseline_threshold, resistance)
   }
 
-  # Divide alpha values by 2
+  # Warn if value looks like wrong units (gridDist returns meters)
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1) cli::cli_alert_warning('Very small dispersal value provided. Check that units are in m, not degrees!')
+    else if(value > 1e7) cli::cli_alert_warning('Very large dispersal value provided. Check that units are in m, not km!')
+  }
+
+  # Use the supplied per-step dispersal distance as the maximum reach and
+  # apply a negative exponential decay within that radius.
   alpha <- value/2
 
-  # Scale value for different projections
-  value_scale <- ifelse(terra::is.lonlat(baseline_threshold), terra::res(baseline_threshold)[1] * 10000, 1)
-
   # Grow baseline raster by using an exponentially weighted kernel
-  ras_dis <- terra::gridDist(baseline_threshold, target = 1, scale = value_scale)
+  dis <- terra::gridDist(baseline_threshold, target = 1)
   # Normalized (with a constant) negative exponential kernel
-  ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
-  # Equivalent to alpha = 1/value and
-  # ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
+  ras_dis <- terra::app(dis, fun = function(x) (1 / (2 * pi * alpha ^ 2)) * exp(-x / alpha) )
+  ras_dis[dis > value] <- 0
   if(normalize){
     ras_dis <- predictor_transform(ras_dis, option = 'norm')
   }
@@ -676,7 +674,7 @@ methods::setMethod(
         msg = "Ensure that variable limits are correctly set!"
       )
       if(is.null(names)) names <- NA
-      if(length(names)!=length(value_min)) cli::cli_alert_warning("More variable names that limits provided...")
+      if(length(names)!=length(value_min)) cli::cli_alert_warning("More variable names than limits provided...")
       co[['adaptability']] <- list(method = method,
                                    params = c("names" = names,
                                               "approach" = approach,
@@ -762,7 +760,8 @@ methods::setMethod(
 #' predictors and biodiversity predictors.
 #' @param approach [`character`] on whether thresholds or hinges are to be calculated (Default: \code{'thresh'}).
 #' @param names A [`character`] or \code{NULL} of the names of predictors.
-#' @param value A [`numeric`] value of the preferred
+#' @param value A [`numeric`] preferred (optimal) value for the variable; currently unused in the calculation but
+#'   reserved for future bell-curve / optimum response implementations.
 #' @param value_min A [`numeric`] minimum value used for method \code{"fixedlimit"}.
 #' @param value_max A [`numeric`] maximum value used for method \code{"fixedlimit"}.
 #'

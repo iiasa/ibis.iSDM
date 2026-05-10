@@ -4,7 +4,9 @@
 
 #### Minor improvements and bug fixes
 
+* Minor :bug: fixes with scenario predictons not accounting properly for zone limits.
 * Replacement of the `st_kde` function with an internal implementation of kernel density estimation in c++
+* Fixed Log function for both model and scenario fitting.
 
 # ibis.iSDM 0.1.7
 

@@ -23,6 +23,7 @@ BiodiversityScenario <- R6::R6Class(
     #' @field constraints Any constraints set for projection.
     #' @field latentfactors A [`list`] on whether latentfactors are used.
     #' @field scenarios The resulting [`stars`] objects.
+    #' @field log A [`Log-class`] object for capturing messages.
     modelobject = new_waiver(),
     modelid = new_waiver(),
     limits = new_waiver(),
@@ -30,6 +31,7 @@ BiodiversityScenario <- R6::R6Class(
     constraints = new_waiver(),
     latentfactors = new_waiver(),
     scenarios = new_waiver(),
+    log = new_waiver(),
 
     #' @description
     #' Initializes the object and creates an empty list
@@ -300,6 +302,27 @@ BiodiversityScenario <- R6::R6Class(
       } else {
         self$constraints <- x
       }
+      return(self)
+    },
+
+    #' @description
+    #' Returns the output filename of the current log object if set.
+    #' @return A [`character`] where the output is returned.
+    get_log = function(){
+      if(is.Waiver(self$log)){
+        return('<Console>')
+      } else {
+        self$log$get_filename()
+      }
+    },
+
+    #' @description
+    #' Set a new log object
+    #' @param x A [`Log-class`] object.
+    #' @return This object
+    set_log = function(x){
+      assertthat::assert_that(inherits(x, "Log"))
+      self$log <- x
       return(self)
     },
 

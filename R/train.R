@@ -853,7 +853,7 @@ methods::setMethod(
       }
 
       # Also clip the predictors if set
-      if(x$get_limits()$limits_clip && nrow(zones)>0){
+      if(x$get_limits()$limits_clip && !is.null(zones) && nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(
           suppressWarnings( sf::st_union(
@@ -897,9 +897,10 @@ methods::setMethod(
         zones <- subset(x$get_limits()$layer, limit %in% unique(zones$limit) )
       }
 
-      l <- list("layer" = zones, "limits_method" = x$limits$limits_method,
-                "mcp_buffer" = x$limits$mcp_buffer,
-                "limits_clip" = x$limits$limits_clip)
+      l <- list("layer" = zones, "limits_method" = x$get_limits()$limits_method,
+                "mcp_buffer" = x$get_limits()$mcp_buffer,
+                "limits_clip" = x$get_limits()$limits_clip,
+                "novel" = x$get_limits()$novel)
       settings$set("limits", l)
       # Save the zones categories for later too!
       settings$set("limits_zones_categories", unique(zones$limit))
@@ -2148,7 +2149,7 @@ methods::setMethod(
           o <- terra::mask(out$get_data("prediction"), layer)
         } else {
           # Default! Leaves rest of background to 0
-          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = NA)
+          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = 0)
         }
         out <- out$set_data("prediction", o)
         try({ rm(layer, o) })

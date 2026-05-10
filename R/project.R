@@ -115,6 +115,9 @@ methods::setMethod(
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
     if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
+    # Set up logging if specified
+    if(!is.Waiver(mod$log)) mod$log$open()
+
     # Get the model object
     fit <- mod$get_model(copy = TRUE)
     # Get background
@@ -206,20 +209,21 @@ methods::setMethod(
         }
       }
       # MJ: This code below is necessary for some engine predictions
-      # However by default is not done unless limits_clip is set to TRUE.
-      # Also adjust the model container
-      fit$model$background <- limits
-      # Clip the predictor object
-      fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
-      fit$model$predictors_object$crop_data(limits)
-      fit$model$predictors_object$mask(limits)
-      fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
-      # And offset if found
-      if(!is.null(fit$model$offset_object)){
-        fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
-        fit$model$offset_object <- terra::crop(fit$model$offset_object, limits)
-        fit$model$offset_object <- terra::mask(fit$model$offset_object, limits)
-        fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
+      # Only done when limits_clip is set to TRUE; by default the background is not clipped.
+      if(isTRUE(settings$get("limits")$limits_clip)){
+        fit$model$background <- limits
+        # Clip the predictor object
+        fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
+        fit$model$predictors_object$crop_data(limits)
+        fit$model$predictors_object$mask(limits)
+        fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+        # And offset if found
+        if(!is.null(fit$model$offset_object)){
+          fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
+          fit$model$offset_object <- terra::crop(fit$model$offset_object, limits)
+          fit$model$offset_object <- terra::mask(fit$model$offset_object, limits)
+          fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
+        }
       }
     }
 
@@ -397,6 +401,7 @@ methods::setMethod(
         if(scenario_constraints[["adaptability"]]$method == "fixedlimit") {
           nd <- .fixedlimit(newdata = nd, model = mod$get_model()[['model']],
                             names = scenario_constraints[["adaptability"]]$params['names'],
+                            approach = scenario_constraints[["adaptability"]]$params['approach'],
                             value = scenario_constraints[["adaptability"]]$params['value'] |> as.numeric(),
                             value_min = scenario_constraints[["adaptability"]]$params['value_min'] |> as.numeric(),
                             value_max = scenario_constraints[["adaptability"]]$params['value_max'] |> as.numeric()
@@ -776,6 +781,10 @@ methods::setMethod(
     out <- mod$clone(deep = TRUE)
     out$scenarios <- proj
     out$scenarios_migclim <- mc
+
+    # Stop logging if specified
+    if(!is.Waiver(mod$log)) mod$log$close()
+
     return(out)
   }
 )

@@ -44,6 +44,8 @@ This requires set \code{\link{threshold}} prior to projection.
 \item{\code{latentfactors}}{A \code{\link{list}} on whether latentfactors are used.}
 
 \item{\code{scenarios}}{The resulting \code{\link{stars}} objects.}
+
+\item{\code{log}}{A \code{\linkS4class{Log}} object for capturing messages.}
 }
 \if{html}{\out{</div>}}
 }
@@ -68,6 +70,8 @@ This requires set \code{\link{threshold}} prior to projection.
 \item \href{#method-BiodiversityScenario-apply_threshold}{\code{BiodiversityScenario$apply_threshold()}}
 \item \href{#method-BiodiversityScenario-set_predictors}{\code{BiodiversityScenario$set_predictors()}}
 \item \href{#method-BiodiversityScenario-set_constraints}{\code{BiodiversityScenario$set_constraints()}}
+\item \href{#method-BiodiversityScenario-get_log}{\code{BiodiversityScenario$get_log()}}
+\item \href{#method-BiodiversityScenario-set_log}{\code{BiodiversityScenario$set_log()}}
 \item \href{#method-BiodiversityScenario-get_simulation}{\code{BiodiversityScenario$get_simulation()}}
 \item \href{#method-BiodiversityScenario-set_simulation}{\code{BiodiversityScenario$set_simulation()}}
 \item \href{#method-BiodiversityScenario-get_predictors}{\code{BiodiversityScenario$get_predictors()}}
@@ -360,6 +364,39 @@ Set new constrains
 }
 \subsection{Returns}{
 This object.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-get_log"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-get_log}{}}}
+\subsection{Method \code{get_log()}}{
+Returns the output filename of the current log object if set.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$get_log()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+A \code{\link{character}} where the output is returned.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BiodiversityScenario-set_log"></a>}}
+\if{latex}{\out{\hypertarget{method-BiodiversityScenario-set_log}{}}}
+\subsection{Method \code{set_log()}}{
+Set a new log object
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BiodiversityScenario$set_log(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{A \code{\linkS4class{Log}} object.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+This object
 }
 }
 \if{html}{\out{<hr>}}
