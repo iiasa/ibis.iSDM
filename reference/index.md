@@ -143,7 +143,7 @@ in various forms.
   : Add a control to a BiodiversityModel object to limit extrapolation
 
 - [`add_log()`](https://iiasa.github.io/ibis.iSDM/reference/add_log.md)
-  : Adds a log file to distribution object
+  : Adds a log file to distribution or scenario object
 
 - [`add_offset()`](https://iiasa.github.io/ibis.iSDM/reference/add_offset.md)
   : Specify a spatial explicit offset

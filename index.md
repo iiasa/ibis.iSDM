@@ -18,6 +18,7 @@ planned, but in the meantime the package can be found on R-universe as
 well.
 
 ``` r
+
 # For installation (Not yet done)
 install.packages("ibis.iSDM", repos = "https://iiasa.r-universe.dev")
 

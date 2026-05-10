@@ -39,6 +39,7 @@ covariate extraction where at least one variable has missing data. For
 instance by assinging a constant to `NA` values:
 
 ``` r
+
 predictors[is.na(predictors)] <- 0
 ```
 
@@ -62,6 +63,7 @@ However, it is possible to add these pseudo-absence points to a
 presence-only dataset as follows:
 
 ``` r
+
 virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
 # This takes the default pseudo-absence options created when loading the Ibis package.
 virtual_points <- add_pseudoabsence(virtual_points, field_occurrence = "Observed")
@@ -125,6 +127,7 @@ limited only to those zones where supplied biodiversity observations
 fall in.
 
 ``` r
+
 # Where zone is a provided raster
 mod <- distribution(background, limits = zone) |>  
   add_biodiversity_poipo(species_data) |>  
@@ -160,6 +163,7 @@ to be wrapped in a `PriorList` to be used in the estimation.
 Example:
 
 ``` r
+
 # We have prior information that 'Forest' is important for a species
 # In this case and for the INLA engine we define normal prior on the mean and precision
 p <- INLAPrior(variable = "Forest",type = "normal",hyper = c(2, 10))
@@ -204,6 +208,7 @@ these settings to the `add_biodiversity` function.
 To overwrite the global settings, do the following:
 
 ``` r
+
 # Define new settings with greater number of background points
 ss <- pseudoabs_settings(background = NULL, nrpoints =  1e6)
 # Overwrite the default settings
@@ -214,6 +219,7 @@ Alternatively one could think of specifying specific pseudo-absence
 sampling information to one biodiversity dataset specifically:
 
 ``` r
+
 # Define absence layer with biased background to sample from
 ss <- pseudoabs_settings(background = NULL, bias = bias_layer)
 
@@ -246,6 +252,7 @@ multiple models on the same instance, it is suggested to disable the
 `'ibis.runparallel'` option.
 
 ``` r
+
 # Check ibis options if set
 ibis_options()
 options('ibis.runparallel' = FALSE) # Set to FALSE
@@ -268,6 +275,7 @@ value (discouraged as it can be errorprone) or by simply multiplying
 them.
 
 ``` r
+
 offset1 <- runif(10)
 offset2 <- runif(10)
 # Identical
@@ -295,6 +303,7 @@ messages:
   other package related message. This can be done via
 
 ``` r
+
 options("ibis.setupmessages" = FALSE)
 ```
 
@@ -356,6 +365,7 @@ pre-estimation removal of predictor, such for example through variable
 importance criteria or colinearity. See code below for an example.
 
 ``` r
+
 # Prior to model fitting, remove highly collinear predictors through a pearson correlation assessment
 mod <- distribution(background) |>  
   add_biodiversity_poipo(species_data) |>  
@@ -390,6 +400,7 @@ function.
 **Example:**
 
 ``` r
+
 mod <- distribution(background) |>  
   add_biodiversity_poipo(species_data) |>  
   engine_inlabru() |>  
@@ -413,6 +424,7 @@ the parameters of the engine. A good way to check the performance is
 also to plot the evaluation log and **logloss**.
 
 ``` r
+
 # Requires a fitted model
 plot(fit$get_data("fit_best")$evaluation_log)
 ```
@@ -435,6 +447,7 @@ the overhead of setting up a model negates any speed improvements**
 To set this up, simply execute the following
 
 ``` r
+
 # Set parallel option
 ibis_enable_parallel() # Enable parallel processing in general
 ibis_set_threads(4) # 4 Threads
@@ -557,6 +570,7 @@ as a function to each Biodiversity distribution object. See below for an
 example.
 
 ``` r
+
 # Train a model
 fit <- distribution(background) |> 
   # Presence-absence data
@@ -593,6 +607,7 @@ files with ending ‘nc’ (netcdf) and with multiple variables are stored
 as such. To read them in:
 
 ``` r
+
 library(stars)
 sc <- stars::read_mdim('myscenarioprojection.nc')
 # Split the attribute variable up

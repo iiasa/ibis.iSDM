@@ -36,6 +36,7 @@ in the scenario help page.
 ## Load relevant packages and testing data
 
 ``` r
+
 # Load the package
 library(ibis.iSDM)
 library(inlabru)
@@ -53,6 +54,7 @@ Lets load some of the prepared test data for this exercise. This time we
 are going to make use of several datasets.
 
 ``` r
+
 # Background layer
 background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
@@ -78,6 +80,7 @@ predictors <- subset(predictors, c("bio01_mean_50km","bio03_mean_50km","bio19_me
 We can define a generic model to use for any of the sections below.
 
 ``` r
+
 # First define a generic model and engine using the available predictors
 basemodel <- distribution(background) |> 
       add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
@@ -96,6 +99,7 @@ approach is that predictors can be easily added to all kinds of
 `engines` in the ibis.iSDM package and also used for scenarios.
 
 ``` r
+
 
 # Here we simply add the range as simple binary predictor
 mod1 <- basemodel |>  
@@ -123,6 +127,7 @@ suppose a species is known to occur between 300 and 800m above sea
 level, this can be added as follows:
 
 ``` r
+
 # Specification 
 basemodel <- distribution(background) |> 
       add_predictors(env = predictors, transform = "scale", derivates = "none")  |> 
@@ -153,11 +158,12 @@ instance either by adding an expert-delineated range as offset or by
 factoring out the spatial bias of areas with high sampling density or
 accessibility. Multiple offsets can be specified for any given PPM by
 simply multiplying them, since
-$log\left( off_{1}*off_{2} \right) = log\left( off_{1} \right) + log\left( off_{2} \right)$.
-A comprehensive overview of including offsets in SDMs can be found in
-[Merow et al. (2016)](http://doi.wiley.com/10.1111/geb.12453).
+$`log(off_1 * off_2) = log(off_1) + log(off_2)`$. A comprehensive
+overview of including offsets in SDMs can be found in [Merow et
+al. (2016)](http://doi.wiley.com/10.1111/geb.12453).
 
 ``` r
+
 
 # Specification 
 mod1 <- distribution(background)  |>  
@@ -198,6 +204,7 @@ parameter sets the value at which the bias covariate is held constant
 during prediction (e.g., `0` to represent minimal bias).
 
 ``` r
+
 # Load a human modification index layer as proxy for sampling bias
 bias_layer <- terra::rast(system.file("extdata/predictors/hmi_mean_50km.tif",
                                        package = "ibis.iSDM", mustWork = TRUE))
@@ -229,6 +236,7 @@ combining them into an ensemble. This can be enabled via
 [`add_control_esm()`](https://iiasa.github.io/ibis.iSDM/reference/add_control_esm.md).
 
 ``` r
+
 # Train a model using the ESM approach
 mod_esm <- distribution(background) |> 
       add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
@@ -238,7 +246,7 @@ mod_esm <- distribution(background) |>
       engine_glmnet() |> 
       train(runname = "ESM prediction", only_linear = TRUE)
 #> Training 28 ESM GLMNET-Engine models with 2 predictors each.
-#> [Setup] 2026-03-17 23:08:06.602366 | Replacing currently selected engine.
+#> [Setup] 2026-05-10 15:19:46.440496 | Replacing currently selected engine.
 #> 
 #> ! Overwriting previously defined engine.
 
@@ -267,17 +275,16 @@ specification of priors differs depending on the engine in question.
 Generally \[`Prior-class`\] objects can be grouped into:
 
 - Probabilistic priors with estimates placed on for example the mean
-  ($\mu$) and standard deviation ($\sigma$) or precision in the case of
-  \[`engine_inla`\]. Such priors usually allow the greatest amount of
+  ($`\mu`$) and standard deviation ($`\sigma`$) or precision in the case
+  of \[`engine_inla`\]. Such priors usually allow the greatest amount of
   flexibility since they are able to incorporate information on both the
   sign and magnitude of a coefficient.
 
 - Monotonic constraints on the direction of a coefficient and predictor
-  in the model, such that is
-  $f\left( x_{1} \right) > = f\left( x_{2} \right)$ or
-  $f\left( x_{1} \right) < = f\left( x_{2} \right)$. Useful to
-  incorporate for instance prior ecological knowledge on that a certain
-  response function for example has to be positive.
+  in the model, such that is $`f(x_1) >= f(x_2)`$ or
+  $`f(x_1) <= f(x_2)`$. Useful to incorporate for instance prior
+  ecological knowledge on that a certain response function for example
+  has to be positive.
 
 - More complex priors specified on random spatial effects such as
   penalized complexity priors used for SPDE effects in
@@ -294,6 +301,7 @@ can be found on the individual help pages of the
 function.
 
 ``` r
+
 
 # Set a clean base model with biodiversity data
 x <- distribution(background) |> 
@@ -321,7 +329,7 @@ p <- INLAPrior(variable = "CLC3_211_mean_50km",
 pp <- priors(p)
 # The variables and values in this object can be queried as well
 pp$varnames()
-#> eb807427-2d05-4e91-bec0-3e0d544b3b1d 
+#> 1dc92a6b-5699-448b-a177-9b2a3802904a 
 #>                 "CLC3_211_mean_50km"
 
 # Priors can then be added via 
@@ -336,6 +344,7 @@ p1 <- partial(mod1, pp$varnames(), plot = TRUE)
 ![](03_integrate_data_files/figure-html/Specification%20of%20priors-1.png)
 
 ``` r
+
 p2 <- partial(mod2, pp$varnames(), plot = TRUE)
 ```
 
@@ -362,6 +371,7 @@ partial responses via
 [`ensemble_partial()`](https://iiasa.github.io/ibis.iSDM/reference/ensemble_partial.md)).
 
 ``` r
+
 # Create and fit two models
 mod1 <- distribution(background) |>  
       add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
@@ -385,12 +395,14 @@ plot(mod1)
 ![](03_integrate_data_files/figure-html/Model%20ensembles-1.png)
 
 ``` r
+
 plot(mod2)
 ```
 
 ![](03_integrate_data_files/figure-html/Model%20ensembles-2.png)
 
 ``` r
+
 
 # Now create an ensemble:
 # By setting normalize to TRUE we furthermore ensure each prediction
@@ -467,6 +479,7 @@ All of these can be specified as parameter in
 models are trained in the sequence at which datasets are added!**
 
 ``` r
+
 # Specification 
 mod1 <- distribution(background) |>  
       add_predictors(env = predictors, transform = "scale", derivates = "none") |> 
@@ -492,49 +505,56 @@ Some engines, notably \[`engine_inla`\], \[`engine_inlabru`\] and
 The algorithmic approach in this package generally follows an approach
 outlined where any presence-only datasets are modelled through a
 log-Gaussian Cox process where the expected number of individuals are
-estimated as a function of area $A$ following a Poisson distribution:
+estimated as a function of area $`A`$ following a Poisson distribution:
 
 \$\$\begin{align\*} N(A) &\sim {\sf Poisson}\left(\int\_{A}
-\lambda(i)\right) \\ \end{align\*}\$\$ $$\begin{array}{r}
-{\log\left( \lambda(i) \right) = \alpha_{1} + \sum\limits_{k}^{K}\beta_{k}x_{i}}
-\end{array}$$
+\lambda(i)\right) \\ \end{align\*}\$\$
+``` math
+\begin{align*}
+\log(\lambda(i)) = \alpha_{1} + \sum_{k}^{K} \beta_{k}x_{i} 
+\end{align*}
+```
 
-where $N$ is the number of individuals, $A$ the Area for a given spatial
-unit $i$, with $N(A)$ being an estimate of the relative rate of
-occurrence per unit area (or ROR). $k$ is an increment for $K$ number of
-predictors. $\lambda$ is the intensity function, $\alpha$ the intercept
-and $\beta$ the parameter coefficients for environmental covariates.
-Note that for interactions
+where $`N`$ is the number of individuals, $`A`$ the Area for a given
+spatial unit $`i`$, with $`N(A)`$ being an estimate of the relative rate
+of occurrence per unit area (or ROR). $`k`$ is an increment for $`K`$
+number of predictors. $`\lambda`$ is the intensity function, $`\alpha`$
+the intercept and $`\beta`$ the parameter coefficients for environmental
+covariates. Note that for interactions
 
 Presence-absence data are estimated as draws from a *Bernoulli*
 distribution:
 
 \$\$\begin{align\*} Y\_{i} &\sim {\sf Bernoulli(p\_{i})}, i = 1, 2, ...
-\\ \end{align\*}\$\$ $$\begin{aligned}
-{\log\left( - \log\left( 1 - p_{i} \right) \right)} & {= \alpha_{2} + \sum\limits_{k}^{K}\beta_{k}x_{i}}
-\end{aligned}$$
+\\ \end{align\*}\$\$
+``` math
+\begin{align*}
+\log(-\log(1-p_{i})) &= \alpha_{2} + \sum_{k}^{K} \beta_{k}x_{i}
+\end{align*}
+```
 
-where $Y$ is the presence-absence of an record (usually a standardized
+where $`Y`$ is the presence-absence of an record (usually a standardized
 survey) as sampled from a *Bernoulli* distribution in a given spatial
-unit $i$. $\alpha$ being the intercept and $\beta$ the parameter
+unit $`i`$. $`\alpha`$ being the intercept and $`\beta`$ the parameter
 coefficients for environmental covariates. The log-likelihood can be
 understood as cloglog functon.
 
 The Joint likelihood is then estimated by multiplying the two
-likelihoods from above $\prod_{l}^{L}f(l)$, where $L$ is an individual
-likelihood, with $\beta_{k}$ being shared parameters between the two
-likelihoods. This works if we assume that
-$cloglog\left( p_{i} \right) \approx log\left( \lambda(i) \right)$.
-Equally it is also possible to add shared latent spatial effects such as
-Gaussian fields (approximated through a stochastic partial differential
-equation (SPDE)) to the model, assuming that there are shared factors -
-or biases - affecting all datasets.
+likelihoods from above $`\prod_{l}^{L} f(l)`$, where $`L`$ is an
+individual likelihood, with $`\beta_{k}`$ being shared parameters
+between the two likelihoods. This works if we assume that
+$`cloglog(p_i) \approx log(\lambda(i))`$. Equally it is also possible to
+add shared latent spatial effects such as Gaussian fields (approximated
+through a stochastic partial differential equation (SPDE)) to the model,
+assuming that there are shared factors - or biases - affecting all
+datasets.
 
 See the [Engine
 comparison](https://iiasa.github.io/ibis.iSDM/articles/06_engine_comparison.md)
 for an overview on which engines support which level of integration.
 
 ``` r
+
 
 # Define a model
 mod1 <- distribution(background) |>  
@@ -557,14 +577,15 @@ plot(mod1)
 
 ``` r
 
+
 # Note how an overall intercept as well as separate intercepts for each dataset are added.
 summary(mod1)
 #> # A tibble: 11 × 8
 #>    variable                   mean      sd      q05     q50    q95    mode   kld
 #>    <chr>                     <dbl>   <dbl>    <dbl>   <dbl>  <dbl>   <dbl> <dbl>
 #>  1 Intercept               -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
-#>  2 Intercept_X17d57c3c_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
-#>  3 Intercept_X69dca1a3_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
+#>  2 Intercept_X05829c1e_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
+#>  3 Intercept_X2e185889_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
 #>  4 bio01_mean_50km         -0.109   0.134   -0.330  -0.109   0.112 -0.109      0
 #>  5 bio03_mean_50km         -0.482   0.121   -0.681  -0.482  -0.283 -0.482      0
 #>  6 bio19_mean_50km          0.472   0.0870   0.329   0.472   0.615  0.472      0

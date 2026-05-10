@@ -1,4 +1,4 @@
-# Adds a log file to distribution object
+# Adds a log file to distribution or scenario object
 
 This function allows to specify a file as
 [Log](https://iiasa.github.io/ibis.iSDM/reference/Log-class.md) file,
@@ -11,6 +11,9 @@ add_log(x, filename)
 
 # S4 method for class 'BiodiversityDistribution,character'
 add_log(x, filename)
+
+# S4 method for class 'BiodiversityScenario,character'
+add_log(x, filename)
 ```
 
 ## Arguments
@@ -20,6 +23,8 @@ add_log(x, filename)
   [`distribution()`](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
   (i.e.
   [`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md))
+  or
+  [`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
   object.
 
 - filename:

@@ -6,7 +6,7 @@ Model](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.md)),
 species distribution models (SDMs) are commonly used to make predictions
 on how biodiversity is expected to change under future conditions.
 Usually this is being done by first training a model on present
-observations and then projecting the resulting $\beta$ coefficients to
+observations and then projecting the resulting $`\beta`$ coefficients to
 another set of environmental predictors from another time period or
 spatial region.
 
@@ -44,6 +44,7 @@ and comparative overview.
 ## Load relevant packages and testing data
 
 ``` r
+
 # Load the packages
 library(ibis.iSDM)
 library(stars)
@@ -64,6 +65,7 @@ Note the names of predictors used for building a distribution model have
 to be consistent with those for creating projections!
 
 ``` r
+
 # Background and biodiversity data
 background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
 virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points', quiet = TRUE)
@@ -101,13 +103,14 @@ guidance on how distribution models are trained, see other vignettes
 ([1](https://iiasa.github.io/ibis.iSDM/articles/01_train_simple_model.md)).
 
 ``` r
+
 # Train model adding the data loaded above
 x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |> 
   # Note that we scale the predictors here
   add_predictors(pred_current, transform = 'scale',derivates = 'none') |> 
   engine_glmnet(alpha = 0) 
-#> Loaded glmnet 4.1-10
+#> Loaded glmnet 5.0
 
 # Train the model
 modf <- train(x, runname = 'Simple PPM', verbose = FALSE)
@@ -140,27 +143,29 @@ sc
 names(sc)
 #>  [1] "threshold"            "verify"               "summary_beforeafter" 
 #>  [4] "summary"              "show"                 "set_simulation"      
-#>  [7] "set_predictors"       "set_latent"           "set_data"            
-#> [10] "set_constraints"      "scenarios"            "save"                
-#> [13] "rm_predictors"        "rm_limits"            "rm_latent"           
-#> [16] "rm_data"              "rm_constraints"       "print"               
-#> [19] "predictors"           "plot_threshold"       "plot_scenarios_slope"
-#> [22] "plot_relative_change" "plot_migclim"         "plot_animation"      
-#> [25] "plot"                 "modelobject"          "modelid"             
-#> [28] "mask"                 "limits"               "latentfactors"       
-#> [31] "initialize"           "get_timeperiod"       "get_thresholdvalue"  
-#> [34] "get_threshold"        "get_simulation"       "get_resolution"      
-#> [37] "get_projection"       "get_predictors"       "get_predictor_names" 
-#> [40] "get_model"            "get_limits"           "get_latent"          
-#> [43] "get_data"             "get_constraints"      "get_centroid"        
-#> [46] "constraints"          "clone"                "calc_scenarios_slope"
-#> [49] "apply_threshold"      ".__enclos_env__"
+#>  [7] "set_predictors"       "set_log"              "set_latent"          
+#> [10] "set_data"             "set_constraints"      "scenarios"           
+#> [13] "save"                 "rm_predictors"        "rm_limits"           
+#> [16] "rm_latent"            "rm_data"              "rm_constraints"      
+#> [19] "print"                "predictors"           "plot_threshold"      
+#> [22] "plot_scenarios_slope" "plot_relative_change" "plot_migclim"        
+#> [25] "plot_animation"       "plot"                 "modelobject"         
+#> [28] "modelid"              "mask"                 "log"                 
+#> [31] "limits"               "latentfactors"        "initialize"          
+#> [34] "get_timeperiod"       "get_thresholdvalue"   "get_threshold"       
+#> [37] "get_simulation"       "get_resolution"       "get_projection"      
+#> [40] "get_predictors"       "get_predictor_names"  "get_model"           
+#> [43] "get_log"              "get_limits"           "get_latent"          
+#> [46] "get_data"             "get_constraints"      "get_centroid"        
+#> [49] "constraints"          "clone"                "calc_scenarios_slope"
+#> [52] "apply_threshold"      ".__enclos_env__"
 ```
 
 The scenario object can finally be trained via
 [`project()`](https://iiasa.github.io/ibis.iSDM/reference/project.md).
 
 ``` r
+
 sc.fit1 <- sc |> project()
 # Note that an indication of fitted scenarios has been added to the object
 sc.fit1
@@ -198,6 +203,7 @@ can be visualized and interacted with:
   specified).
 
 ``` r
+
 # Plot all scenarios. With a large number of predictors this figure will be messy...
 plot(sc.fit1) # or sc.fit1$plot()
 ```
@@ -205,6 +211,7 @@ plot(sc.fit1) # or sc.fit1$plot()
 ![](04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-1.png)
 
 ``` r
+
 
 # As an alternative, visualize the linear slope per grid cell and across all time steps
 o <- sc.fit1$calc_scenarios_slope(plot = TRUE)
@@ -214,6 +221,7 @@ o <- sc.fit1$calc_scenarios_slope(plot = TRUE)
 
 ``` r
 
+
 # Another option is to calculate the relative change between start and finish
 o <- sc.fit1$plot_relative_change(plot = TRUE)
 ```
@@ -221,6 +229,7 @@ o <- sc.fit1$plot_relative_change(plot = TRUE)
 ![](04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-3.png)
 
 ``` r
+
 
 # We can also summarize the thresholded data
 o <- sc.fit1$summary()
@@ -232,6 +241,7 @@ plot(area_km2~band, data = o, type = 'b',
 ![](04_biodiversity_projections_files/figure-html/Plotting%20and%20summarizing%20the%20created%20projections-4.png)
 
 ``` r
+
 
 # How does habitat gain and loss change over time?
 plot(totchange_gain_km2~band, data = o, type = 'n',
@@ -270,7 +280,7 @@ depend on other packages.
   To add a dispersal constraint to the projections which is applied
   after each time step. Supports various options with `'sdd_fixed'` for
   fixed dispersal kernels, `'sdd_nexpkernel'` for a negative exponential
-  kernel or `'sdd_kissmig'` for applying the kissmig framework.
+  kernel or `'kissmig'` for applying the kissmig framework.
 - [`add_constraint_MigClim()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_MigClim.md)
   Use the MigClim R-package to simulate dispersal events between time
   steps. A number of parameters are required here and adding this
@@ -302,6 +312,7 @@ particularly help for projections that use variables known to make
 sudden, abrupt jumps between time steps (e.g. precipitation anomalies).
 
 ``` r
+
 # Adding a simple negative exponential kernel to constrain the predictions
 sc.fit2 <- sc |>   
    add_constraint(method = "sdd_nex", value = 1e5) |> 
@@ -336,16 +347,19 @@ sc.fit1$plot(which = 40) # Baseline
 ![](04_biodiversity_projections_files/figure-html/Add%20constraints%20and%20reproject-1.png)
 
 ``` r
+
 sc.fit2$plot(which = 40) # With dispersal constrain
 ```
 
 ![](04_biodiversity_projections_files/figure-html/Add%20constraints%20and%20reproject-2.png)
 
 ``` r
+
 sc.fit3$plot(which = 40) # With dispersal limit and nichelimitation (within a standard deviation)
 ```
 
 ``` r
+
 # Lets compare the difference in projections compared to the naive one defined earlier. 
 o1 <- sc.fit1$summary()
 o2 <- sc.fit2$summary()
@@ -372,25 +386,26 @@ legend("bottomleft",
 
 ``` r
 
+
 # Lastly it is also possible to directly summarize the state 
 # before (usually first year) and end (last year).
 sc.fit2$summary_beforeafter()
 #> # A tibble: 13 × 5
-#>    runname    category                  period       value unit      
-#>    <chr>      <chr>                     <chr>        <dbl> <chr>     
-#>  1 Simple PPM Current range             2016-01-01 433.    ha        
-#>  2 Simple PPM Future range              2100-01-01 334.    ha        
-#>  3 Simple PPM Unsuitable                84 years   857.    ha        
-#>  4 Simple PPM Loss                      84 years   101.    ha        
-#>  5 Simple PPM Gain                      84 years     1.64  ha        
-#>  6 Simple PPM Stable                    84 years   332.    ha        
-#>  7 Simple PPM Percent loss              84 years    23.3   %         
-#>  8 Simple PPM Percent gain              84 years     0.378 %         
-#>  9 Simple PPM Range change              84 years   -99.4   ha        
-#> 10 Simple PPM Percent change            84 years   -10.4   %         
-#> 11 Simple PPM Sorensen index            84 years     0.877 similarity
-#> 12 Simple PPM Centroid distance         84 years   105.    km        
-#> 13 Simple PPM Centroid change direction 84 years    36.8   deg
+#>    runname    category                  period        value unit      
+#>    <chr>      <chr>                     <chr>         <dbl> <chr>     
+#>  1 Simple PPM Current range             2016-01-01  433.    ha        
+#>  2 Simple PPM Future range              2100-01-01  329.    ha        
+#>  3 Simple PPM Unsuitable                84 years    859.    ha        
+#>  4 Simple PPM Loss                      84 years    103.    ha        
+#>  5 Simple PPM Gain                      84 years      0     ha        
+#>  6 Simple PPM Stable                    84 years    329.    ha        
+#>  7 Simple PPM Percent loss              84 years     23.9   %         
+#>  8 Simple PPM Percent gain              84 years      0     %         
+#>  9 Simple PPM Range change              84 years   -103.    ha        
+#> 10 Simple PPM Percent change            84 years    -10.7   %         
+#> 11 Simple PPM Sorensen index            84 years      0.875 similarity
+#> 12 Simple PPM Centroid distance         84 years    116.    km        
+#> 13 Simple PPM Centroid change direction 84 years     32.3   deg
 ```
 
 Another option for constraining prediction is also by imposing a zonal

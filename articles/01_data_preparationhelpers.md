@@ -20,6 +20,7 @@ R](https://r.geocompx.org/) book. Many unexpected errors or patterns
 when using the package can usually be tracked down to data preparation.
 
 ``` r
+
 # Load the package
 library(ibis.iSDM)
 library(terra)
@@ -57,6 +58,7 @@ and ‘poipa’ methods in `ibis.iSDM` which are generally easier to
 interpret (response scale from 0 to 1) and also faster to fit as model.
 
 ``` r
+
 ## Lets load some testing data from the package
 
 # Background layer
@@ -85,6 +87,7 @@ Example:
 
 ``` r
 
+
 # Define new settings for sampling points outside the minimum convex polygon of
 # the known presence data
 abs <- pseudoabs_settings(background = background,
@@ -106,6 +109,7 @@ plot(point1['Observed'])
 ![](01_data_preparationhelpers_files/figure-html/Define%20and%20add%20pseudo-absence%20data-1.png)
 
 ``` r
+
 
 # --- #
 # Another option sampling inside the range, but biased by a bias layer
@@ -158,6 +162,7 @@ implementation and rationale for thinning.
 data!**
 
 ``` r
+
 ## We use the data loaded in above
 plot(virtual_species['Observed'], main = "Original data")
 ```
@@ -165,6 +170,7 @@ plot(virtual_species['Observed'], main = "Original data")
 ![](01_data_preparationhelpers_files/figure-html/Thinning-1.png)
 
 ``` r
+
 
 # Random thinning. Note the messages of number of thinned points
 point1 <- thin_observations(data = virtual_species,
@@ -182,6 +188,7 @@ plot(point1['Observed'], main = "Random thinning")
 ![](01_data_preparationhelpers_files/figure-html/Thinning-2.png)
 
 ``` r
+
 
 # Another way: Use environmental thinning to retain enough points
 # across the niche defined by a set of covariates
@@ -220,6 +227,7 @@ to the modelling process, rather than preparing the input data (which
 needs to be undertaken using the `terra` package).
 
 ``` r
+
 # Load some test covariates
 predictors <- terra::rast(list.files(system.file("extdata/predictors/", package = "ibis.iSDM", mustWork = TRUE), "*.tif",full.names = TRUE))
 ```
@@ -236,6 +244,7 @@ to any `terra` ‘SpatRaster’ object.
 as parameter!**
 
 ``` r
+
 # Let's take a simple layer for an example
 layer <- predictors$bio19_mean_50km
 
@@ -251,6 +260,7 @@ terra::plot( new )
 ![](01_data_preparationhelpers_files/figure-html/Transform%20predictors-1.png)
 
 ``` r
+
 
 # Another common use case is to windsorize a layer, for example by removing
 # top outliers from a prediction.
@@ -290,6 +300,7 @@ some cases substantial) additional predictors.
 as parameter!**
 
 ``` r
+
 # Let's take a simple layer for an example
 layer <- predictors$ndvi_mean_50km
 
@@ -305,6 +316,7 @@ terra::plot( new )
 
 ``` r
 
+
 # Create some hinge transformations
 new2 <- predictor_derivate(layer, option = "hinge",
                            # The number is controlled by the number of knots
@@ -317,6 +329,7 @@ terra::plot( new2 )
 
 ``` r
 
+
 # What does this do precisely?
 # Lets check
 df <- data.frame( ndvi = terra::values(layer),
@@ -328,18 +341,21 @@ plot(df$ndvi_mean_50km, df[,2], ylab = "First hinge of ndvi", xlab = "NDVI")
 ![](01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-3.png)
 
 ``` r
+
 plot(df$ndvi_mean_50km, df[,3], ylab = "Second hinge of ndvi",xlab = "NDVI")
 ```
 
 ![](01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-4.png)
 
 ``` r
+
 plot(df$ndvi_mean_50km, df[,4], ylab = "Third hinge of ndvi", xlab = "NDVI")
 ```
 
 ![](01_data_preparationhelpers_files/figure-html/Creating%20derivates%20of%20predictors-5.png)
 
 ``` r
+
 plot(df$ndvi_mean_50km, df[,5], ylab = "Fourth hinge of ndvi",xlab = "NDVI")
 ```
 
@@ -350,6 +366,7 @@ interactions among variables, for example if one expects climate to
 interact with forest cover.
 
 ``` r
+
 # Create interacting variables
 
 new <- predictor_derivate(predictors,option = "interaction",
@@ -373,6 +390,7 @@ function for spatial replacement and aggregation. It is also possible to
 assign values (for example from a specific zone) to a different area.
 
 ``` r
+
 library(terra)
 # Load a zonal layer
 countries <- terra::rast(system.file("extdata/countries.tif",package = "ibis.iSDM", mustWork = TRUE))
@@ -417,6 +435,7 @@ extent of missing data in a set of predictors which can be convenient
 for assessing errors during data preparation.
 
 ``` r
+
 # Make a subset of all predictors to show the concept
 layers <- subset(predictors,  c("aspect_mean_50km",
                                         "CLC3_312_mean_50km",
@@ -436,6 +455,7 @@ terra::plot(new)
 ![](01_data_preparationhelpers_files/figure-html/unnamed-chunk-2-1.png)
 
 ``` r
+
 # Or assess like this
 plot(!terra::noNA(new$aspect_mean_50km), main = "Missing observations")
 ```
@@ -461,6 +481,7 @@ that can also be directly called within
 [`project()`](https://iiasa.github.io/ibis.iSDM/reference/project.md).
 
 ``` r
+
 
 # Load some stars rasters
 ll <- list.files(system.file('extdata/predictors_presfuture/',
@@ -513,6 +534,7 @@ transformed or derivate versions of scenario predictors through the same
 helper function.
 
 ``` r
+
 # Load some stars rasters
 ll <- list.files(system.file('extdata/predictors_presfuture/',
                              package = 'ibis.iSDM',

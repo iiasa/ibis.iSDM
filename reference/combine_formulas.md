@@ -47,9 +47,9 @@ This likely won't work for interaction terms (such as `*` or `:`).
 # Combine everything (default)
 combine_formulas(observed ~ rainfall + temp, observed ~ rainfall + forest.cover)
 #> observed ~ rainfall + temp
-#> <environment: 0x55a22a029b90>
+#> <environment: 0x5635fe0b09d8>
 # Combine only LHS
 combine_formulas(observed ~ rainfall + temp, observed ~ rainfall + forest.cover, combine = "lhs")
 #> observed ~ rainfall + temp + rainfall + forest.cover
-#> <environment: 0x55a22a029b90>
+#> <environment: 0x5635fe0b09d8>
 ```

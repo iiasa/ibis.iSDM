@@ -39,7 +39,7 @@ i.e. all cells are `NA`.
 ``` r
 require(terra)
 #> Loading required package: terra
-#> terra 1.9.1
+#> terra 1.9.25
 #> 
 #> Attaching package: ‘terra’
 #> The following object is masked from ‘package:ibis.iSDM’:
@@ -47,9 +47,9 @@ require(terra)
 #>     modal
 r <- rast(matrix(1:100, 5, 20))
 emptyraster(r)
-#> class       : SpatRaster 
+#> class       : SpatRaster
 #> size        : 5, 20, 1  (nrow, ncol, nlyr)
 #> resolution  : 1, 1  (x, y)
 #> extent      : 0, 20, 0, 5  (xmin, xmax, ymin, ymax)
-#> coord. ref. :  
+#> coord. ref. : 
 ```

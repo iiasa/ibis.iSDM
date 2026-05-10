@@ -64,6 +64,11 @@ prior to projection.
   The resulting [`stars`](https://rdrr.io/r/graphics/stars.html)
   objects.
 
+- `log`:
+
+  A [`Log`](https://iiasa.github.io/ibis.iSDM/reference/Log-class.md)
+  object for capturing messages.
+
 ## Methods
 
 ### Public methods
@@ -103,6 +108,10 @@ prior to projection.
 - [`BiodiversityScenario$set_predictors()`](#method-BiodiversityScenario-set_predictors)
 
 - [`BiodiversityScenario$set_constraints()`](#method-BiodiversityScenario-set_constraints)
+
+- [`BiodiversityScenario$get_log()`](#method-BiodiversityScenario-get_log)
+
+- [`BiodiversityScenario$set_log()`](#method-BiodiversityScenario-set_log)
 
 - [`BiodiversityScenario$get_simulation()`](#method-BiodiversityScenario-get_simulation)
 
@@ -443,6 +452,42 @@ Set new constrains
 #### Returns
 
 This object.
+
+------------------------------------------------------------------------
+
+### Method `get_log()`
+
+Returns the output filename of the current log object if set.
+
+#### Usage
+
+    BiodiversityScenario$get_log()
+
+#### Returns
+
+A [`character`](https://rdrr.io/r/base/character.html) where the output
+is returned.
+
+------------------------------------------------------------------------
+
+### Method `set_log()`
+
+Set a new log object
+
+#### Usage
+
+    BiodiversityScenario$set_log(x)
+
+#### Arguments
+
+- `x`:
+
+  A [`Log`](https://iiasa.github.io/ibis.iSDM/reference/Log-class.md)
+  object.
+
+#### Returns
+
+This object
 
 ------------------------------------------------------------------------
 

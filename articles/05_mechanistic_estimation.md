@@ -77,6 +77,7 @@ others) to scenario objects.
 *Example:*
 
 ``` r
+
 library(ibis.iSDM)
 library(terra)
 library(ggplot2)
@@ -135,6 +136,7 @@ the [help-page](https://www.wsl.ch/en/services-produkte/kissmig/) for
 further help and explanations of parameters.
 
 ``` r
+
 
 # Create a scenario object
 sc <- scenario(fit) |> 
@@ -200,6 +202,7 @@ dependencies (some of which have also disappeared from CRAN), it can be
 run in *ibis.iSDM* as follows:
 
 ``` r
+
 prj <- scenario(fit) |> 
   # Apply the same variable transformations as above. 
   add_predictors(pred_future, transform = 'scale') |> 
@@ -253,6 +256,7 @@ al. 2021](https://doi.org/10.1111/ecog.05877)).
 choices!**
 
 ``` r
+
 if("steps" %in% installed.packages()[,1]){
   require("steps")
   

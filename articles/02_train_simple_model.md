@@ -32,6 +32,7 @@ minimum of at least 3 components:
 ### Load package and make a basic model
 
 ``` r
+
 # Load the package
 library(ibis.iSDM)
 library(inlabru)
@@ -51,6 +52,7 @@ forest-associated species for northern Europe. There are also some test
 predictors available for modelling. So first lets load the data:
 
 ``` r
+
 # Background layer
 background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM", mustWork = TRUE))
 # Load virtual species points
@@ -82,15 +84,14 @@ Now lets build a simple model object. In this case we make use of
 presence-only biodiversity records (`add_biodiversity_poipo`). Any
 presence-only records added to an object created through
 [`distribution()`](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
-are by default modelled as intensity $\lambda$ through an inhomogeneous
-Poisson point process model (PPM), where the Number of Individuals $N$
-is integrated as relative rate of occurrence per unit area:
-$N_{i} \sim Poisson\left( \lambda_{i}|A_{i} \right)$. Here $\lambda$ can
-then be estimated by relating it to environmental covariates
-$log\left( \lambda_{i} \right) = \alpha + \beta\left( x_{i} \right)$,
-where $i$ is a grid cell.
+are by default modelled as intensity $`\lambda`$ through an
+inhomogeneous Poisson point process model (PPM), where the Number of
+Individuals $`N`$ is integrated as relative rate of occurrence per unit
+area: $`N_i \sim Poisson(\lambda_i|A_i)`$. Here $`\lambda`$ can then be
+estimated by relating it to environmental covariates
+$`log(\lambda_i) = \alpha + \beta(x_i)`$, where $`i`$ is a grid cell.
 
-It is inhomogeneous since the $\lambda$ varies over the whole sampling
+It is inhomogeneous since the $`\lambda`$ varies over the whole sampling
 extent. In the context of species distribution modelling PPMs are
 structurally similar to the popular Maxent modelling framework (see
 [Renner & Warton
@@ -99,10 +100,11 @@ and [Renner et al. 2015](http://doi.wiley.com/10.1111/2041-210X.12352).
 Critically, presence-only records can only give an indication of a
 biased sampling and thus sampling bias has to be taken somehow into
 account, either through careful data preparation, a priori thinning or
-model-based control by including covariates $\sigma_{i}$ that might
+model-based control by including covariates $`\sigma_i`$ that might
 explain this sampling bias.
 
 ``` r
+
 
 # First we define a distribution object using the background layer
 mod <- distribution(background)
@@ -155,6 +157,7 @@ Of course all of these steps can also be done in “pipe” using the `|>`
 syntax.
 
 ``` r
+
 print("Create model")
 #> [1] "Create model"
 
@@ -172,6 +175,7 @@ contained data. For example, it is possible to plot and obtain any of
 the data added to this object.
 
 ``` r
+
 # Make visualization of the contained biodiversity data
 plot(mod$biodiversity)
 ```
@@ -179,6 +183,7 @@ plot(mod$biodiversity)
 ![](02_train_simple_model_files/figure-html/unnamed-chunk-3-1.png)
 
 ``` r
+
 
 # Other options to explore
 names(mod)
@@ -218,6 +223,7 @@ is being fitted. Unless not possible, the default way is fitting a
 linear model based on the provided engine and biodiversity data types.
 
 ``` r
+
 print("Fit model")
 #> [1] "Fit model"
 
@@ -253,6 +259,7 @@ interacted with.
   used to fit the model.
 
 ``` r
+
 # Plot the mean of the posterior predictions
 plot(fit, "mean")
 ```
@@ -260,6 +267,7 @@ plot(fit, "mean")
 ![](02_train_simple_model_files/figure-html/Plot%20the%20model%20output-1.png)
 
 ``` r
+
 
 # Print out some summary statistics
 summary(fit)
@@ -291,6 +299,7 @@ calculating a
 estimate of the used data.
 
 ``` r
+
 # To calculate a partial effect for a given variable
 o <- partial(fit, x.var = "CLC3_312_mean_50km", plot = TRUE)
 ```
@@ -298,6 +307,7 @@ o <- partial(fit, x.var = "CLC3_312_mean_50km", plot = TRUE)
 ![](02_train_simple_model_files/figure-html/partial%20effect-1.png)
 
 ``` r
+
 # The object o contains the data underlying this figure
 
 # Similarly the partial effect can be visualized spatially as 'spartial'
@@ -318,6 +328,7 @@ object.
 
 ``` r
 
+
 # Calculate a threshold based on a 50% percentile criterion
 fit <- threshold(fit, method = "percentile", value = 0.5)
 
@@ -337,6 +348,7 @@ fit$plot_threshold()
 ![](02_train_simple_model_files/figure-html/Example%20for%20model-based%20thresholding-1.png)
 
 ``` r
+
 
 # It is also possible to use truncated thresholds, which removes non-suitable areas
 # while retaining those that are suitable. These are then normalized to a range of [0-1]
@@ -361,25 +373,26 @@ cross-validation scheme to obtain withheld data or use independently
 gathered data.
 
 ``` r
+
 # By Default validation statistics are continuous and evaluate the predicted estimates against the number of records per grid cell.
 fit$rm_threshold()
 validate(fit, method = "cont")
 #>                                modelid                 name     method
-#> 1 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 2 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 3 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 4 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 5 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 6 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 7 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
-#> 8 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species continuous
+#> 1 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 2 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 3 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 4 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 5 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 6 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 7 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
+#> 8 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species continuous
 #>       metric       value
 #> 1          n 208.0000000
 #> 2         r2        -Inf
-#> 3       rmse   0.6101771
-#> 4        mae   0.5308264
-#> 5       mape   0.5308264
-#> 6    logloss   1.4549208
+#> 3       rmse   0.6094468
+#> 4        mae   0.5301522
+#> 5       mape   0.5301522
+#> 6    logloss   1.4533277
 #> 7   normgini         NaN
 #> 8 cont.boyce          NA
 
@@ -387,19 +400,19 @@ validate(fit, method = "cont")
 fit <- threshold(fit, method = "percentile", value = 0.5, format = "binary")
 validate(fit, method = "disc")
 #>                                 modelid                 name   method
-#> 1  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 2  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 3  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 4  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 5  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 6  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 7  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 8  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 9  2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 10 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 11 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 12 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
-#> 13 2b553d76-8891-4180-80ca-309bc16f0218 Virtual test species discrete
+#> 1  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 2  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 3  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 4  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 5  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 6  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 7  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 8  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 9  7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 10 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 11 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 12 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
+#> 13 7282474a-8361-421d-b7a0-4b5b4f1733c1 Virtual test species discrete
 #>                 metric       value
 #> 1                    n 602.0000000
 #> 2                  auc   0.6941624
@@ -438,6 +451,7 @@ identify areas of environmental extrapolation.
 Note that this is executed on the model object.
 
 ``` r
+
 # Calculate MESS (Multivariate Environmental Similarity Surface)
 sim <- similarity(mod, method = "mess", plot = FALSE)
 
@@ -458,6 +472,7 @@ Spatial predictions can also be exported as GeoTIFF or NetCDF via
 [`write_output()`](https://iiasa.github.io/ibis.iSDM/reference/write_output.md).
 
 ``` r
+
 # Save the fitted model as an RDS file
 write_model(fit, fname = "my_fitted_model.rds")
 
@@ -495,6 +510,7 @@ spatial pattern can be explained by commonalities in the sampling
 process).
 
 ``` r
+
 # Here we are going to use the xgboost algorithm instead and set as engine below.
 # We are going to fit two separate Poisson Process Models (PPMs) on presence-only data.
 
@@ -528,12 +544,14 @@ plot(background, main = "Biodiversity data"); plot(virtual_species['Observed'], 
 ![](02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constraints-1.png)
 
 ``` r
+
 plot(mod_null)
 ```
 
 ![](02_train_simple_model_files/figure-html/Train%20models%20with%20spatial%20constraints-2.png)
 
 ``` r
+
 plot(mod_dist)
 ```
 
@@ -551,6 +569,7 @@ that this approach effectively also limits the prediction background /
 output!**
 
 ``` r
+
 # Create again a distribution object, but this time with limits (use the Köppen-geiger layer from above)
 # The zones layer must be a factor layer (e.g. is.factor(layer) )
 
