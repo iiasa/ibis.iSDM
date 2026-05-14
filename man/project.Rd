@@ -50,7 +50,7 @@ applied. Currently supported is \code{`loess`}.}
 
 \item{layer}{A \code{\link{character}} specifying the layer to be projected (Default: \code{"mean"}).}
 
-\item{env}{An optional \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link{data.frame}} object for prediction.
+\item{env}{An optional \code{\link[terra:SpatRaster]{SpatRaster}} or \code{\link{data.frame}} object for prediction.
 Ignored unless a \code{\link{DistributionModel}} object is supplied (Default: \code{NULL}).}
 
 \item{verbose}{Setting this \code{\link{logical}} value to \code{TRUE} prints out further
@@ -61,7 +61,7 @@ Saves \code{\link{stars}} objects of the obtained predictions in mod.
 }
 \description{
 Equivalent to \link{train}, this function acts as a wrapper to
-project the model stored in a \code{\linkS4class{BiodiversityScenario}} object to newly
+project the model stored in a \code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object to newly
 supplied (future) covariates. Supplied predictors are usually
 spatial-temporal predictors which should be prepared via \code{\link[=add_predictors]{add_predictors()}}
 (e.g. transformations and derivates) in the same way as they have been during
@@ -89,13 +89,13 @@ can be used to specifically constrain a projection within a certain area
 }
 
 Many constrains also requires thresholds to be calculated. Adding
-\code{\link[=threshold]{threshold()}} to a \code{\linkS4class{BiodiversityScenario}} object enables the
+\code{\link[=threshold]{threshold()}} to a \code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object enables the
 computation of thresholds at every step based on the threshold used for the
 main model (threshold values are taken from there).
 
 It is also possible to make a complementary simulation with the \code{steps}
 package, which can be provided via \code{\link[=simulate_population_steps]{simulate_population_steps()}} to the
-\code{\linkS4class{BiodiversityScenario}} object. Similar as with thresholds, estimates
+\code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object. Similar as with thresholds, estimates
 values will then be added to the outputs.
 
 Finally this function also allows temporal stabilization across prediction

@@ -504,10 +504,7 @@ engine_glmnet <- function(x,
       assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Chunk the data
         splits <- chunk_data(full_sub, N = getOption("ibis.nthread",default = 10),
                              index_only = TRUE)
@@ -867,10 +864,7 @@ engine_glmnet <- function(x,
       assertthat::assert_that(nrow(df_sub)>0)
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Chunk the data
         splits <- chunk_data(df_sub, N = getOption("ibis.nthread",default = 10),
                              index_only = TRUE)

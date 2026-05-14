@@ -22,7 +22,7 @@ iteration steps (or within year migration steps). For adaptability
 constraints this parameter specifies the extent (in units of standard
 deviation) to which extrapolations should be performed.}
 
-\item{resistance}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object describing a resistance surface or
+\item{resistance}{A \code{\link[terra:SpatRaster]{SpatRaster}} object describing a resistance surface or
 barrier for use in connectivity constrains (Default: \code{NULL}).}
 
 \item{...}{passed on parameters. See also the specific methods for adding
@@ -46,15 +46,15 @@ the prediction.
 }
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint}()},
-\code{\link{add_constraint_MigClim}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_boundary}()},
-\code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint_threshold}()},
-\code{\link{simulate_population_steps}()}
+Other constraint:
+\code{\link[=add_constraint]{add_constraint()}},
+\code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_boundary]{add_constraint_boundary()}},
+\code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}},
+\code{\link[=add_constraint_minsize]{add_constraint_minsize()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}},
+\code{\link[=simulate_population_steps]{simulate_population_steps()}}
 }
 \concept{constraint}
 \keyword{scenario}

@@ -13,8 +13,8 @@ add_log(x, filename)
 \S4method{add_log}{BiodiversityScenario,character}(x, filename)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) or
-\code{\linkS4class{BiodiversityScenario}} object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) or
+\code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object.}
 
 \item{filename}{A \code{\link{character}} object. The destination must be writeable and
 filename ends with \code{'txt'}.}
@@ -23,7 +23,7 @@ filename ends with \code{'txt'}.}
 Adds a log file to a \code{\link{distribution}} object.
 }
 \description{
-This function allows to specify a file as \linkS4class{Log} file,
+This function allows to specify a file as \link[=Log-class]{Log} file,
 which is used to save all console outputs, prints and messages.
 }
 \examples{

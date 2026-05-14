@@ -58,7 +58,7 @@ write_output(
 )
 }
 \arguments{
-\item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link[terra:terra-package]{terra::terra}}
+\item{mod}{Provided \code{\link{DistributionModel}}, \code{\link{BiodiversityScenario}}, \code{\link[terra:terra]{terra}}
 or \code{\link{stars}} object.}
 
 \item{fname}{A \code{\link{character}} depicting an output filename.}
@@ -78,7 +78,7 @@ No R-output is created. A file is written to the target direction.
 The \code{write_output} function is a generic wrapper to writing any
 output files (e.g. projections) created with the \code{\link{ibis.iSDM-package}}. It is
 possible to write outputs of fitted \code{\link{DistributionModel}},
-\code{\link{BiodiversityScenario}} or individual \code{\link[terra:terra-package]{terra::terra}} or \code{\link{stars}} objects. In
+\code{\link{BiodiversityScenario}} or individual \code{\link[terra:terra]{terra}} or \code{\link{stars}} objects. In
 case a \code{\link{data.frame}} is supplied, the output is written as csv file.
 \strong{For creating summaries of distribution and scenario parameters and performance,
 see \code{write_summary()}}

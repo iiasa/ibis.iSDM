@@ -32,16 +32,16 @@ nicheplot(
 )
 }
 \arguments{
-\item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}
+\item{mod}{A trained \code{\link{DistributionModel}} or alternatively a \code{\link[terra:SpatRaster]{SpatRaster}}
 object with \code{prediction} model within.}
 
-\item{xvar}{A \code{\link{character}} denoting the predictor on the x-axis. Alternatively a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}
+\item{xvar}{A \code{\link{character}} denoting the predictor on the x-axis. Alternatively a \code{\link[terra:SpatRaster]{SpatRaster}}
 object can be provided.}
 
-\item{yvar}{A \code{\link{character}} denoting the predictor on the y-axis. Alternatively a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}
+\item{yvar}{A \code{\link{character}} denoting the predictor on the y-axis. Alternatively a \code{\link[terra:SpatRaster]{SpatRaster}}
 object can be provided.}
 
-\item{envvars}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object containing all environmental variables. Only
+\item{envvars}{A \code{\link[terra:SpatRaster]{SpatRaster}} object containing all environmental variables. Only
 used if \code{xvar} and \code{yvar} is empty (Default: \code{NULL}).}
 
 \item{overlay_data}{A \code{\link{logical}} on whether training data should be overlaid
@@ -69,7 +69,7 @@ predictions (e.g. from \code{\link[=train]{train()}}) against underlying predict
 to explain the underlying gradients of the niche.
 
 Supported Inputs for this function are either single trained \code{ibis.iSDM}
-\code{\link{DistributionModel}} objects or alternatively a set of three \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} objects.
+\code{\link{DistributionModel}} objects or alternatively a set of three \code{\link[terra:SpatRaster]{SpatRaster}} objects.
 In both cases, users can specify \code{"xvar"} and \code{"yvar"} explicitly
 or leave them empty. In the latter case a principal component analysis (PCA)
 is conducted on the full environmental stack (loaded from \code{\link{DistributionModel}}

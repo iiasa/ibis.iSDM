@@ -37,7 +37,7 @@ options (Default: \code{'mean'}).}
 (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer names
 in ensembles of \code{SpatRaster} objects.}
 
-\item{newdata}{A optional \code{\link{data.frame}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object supplied to
+\item{newdata}{A optional \code{\link{data.frame}} or \code{\link[terra:SpatRaster]{SpatRaster}} object supplied to
 the model (DefaultL \code{NULL}). This object needs to have identical names as the original predictors.}
 
 \item{normalize}{\code{\link{logical}} on whether the inputs of the ensemble should be

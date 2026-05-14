@@ -235,7 +235,7 @@ factor_to_numeric <- function(x) {
 #' @description This little wrapper converts and ensures that a vector of time
 #' objects are in POSIXct format.
 #'
-#' @param vec A [`vector`] with [`numeric`] or [`POSIXct`] data
+#' @param vec A [`vector`] with [`numeric`] or [`base::POSIXct`] data
 #'
 #' @keywords utils
 #'
@@ -609,6 +609,22 @@ collect_occurrencepoints <- function(model, include_absences = FALSE,
   }
 
   return(locs)
+}
+
+#' Ensure doFuture is attached for parallel prediction
+#'
+#' @description
+#' Checks that \pkg{doFuture} is installed and attaches it to the search path
+#' if not already loaded. Must be called before any \code{\%dofuture\%}
+#' expression is evaluated.
+#'
+#' @noRd
+#' @keywords internal
+ensure_doFuture <- function() {
+  check_package("doFuture")
+  if (!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs)) {
+    try({requireNamespace('doFuture'); attachNamespace("doFuture")}, silent = TRUE)
+  }
 }
 
 #' Compute partial dependence for a fitted model

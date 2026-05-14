@@ -38,7 +38,7 @@ validate(
 }
 \arguments{
 \item{mod}{A fitted \code{\link{BiodiversityDistribution}} object with set predictors.
-Alternatively one can also provide directly a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, however in this
+Alternatively one can also provide directly a \code{\link[terra:SpatRaster]{SpatRaster}}, however in this
 case the \code{point} layer also needs to be provided.}
 
 \item{method}{Should the validation be conducted on the continious prediction
@@ -47,7 +47,7 @@ depending on the method different metrics can be computed. See Details.}
 
 \item{layer}{In case multiple layers exist, which one to use? (Default: \code{'mean'}).}
 
-\item{point}{A \code{\link[sf:sf]{sf::sf}} object with type \code{POINT} or \code{MULTIPOINT}.}
+\item{point}{A \code{\link[sf:sf]{sf}} object with type \code{POINT} or \code{MULTIPOINT}.}
 
 \item{point_column}{A \code{\link{character}} vector with the name of the column containing
 the independent observations. (Default: \code{'observed'}).}

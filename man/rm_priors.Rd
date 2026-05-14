@@ -10,7 +10,7 @@ rm_priors(x, names = NULL, ...)
 \S4method{rm_priors}{BiodiversityDistribution}(x, names = NULL, ...)
 }
 \arguments{
-\item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\link{distribution} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{names}{A \code{\link{vector}} or \code{\link{character}} object for priors to be removed.}
 
@@ -32,23 +32,23 @@ object. In order to remove a set prior, the name of the prior has to be specifie
 
 }
 \seealso{
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{get_priors}()},
-\code{\link{priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPrior]{GDBPrior()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPrior]{INLAPrior()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBPrior]{XGBPrior()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=add_priors]{add_priors()}},
+\code{\link[=get_priors]{get_priors()}},
+\code{\link[=priors]{priors()}}
 }
 \concept{prior}

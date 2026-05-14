@@ -32,9 +32,9 @@ distribution(
 }
 \arguments{
 \item{background}{Specification of the modelling background. Must be a
-\code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object.}
+\code{\link[terra:SpatRaster]{SpatRaster}} or \code{\link[sf:sf]{sf}} object.}
 
-\item{limits}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, \code{\link[sf:sf]{sf::sf}} or \code{\link{stars}} object that limits the prediction
+\item{limits}{A \code{\link[terra:SpatRaster]{SpatRaster}}, \code{\link[sf:sf]{sf}} or \code{\link{stars}} object that limits the prediction
 surface when intersected with input data (Default: \code{NULL}). In case of a
 \code{\link{stars}} object the first factorized time entry is taken.}
 
@@ -49,7 +49,7 @@ Only used if \code{"mcp"} is used.}
 fitting a model (\code{TRUE}) or just the prediction (\code{FALSE}, default).}
 }
 \value{
-\code{\linkS4class{BiodiversityDistribution}} object containing data for building
+\code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}} object containing data for building
 a biodiversity distribution modelling problem.
 }
 \description{
@@ -79,13 +79,13 @@ modify or summarize data within the created object.
 as well as a specified engine.}
 }
 \details{
-This function creates a \code{\linkS4class{BiodiversityDistribution}} object
+This function creates a \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}} object
 that in itself contains other functions and stores parameters and
 (pre-)processed data. A full list of functions available can be queried via
 \code{"names(object)"}. Some of the functions are not intended to be
 manipulated directly, but rather through convenience functions (e.g.
 \code{"object$set_predictors()"}). Similarly other objects are stored in the
-\code{\linkS4class{BiodiversityDistribution}} object that have their own functions as
+\code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}} object that have their own functions as
 well and can be queried (e.g. \code{"names(object)"}). For a list of
 functions see the reference documentation. By default, if some datasets are
 not set, then a \code{"Waiver"} object is returned instead.
@@ -103,7 +103,7 @@ with function depended on the added engine.
 
 Useful high-level functions to address those objects are for instance:
 \itemize{
-\item \code{object$show()} A generic summary of the \code{\linkS4class{BiodiversityDistribution}}
+\item \code{object$show()} A generic summary of the \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}
 object contents. Can also be called via \link{print}.
 \item \code{object$get_biodiversity_equations()} Lists the equations used for each
 biodiversity dataset with given id. Defaults to all predictors.

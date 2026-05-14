@@ -89,7 +89,6 @@ Suggests:
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
-RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 Biarch: true
@@ -178,3 +177,4 @@ Collate:
     'zzz.R'
 Remotes:
   ElliotDovers/scampr
+Config/roxygen2/version: 8.0.0

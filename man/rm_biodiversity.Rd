@@ -10,7 +10,7 @@ rm_biodiversity(x, name, id)
 \S4method{rm_biodiversity}{BiodiversityDistribution}(x, name, id)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{name}{A \code{\link{character}} with the name of the biodiversity dataset.}
 
@@ -18,7 +18,7 @@ rm_biodiversity(x, name, id)
 }
 \description{
 Remove a particular dataset (or all) from an \link{distribution} object with
-a \code{\linkS4class{BiodiversityDatasetCollection}}.
+a \code{\link[=BiodiversityDatasetCollection-class]{BiodiversityDatasetCollection}}.
 }
 \examples{
 \dontrun{

@@ -39,26 +39,26 @@ Xgboost: extreme gradient boosting. R package version 0.4-2, 1(4), 1-4.
 }
 }
 \seealso{
-\code{\linkS4class{Prior}} and \code{\link{GDBPrior}}.
+\code{\link[=Prior-class]{Prior}} and \code{\link{GDBPrior}}.
 
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{get_priors}()},
-\code{\link{priors}()},
-\code{\link{rm_priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPrior]{GDBPrior()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPrior]{INLAPrior()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=add_priors]{add_priors()}},
+\code{\link[=get_priors]{get_priors()}},
+\code{\link[=priors]{priors()}},
+\code{\link[=rm_priors]{rm_priors()}}
 }
 \concept{prior}
 \keyword{priors}

@@ -23,7 +23,7 @@
 \item{x}{Any object belonging to \link{DistributionModel}, \link{BiodiversityDatasetCollection},
 \link{PredictorDataset} or \link{BiodiversityScenario}.}
 
-\item{what}{In case a \link[terra:SpatRaster-class]{terra::SpatRaster} is supplied, this parameter specifies the layer
+\item{what}{In case a \link[terra:SpatRaster]{SpatRaster} is supplied, this parameter specifies the layer
 to be shown (Default: \code{"mean"}).}
 
 \item{...}{Further arguments passed on to \code{x$plot}.}

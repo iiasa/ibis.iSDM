@@ -39,7 +39,7 @@ options (Default: \code{'mean'}).}
 (Default: \code{'mean'}). If set to \code{NULL} ignore any of the layer names
 in ensembles of \code{SpatRaster} objects.}
 
-\item{newdata}{A optional \code{\link{data.frame}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object supplied to
+\item{newdata}{A optional \code{\link{data.frame}} or \code{\link[terra:SpatRaster]{SpatRaster}} object supplied to
 the model (DefaultL \code{NULL}). This object needs to have identical names as the original predictors.}
 
 \item{min.value}{A optional \code{\link{numeric}} stating a minimum value that needs
@@ -50,7 +50,7 @@ to be surpassed in each layer before calculating and ensemble
 normalized to a scale of 0-1 (Default: \code{TRUE}).}
 }
 \value{
-A \link[terra:SpatRaster-class]{terra::SpatRaster} object with the combined partial effects of the supplied models.
+A \link[terra:SpatRaster]{SpatRaster} object with the combined partial effects of the supplied models.
 }
 \description{
 Similar to the \code{ensemble()} function, this function creates an

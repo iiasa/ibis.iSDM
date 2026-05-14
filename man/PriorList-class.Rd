@@ -8,7 +8,7 @@
 A PriorList object.
 }
 \description{
-This class represents a collection of \code{\linkS4class{Prior}} objects. It provides
+This class represents a collection of \code{\link[=Prior-class]{Prior}} objects. It provides
 methods for accessing, adding and removing priors from the list
 }
 \examples{
@@ -21,298 +21,327 @@ priors(
 }
 \keyword{classes}
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{priors}}{A list of \code{\linkS4class{Prior}} object.}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{priors}}{A list of \code{\link[=Prior-class]{Prior}} object.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-PriorList-new}{\code{PriorList$new()}}
-\item \href{#method-PriorList-print}{\code{PriorList$print()}}
-\item \href{#method-PriorList-show}{\code{PriorList$show()}}
-\item \href{#method-PriorList-length}{\code{PriorList$length()}}
-\item \href{#method-PriorList-ids}{\code{PriorList$ids()}}
-\item \href{#method-PriorList-varnames}{\code{PriorList$varnames()}}
-\item \href{#method-PriorList-classes}{\code{PriorList$classes()}}
-\item \href{#method-PriorList-types}{\code{PriorList$types()}}
-\item \href{#method-PriorList-exists}{\code{PriorList$exists()}}
-\item \href{#method-PriorList-add}{\code{PriorList$add()}}
-\item \href{#method-PriorList-get}{\code{PriorList$get()}}
-\item \href{#method-PriorList-collect}{\code{PriorList$collect()}}
-\item \href{#method-PriorList-rm}{\code{PriorList$rm()}}
-\item \href{#method-PriorList-summary}{\code{PriorList$summary()}}
-\item \href{#method-PriorList-combine}{\code{PriorList$combine()}}
-\item \href{#method-PriorList-clone}{\code{PriorList$clone()}}
-}
+  \itemize{
+    \item \href{#method-PriorList-initialize}{\code{PriorList$new()}}
+    \item \href{#method-PriorList-print}{\code{PriorList$print()}}
+    \item \href{#method-PriorList-show}{\code{PriorList$show()}}
+    \item \href{#method-PriorList-length}{\code{PriorList$length()}}
+    \item \href{#method-PriorList-ids}{\code{PriorList$ids()}}
+    \item \href{#method-PriorList-varnames}{\code{PriorList$varnames()}}
+    \item \href{#method-PriorList-classes}{\code{PriorList$classes()}}
+    \item \href{#method-PriorList-types}{\code{PriorList$types()}}
+    \item \href{#method-PriorList-exists}{\code{PriorList$exists()}}
+    \item \href{#method-PriorList-add}{\code{PriorList$add()}}
+    \item \href{#method-PriorList-get}{\code{PriorList$get()}}
+    \item \href{#method-PriorList-collect}{\code{PriorList$collect()}}
+    \item \href{#method-PriorList-rm}{\code{PriorList$rm()}}
+    \item \href{#method-PriorList-summary}{\code{PriorList$summary()}}
+    \item \href{#method-PriorList-combine}{\code{PriorList$combine()}}
+    \item \href{#method-PriorList-clone}{\code{PriorList$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-PriorList-new"></a>}}
-\if{latex}{\out{\hypertarget{method-PriorList-new}{}}}
-\subsection{Method \code{new()}}{
-Initializes the object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$new(priors)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-PriorList-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-PriorList-initialize}{}}}
+\subsection{\code{PriorList$new()}}{
+  Initializes the object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$new(priors)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{priors}}{A list of \code{\link[=Prior-class]{Prior}} object.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{priors}}{A list of \code{\linkS4class{Prior}} object.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-print"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-print}{}}}
-\subsection{Method \code{print()}}{
-Print out summary statistics
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$print()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$print()}}{
+  Print out summary statistics
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$print()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A message on screen
+  }
 }
 
-\subsection{Returns}{
-A message on screen
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-show"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-show}{}}}
-\subsection{Method \code{show()}}{
-Aliases that calls print.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$show()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$show()}}{
+  Aliases that calls print.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$show()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A message on screen
+  }
 }
 
-\subsection{Returns}{
-A message on screen
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-length"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-length}{}}}
-\subsection{Method \code{length()}}{
-Number of priors in object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$length()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$length()}}{
+  Number of priors in object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$length()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{numeric}} with the number of priors set
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{numeric}} with the number of priors set
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-ids"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-ids}{}}}
-\subsection{Method \code{ids()}}{
-Ids of prior objects
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$ids()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$ids()}}{
+  Ids of prior objects
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$ids()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A list with ids of the priors objects for query
+  }
 }
 
-\subsection{Returns}{
-A list with ids of the priors objects for query
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-varnames"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-varnames}{}}}
-\subsection{Method \code{varnames()}}{
-Variable names of priors in object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$varnames()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$varnames()}}{
+  Variable names of priors in object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$varnames()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} list with the variable names of the priors.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{character}} list with the variable names of the priors.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-classes"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-classes}{}}}
-\subsection{Method \code{classes()}}{
-Function to return the classes of all contained priors
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$classes()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$classes()}}{
+  Function to return the classes of all contained priors
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$classes()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} list with the class names of the priors.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{character}} list with the class names of the priors.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-types"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-types}{}}}
-\subsection{Method \code{types()}}{
-Get types of all contained priors
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$types()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$types()}}{
+  Get types of all contained priors
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$types()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} list with the type names of the priors.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{character}} list with the type names of the priors.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-exists"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-exists}{}}}
-\subsection{Method \code{exists()}}{
-Does a certain variable or type combination exist as prior ?
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$exists(variable, type = NULL)}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$exists()}}{
+  Does a certain variable or type combination exist as prior ?
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$exists(variable, type = NULL)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{variable}}{A \code{\link{character}} with the variable name.}
+      \item{\code{type}}{A \code{\link{character}} with the type.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} id.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{variable}}{A \code{\link{character}} with the variable name.}
-
-\item{\code{type}}{A \code{\link{character}} with the type.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \code{\link{character}} id.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-add"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-add}{}}}
-\subsection{Method \code{add()}}{
-Add a new prior to the object.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$add(p)}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$add()}}{
+  Add a new prior to the object.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$add(p)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{p}}{A \code{\link[=Prior-class]{Prior}} object.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Invisible TRUE
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{p}}{A \code{\linkS4class{Prior}} object.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisible TRUE
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-get"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-get}{}}}
-\subsection{Method \code{get()}}{
-Get specific prior values from the list if set
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$get(variable, type = NULL, what = "value")}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$get()}}{
+  Get specific prior values from the list if set
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$get(variable, type = NULL, what = "value")}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{variable}}{A \code{\link{character}} with the variable name.}
+      \item{\code{type}}{A \code{\link{character}} with the type name}
+      \item{\code{what}}{A \code{\link{character}} on the specific entry to return (Default: \code{prior value}).}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The prior object.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{variable}}{A \code{\link{character}} with the variable name.}
-
-\item{\code{type}}{A \code{\link{character}} with the type name}
-
-\item{\code{what}}{A \code{\link{character}} on the specific entry to return (Default: \code{prior value}).}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-The prior object.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-collect"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-collect}{}}}
-\subsection{Method \code{collect()}}{
-Collect priors for a given id or multiple.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$collect(id)}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$collect()}}{
+  Collect priors for a given id or multiple.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$collect(id)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{id}}{A \code{\link{character}} with the prior id.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link[=PriorList-class]{PriorList}} object.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{id}}{A \code{\link{character}} with the prior id.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \code{\linkS4class{PriorList}} object.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-rm"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-rm}{}}}
-\subsection{Method \code{rm()}}{
-Remove a set prior by id
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$rm(id)}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$rm()}}{
+  Remove a set prior by id
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$rm(id)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{id}}{A \code{\link{character}} with the prior id.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Invisible TRUE
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{id}}{A \code{\link{character}} with the prior id.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisible TRUE
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-summary"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-summary}{}}}
-\subsection{Method \code{summary()}}{
-Summary function that lists all priors
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$summary()}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$summary()}}{
+  Summary function that lists all priors
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$summary()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{data.frame}} with the summarized priors.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{data.frame}} with the summarized priors.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-combine"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-combine}{}}}
-\subsection{Method \code{combine()}}{
-Combining function to combine this PriorList with another new one
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$combine(x)}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$combine()}}{
+  Combining function to combine this PriorList with another new one
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$combine(x)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{x}}{A new \code{\link[=PriorList-class]{PriorList}} object.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Invisible TRUE
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{A new \code{\linkS4class{PriorList}} object.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisible TRUE
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-PriorList-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-PriorList-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{PriorList$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{PriorList$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{PriorList$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

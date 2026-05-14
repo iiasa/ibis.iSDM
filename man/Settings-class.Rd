@@ -5,172 +5,188 @@
 \alias{Settings}
 \title{Prototype for model settings object}
 \description{
-Basic \code{\link[R6:R6Class]{R6::R6}} object for Settings object, a List that stores settings used
+Basic \code{\link[R6:R6]{R6}} object for Settings object, a List that stores settings used
 related to model training.
 }
 \keyword{classes}
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{name}}{The default name of this settings as \code{\link{character}}.}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{name}}{The default name of this settings as \code{\link{character}}.}
 
-\item{\code{modelid}}{A \code{\link{character}} of the model id this belongs to.}
+    \item{\code{modelid}}{A \code{\link{character}} of the model id this belongs to.}
 
-\item{\code{data}}{A \code{\link{list}} of contained settings.}
-}
-\if{html}{\out{</div>}}
+    \item{\code{data}}{A \code{\link{list}} of contained settings.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-Settings-new}{\code{Settings$new()}}
-\item \href{#method-Settings-print}{\code{Settings$print()}}
-\item \href{#method-Settings-show}{\code{Settings$show()}}
-\item \href{#method-Settings-length}{\code{Settings$length()}}
-\item \href{#method-Settings-duration}{\code{Settings$duration()}}
-\item \href{#method-Settings-summary}{\code{Settings$summary()}}
-\item \href{#method-Settings-get}{\code{Settings$get()}}
-\item \href{#method-Settings-set}{\code{Settings$set()}}
-\item \href{#method-Settings-clone}{\code{Settings$clone()}}
-}
+  \itemize{
+    \item \href{#method-Settings-initialize}{\code{Settings$new()}}
+    \item \href{#method-Settings-print}{\code{Settings$print()}}
+    \item \href{#method-Settings-show}{\code{Settings$show()}}
+    \item \href{#method-Settings-length}{\code{Settings$length()}}
+    \item \href{#method-Settings-duration}{\code{Settings$duration()}}
+    \item \href{#method-Settings-summary}{\code{Settings$summary()}}
+    \item \href{#method-Settings-get}{\code{Settings$get()}}
+    \item \href{#method-Settings-set}{\code{Settings$set()}}
+    \item \href{#method-Settings-clone}{\code{Settings$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Settings-new"></a>}}
-\if{latex}{\out{\hypertarget{method-Settings-new}{}}}
-\subsection{Method \code{new()}}{
-Initializes the object and creates an empty list
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$new()}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-Settings-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-Settings-initialize}{}}}
+\subsection{\code{Settings$new()}}{
+  Initializes the object and creates an empty list
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$new()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-print"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-print}{}}}
-\subsection{Method \code{print()}}{
-Print the names and properties of all Biodiversity datasets contained within
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$print()}\if{html}{\out{</div>}}
+\subsection{\code{Settings$print()}}{
+  Print the names and properties of all Biodiversity datasets contained within
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$print()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A message on screen
+  }
 }
 
-\subsection{Returns}{
-A message on screen
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-show"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-show}{}}}
-\subsection{Method \code{show()}}{
-Shows the name and the settings
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$show()}\if{html}{\out{</div>}}
+\subsection{\code{Settings$show()}}{
+  Shows the name and the settings
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$show()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} of the name and settings.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{character}} of the name and settings.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-length"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-length}{}}}
-\subsection{Method \code{length()}}{
-Number of options
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$length()}\if{html}{\out{</div>}}
+\subsection{\code{Settings$length()}}{
+  Number of options
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$length()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{numeric}} with the number of options.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{numeric}} with the number of options.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-duration"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-duration}{}}}
-\subsection{Method \code{duration()}}{
-Computation duration convenience function
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$duration()}\if{html}{\out{</div>}}
+\subsection{\code{Settings$duration()}}{
+  Computation duration convenience function
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$duration()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The amount of time passed for model fitting if found.
+  }
 }
 
-\subsection{Returns}{
-The amount of time passed for model fitting if found.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-summary"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-summary}{}}}
-\subsection{Method \code{summary()}}{
-Summary call of the contained parameters
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$summary()}\if{html}{\out{</div>}}
+\subsection{\code{Settings$summary()}}{
+  Summary call of the contained parameters
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$summary()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{list}} with the parameters in this object.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{list}} with the parameters in this object.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-get"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-get}{}}}
-\subsection{Method \code{get()}}{
-Get a specific setting
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$get(what)}\if{html}{\out{</div>}}
+\subsection{\code{Settings$get()}}{
+  Get a specific setting
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$get(what)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{what}}{A \code{\link{character}} with the respective setting.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The setting if found in the object.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{what}}{A \code{\link{character}} with the respective setting.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-The setting if found in the object.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-set"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-set}{}}}
-\subsection{Method \code{set()}}{
-Set new settings
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$set(what, x, copy = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{Settings$set()}}{
+  Set new settings
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$set(what, x, copy = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{what}}{A \code{\link{character}} with the name for the new settings.}
+      \item{\code{x}}{The new setting to be stored. Can be any object.}
+      \item{\code{copy}}{\code{\link{logical}} on whether a new settings object is to be created.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    The setting if found in the object.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{what}}{A \code{\link{character}} with the name for the new settings.}
-
-\item{\code{x}}{The new setting to be stored. Can be any object.}
-
-\item{\code{copy}}{\code{\link{logical}} on whether a new settings object is to be created.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-The setting if found in the object.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Settings-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-Settings-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Settings$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{Settings$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Settings$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

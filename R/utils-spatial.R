@@ -68,7 +68,7 @@ terra_to_raster <- function(input){
 #'
 #' @param input A [`SpatRaster`] object to convert to [`sf`].
 #' @param dissolve A [`logical`] flag indicating if polygons are to be dissolved (Default: \code{TRUE}).
-#' @param dummy A [`character`] or [`date`] to be added as \code{time} column in cases
+#' @param dummy A [`character`] or [`base::Date`] to be added as \code{time} column in cases
 #' where no time dimension can be found (Default: \code{NULL}, not used).
 #'
 #' @keywords utils

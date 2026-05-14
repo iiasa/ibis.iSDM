@@ -79,7 +79,7 @@ Adds a MigClim constraint to a \code{\link{BiodiversityScenario}} object.
 }
 \description{
 This function adds a constraint as defined by the MigClim approach
-(Engler et al. 2013) to a \code{\linkS4class{BiodiversityScenario}} object to
+(Engler et al. 2013) to a \code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object to
 constrain future projections. For a detailed description of MigClim, please
 see the respective reference and the UserGuide. \strong{The default parameters chosen
 here are suggestions.}
@@ -108,15 +108,15 @@ into species distribution models. R package version 1.6.
 }
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_boundary}()},
-\code{\link{add_constraint_connectivity}()},
-\code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint_threshold}()},
-\code{\link{simulate_population_steps}()}
+Other constraint:
+\code{\link[=add_constraint]{add_constraint()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_boundary]{add_constraint_boundary()}},
+\code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}},
+\code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}},
+\code{\link[=add_constraint_minsize]{add_constraint_minsize()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}},
+\code{\link[=simulate_population_steps]{simulate_population_steps()}}
 }
 \concept{constraint}
 \keyword{scenario}

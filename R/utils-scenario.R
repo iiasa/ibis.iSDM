@@ -109,8 +109,8 @@ interpolate_gaps <- function(env, date_interpolation = "annual", method = "linea
 #' Small helper function to find the closest temporal entry (date) in a
 #' vector. Can be used to identify closest matching records.
 #'
-#' @param d A [`Date`] or [`POSIXct`] object.
-#' @param timeseries A vector of [`Date`] or [`POSIXct`] object
+#' @param d A [`base::Date`] or [`base::POSIXct`] object.
+#' @param timeseries A vector of [`base::Date`] or [`base::POSIXct`] object
 #' @param return_index A [`logical`] flag on whether to report an index or the
 #' actual entry of the \code{"timeseries"} (Default: \code{TRUE}).
 #'

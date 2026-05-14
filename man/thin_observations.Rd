@@ -19,13 +19,13 @@ thin_observations(
 )
 }
 \arguments{
-\item{data}{A \code{\link[sf:sf]{sf::sf}} object with observed occurrence points. All methods threat
+\item{data}{A \code{\link[sf:sf]{sf}} object with observed occurrence points. All methods threat
 presence-only and presence-absence occurrence points equally.}
 
-\item{background}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the background of the study
+\item{background}{A \code{\link[terra:SpatRaster]{SpatRaster}} object with the background of the study
 region. Use for assessing point density.}
 
-\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with environmental covariates. Needed when
+\item{env}{A \code{\link[terra:SpatRaster]{SpatRaster}} object with environmental covariates. Needed when
 method is set to \code{"environmental"} or \code{"bias"} (Default: \code{NULL}).}
 
 \item{method}{A \code{\link{character}} of the method to be applied (Default: \code{"random"}).}
@@ -36,7 +36,7 @@ remain (Default: \code{10}).}
 \item{mindistance}{A \code{\link{numeric}} for the minimum distance of neighbouring observations
 (Default: \code{NULL}).}
 
-\item{zones}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} to be supplied when option \code{"zones"} is chosen
+\item{zones}{A \code{\link[terra:SpatRaster]{SpatRaster}} to be supplied when option \code{"zones"} is chosen
 (Default: \code{NULL}).}
 
 \item{probs}{A \code{\link{numeric}} used as quantile threshold in \code{"bias"} method.

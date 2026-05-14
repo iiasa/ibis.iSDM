@@ -10,15 +10,15 @@ add_priors(x, priors = NULL, ...)
 \S4method{add_priors}{BiodiversityDistribution}(x, priors = NULL, ...)
 }
 \arguments{
-\item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\link{distribution} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object containing multiple priors.}
+\item{priors}{A \code{\link[=PriorList-class]{PriorList}} object containing multiple priors.}
 
 \item{...}{Other parameters passed down.}
 }
 \description{
 This function simply allows to add priors to an existing
-\link{distribution} object. The supplied priors must be a \code{\linkS4class{PriorList}}
+\link{distribution} object. The supplied priors must be a \code{\link[=PriorList-class]{PriorList}}
 object created through calling \link{priors}.
 }
 \note{
@@ -35,23 +35,23 @@ added as parameter via \link{add_predictors}
 
 }
 \seealso{
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{get_priors}()},
-\code{\link{priors}()},
-\code{\link{rm_priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPrior]{GDBPrior()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPrior]{INLAPrior()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBPrior]{XGBPrior()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=get_priors]{get_priors()}},
+\code{\link[=priors]{priors()}},
+\code{\link[=rm_priors]{rm_priors()}}
 }
 \concept{prior}

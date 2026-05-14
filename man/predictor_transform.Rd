@@ -15,7 +15,7 @@ predictor_transform(
 )
 }
 \arguments{
-\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link{stars}} object.}
+\item{env}{A \code{\link[terra:SpatRaster]{SpatRaster}} or \code{\link{stars}} object.}
 
 \item{option}{A \code{\link{vector}} stating whether predictors should be preprocessed
 in any way (Options: \code{'none'}, \code{'scale'}, \code{'norm'}, \code{'windsor'},
@@ -37,13 +37,13 @@ empty (in this case option has to be set).}
 \item{...}{Currrently not implemented (Non specified).}
 }
 \value{
-Returns a adjusted \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object of identical resolution.
+Returns a adjusted \code{\link[terra:SpatRaster]{SpatRaster}} object of identical resolution.
 }
 \description{
 This function allows the transformation of provided environmental
-predictors (in \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} format). A common use case is for instance the
+predictors (in \code{\link[terra:SpatRaster]{SpatRaster}} format). A common use case is for instance the
 standardization (or scaling) of all predictors prior to model fitting. This
-function works both with \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} as well as with \code{\link{stars}} objects.
+function works both with \code{\link[terra:SpatRaster]{SpatRaster}} as well as with \code{\link{stars}} objects.
 }
 \details{
 Available options are:

@@ -430,7 +430,7 @@ methods::setMethod(
         }
       }
 
-      # Project suitability
+      # --- Project suitability
       pred_tmp <- c("x", "y", fit$model$predictors_names)
       # Warn if any expected predictors are missing from the data
       missing_step_preds <- pred_tmp[!pred_tmp %in% colnames(nd)]
@@ -470,10 +470,12 @@ methods::setMethod(
                            "sdd_fixed" = .sdd_fixed(baseline_threshold,
                                                     new_suit = out,
                                                     value = scenario_constraints$dispersal$params[1],
+                                                    unit = scenario_constraints$dispersal$params[2],
                                                     resistance = resistance ),
                            "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold,
                                                               new_suit = out,
                                                               value = scenario_constraints$dispersal$params[1],
+                                                              unit = scenario_constraints$dispersal$params[2],
                                                               resistance = resistance)
             )
             names(out) <-  paste0('suitability_', step)
@@ -499,6 +501,40 @@ methods::setMethod(
           if(any(scenario_constraints$connectivity$method == "hardbarrier")){
             out[resistance==1] <- 0
           }
+        }
+
+        # Apply zone constraint per timestep if set.
+        # Unlike the posthoc "boundary" constraint, zone masking is applied here
+        # inside the loop so that any downstream threshold computation inherits
+        # the mask.
+        if("zone" %in% names(scenario_constraints)){
+          zone_params <- scenario_constraints$zone$params
+          if(zone_params$type == "static"){
+            mask_rast <- zone_params$layer
+          } else {
+            # Time-series zone: select the layer for this projection step.
+            if(terra::has.time(zone_params$layer)){
+              # Match by time attribute (nearest date)
+              zi <- get_nearest_date(step, terra::time(zone_params$layer), return_index = TRUE)
+            } else {
+              # Match by sequential layer index (layer order = covariate timestep order)
+              zi <- which(times == step)
+              assertthat::assert_that(
+                length(zi) == 1 && zi <= terra::nlyr(zone_params$layer),
+                msg = paste0("Zone layer index ", zi, " exceeds zone SpatRaster layer count (",
+                             terra::nlyr(zone_params$layer), "). Ensure terra::nlyr() matches the number of covariate timesteps.")
+              )
+            }
+            mask_rast <- zone_params$layer[[zi]]
+          }
+          # Align geometries if needed
+          if(!terra::compareGeom(out, mask_rast, stopOnError = FALSE)){
+            mask_rast <- alignRasters(mask_rast, out, method = "ngb", func = terra::modal, cl = FALSE)
+            mask_rast <- terra::extend(mask_rast, out)
+          }
+          out <- terra::mask(out, mask_rast)
+          out[is.na(out)] <- 0
+          out <- terra::mask(out, background)
         }
 
       }

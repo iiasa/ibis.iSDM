@@ -65,15 +65,15 @@ scenario(fit) |>
 
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint}()},
-\code{\link{add_constraint_MigClim}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_boundary}()},
-\code{\link{add_constraint_connectivity}()},
-\code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_threshold}()},
-\code{\link{simulate_population_steps}()}
+Other constraint:
+\code{\link[=add_constraint]{add_constraint()}},
+\code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_boundary]{add_constraint_boundary()}},
+\code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}},
+\code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}},
+\code{\link[=simulate_population_steps]{simulate_population_steps()}}
 }
 \concept{constraint}
 \keyword{scenario}

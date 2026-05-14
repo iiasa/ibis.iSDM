@@ -27,6 +27,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Martin Jung \email{jung@iiasa.ac.at} (\href{https://orcid.org/0000-0002-7569-1390}{ORCID}) [copyright holder]
 
+Authors:
+\itemize{
+  \item Martin Jung \email{jung@iiasa.ac.at} (\href{https://orcid.org/0000-0002-7569-1390}{ORCID}) [copyright holder]
+}
+
 Other contributors:
 \itemize{
   \item Maximilian H.K. Hesselbarth \email{hesselbarth@iiasa.ac.at} (\href{https://orcid.org/0000-0003-1125-9918}{ORCID}) [contributor]

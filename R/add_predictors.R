@@ -159,7 +159,7 @@ methods::setMethod(
     # Check that background and range align, otherwise raise error
     if(is.Raster(env)){
       if(!is_comparable_raster(env, x$background)){
-        cli::cli_alert_warning('Supplied range does not align with background! Aligning them now...')
+        cli::cli_alert_warning('Supplied predictors does not align with background! Aligning them now...')
         env <- alignRasters(env, x$background, method = 'bilinear', func = mean, cl = FALSE)
       }
     }
@@ -861,7 +861,7 @@ methods::setMethod(
       }
     }
 
-    # checl env object
+    # check env object
     assertthat::assert_that(length(env)>0, msg = "No matching variables found!")
 
     # Get state if not set
@@ -886,6 +886,27 @@ methods::setMethod(
           }
         }
       }
+    }
+
+    # Finally align with model background
+    if(inherits(model$background, "sf")){
+      # Check that they align
+      assertthat::assert_that(sf::st_crs(model$background) == sf::st_crs(env), msg = "CRS of model background and scenario predictors do not match!")
+      # Now crop
+      env <- suppressMessages(
+        suppressWarnings(
+          sf::st_crop(env, sf::st_bbox(model$background))
+          )
+      )
+    } else if(inherits(model$background, "SpatRaster")){
+      # Check that they align
+      assertthat::assert_that(terra::crs(model$background) == sf::st_crs(env), msg = "CRS of model background and scenario predictors do not match!")
+      # Now crop
+      env <- suppressMessages(
+        suppressWarnings(
+          stars::st_crop(env, stars::st_as_sfc(stars::st_bbox(model$background)))
+        )
+      )
     }
 
     # Messenger

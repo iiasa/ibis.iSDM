@@ -16,7 +16,7 @@ to be supplied.}
 \item{...}{other arguments that can be passed to \code{\link{terra}}}
 }
 \value{
-an empty \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, i.e. all cells are \code{NA}.
+an empty \code{\link[terra:SpatRaster]{SpatRaster}}, i.e. all cells are \code{NA}.
 }
 \description{
 This function creates an empty copy of a provided

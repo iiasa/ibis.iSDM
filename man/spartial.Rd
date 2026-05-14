@@ -13,7 +13,7 @@ spartial(mod, x.var, constant = NULL, newdata = NULL, plot = FALSE, ...)
 spartial.DistributionModel(mod, ...)
 }
 \arguments{
-\item{mod}{A \code{\linkS4class{DistributionModel}} object with trained model.}
+\item{mod}{A \code{\link[=DistributionModel-class]{DistributionModel}} object with trained model.}
 
 \item{x.var}{A \link{character} indicating the variable for which a partial effect
 is to be calculated.}
@@ -29,12 +29,12 @@ for example created from a raster file (Default: \code{NULL}).}
 \item{...}{Other engine specific parameters.}
 }
 \value{
-A \link[terra:SpatRaster-class]{terra::SpatRaster} containing the mapped partial response of the variable.
+A \link[terra:SpatRaster]{SpatRaster} containing the mapped partial response of the variable.
 }
 \description{
 Similar to \link{partial}, this function calculates a partial response
 of a trained model for a given variable. Differently from \link{partial} in space.
-However the result is a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} showing the spatial magnitude of the
+However the result is a \code{\link[terra:SpatRaster]{SpatRaster}} showing the spatial magnitude of the
 partial response.
 }
 \details{

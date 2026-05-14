@@ -13,14 +13,14 @@ rm_latent(x)
 \S4method{rm_latent}{BiodiversityScenario}(x)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 }
 \value{
 Removes a latent spatial effect from a \code{\link{distribution}} object.
 }
 \description{
 This is just a wrapper function for removing specified offsets
-from a \code{\linkS4class{BiodiversityDistribution}}) object.
+from a \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.
 }
 \examples{
 \dontrun{

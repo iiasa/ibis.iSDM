@@ -10,7 +10,7 @@ rm_limits(x)
 \S4method{rm_limits}{BiodiversityDistribution}(x)
 }
 \arguments{
-\item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\link{distribution} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 }
 \description{
 This function allows to remove set limits from an existing \link{distribution}
@@ -29,7 +29,7 @@ object.
 \seealso{
 \code{\link[=add_limits_extrapolation]{add_limits_extrapolation()}}
 
-Other control: 
-\code{\link{rm_control}()}
+Other control:
+\code{\link[=rm_control]{rm_control()}}
 }
 \concept{control}

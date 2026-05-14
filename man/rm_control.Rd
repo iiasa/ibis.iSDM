@@ -10,7 +10,7 @@ rm_control(x, type)
 \S4method{rm_control}{BiodiversityDistribution}(x, type)
 }
 \arguments{
-\item{x}{\link{distribution} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\link{distribution} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{type}{A \code{\link{character}} vector describing the type of control to be removed.
 Can be missing.}
@@ -32,7 +32,7 @@ object.
 \seealso{
 \code{\link[=add_control_bias]{add_control_bias()}}
 
-Other control: 
-\code{\link{rm_limits}()}
+Other control:
+\code{\link[=rm_limits]{rm_limits()}}
 }
 \concept{control}
