@@ -24,7 +24,7 @@ get_ngbvalue(
 
   A [`matrix`](https://rdrr.io/r/base/matrix.html),
   [`data.frame`](https://rdrr.io/r/base/data.frame.html) or
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
 
 - env:
 
@@ -59,7 +59,7 @@ extracted covariate data from each provided data point.
 ## Details
 
 Nearest neighbour matching is done via the
-[geodist::geodist](https://hypertidy.github.io/geodist/reference/geodist.html)
+[geodist](https://hypertidy.github.io/geodist/reference/geodist.html)
 R-package
 ([`geodist::geodist`](https://hypertidy.github.io/geodist/reference/geodist.html)).
 

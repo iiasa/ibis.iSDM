@@ -144,7 +144,7 @@ add_predictors(
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
   [`stars`](https://rdrr.io/r/graphics/stars.html) or
   [`data.frame`](https://rdrr.io/r/base/data.frame.html) object.
 

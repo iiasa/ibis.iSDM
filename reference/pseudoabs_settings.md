@@ -8,7 +8,7 @@ absence points for Binomial (Bernoulli really) distributed responses
 points. For more details read Renner et al. (2015).
 
 The function `'add_pseudoabsence'` allows to add absence points to any
-[`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object. See
+[`sf`](https://r-spatial.github.io/sf/reference/sf.html) object. See
 **Details** for additional parameter description and examples on how to
 'turn' a presence-only dataset into a presence-(pseudo-)absence.
 
@@ -46,8 +46,8 @@ pseudoabs_settings(
 - background:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   over which background points can be sampled. Default is `NULL`
   (Default) and the background is then added when the sampling is first
   called.
@@ -89,8 +89,8 @@ pseudoabs_settings(
 
 - layer:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   (in the case of method `'zones'`) object indicating the range of a
   species. Only used with `method = "range"` or `method = "zones"`
   (Default: `NULL`).
@@ -98,7 +98,7 @@ pseudoabs_settings(
 - bias:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   with the same extent and projection and background. Absence points
   will be preferentially sampled in areas with higher (!) bias.
   (Default: `NULL`).
@@ -130,7 +130,7 @@ layer. Possible parameters for `method` are:
 
 - `'zones'` A ratified (e.g. of type
   [factor](https://rdrr.io/r/base/factor.html))
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   layer depicting zones from which absence points are to be sampled.
   This method checks which points fall within which zones and then
   samples absence points either within or outside these zones
@@ -139,7 +139,7 @@ layer. Possible parameters for `method` are:
 
 - `'target'` Make use of a target background for sampling absence
   points. Here a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object has to be provided through the parameter `'layer'`. Absence
   points are then sampled exclusively within the target areas for grid
   cells with non-zero values.

@@ -113,7 +113,7 @@ in various forms.
   : Adds an adaptability constraint to a scenario object
 
 - [`add_constraint_boundary()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_boundary.md)
-  : Adds a boundary constraint to a scenario object
+  : Adds a boundary or zone constraint to a scenario object
 
 - [`add_constraint_connectivity()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_connectivity.md)
   : Adds a connectivity constraint to a scenario object.
@@ -289,7 +289,7 @@ scenarios to limit extrapolations.
   : Adds an adaptability constraint to a scenario object
 
 - [`add_constraint_boundary()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_boundary.md)
-  : Adds a boundary constraint to a scenario object
+  : Adds a boundary or zone constraint to a scenario object
 
 - [`add_constraint_connectivity()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_connectivity.md)
   : Adds a connectivity constraint to a scenario object.
@@ -385,7 +385,7 @@ needs to be reformatted.
   :
 
   Align a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object to another by harmonizing geometry and extend.
 
 - [`emptyraster()`](https://iiasa.github.io/ibis.iSDM/reference/emptyraster.md)

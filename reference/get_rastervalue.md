@@ -1,10 +1,10 @@
 # Function to extract point values directly from a SpatRaster
 
 This function simply extracts the values from a provided
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
-[`terra::SpatRasterDataset`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
+[`SpatRasterDataset`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 or
-[`terra::SpatRasterCollection`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRasterCollection`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object. For points where or `NA` values were extracted a small buffer is
 applied to try and obtain the remaining values.
 
@@ -20,12 +20,12 @@ get_rastervalue(coords, env, ngb_fill = TRUE, rm.na = FALSE)
 
   A [`data.frame`](https://rdrr.io/r/base/data.frame.html),
   [`matrix`](https://rdrr.io/r/base/matrix.html) or
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
 
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the provided predictors.
 
 - ngb_fill:

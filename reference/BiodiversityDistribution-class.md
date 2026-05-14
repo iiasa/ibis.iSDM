@@ -1,10 +1,10 @@
 # Biodiversity Distribution master class
 
-Base [`R6::R6`](https://r6.r-lib.org/reference/R6Class.html) class for
-any biodiversity distribution objects. Serves as container that supplies
+Base [`R6`](https://r6.r-lib.org/reference/R6Class.html) class for any
+biodiversity distribution objects. Serves as container that supplies
 data and functions to other
-[`R6::R6`](https://r6.r-lib.org/reference/R6Class.html) classes.
-Generally stores all objects and parameters added to a model.
+[`R6`](https://r6.r-lib.org/reference/R6Class.html) classes. Generally
+stores all objects and parameters added to a model.
 
 ## Details
 
@@ -40,15 +40,14 @@ Not implemented yet.
 - `background`:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   delineating the modelling extent.
 
 - `limits`:
 
-  An optional
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object on
-  potential extrapolation limits
+  An optional [`sf`](https://r-spatial.github.io/sf/reference/sf.html)
+  object on potential extrapolation limits
 
 - `biodiversity`:
 
@@ -98,7 +97,7 @@ Not implemented yet.
 
 ### Public methods
 
-- [`BiodiversityDistribution$new()`](#method-BiodiversityDistribution-new)
+- [`BiodiversityDistribution$new()`](#method-BiodiversityDistribution-initialize)
 
 - [`BiodiversityDistribution$print()`](#method-BiodiversityDistribution-print)
 
@@ -190,7 +189,7 @@ Not implemented yet.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `BiodiversityDistribution$new()`
 
 Initializes the object and creates an BiodiversityDataset by default.
 
@@ -203,15 +202,14 @@ Initializes the object and creates an BiodiversityDataset by default.
 - `background`:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   delineating the modelling extent.
 
 - `limits`:
 
-  An optional
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object on
-  potential extrapolation limits
+  An optional [`sf`](https://r-spatial.github.io/sf/reference/sf.html)
+  object on potential extrapolation limits
 
 - `biodiversity`:
 
@@ -229,7 +227,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `BiodiversityDistribution$print()`
 
 Looks for and returns the properties of all contained objects.
 
@@ -243,7 +241,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `BiodiversityDistribution$show()`
 
 An alias for print
 
@@ -257,7 +255,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `name()`
+### `BiodiversityDistribution$name()`
 
 Returns self-describing name
 
@@ -271,7 +269,7 @@ A [`character`](https://rdrr.io/r/base/character.html) with the name
 
 ------------------------------------------------------------------------
 
-### Method `show_background_info()`
+### `BiodiversityDistribution$show_background_info()`
 
 Summarizes extent and projection from set background
 
@@ -285,7 +283,7 @@ A [`character`](https://rdrr.io/r/base/character.html) with the name
 
 ------------------------------------------------------------------------
 
-### Method `set_limits()`
+### `BiodiversityDistribution$set_limits()`
 
 Specify new limits to the background
 
@@ -306,7 +304,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_limits()`
+### `BiodiversityDistribution$get_limits()`
 
 Get provided limits if set or a waiver
 
@@ -320,7 +318,7 @@ A [`list`](https://rdrr.io/r/base/list.html) or waiver.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_limits()`](https://iiasa.github.io/ibis.iSDM/reference/rm_limits.md)
+### `BiodiversityDistribution$rm_limits()`
 
 Remove limits if set.
 
@@ -334,7 +332,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_predictor_names()`
+### `BiodiversityDistribution$get_predictor_names()`
 
 Function for querying predictor names if existing
 
@@ -348,7 +346,7 @@ A [`character`](https://rdrr.io/r/base/character.html) vector.
 
 ------------------------------------------------------------------------
 
-### Method `set_latent()`
+### `BiodiversityDistribution$set_latent()`
 
 Adding latent factors to the object.
 
@@ -378,7 +376,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_latent()`
+### `BiodiversityDistribution$get_latent()`
 
 Get latent factors if found in object.
 
@@ -393,7 +391,7 @@ objects.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_latent()`](https://iiasa.github.io/ibis.iSDM/reference/rm_latent.md)
+### `BiodiversityDistribution$rm_latent()`
 
 Remove latent factors if found in object.
 
@@ -407,7 +405,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md)
+### `BiodiversityDistribution$get_priors()`
 
 Get prior object if found in object.
 
@@ -421,7 +419,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method [`set_priors()`](https://iiasa.github.io/ibis.iSDM/reference/set_priors.md)
+### `BiodiversityDistribution$set_priors()`
 
 Specify new prior object. Overwrites existing ones
 
@@ -443,7 +441,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `set_biodiversity()`
+### `BiodiversityDistribution$set_biodiversity()`
 
 Adds a new biodiversity object to the existing empty collection.
 
@@ -470,7 +468,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `set_predictors()`
+### `BiodiversityDistribution$set_predictors()`
 
 Set a new Predictor object to this object.
 
@@ -492,7 +490,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `set_engine()`
+### `BiodiversityDistribution$set_engine()`
 
 Set a new Engine object to this object.
 
@@ -514,7 +512,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_engine()`
+### `BiodiversityDistribution$get_engine()`
 
 Gets the name of the current engine if set.
 
@@ -529,7 +527,7 @@ name
 
 ------------------------------------------------------------------------
 
-### Method `rm_engine()`
+### `BiodiversityDistribution$rm_engine()`
 
 Removes the current engine if set.
 
@@ -543,7 +541,7 @@ This object
 
 ------------------------------------------------------------------------
 
-### Method `get_prior_variables()`
+### `BiodiversityDistribution$get_prior_variables()`
 
 Get prior variables
 
@@ -558,7 +556,7 @@ names for which priors have been added.
 
 ------------------------------------------------------------------------
 
-### Method `set_offset()`
+### `BiodiversityDistribution$set_offset()`
 
 Specify new offsets.
 
@@ -571,7 +569,7 @@ Specify new offsets.
 - `x`:
 
   A new
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object to be used as offset.
 
 #### Returns
@@ -580,7 +578,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_offset()`
+### `BiodiversityDistribution$get_offset()`
 
 Get offset (print name)
 
@@ -595,7 +593,7 @@ offsets in here.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_offset()`](https://iiasa.github.io/ibis.iSDM/reference/rm_offset.md)
+### `BiodiversityDistribution$rm_offset()`
 
 Remove offsets if found.
 
@@ -616,7 +614,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `plot_offsets()`
+### `BiodiversityDistribution$plot_offsets()`
 
 Plot offset if found.
 
@@ -630,7 +628,7 @@ A graphical element.
 
 ------------------------------------------------------------------------
 
-### Method `get_offset_type()`
+### `BiodiversityDistribution$get_offset_type()`
 
 Get offset parameters if found
 
@@ -645,7 +643,7 @@ if found.
 
 ------------------------------------------------------------------------
 
-### Method `set_control()`
+### `BiodiversityDistribution$set_control()`
 
 Set new bias control
 
@@ -663,7 +661,7 @@ Set new bias control
 - `x`:
 
   A new bias control object. Expecting a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object.
 
 - `method`:
@@ -681,7 +679,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_control()`
+### `BiodiversityDistribution$get_control()`
 
 Get bias control (print name)
 
@@ -703,7 +701,7 @@ object if found.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_control()`](https://iiasa.github.io/ibis.iSDM/reference/rm_control.md)
+### `BiodiversityDistribution$rm_control()`
 
 Remove bias controls if found.
 
@@ -724,7 +722,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `plot_bias()`
+### `BiodiversityDistribution$plot_bias()`
 
 Plot bias variable if set.
 
@@ -738,7 +736,7 @@ A graphical element.
 
 ------------------------------------------------------------------------
 
-### Method `get_log()`
+### `BiodiversityDistribution$get_log()`
 
 Returns the output filename of the current log object if set.
 
@@ -753,7 +751,7 @@ is returned.
 
 ------------------------------------------------------------------------
 
-### Method `set_log()`
+### `BiodiversityDistribution$set_log()`
 
 Set a new log object
 
@@ -774,7 +772,7 @@ This object
 
 ------------------------------------------------------------------------
 
-### Method `get_extent()`
+### `BiodiversityDistribution$get_extent()`
 
 Get extent
 
@@ -788,7 +786,7 @@ Background extent or NULL.
 
 ------------------------------------------------------------------------
 
-### Method `get_projection()`
+### `BiodiversityDistribution$get_projection()`
 
 Get projection from the background in crs format.
 
@@ -802,7 +800,7 @@ A [`character`](https://rdrr.io/r/base/character.html) of the projection
 
 ------------------------------------------------------------------------
 
-### Method `get_resolution()`
+### `BiodiversityDistribution$get_resolution()`
 
 Return resolution of the background object.
 
@@ -816,7 +814,7 @@ A [`vector`](https://rdrr.io/r/base/vector.html) with the resolution.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_predictors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_predictors.md)
+### `BiodiversityDistribution$rm_predictors()`
 
 Remove predictiors. Either all of them or specific ones.
 
@@ -837,7 +835,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+### `BiodiversityDistribution$rm_priors()`
 
 Remove priors. Either all of them or specific ones.
 
@@ -858,7 +856,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `show_biodiversity_length()`
+### `BiodiversityDistribution$show_biodiversity_length()`
 
 Show number of biodiversity records
 
@@ -873,7 +871,7 @@ biodiversity records
 
 ------------------------------------------------------------------------
 
-### Method `show_biodiversity_equations()`
+### `BiodiversityDistribution$show_biodiversity_equations()`
 
 Show Equations of biodiversity records
 
@@ -887,7 +885,7 @@ A message on screen.
 
 ------------------------------------------------------------------------
 
-### Method `get_biodiversity_equations()`
+### `BiodiversityDistribution$get_biodiversity_equations()`
 
 Get equations of biodiversity records
 
@@ -901,7 +899,7 @@ A [`list`](https://rdrr.io/r/base/list.html) vector.
 
 ------------------------------------------------------------------------
 
-### Method `get_biodiversity_types()`
+### `BiodiversityDistribution$get_biodiversity_types()`
 
 Query all biodiversity types in this object
 
@@ -915,7 +913,7 @@ A [`character`](https://rdrr.io/r/base/character.html) vector.
 
 ------------------------------------------------------------------------
 
-### Method `get_biodiversity_ids()`
+### `BiodiversityDistribution$get_biodiversity_ids()`
 
 Return all biodiversity dataset ids in the object
 
@@ -930,7 +928,7 @@ biodiversity datasets
 
 ------------------------------------------------------------------------
 
-### Method `get_biodiversity_names()`
+### `BiodiversityDistribution$get_biodiversity_names()`
 
 Return all the [`character`](https://rdrr.io/r/base/character.html)
 names of all biodiversity datasets
@@ -946,7 +944,7 @@ biodiversity datasets
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://iiasa.github.io/ibis.iSDM/reference/plot.md)
+### `BiodiversityDistribution$plot()`
 
 Plots the content of this class.
 
@@ -960,7 +958,7 @@ A message.
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
+### `BiodiversityDistribution$summary()`
 
 Summary function for this object.
 
@@ -974,7 +972,7 @@ A message.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `BiodiversityDistribution$clone()`
 
 The objects of this class are cloneable with this method.
 
@@ -996,7 +994,7 @@ background <- terra::rast(system.file('extdata/europegrid_50km.tif',
 package='ibis.iSDM',mustWork = TRUE))
 # Define model
 x <- distribution(background)
-#> [Setup] 2026-05-10 15:18:03.498164 | Creating distribution object...
+#> [Setup] 2026-05-14 13:33:54.100579 | Creating distribution object...
 names(x)
 #>  [1] ".__enclos_env__"             "engine"                     
 #>  [3] "log"                         "offset"                     

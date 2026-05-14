@@ -4,7 +4,7 @@ many instances be complex and non-linear. Visualizing obtained suitability
 predictions (e.g. from train()) against underlying predictors might help
 to explain the underlying gradients of the niche.
 Supported Inputs for this function are either single trained ibis.iSDM
-DistributionModel objects or alternatively a set of three terra::SpatRaster objects.
+DistributionModel objects or alternatively a set of three SpatRaster objects.
 In both cases, users can specify "xvar" and "yvar" explicitly
 or leave them empty. In the latter case a principal component analysis (PCA)
 is conducted on the full environmental stack (loaded from DistributionModel
@@ -13,7 +13,7 @@ many instances be complex and non-linear. Visualizing obtained suitability
 predictions (e.g. from train()) against underlying predictors might help
 to explain the underlying gradients of the niche.
 Supported Inputs for this function are either single trained ibis.iSDM
-DistributionModel objects or alternatively a set of three terra::SpatRaster objects.
+DistributionModel objects or alternatively a set of three SpatRaster objects.
 In both cases, users can specify "xvar" and "yvar" explicitly
 or leave them empty. In the latter case a principal component analysis (PCA)
 is conducted on the full environmental stack (loaded from DistributionModel
@@ -68,7 +68,7 @@ many instances be complex and non-linear. Visualizing obtained suitability
 predictions (e.g. from <code><a href="train.html">train()</a></code>) against underlying predictors might help
 to explain the underlying gradients of the niche.</p>
 <p>Supported Inputs for this function are either single trained <code>ibis.iSDM</code>
-<code><a href="DistributionModel-class.html">DistributionModel</a></code> objects or alternatively a set of three <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> objects.
+<code><a href="DistributionModel-class.html">DistributionModel</a></code> objects or alternatively a set of three <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> objects.
 In both cases, users can specify <code>"xvar"</code> and <code>"yvar"</code> explicitly
 or leave them empty. In the latter case a principal component analysis (PCA)
 is conducted on the full environmental stack (loaded from <code><a href="DistributionModel-class.html">DistributionModel</a></code>
@@ -110,22 +110,22 @@ or supplied separately).</p>
 
 
 <dl><dt id="arg-mod">mod<a class="anchor" aria-label="anchor" href="#arg-mod"></a></dt>
-<dd><p>A trained <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>
+<dd><p>A trained <code><a href="DistributionModel-class.html">DistributionModel</a></code> or alternatively a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>
 object with <code>prediction</code> model within.</p></dd>
 
 
 <dt id="arg-xvar">xvar<a class="anchor" aria-label="anchor" href="#arg-xvar"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the predictor on the x-axis. Alternatively a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the predictor on the x-axis. Alternatively a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>
 object can be provided.</p></dd>
 
 
 <dt id="arg-yvar">yvar<a class="anchor" aria-label="anchor" href="#arg-yvar"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the predictor on the y-axis. Alternatively a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>
+<dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the predictor on the y-axis. Alternatively a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>
 object can be provided.</p></dd>
 
 
 <dt id="arg-envvars">envvars<a class="anchor" aria-label="anchor" href="#arg-envvars"></a></dt>
-<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object containing all environmental variables. Only
+<dd><p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object containing all environmental variables. Only
 used if <code>xvar</code> and <code>yvar</code> is empty (Default: <code>NULL</code>).</p></dd>
 
 
@@ -183,15 +183,15 @@ should be written to.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="add_predictors.html">add_predictors</a></span><span class="op">(</span><span class="va">predictors</span>, transform <span class="op">=</span> <span class="st">'none'</span>,derivates <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="engine_glm.html">engine_glm</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="train.html">train</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2026-05-10 15:18:23.111362 | Creating distribution object...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2026-05-10 15:18:23.112348 | Adding poipo dataset...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2026-05-10 15:18:23.118155 | Adding predictors...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-10 15:18:23.309731 | Collecting input parameters.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-10 15:18:23.490782 | Adding engine-specific parameters.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-10 15:18:23.495787 | Engine setup.</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-10 15:18:23.758976 | Starting fitting: Virtual points</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-10 15:18:23.824403 | Starting prediction...</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Done] 2026-05-10 15:18:23.959728 | Completed after 0.65 secs</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2026-05-14 13:34:13.154249 | Creating distribution object...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2026-05-14 13:34:13.155189 | Adding poipo dataset...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Setup] 2026-05-14 13:34:13.160656 | Adding predictors...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-14 13:34:13.34412 | Collecting input parameters.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-14 13:34:13.522402 | Adding engine-specific parameters.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-14 13:34:13.527184 | Engine setup.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-14 13:34:13.786661 | Starting fitting: Virtual points</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Estimation] 2026-05-14 13:34:13.844967 | Starting prediction...</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">[Done] 2026-05-14 13:34:13.981079 | Completed after 0.63 secs</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot niche for prediction for temperature and forest cover</span></span></span>
 <span class="r-in"><span><span class="fu">nicheplot</span><span class="op">(</span><span class="va">fit</span>, xvar <span class="op">=</span> <span class="st">"bio01_mean_50km"</span>, yvar <span class="op">=</span> <span class="st">"CLC3_312_mean_50km"</span> <span class="op">)</span></span></span>

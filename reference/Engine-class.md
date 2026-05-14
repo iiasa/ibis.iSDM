@@ -20,7 +20,7 @@ Basic object for engine, all other engines inherit from here.
 
 ### Public methods
 
-- [`Engine$new()`](#method-Engine-new)
+- [`Engine$new()`](#method-Engine-initialize)
 
 - [`Engine$print()`](#method-Engine-print)
 
@@ -40,7 +40,7 @@ Basic object for engine, all other engines inherit from here.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `Engine$new()`
 
 Initializes the object and creates an empty list
 
@@ -64,7 +64,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `Engine$print()`
 
 Print the Engine name
 
@@ -78,7 +78,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `Engine$show()`
 
 Aliases that calls print.
 
@@ -92,7 +92,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `get_class()`
+### `Engine$get_class()`
 
 Get class description
 
@@ -107,7 +107,7 @@ saved in engine
 
 ------------------------------------------------------------------------
 
-### Method [`get_data()`](https://iiasa.github.io/ibis.iSDM/reference/get_data.md)
+### `Engine$get_data()`
 
 Get specific data from this engine
 
@@ -127,7 +127,7 @@ A [`list`](https://rdrr.io/r/base/list.html) with the data.
 
 ------------------------------------------------------------------------
 
-### Method `list_data()`
+### `Engine$list_data()`
 
 List all data
 
@@ -142,7 +142,7 @@ data entries.
 
 ------------------------------------------------------------------------
 
-### Method `set_data()`
+### `Engine$set_data()`
 
 Set data for this engine
 
@@ -167,7 +167,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `get_self()`
+### `Engine$get_self()`
 
 Dummy function to get self object
 
@@ -181,7 +181,7 @@ This object
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `Engine$clone()`
 
 The objects of this class are cloneable with this method.
 

@@ -33,21 +33,21 @@ thin_observations(
 
 - data:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-  with observed occurrence points. All methods threat presence-only and
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object with
+  observed occurrence points. All methods threat presence-only and
   presence-absence occurrence points equally.
 
 - background:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the background of the study region. Use for assessing
   point density.
 
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with environmental covariates. Needed when method is set to
   `"environmental"` or `"bias"` (Default: `NULL`).
 
@@ -69,7 +69,7 @@ thin_observations(
 - zones:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   to be supplied when option `"zones"` is chosen (Default: `NULL`).
 
 - probs:

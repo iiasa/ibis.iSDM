@@ -22,15 +22,14 @@ predictor_summarize_zones(
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the predictors.
 
 - layer:
 
   Either a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or a [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html)
-  object.
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or a [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
 
 - fun:
 
@@ -42,7 +41,7 @@ predictor_summarize_zones(
 - target_layer:
 
   (Optional)
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with categorical zones for which the summarized value is to be
   set.
 
@@ -54,7 +53,7 @@ predictor_summarize_zones(
 ## Value
 
 A
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object with the same number of layers as the input.
 
 ## Details

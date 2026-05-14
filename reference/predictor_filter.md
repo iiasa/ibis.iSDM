@@ -18,7 +18,7 @@ predictor_filter(env, keep = NULL, method = "pearson", ...)
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   or alternatively
   [`data.frame`](https://rdrr.io/r/base/data.frame.html) or
   [`matrix`](https://rdrr.io/r/base/matrix.html) with extracted

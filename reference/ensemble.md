@@ -58,7 +58,7 @@ ensemble(
   Provided
   [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md)
   or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   objects.
 
 - method:
@@ -100,7 +100,7 @@ ensemble(
 
 - point:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   containing observational data used for model training. Used for method
   `'superlearner'` only (Default: `NULL`).
 
@@ -120,7 +120,7 @@ ensemble(
 ## Value
 
 A
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object containing the ensemble of the provided predictions specified by
 `method` and a coefficient of variation across all models.
 

@@ -85,7 +85,7 @@ project(
 - env:
 
   An optional
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   or [`data.frame`](https://rdrr.io/r/base/data.frame.html) object for
   prediction. Ignored unless a
   [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md)

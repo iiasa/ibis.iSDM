@@ -5,10 +5,24 @@ Add dispersal constraint to an existing `scenario`
 ## Usage
 
 ``` r
-add_constraint_dispersal(mod, method, value = NULL, type = NULL, ...)
+add_constraint_dispersal(
+  mod,
+  method,
+  value = NULL,
+  unit = "m",
+  type = NULL,
+  ...
+)
 
 # S4 method for class 'BiodiversityScenario'
-add_constraint_dispersal(mod, method, value = NULL, type = NULL, ...)
+add_constraint_dispersal(
+  mod,
+  method,
+  value = NULL,
+  unit = "m",
+  type = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -34,6 +48,12 @@ add_constraint_dispersal(mod, method, value = NULL, type = NULL, ...)
   within year migration steps). For adaptability constraints this
   parameter specifies the extent (in units of standard deviation) to
   which extrapolations should be performed.
+
+- unit:
+
+  A [`character`](https://rdrr.io/r/base/character.html) indicating the
+  unit of the value parameter. Available are meter (`"m"`) and kilometre
+  (`"km"`) (Default: `"m"`).
 
 - type:
 

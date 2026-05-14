@@ -24,8 +24,8 @@ scenario(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
 - limits:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   that limits the projection surface when intersected with the
   prediction data (Default: `NULL`). This can for instance be set as an
   expert-delineated constrain to limit spatial projections.

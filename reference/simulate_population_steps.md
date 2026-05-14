@@ -61,7 +61,7 @@ simulate_population_steps(
 - carrying_capacity:
 
   Either
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   or a [`numeric`](https://rdrr.io/r/base/numeric.html) estimate of the
   maximum carrying capacity, e.g. how many adult individual are likely
   to occur per grid cell. If set to
@@ -73,7 +73,7 @@ simulate_population_steps(
 - initial:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   giving the initial population size. If not provided, then initial
   populations are guessed (see details) from the projected suitability
   rasters (Default: `NULL`).
@@ -117,8 +117,8 @@ population and not all possible options are represented in this wrapper.
 
 Furthermore, the package still makes use of the `raster` package for
 much of its internal data processing. Since *ibis.iSDM* switched to
-[terra::terra](https://rspatial.github.io/terra/reference/terra-package.html)
-a while ago, there can be efficiency problems as layers need to be
+[terra](https://rspatial.github.io/terra/reference/terra-package.html) a
+while ago, there can be efficiency problems as layers need to be
 translated between packages.
 
 ## References

@@ -106,6 +106,17 @@ al. (2013).
   but can be used to specifically constrain a projection within a
   certain area (e.g. a species range or an island).
 
+- `zone` - Applies a per-timestep zone mask within the projection loop
+  (before threshold computation). Supports a static layer (single
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html)) applied
+  identically at every timestep, or a time-series layer (multi-layer
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  with a time dimension, or
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) with a `time`
+  column) where the layer closest in time to each projection step is
+  selected automatically.
+
 - `minsize` - Allows to specify a certain size that must be satisfied in
   order for a thresholded patch to be occupied. Can be thought of as a
   minimum size requirement. See

@@ -1,6 +1,6 @@
 # Prototype for model settings object
 
-Basic [`R6::R6`](https://r6.r-lib.org/reference/R6Class.html) object for
+Basic [`R6`](https://r6.r-lib.org/reference/R6Class.html) object for
 Settings object, a List that stores settings used related to model
 training.
 
@@ -24,7 +24,7 @@ training.
 
 ### Public methods
 
-- [`Settings$new()`](#method-Settings-new)
+- [`Settings$new()`](#method-Settings-initialize)
 
 - [`Settings$print()`](#method-Settings-print)
 
@@ -44,7 +44,7 @@ training.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `Settings$new()`
 
 Initializes the object and creates an empty list
 
@@ -58,7 +58,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `Settings$print()`
 
 Print the names and properties of all Biodiversity datasets contained
 within
@@ -73,7 +73,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `Settings$show()`
 
 Shows the name and the settings
 
@@ -88,7 +88,7 @@ settings.
 
 ------------------------------------------------------------------------
 
-### Method [`length()`](https://rdrr.io/r/base/length.html)
+### `Settings$length()`
 
 Number of options
 
@@ -103,7 +103,7 @@ options.
 
 ------------------------------------------------------------------------
 
-### Method `duration()`
+### `Settings$duration()`
 
 Computation duration convenience function
 
@@ -117,7 +117,7 @@ The amount of time passed for model fitting if found.
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
+### `Settings$summary()`
 
 Summary call of the contained parameters
 
@@ -132,7 +132,7 @@ object.
 
 ------------------------------------------------------------------------
 
-### Method [`get()`](https://rdrr.io/r/base/get.html)
+### `Settings$get()`
 
 Get a specific setting
 
@@ -153,7 +153,7 @@ The setting if found in the object.
 
 ------------------------------------------------------------------------
 
-### Method `set()`
+### `Settings$set()`
 
 Set new settings
 
@@ -183,7 +183,7 @@ The setting if found in the object.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `Settings$clone()`
 
 The objects of this class are cloneable with this method.
 

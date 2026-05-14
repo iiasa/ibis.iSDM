@@ -72,7 +72,7 @@ add_latent_spatial(x, layer = NULL, reuse_latent = TRUE, ...)
 - layer:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   layer describing alternative latent effects to be used instead if
   `"reuse_latent"` is set to `FALSE`.
 

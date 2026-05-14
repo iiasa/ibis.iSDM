@@ -1,9 +1,9 @@
 # Add biodiversity polygon dataset to a distribution object (presence-only)
 
 This function can be used to add a
-[`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon
-dataset to an existing distribution object. Presence-only polygon data
-is treated differently than point data in some engines, particularly
+[`sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon dataset
+to an existing distribution object. Presence-only polygon data is
+treated differently than point data in some engines, particularly
 through the way that points are generated.
 
 ## Usage
@@ -60,7 +60,7 @@ add_biodiversity_polpo(
 
 - polpo:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon
   object of presence-only occurrences.
 
 - name:
@@ -112,7 +112,7 @@ add_biodiversity_polpo(
 - simulate_bias:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   layer describing an eventual preference for simulation (Default:
   `NULL`).
 

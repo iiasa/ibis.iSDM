@@ -62,8 +62,8 @@ add_control_bias(
 
 - layer:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the range for the target feature. Specify a variable that
   is not already added to `"x"` to avoid issues with duplications.
 

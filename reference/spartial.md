@@ -6,7 +6,7 @@ function calculates a partial response of a trained model for a given
 variable. Differently from
 [partial](https://iiasa.github.io/ibis.iSDM/reference/partial.md) in
 space. However the result is a
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 showing the spatial magnitude of the partial response.
 
 ## Usage
@@ -58,7 +58,7 @@ spartial.DistributionModel(mod, ...)
 ## Value
 
 A
-[terra::SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 containing the mapped partial response of the variable.
 
 ## Details

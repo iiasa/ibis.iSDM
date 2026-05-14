@@ -1,7 +1,7 @@
 # Identify local limiting factor
 
 Calculates a
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 of locally limiting factors from a given projected model. To calculate
 this first the
 [`spartial`](https://iiasa.github.io/ibis.iSDM/reference/spartial.md)

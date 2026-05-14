@@ -1,11 +1,11 @@
 # Add biodiversity polygon dataset to a distribution object (presence-absence)
 
 This function can be used to add a
-[`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon
-dataset to an existing distribution object. Presence-absence polygon
-data assumes that each area within the polygon can be treated as
-'presence' for the species, while each area outside the polygon is where
-the species is absent.
+[`sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon dataset
+to an existing distribution object. Presence-absence polygon data
+assumes that each area within the polygon can be treated as 'presence'
+for the species, while each area outside the polygon is where the
+species is absent.
 
 ## Usage
 
@@ -61,7 +61,7 @@ add_biodiversity_polpa(
 
 - polpa:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) polygon
   object of presence-absence occurrences.
 
 - name:
@@ -113,7 +113,7 @@ add_biodiversity_polpa(
 - simulate_bias:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   layer describing an eventual preference for simulation (Default:
   `NULL`).
 

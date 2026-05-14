@@ -56,8 +56,8 @@ run_parallel(
 
 By default, the parallel package is used for parallel computation,
 however an option exists to use the
-[future::future](https://future.futureverse.org/reference/future.html)
-package instead.
+[future](https://future.futureverse.org/reference/future.html) package
+instead.
 
 ## Examples
 

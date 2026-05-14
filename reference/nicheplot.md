@@ -10,7 +10,7 @@ gradients of the niche.
 Supported Inputs for this function are either single trained `ibis.iSDM`
 [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md)
 objects or alternatively a set of three
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 objects. In both cases, users can specify `"xvar"` and `"yvar"`
 explicitly or leave them empty. In the latter case a principal component
 analysis (PCA) is conducted on the full environmental stack (loaded from
@@ -55,27 +55,27 @@ nicheplot(
   A trained
   [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md)
   or alternatively a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with `prediction` model within.
 
 - xvar:
 
   A [`character`](https://rdrr.io/r/base/character.html) denoting the
   predictor on the x-axis. Alternatively a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object can be provided.
 
 - yvar:
 
   A [`character`](https://rdrr.io/r/base/character.html) denoting the
   predictor on the y-axis. Alternatively a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object can be provided.
 
 - envvars:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object containing all environmental variables. Only used if `xvar` and
   `yvar` is empty (Default: `NULL`).
 
@@ -139,15 +139,15 @@ name = 'Virtual points',docheck = FALSE) |>
 add_predictors(predictors, transform = 'none',derivates = 'none') |>
 engine_glm() |>
 train()
-#> [Setup] 2026-05-10 15:18:23.111362 | Creating distribution object...
-#> [Setup] 2026-05-10 15:18:23.112348 | Adding poipo dataset...
-#> [Setup] 2026-05-10 15:18:23.118155 | Adding predictors...
-#> [Estimation] 2026-05-10 15:18:23.309731 | Collecting input parameters.
-#> [Estimation] 2026-05-10 15:18:23.490782 | Adding engine-specific parameters.
-#> [Estimation] 2026-05-10 15:18:23.495787 | Engine setup.
-#> [Estimation] 2026-05-10 15:18:23.758976 | Starting fitting: Virtual points
-#> [Estimation] 2026-05-10 15:18:23.824403 | Starting prediction...
-#> [Done] 2026-05-10 15:18:23.959728 | Completed after 0.65 secs
+#> [Setup] 2026-05-14 13:34:13.154249 | Creating distribution object...
+#> [Setup] 2026-05-14 13:34:13.155189 | Adding poipo dataset...
+#> [Setup] 2026-05-14 13:34:13.160656 | Adding predictors...
+#> [Estimation] 2026-05-14 13:34:13.34412 | Collecting input parameters.
+#> [Estimation] 2026-05-14 13:34:13.522402 | Adding engine-specific parameters.
+#> [Estimation] 2026-05-14 13:34:13.527184 | Engine setup.
+#> [Estimation] 2026-05-14 13:34:13.786661 | Starting fitting: Virtual points
+#> [Estimation] 2026-05-14 13:34:13.844967 | Starting prediction...
+#> [Done] 2026-05-14 13:34:13.981079 | Completed after 0.63 secs
 
 # Plot niche for prediction for temperature and forest cover
 nicheplot(fit, xvar = "bio01_mean_50km", yvar = "CLC3_312_mean_50km" )

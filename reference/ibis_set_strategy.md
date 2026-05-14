@@ -40,5 +40,5 @@ Currently supported strategies are:
 
 ## See also
 
-[future::future](https://future.futureverse.org/reference/future.html),
+[future](https://future.futureverse.org/reference/future.html),
 [ibis_future](https://iiasa.github.io/ibis.iSDM/reference/ibis_future.md)

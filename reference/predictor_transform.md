@@ -2,11 +2,11 @@
 
 This function allows the transformation of provided environmental
 predictors (in
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 format). A common use case is for instance the standardization (or
 scaling) of all predictors prior to model fitting. This function works
 both with
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 as well as with [`stars`](https://rdrr.io/r/graphics/stars.html)
 objects.
 
@@ -29,7 +29,7 @@ predictor_transform(
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   or [`stars`](https://rdrr.io/r/graphics/stars.html) object.
 
 - option:
@@ -72,7 +72,7 @@ predictor_transform(
 ## Value
 
 Returns a adjusted
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object of identical resolution.
 
 ## Details

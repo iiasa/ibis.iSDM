@@ -4,8 +4,8 @@ modelling that estimated continuous suitability surfaces are converted into
 discrete representations of where suitable habitat might or might not exist.
 This so called threshold'ing can be done in various ways which are further
 described in the details.
-In case a terra::SpatRaster is provided as input in this function for
-obj, it is furthermore necessary to provide a sf::sf object for
+In case a SpatRaster is provided as input in this function for
+obj, it is furthermore necessary to provide a sf object for
 validation as there is no DistributionModel to read this information
 from.
 Note: This of course also allows to estimate the threshold based on withheld data, for instance
@@ -22,8 +22,8 @@ modelling that estimated continuous suitability surfaces are converted into
 discrete representations of where suitable habitat might or might not exist.
 This so called threshold'ing can be done in various ways which are further
 described in the details.
-In case a terra::SpatRaster is provided as input in this function for
-obj, it is furthermore necessary to provide a sf::sf object for
+In case a SpatRaster is provided as input in this function for
+obj, it is furthermore necessary to provide a sf object for
 validation as there is no DistributionModel to read this information
 from.
 Note: This of course also allows to estimate the threshold based on withheld data, for instance
@@ -86,8 +86,8 @@ modelling that estimated continuous suitability surfaces are converted into
 discrete representations of where suitable habitat might or might not exist.
 This so called <em>threshold'ing</em> can be done in various ways which are further
 described in the details.</p>
-<p>In case a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> is provided as input in this function for
-<code>obj</code>, it is furthermore necessary to provide a <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object for
+<p>In case a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> is provided as input in this function for
+<code>obj</code>, it is furthermore necessary to provide a <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf</a></code> object for
 validation as there is no <code><a href="DistributionModel-class.html">DistributionModel</a></code> to read this information
 from.</p>
 <p><strong>Note:</strong> This of course also allows to estimate the threshold based on withheld data, for instance
@@ -170,7 +170,7 @@ the specific threshold for scenarios (Default: <code>NULL</code> grabs the value
 
 
 <dt id="arg-point">point<a class="anchor" aria-label="anchor" href="#arg-point"></a></dt>
-<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object containing observational data used for model training.</p></dd>
+<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf</a></code> object containing observational data used for model training.</p></dd>
 
 
 <dt id="arg-field-occurrence">field_occurrence<a class="anchor" aria-label="anchor" href="#arg-field-occurrence"></a></dt>
@@ -193,7 +193,7 @@ Also see Muscatello et al. (2021).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a> if a <a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a> object as input. Otherwise the threshold
+    <p>A <a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a> if a <a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a> object as input. Otherwise the threshold
 is added to the respective <code><a href="DistributionModel-class.html">DistributionModel</a></code> or <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object.</p>
     </div>
     <div class="section level2">

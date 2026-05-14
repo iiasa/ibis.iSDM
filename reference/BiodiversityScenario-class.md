@@ -1,9 +1,9 @@
 # Class for a biodiversity scenario from a trained model
 
-Base [`R6::R6`](https://r6.r-lib.org/reference/R6Class.html) class for
-any biodiversity scenario objects. Serves as container that supplies
-data and functions to other
-[`R6::R6`](https://r6.r-lib.org/reference/R6Class.html) classes and
+Base [`R6`](https://r6.r-lib.org/reference/R6Class.html) class for any
+biodiversity scenario objects. Serves as container that supplies data
+and functions to other
+[`R6`](https://r6.r-lib.org/reference/R6Class.html) classes and
 functions.
 
 ## Note
@@ -27,8 +27,6 @@ prior to projection.
 
 [`threshold()`](https://iiasa.github.io/ibis.iSDM/reference/threshold.md)
 
-[`threshold()`](https://iiasa.github.io/ibis.iSDM/reference/threshold.md)
-
 [`add_latent_spatial()`](https://iiasa.github.io/ibis.iSDM/reference/add_latent_spatial.md)
 
 ## Public fields
@@ -43,8 +41,8 @@ prior to projection.
 
 - `limits`:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-  used to constraint the prediction.
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object used
+  to constraint the prediction.
 
 - `predictors`:
 
@@ -73,7 +71,7 @@ prior to projection.
 
 ### Public methods
 
-- [`BiodiversityScenario$new()`](#method-BiodiversityScenario-new)
+- [`BiodiversityScenario$new()`](#method-BiodiversityScenario-initialize)
 
 - [`BiodiversityScenario$print()`](#method-BiodiversityScenario-print)
 
@@ -161,7 +159,7 @@ prior to projection.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `BiodiversityScenario$new()`
 
 Initializes the object and creates an empty list
 
@@ -175,7 +173,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `BiodiversityScenario$print()`
 
 Print the names and properties of all scenarios.
 
@@ -189,7 +187,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `verify()`
+### `BiodiversityScenario$verify()`
 
 Verify that set Model exist and check self-validity
 
@@ -203,7 +201,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `BiodiversityScenario$show()`
 
 Show the name of the Model
 
@@ -217,7 +215,7 @@ Model objectname
 
 ------------------------------------------------------------------------
 
-### Method `get_projection()`
+### `BiodiversityScenario$get_projection()`
 
 Get projection of the projection.
 
@@ -227,12 +225,12 @@ Get projection of the projection.
 
 #### Returns
 
-A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-with the geographic projection
+A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object with
+the geographic projection
 
 ------------------------------------------------------------------------
 
-### Method `get_resolution()`
+### `BiodiversityScenario$get_resolution()`
 
 Get resultion of the projection.
 
@@ -247,7 +245,7 @@ resolution.
 
 ------------------------------------------------------------------------
 
-### Method `get_model()`
+### `BiodiversityScenario$get_model()`
 
 Get the actual model used for projection
 
@@ -268,7 +266,7 @@ A DistributionModel object.
 
 ------------------------------------------------------------------------
 
-### Method `get_limits()`
+### `BiodiversityScenario$get_limits()`
 
 Get provided projection limits if set.
 
@@ -278,12 +276,12 @@ Get provided projection limits if set.
 
 #### Returns
 
-A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object or
+A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object or
 NULL.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_limits()`](https://iiasa.github.io/ibis.iSDM/reference/rm_limits.md)
+### `BiodiversityScenario$rm_limits()`
 
 Remove current limits.
 
@@ -297,7 +295,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `get_predictor_names()`
+### `BiodiversityScenario$get_predictor_names()`
 
 Get names of predictors for scenario object.
 
@@ -312,7 +310,7 @@ names.
 
 ------------------------------------------------------------------------
 
-### Method `get_timeperiod()`
+### `BiodiversityScenario$get_timeperiod()`
 
 Get time period of projection.
 
@@ -333,7 +331,7 @@ A time period from start to end.
 
 ------------------------------------------------------------------------
 
-### Method `get_constraints()`
+### `BiodiversityScenario$get_constraints()`
 
 Get constrains for model
 
@@ -348,7 +346,7 @@ the scenario.
 
 ------------------------------------------------------------------------
 
-### Method `rm_constraints()`
+### `BiodiversityScenario$rm_constraints()`
 
 Remove contraints from model
 
@@ -362,7 +360,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `get_threshold()`
+### `BiodiversityScenario$get_threshold()`
 
 Get thresholds if specified.
 
@@ -377,7 +375,7 @@ the threshold.
 
 ------------------------------------------------------------------------
 
-### Method `get_thresholdvalue()`
+### `BiodiversityScenario$get_thresholdvalue()`
 
 Duplicate function for internal consistency to return threshold
 
@@ -392,7 +390,7 @@ the threshold.
 
 ------------------------------------------------------------------------
 
-### Method `apply_threshold()`
+### `BiodiversityScenario$apply_threshold()`
 
 Apply a new threshold to the projection.
 
@@ -413,7 +411,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `set_predictors()`
+### `BiodiversityScenario$set_predictors()`
 
 Set new predictors to this object.
 
@@ -434,7 +432,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `set_constraints()`
+### `BiodiversityScenario$set_constraints()`
 
 Set new constrains
 
@@ -455,7 +453,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_log()`
+### `BiodiversityScenario$get_log()`
 
 Returns the output filename of the current log object if set.
 
@@ -470,7 +468,7 @@ is returned.
 
 ------------------------------------------------------------------------
 
-### Method `set_log()`
+### `BiodiversityScenario$set_log()`
 
 Set a new log object
 
@@ -491,7 +489,7 @@ This object
 
 ------------------------------------------------------------------------
 
-### Method `get_simulation()`
+### `BiodiversityScenario$get_simulation()`
 
 Get simulation options and parameters if gound
 
@@ -505,7 +503,7 @@ A [`list`](https://rdrr.io/r/base/list.html) with the parameters.
 
 ------------------------------------------------------------------------
 
-### Method `set_simulation()`
+### `BiodiversityScenario$set_simulation()`
 
 Set simulation objects.
 
@@ -526,7 +524,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_predictors()`
+### `BiodiversityScenario$get_predictors()`
 
 Get Predictors from the object.
 
@@ -540,7 +538,7 @@ A predictor dataset.
 
 ------------------------------------------------------------------------
 
-### Method [`rm_predictors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_predictors.md)
+### `BiodiversityScenario$rm_predictors()`
 
 Remove predictors from the object.
 
@@ -561,7 +559,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method [`get_data()`](https://iiasa.github.io/ibis.iSDM/reference/get_data.md)
+### `BiodiversityScenario$get_data()`
 
 Get scenario predictions or any other data
 
@@ -582,7 +580,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `rm_data()`
+### `BiodiversityScenario$rm_data()`
 
 Remove scenario predictions
 
@@ -590,20 +588,13 @@ Remove scenario predictions
 
     BiodiversityScenario$rm_data()
 
-#### Arguments
-
-- `what`:
-
-  A [`character`](https://rdrr.io/r/base/character.html) vector with
-  names of what
-
 #### Returns
 
 Invisible
 
 ------------------------------------------------------------------------
 
-### Method `set_data()`
+### `BiodiversityScenario$set_data()`
 
 Set new data in object.
 
@@ -623,7 +614,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `set_latent()`
+### `BiodiversityScenario$set_latent()`
 
 Adding latent factors to the object.
 
@@ -644,7 +635,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_latent()`
+### `BiodiversityScenario$get_latent()`
 
 Get latent factors if found in object.
 
@@ -658,7 +649,7 @@ A [`list`](https://rdrr.io/r/base/list.html) with the latent settings
 
 ------------------------------------------------------------------------
 
-### Method [`rm_latent()`](https://iiasa.github.io/ibis.iSDM/reference/rm_latent.md)
+### `BiodiversityScenario$rm_latent()`
 
 Remove latent factors if found in object.
 
@@ -672,7 +663,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://iiasa.github.io/ibis.iSDM/reference/plot.md)
+### `BiodiversityScenario$plot()`
 
 Plot the predictions made here.
 
@@ -702,7 +693,7 @@ A graphical representation
 
 ------------------------------------------------------------------------
 
-### Method `plot_threshold()`
+### `BiodiversityScenario$plot_threshold()`
 
 Convenience function to plot thresholds if set
 
@@ -723,7 +714,7 @@ A graphical representation
 
 ------------------------------------------------------------------------
 
-### Method `plot_migclim()`
+### `BiodiversityScenario$plot_migclim()`
 
 Plot Migclim results if existing.
 
@@ -737,7 +728,7 @@ A graphical representation
 
 ------------------------------------------------------------------------
 
-### Method `plot_animation()`
+### `BiodiversityScenario$plot_animation()`
 
 Plot animation of scenarios if possible
 
@@ -762,7 +753,7 @@ A graphical representation
 
 ------------------------------------------------------------------------
 
-### Method `plot_relative_change()`
+### `BiodiversityScenario$plot_relative_change()`
 
 Plot relative change between baseline and projected thresholds
 
@@ -793,11 +784,11 @@ Plot relative change between baseline and projected thresholds
 #### Returns
 
 A graphical representation or
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
+### `BiodiversityScenario$summary()`
 
 Summarize the change in layers between timesteps
 
@@ -833,7 +824,7 @@ Summarized coefficients as
 
 ------------------------------------------------------------------------
 
-### Method `summary_beforeafter()`
+### `BiodiversityScenario$summary_beforeafter()`
 
 Summarize before-after change of first and last layer.
 
@@ -848,7 +839,7 @@ Summarized coefficients as
 
 ------------------------------------------------------------------------
 
-### Method `plot_scenarios_slope()`
+### `BiodiversityScenario$plot_scenarios_slope()`
 
 Calculate slopes across the projection
 
@@ -877,7 +868,7 @@ A plot of the scenario slopes
 
 ------------------------------------------------------------------------
 
-### Method `calc_scenarios_slope()`
+### `BiodiversityScenario$calc_scenarios_slope()`
 
 Calculate slopes across the projection
 
@@ -909,12 +900,12 @@ Calculate slopes across the projection
 #### Returns
 
 A
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 layer or [`stars`](https://rdrr.io/r/graphics/stars.html) object.
 
 ------------------------------------------------------------------------
 
-### Method [`mask()`](https://iiasa.github.io/ibis.iSDM/reference/mask.md)
+### `BiodiversityScenario$mask()`
 
 Convenience function to mask all input projections.
 
@@ -942,7 +933,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `get_centroid()`
+### `BiodiversityScenario$get_centroid()`
 
 Get centroids of projection layers
 
@@ -959,12 +950,12 @@ Get centroids of projection layers
 
 #### Returns
 
-Returns a [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html)
+Returns a [`sf`](https://r-spatial.github.io/sf/reference/sf.html)
 object.
 
 ------------------------------------------------------------------------
 
-### Method [`save()`](https://rdrr.io/r/base/save.html)
+### `BiodiversityScenario$save()`
 
 Save object as output somewhere
 
@@ -994,7 +985,7 @@ Saved spatial prediction on drive.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `BiodiversityScenario$clone()`
 
 The objects of this class are cloneable with this method.
 

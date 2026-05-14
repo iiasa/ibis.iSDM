@@ -21,7 +21,7 @@ A PriorList object.
 
 ### Public methods
 
-- [`PriorList$new()`](#method-PriorList-new)
+- [`PriorList$new()`](#method-PriorList-initialize)
 
 - [`PriorList$print()`](#method-PriorList-print)
 
@@ -55,7 +55,7 @@ A PriorList object.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `PriorList$new()`
 
 Initializes the object
 
@@ -77,7 +77,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `PriorList$print()`
 
 Print out summary statistics
 
@@ -91,7 +91,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `PriorList$show()`
 
 Aliases that calls print.
 
@@ -105,7 +105,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method [`length()`](https://rdrr.io/r/base/length.html)
+### `PriorList$length()`
 
 Number of priors in object
 
@@ -120,7 +120,7 @@ priors set
 
 ------------------------------------------------------------------------
 
-### Method `ids()`
+### `PriorList$ids()`
 
 Ids of prior objects
 
@@ -134,7 +134,7 @@ A list with ids of the priors objects for query
 
 ------------------------------------------------------------------------
 
-### Method `varnames()`
+### `PriorList$varnames()`
 
 Variable names of priors in object
 
@@ -149,7 +149,7 @@ variable names of the priors.
 
 ------------------------------------------------------------------------
 
-### Method `classes()`
+### `PriorList$classes()`
 
 Function to return the classes of all contained priors
 
@@ -164,7 +164,7 @@ class names of the priors.
 
 ------------------------------------------------------------------------
 
-### Method `types()`
+### `PriorList$types()`
 
 Get types of all contained priors
 
@@ -179,7 +179,7 @@ type names of the priors.
 
 ------------------------------------------------------------------------
 
-### Method [`exists()`](https://rdrr.io/r/base/exists.html)
+### `PriorList$exists()`
 
 Does a certain variable or type combination exist as prior ?
 
@@ -204,7 +204,7 @@ A [`character`](https://rdrr.io/r/base/character.html) id.
 
 ------------------------------------------------------------------------
 
-### Method `add()`
+### `PriorList$add()`
 
 Add a new prior to the object.
 
@@ -226,7 +226,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method [`get()`](https://rdrr.io/r/base/get.html)
+### `PriorList$get()`
 
 Get specific prior values from the list if set
 
@@ -257,7 +257,7 @@ The prior object.
 
 ------------------------------------------------------------------------
 
-### Method `collect()`
+### `PriorList$collect()`
 
 Collect priors for a given id or multiple.
 
@@ -278,7 +278,7 @@ A `PriorList` object.
 
 ------------------------------------------------------------------------
 
-### Method [`rm()`](https://rdrr.io/r/base/rm.html)
+### `PriorList$rm()`
 
 Remove a set prior by id
 
@@ -299,7 +299,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
+### `PriorList$summary()`
 
 Summary function that lists all priors
 
@@ -314,7 +314,7 @@ summarized priors.
 
 ------------------------------------------------------------------------
 
-### Method `combine()`
+### `PriorList$combine()`
 
 Combining function to combine this PriorList with another new one
 
@@ -334,7 +334,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `PriorList$clone()`
 
 The objects of this class are cloneable with this method.
 

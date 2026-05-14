@@ -52,7 +52,6 @@
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="predictor_derivate.html">predictor_derivate()</a></code></p>
-<p><code><a href="predictor_transform.html">predictor_transform()</a></code></p>
 <p><code><a href="predictor_transform.html">predictor_transform()</a></code></p></div>
     </div>
     <div class="section level2">
@@ -61,23 +60,23 @@
 <dd><p>The id for this collection as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
 
-<dt><code>data</code></dt>
-<dd><p>A predictor dataset usually as <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>.</p></dd>
+    <dt><code>data</code></dt>
+<dd><p>A predictor dataset usually as <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>.</p></dd>
 
 
-<dt><code>name</code></dt>
+    <dt><code>name</code></dt>
 <dd><p>A name for this object.</p></dd>
 
 
-<dt><code>transformed</code></dt>
+    <dt><code>transformed</code></dt>
 <dd><p>Saves whether the predictors have been transformed somehow.</p></dd>
 
 
-<dt><code>timeperiod</code></dt>
+    <dt><code>timeperiod</code></dt>
 <dd><p>A timeperiod field</p></dd>
 
 
-<dt><code>is.spatial</code></dt>
+    <dt><code>is.spatial</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag on whether the predictor is spatial or not.</p></dd>
 
 
@@ -88,8 +87,7 @@
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
-
-<ul><li><p><a href="#method-PredictorDataset-new"><code>PredictorDataset$new()</code></a></p></li>
+<p></p><ul><li><p><a href="#method-PredictorDataset-initialize"><code>PredictorDataset$new()</code></a></p></li>
 <li><p><a href="#method-PredictorDataset-print"><code>PredictorDataset$print()</code></a></p></li>
 <li><p><a href="#method-PredictorDataset-get_name"><code>PredictorDataset$get_name()</code></a></p></li>
 <li><p><a href="#method-PredictorDataset-get_id"><code>PredictorDataset$get_id()</code></a></p></li>
@@ -114,412 +112,391 @@
 <li><p><a href="#method-PredictorDataset-ncell"><code>PredictorDataset$ncell()</code></a></p></li>
 <li><p><a href="#method-PredictorDataset-plot"><code>PredictorDataset$plot()</code></a></p></li>
 <li><p><a href="#method-PredictorDataset-clone"><code>PredictorDataset$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-PredictorDataset-new"></a><div class="section">
-<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+</ul></div><p></p><hr><a id="method-PredictorDataset-initialize"></a><div class="section">
+<h3 id="predictordataset-new-"><code>PredictorDataset$new()</code><a class="anchor" aria-label="anchor" href="#predictordataset-new-"></a></h3>
 <p>Initializes the object and creates an empty list</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/PredictorDataset-class.html">PredictorDataset</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">id</span>, <span class="va">data</span>, transformed <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>id</code></dt>
 <dd><p>The id for this collection as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
+      <dt><code>data</code></dt>
+<dd><p>A predictor dataset usually as <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>.</p></dd>
 
-<dt><code>data</code></dt>
-<dd><p>A predictor dataset usually as <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>.</p></dd>
-
-
-<dt><code>transformed</code></dt>
+      <dt><code>transformed</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag if predictors have been transformed. Assume not.</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>Any other parameters found.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>NULL</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-print"></a><div class="section">
-<h3 id="method-print-">Method <code><a href="print.html">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-print"></a><div class="section">
+<h3 id="predictordataset-print-"><code>PredictorDataset$print()</code><a class="anchor" aria-label="anchor" href="#predictordataset-print-"></a></h3>
 <p>Print the names and properties of all Biodiversity datasets contained within</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span>format <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>format</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag on whether a message should be printed.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>A message on screen</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_name"></a><div class="section">
-<h3 id="method-get-name-">Method <code>get_name()</code><a class="anchor" aria-label="anchor" href="#method-get-name-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_name"></a><div class="section">
+<h3 id="predictordataset-get-name-"><code>PredictorDataset$get_name()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-name-"></a></h3>
 <p>Return name of this object</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_name</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>Default <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> name.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_id"></a><div class="section">
-<h3 id="method-get-id-">Method <code>get_id()</code><a class="anchor" aria-label="anchor" href="#method-get-id-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_id"></a><div class="section">
+<h3 id="predictordataset-get-id-"><code>PredictorDataset$get_id()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-id-"></a></h3>
 <p>Get Id of this object</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_id</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>Default <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> name.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_names"></a><div class="section">
-<h3 id="method-get-names-">Method <code>get_names()</code><a class="anchor" aria-label="anchor" href="#method-get-names-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_names"></a><div class="section">
+<h3 id="predictordataset-get-names-"><code>PredictorDataset$get_names()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-names-"></a></h3>
 <p>Get names of data</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_names</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> names of the data value.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_predictor_names"></a><div class="section">
-<h3 id="method-get-predictor-names-">Method <code>get_predictor_names()</code><a class="anchor" aria-label="anchor" href="#method-get-predictor-names-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_predictor_names"></a><div class="section">
+<h3 id="predictordataset-get-predictor-names-"><code>PredictorDataset$get_predictor_names()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-predictor-names-"></a></h3>
 <p>Alias for get_names</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_predictor_names</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> names of the data value.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_data"></a><div class="section">
-<h3 id="method-get-data-">Method <code><a href="get_data.html">get_data()</a></code><a class="anchor" aria-label="anchor" href="#method-get-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_data"></a><div class="section">
+<h3 id="predictordataset-get-data-"><code>PredictorDataset$get_data()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-data-"></a></h3>
 <p>Get a specific dataset</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span>df <span class="op">=</span> <span class="cn">FALSE</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>df</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> on whether data is to be returned as <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code>.</p></dd>
 
-
-<dt><code>na.rm</code></dt>
+      <dt><code>na.rm</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> if <code>NA</code> is to be removed from data.frame.</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>Any other parameters passed on.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
-<p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> or <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code>.</p>
+<p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code>.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_time"></a><div class="section">
-<h3 id="method-get-time-">Method <code>get_time()</code><a class="anchor" aria-label="anchor" href="#method-get-time-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_time"></a><div class="section">
+<h3 id="predictordataset-get-time-"><code>PredictorDataset$get_time()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-time-"></a></h3>
 <p>Get time dimension of object.</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_time</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>...</code></dt>
 <dd><p>Any other parameters passed on.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with the time dimension of the dataset.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_projection"></a><div class="section">
-<h3 id="method-get-projection-">Method <code>get_projection()</code><a class="anchor" aria-label="anchor" href="#method-get-projection-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_projection"></a><div class="section">
+<h3 id="predictordataset-get-projection-"><code>PredictorDataset$get_projection()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-projection-"></a></h3>
 <p>Get Projection</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_projection</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with the geographical projection of the object.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_resolution"></a><div class="section">
-<h3 id="method-get-resolution-">Method <code>get_resolution()</code><a class="anchor" aria-label="anchor" href="#method-get-resolution-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_resolution"></a><div class="section">
+<h3 id="predictordataset-get-resolution-"><code>PredictorDataset$get_resolution()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-resolution-"></a></h3>
 <p>Get Resolution</p><div class="section">
 <h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_resolution</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with the spatial resolution of the data.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_ext"></a><div class="section">
-<h3 id="method-get-ext-">Method <code>get_ext()</code><a class="anchor" aria-label="anchor" href="#method-get-ext-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_ext"></a><div class="section">
+<h3 id="predictordataset-get-ext-"><code>PredictorDataset$get_ext()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-ext-"></a></h3>
 <p>Get Extent of predictors</p><div class="section">
 <h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_ext</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with the spatial resolution of the data.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-crop_data"></a><div class="section">
-<h3 id="method-crop-data-">Method <code>crop_data()</code><a class="anchor" aria-label="anchor" href="#method-crop-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-crop_data"></a><div class="section">
+<h3 id="predictordataset-crop-data-"><code>PredictorDataset$crop_data()</code><a class="anchor" aria-label="anchor" href="#predictordataset-crop-data-"></a></h3>
 <p>Utility function to clip the predictor dataset by another dataset</p><div class="section">
 <h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">crop_data</span><span class="op">(</span><span class="va">pol</span>, apply_time <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>pol</code></dt>
-<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object used for cropping the data.</p></dd>
+<dd><p>A <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf</a></code> object used for cropping the data.</p></dd>
 
-
-<dt><code>apply_time</code></dt>
+      <dt><code>apply_time</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag indicating if time should be acknowledged in cropping.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h4>
 <p>This code now also is able to determine the temporally closest
 layer. In case a <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> exists as predictor, only that is returned.</p>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-11">Returns<a class="anchor" aria-label="anchor" href="#returns-11"></a></h4>
 <p>Invisible TRUE</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-mask"></a><div class="section">
-<h3 id="method-mask-">Method <code><a href="mask.html">mask()</a></code><a class="anchor" aria-label="anchor" href="#method-mask-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-mask"></a><div class="section">
+<h3 id="predictordataset-mask-"><code>PredictorDataset$mask()</code><a class="anchor" aria-label="anchor" href="#predictordataset-mask-"></a></h3>
 <p>Utility function to mask the predictor dataset by another dataset</p><div class="section">
 <h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">mask</span><span class="op">(</span><span class="va">mask</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>mask</code></dt>
 <dd><p>A <code>SpatRaster</code> or <code>sf</code> object.</p></dd>
 
-
-<dt><code>inverse</code></dt>
+      <dt><code>inverse</code></dt>
 <dd><p>A <code>logical</code> flag if the inverse should be masked instead.</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>Any other parameters passed on to masking.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-12">Returns<a class="anchor" aria-label="anchor" href="#returns-12"></a></h4>
 <p>Invisible</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-set_data"></a><div class="section">
-<h3 id="method-set-data-">Method <code>set_data()</code><a class="anchor" aria-label="anchor" href="#method-set-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-set_data"></a><div class="section">
+<h3 id="predictordataset-set-data-"><code>PredictorDataset$set_data()</code><a class="anchor" aria-label="anchor" href="#predictordataset-set-data-"></a></h3>
 <p>Add a new Predictor dataset to this collection</p><div class="section">
 <h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">set_data</span><span class="op">(</span><span class="va">value</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>value</code></dt>
-<dd><p>A new <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
+<dd><p>A new <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> or <code><a href="https://rdrr.io/r/graphics/stars.html" class="external-link">stars</a></code> object.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-13">Returns<a class="anchor" aria-label="anchor" href="#returns-13"></a></h4>
 <p>This object</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-rm_data"></a><div class="section">
-<h3 id="method-rm-data-">Method <code>rm_data()</code><a class="anchor" aria-label="anchor" href="#method-rm-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-rm_data"></a><div class="section">
+<h3 id="predictordataset-rm-data-"><code>PredictorDataset$rm_data()</code><a class="anchor" aria-label="anchor" href="#predictordataset-rm-data-"></a></h3>
 <p>Remove a specific Predictor by name</p><div class="section">
 <h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">rm_data</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the predictor name to be removed.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-14">Returns<a class="anchor" aria-label="anchor" href="#returns-14"></a></h4>
 <p>Invisible</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-show"></a><div class="section">
-<h3 id="method-show-">Method <code>show()</code><a class="anchor" aria-label="anchor" href="#method-show-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-show"></a><div class="section">
+<h3 id="predictordataset-show-"><code>PredictorDataset$show()</code><a class="anchor" aria-label="anchor" href="#predictordataset-show-"></a></h3>
 <p>Alias for print method</p><div class="section">
 <h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-15">Returns<a class="anchor" aria-label="anchor" href="#returns-15"></a></h4>
 <p>Invisible</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-summary"></a><div class="section">
-<h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-summary"></a><div class="section">
+<h3 id="predictordataset-summary-"><code>PredictorDataset$summary()</code><a class="anchor" aria-label="anchor" href="#predictordataset-summary-"></a></h3>
 <p>Collect info statistics with optional decimals</p><div class="section">
 <h4 id="usage-16">Usage<a class="anchor" aria-label="anchor" href="#usage-16"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span>digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>digits</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> Giving the rounding precision</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-16">Returns<a class="anchor" aria-label="anchor" href="#returns-16"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> summarizing the data.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-has_derivates"></a><div class="section">
-<h3 id="method-has-derivates-">Method <code>has_derivates()</code><a class="anchor" aria-label="anchor" href="#method-has-derivates-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-has_derivates"></a><div class="section">
+<h3 id="predictordataset-has-derivates-"><code>PredictorDataset$has_derivates()</code><a class="anchor" aria-label="anchor" href="#predictordataset-has-derivates-"></a></h3>
 <p>Indication if there are any predictors that are derivates of outers</p><div class="section">
 <h4 id="usage-17">Usage<a class="anchor" aria-label="anchor" href="#usage-17"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">has_derivates</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-17">Returns<a class="anchor" aria-label="anchor" href="#returns-17"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-is_transformed"></a><div class="section">
-<h3 id="method-is-transformed-">Method <code>is_transformed()</code><a class="anchor" aria-label="anchor" href="#method-is-transformed-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-is_transformed"></a><div class="section">
+<h3 id="predictordataset-is-transformed-"><code>PredictorDataset$is_transformed()</code><a class="anchor" aria-label="anchor" href="#predictordataset-is-transformed-"></a></h3>
 <p>Predictors have been transformed?</p><div class="section">
 <h4 id="usage-18">Usage<a class="anchor" aria-label="anchor" href="#usage-18"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">is_transformed</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-18">Returns<a class="anchor" aria-label="anchor" href="#returns-18"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-is_spatial"></a><div class="section">
-<h3 id="method-is-spatial-">Method <code>is_spatial()</code><a class="anchor" aria-label="anchor" href="#method-is-spatial-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-is_spatial"></a><div class="section">
+<h3 id="predictordataset-is-spatial-"><code>PredictorDataset$is_spatial()</code><a class="anchor" aria-label="anchor" href="#predictordataset-is-spatial-"></a></h3>
 <p>Is Predictor dataset spatial?</p><div class="section">
 <h4 id="usage-19">Usage<a class="anchor" aria-label="anchor" href="#usage-19"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">is_spatial</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-19">Returns<a class="anchor" aria-label="anchor" href="#returns-19"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-get_transformed_params"></a><div class="section">
-<h3 id="method-get-transformed-params-">Method <code>get_transformed_params()</code><a class="anchor" aria-label="anchor" href="#method-get-transformed-params-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-get_transformed_params"></a><div class="section">
+<h3 id="predictordataset-get-transformed-params-"><code>PredictorDataset$get_transformed_params()</code><a class="anchor" aria-label="anchor" href="#predictordataset-get-transformed-params-"></a></h3>
 <p>Get transformation params.</p><div class="section">
 <h4 id="usage-20">Usage<a class="anchor" aria-label="anchor" href="#usage-20"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">get_transformed_params</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-20">Returns<a class="anchor" aria-label="anchor" href="#returns-20"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-length"></a><div class="section">
-<h3 id="method-length-">Method <code><a href="https://rdrr.io/r/base/length.html" class="external-link">length()</a></code><a class="anchor" aria-label="anchor" href="#method-length-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-length"></a><div class="section">
+<h3 id="predictordataset-length-"><code>PredictorDataset$length()</code><a class="anchor" aria-label="anchor" href="#predictordataset-length-"></a></h3>
 <p>Number of Predictors in object</p><div class="section">
 <h4 id="usage-21">Usage<a class="anchor" aria-label="anchor" href="#usage-21"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">length</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-21">Returns<a class="anchor" aria-label="anchor" href="#returns-21"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-ncell"></a><div class="section">
-<h3 id="method-ncell-">Method <code>ncell()</code><a class="anchor" aria-label="anchor" href="#method-ncell-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-ncell"></a><div class="section">
+<h3 id="predictordataset-ncell-"><code>PredictorDataset$ncell()</code><a class="anchor" aria-label="anchor" href="#predictordataset-ncell-"></a></h3>
 <p>Number of cells or values in object</p><div class="section">
 <h4 id="usage-22">Usage<a class="anchor" aria-label="anchor" href="#usage-22"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">ncell</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-22">Returns<a class="anchor" aria-label="anchor" href="#returns-22"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-plot"></a><div class="section">
-<h3 id="method-plot-">Method <code><a href="plot.html">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-plot"></a><div class="section">
+<h3 id="predictordataset-plot-"><code>PredictorDataset$plot()</code><a class="anchor" aria-label="anchor" href="#predictordataset-plot-"></a></h3>
 <p>Basic Plotting function</p><div class="section">
 <h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-23">Returns<a class="anchor" aria-label="anchor" href="#returns-23"></a></h4>
 <p>A graphical interpretation of the predictors in this object.</p>
 </div>
 
-</div><p></p><hr><a id="method-PredictorDataset-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-PredictorDataset-clone"></a><div class="section">
+<h3 id="predictordataset-clone-"><code>PredictorDataset$clone()</code><a class="anchor" aria-label="anchor" href="#predictordataset-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">PredictorDataset</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
@@ -529,6 +506,7 @@ layer. In case a <code><a href="https://rdrr.io/r/base/data.frame.html" class="e
 </div>
 
 </div>
+
 
     </div>
 

@@ -11,8 +11,8 @@ or
 as input.
 
 As mask either a
-[`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object can be chosen. The mask will be converted internally depending on
 the object.
 
@@ -41,8 +41,8 @@ mask.BiodiversityScenario(x, mask, inverse = FALSE, ...)
 
 - mask:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object.
 
 - inverse:

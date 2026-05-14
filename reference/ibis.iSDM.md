@@ -25,6 +25,11 @@ Useful links:
 **Maintainer**: Martin Jung <jung@iiasa.ac.at>
 ([ORCID](https://orcid.org/0000-0002-7569-1390)) \[copyright holder\]
 
+Authors:
+
+- Martin Jung <jung@iiasa.ac.at>
+  ([ORCID](https://orcid.org/0000-0002-7569-1390)) \[copyright holder\]
+
 Other contributors:
 
 - Maximilian H.K. Hesselbarth <hesselbarth@iiasa.ac.at>

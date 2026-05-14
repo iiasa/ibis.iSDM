@@ -23,8 +23,8 @@ ibis_future(
 
   A [`logical`](https://rdrr.io/r/base/logical.html) check on whether an
   existing
-  [`future::future`](https://future.futureverse.org/reference/future.html)
-  plan exists (Default: `FALSE`).
+  [`future`](https://future.futureverse.org/reference/future.html) plan
+  exists (Default: `FALSE`).
 
 - cores:
 
@@ -35,8 +35,8 @@ ibis_future(
 
   A [`character`](https://rdrr.io/r/base/character.html) denoting the
   strategy to be used for future. See help of
-  [`future::future`](https://future.futureverse.org/reference/future.html)
-  for options. (Default: `"multisession"`).
+  [`future`](https://future.futureverse.org/reference/future.html) for
+  options. (Default: `"multisession"`).
 
 - workers:
 
@@ -69,8 +69,8 @@ Currently supported strategies are:
 ## Note
 
 The `'plan'` set by
-[future::future](https://future.futureverse.org/reference/future.html)
-exists after the function has been executed.
+[future](https://future.futureverse.org/reference/future.html) exists
+after the function has been executed.
 
 If the aim is to parallize across many species, this is better done in a
 scripted solution. Make sure not to parallize predictions within
@@ -78,7 +78,7 @@ existing clusters to avoid out-of-memory issues.
 
 ## See also
 
-[future::future](https://future.futureverse.org/reference/future.html)
+[future](https://future.futureverse.org/reference/future.html)
 
 ## Examples
 

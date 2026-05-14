@@ -2,8 +2,8 @@
 
 This function allows to add a species range which is usually drawn by
 experts in a separate process as spatial explicit prior. Both
-[`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) and
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)-objects
+[`sf`](https://r-spatial.github.io/sf/reference/sf.html) and
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)-objects
 are supported as input.
 
 Users are advised to look at the `"bossMaps"` R-package presented as
@@ -64,8 +64,8 @@ add_predictor_range(
 
 - layer:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the range for the target feature.
 
 - method:
@@ -80,7 +80,7 @@ add_predictor_range(
 - fraction:
 
   An optional
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object that is multiplied with digitized raster layer. Can be used to
   for example to remove or reduce the expected value (Default: `NULL`).
 

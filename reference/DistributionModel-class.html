@@ -62,23 +62,23 @@ by the engine and inference.</p>
 <dd><p>A character id for any trained model</p></dd>
 
 
-<dt><code>name</code></dt>
+    <dt><code>name</code></dt>
 <dd><p>A description of the model as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
 
-<dt><code>model</code></dt>
+    <dt><code>model</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> containing all input datasets and parameters to the model.</p></dd>
 
 
-<dt><code>settings</code></dt>
+    <dt><code>settings</code></dt>
 <dd><p>A <code><a href="Settings-class.html">Settings</a></code> object with information on inference.</p></dd>
 
 
-<dt><code>fits</code></dt>
+    <dt><code>fits</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> containing the prediction and fitted model.</p></dd>
 
 
-<dt><code>.internals</code></dt>
+    <dt><code>.internals</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> containing previous fitted models.</p></dd>
 
 
@@ -89,8 +89,7 @@ by the engine and inference.</p>
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
-
-<ul><li><p><a href="#method-DistributionModel-new"><code>DistributionModel$new()</code></a></p></li>
+<p></p><ul><li><p><a href="#method-DistributionModel-initialize"><code>DistributionModel$new()</code></a></p></li>
 <li><p><a href="#method-DistributionModel-get_name"><code>DistributionModel$get_name()</code></a></p></li>
 <li><p><a href="#method-DistributionModel-print"><code>DistributionModel$print()</code></a></p></li>
 <li><p><a href="#method-DistributionModel-show"><code>DistributionModel$show()</code></a></p></li>
@@ -117,452 +116,429 @@ by the engine and inference.</p>
 <li><p><a href="#method-DistributionModel-mask"><code>DistributionModel$mask()</code></a></p></li>
 <li><p><a href="#method-DistributionModel-save"><code>DistributionModel$save()</code></a></p></li>
 <li><p><a href="#method-DistributionModel-clone"><code>DistributionModel$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-DistributionModel-new"></a><div class="section">
-<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+</ul></div><p></p><hr><a id="method-DistributionModel-initialize"></a><div class="section">
+<h3 id="distributionmodel-new-"><code>DistributionModel$new()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-new-"></a></h3>
 <p>Initializes the object and creates an empty list</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/DistributionModel-class.html">DistributionModel</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">name</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>name</code></dt>
 <dd><p>A description of the model as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>NULL</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_name"></a><div class="section">
-<h3 id="method-get-name-">Method <code>get_name()</code><a class="anchor" aria-label="anchor" href="#method-get-name-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_name"></a><div class="section">
+<h3 id="distributionmodel-get-name-"><code>DistributionModel$get_name()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-name-"></a></h3>
 <p>Return the name of the model</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_name</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the model name used.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-print"></a><div class="section">
-<h3 id="method-print-">Method <code><a href="print.html">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-print"></a><div class="section">
+<h3 id="distributionmodel-print-"><code>DistributionModel$print()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-print-"></a></h3>
 <p>Print the names and summarizes the model within</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>A message on screen</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-show"></a><div class="section">
-<h3 id="method-show-">Method <code>show()</code><a class="anchor" aria-label="anchor" href="#method-show-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-show"></a><div class="section">
+<h3 id="distributionmodel-show-"><code>DistributionModel$show()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-show-"></a></h3>
 <p>Show the name of the Model.</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the run name.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-plot"></a><div class="section">
-<h3 id="method-plot-">Method <code><a href="plot.html">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-plot"></a><div class="section">
+<h3 id="distributionmodel-plot-"><code>DistributionModel$plot()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-plot-"></a></h3>
 <p>Plots the prediction if found.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the specific layer to be plotted.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>A graphical representation of the prediction</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-plot_threshold"></a><div class="section">
-<h3 id="method-plot-threshold-">Method <code>plot_threshold()</code><a class="anchor" aria-label="anchor" href="#method-plot-threshold-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-plot_threshold"></a><div class="section">
+<h3 id="distributionmodel-plot-threshold-"><code>DistributionModel$plot_threshold()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-plot-threshold-"></a></h3>
 <p>Plots the thresholded prediction if found.</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">plot_threshold</span><span class="op">(</span>what <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> or <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> for the layer to be plotted.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>A graphical representation of the thresholded prediction if found.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-show_duration"></a><div class="section">
-<h3 id="method-show-duration-">Method <code>show_duration()</code><a class="anchor" aria-label="anchor" href="#method-show-duration-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-show_duration"></a><div class="section">
+<h3 id="distributionmodel-show-duration-"><code>DistributionModel$show_duration()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-show-duration-"></a></h3>
 <p>Show model run time if settings exist</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">show_duration</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimate of the duration it took to fit the models.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-summary"></a><div class="section">
-<h3 id="method-summary-">Method <code><a href="summary.html">summary()</a></code><a class="anchor" aria-label="anchor" href="#method-summary-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-summary"></a><div class="section">
+<h3 id="distributionmodel-summary-"><code>DistributionModel$summary()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-summary-"></a></h3>
 <p>Get effects or importance tables from model</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span>obj <span class="op">=</span> <span class="st">"fit_best"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>obj</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of which object to return.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></code> summarizing the model, usually its coefficient.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-effects"></a><div class="section">
-<h3 id="method-effects-">Method <code><a href="effects.html">effects()</a></code><a class="anchor" aria-label="anchor" href="#method-effects-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-effects"></a><div class="section">
+<h3 id="distributionmodel-effects-"><code>DistributionModel$effects()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-effects-"></a></h3>
 <p>Generic plotting function for effect plots</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">effects</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"fit_best"</span>, what <span class="op">=</span> <span class="st">"fixed"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> for the object in question.</p></dd>
 
-
-<dt><code>what</code></dt>
+      <dt><code>what</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> for the type of coefficients.</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>Any other options.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-8">Returns<a class="anchor" aria-label="anchor" href="#returns-8"></a></h4>
 <p>A graphical representation of the coefficents.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_equation"></a><div class="section">
-<h3 id="method-get-equation-">Method <code>get_equation()</code><a class="anchor" aria-label="anchor" href="#method-get-equation-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_equation"></a><div class="section">
+<h3 id="distributionmodel-get-equation-"><code>DistributionModel$get_equation()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-equation-"></a></h3>
 <p>Get equation</p><div class="section">
 <h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_equation</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-9">Returns<a class="anchor" aria-label="anchor" href="#returns-9"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/stats/formula.html" class="external-link">formula</a></code> of the inferred model.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_data"></a><div class="section">
-<h3 id="method-get-data-">Method <code><a href="get_data.html">get_data()</a></code><a class="anchor" aria-label="anchor" href="#method-get-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_data"></a><div class="section">
+<h3 id="distributionmodel-get-data-"><code>DistributionModel$get_data()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-data-"></a></h3>
 <p>Get specific fit from this Model</p><div class="section">
 <h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"prediction"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> stating what should be returned.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-10">Returns<a class="anchor" aria-label="anchor" href="#returns-10"></a></h4>
-<p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> object with the prediction.</p>
+<p>A <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> object with the prediction.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_model"></a><div class="section">
-<h3 id="method-get-model-">Method <code>get_model()</code><a class="anchor" aria-label="anchor" href="#method-get-model-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_model"></a><div class="section">
+<h3 id="distributionmodel-get-model-"><code>DistributionModel$get_model()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-model-"></a></h3>
 <p>Small internal helper function to directly get the model object</p><div class="section">
 <h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_model</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-11">Returns<a class="anchor" aria-label="anchor" href="#returns-11"></a></h4>
 <p>A fitted model if existing.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-set_data"></a><div class="section">
-<h3 id="method-set-data-">Method <code>set_data()</code><a class="anchor" aria-label="anchor" href="#method-set-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-set_data"></a><div class="section">
+<h3 id="distributionmodel-set-data-"><code>DistributionModel$set_data()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-set-data-"></a></h3>
 <p>Set new fit for this Model.</p><div class="section">
 <h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">set_data</span><span class="op">(</span><span class="va">x</span>, <span class="va">value</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>The name of the new fit.</p></dd>
 
-
-<dt><code>value</code></dt>
-<dd><p>The <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code> layer (or model) to be inserted.</p></dd>
+      <dt><code>value</code></dt>
+<dd><p>The <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code> layer (or model) to be inserted.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-12">Returns<a class="anchor" aria-label="anchor" href="#returns-12"></a></h4>
 <p>This object.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_thresholdvalue"></a><div class="section">
-<h3 id="method-get-thresholdvalue-">Method <code>get_thresholdvalue()</code><a class="anchor" aria-label="anchor" href="#method-get-thresholdvalue-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_thresholdvalue"></a><div class="section">
+<h3 id="distributionmodel-get-thresholdvalue-"><code>DistributionModel$get_thresholdvalue()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-thresholdvalue-"></a></h3>
 <p>Get the threshold value if calculated</p><div class="section">
 <h4 id="usage-13">Usage<a class="anchor" aria-label="anchor" href="#usage-13"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_thresholdvalue</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-13">Returns<a class="anchor" aria-label="anchor" href="#returns-13"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> threshold value.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_thresholdtype"></a><div class="section">
-<h3 id="method-get-thresholdtype-">Method <code>get_thresholdtype()</code><a class="anchor" aria-label="anchor" href="#method-get-thresholdtype-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_thresholdtype"></a><div class="section">
+<h3 id="distributionmodel-get-thresholdtype-"><code>DistributionModel$get_thresholdtype()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-thresholdtype-"></a></h3>
 <p>Get threshold type and format if calculated.</p><div class="section">
 <h4 id="usage-14">Usage<a class="anchor" aria-label="anchor" href="#usage-14"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_thresholdtype</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-14">Returns<a class="anchor" aria-label="anchor" href="#returns-14"></a></h4>
 <p>A vector with a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> method and <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> threshold value.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-show_rasters"></a><div class="section">
-<h3 id="method-show-rasters-">Method <code>show_rasters()</code><a class="anchor" aria-label="anchor" href="#method-show-rasters-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-show_rasters"></a><div class="section">
+<h3 id="distributionmodel-show-rasters-"><code>DistributionModel$show_rasters()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-show-rasters-"></a></h3>
 <p>List all rasters in object</p><div class="section">
 <h4 id="usage-15">Usage<a class="anchor" aria-label="anchor" href="#usage-15"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">show_rasters</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-15">Returns<a class="anchor" aria-label="anchor" href="#returns-15"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></code> with <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flags for the various objects.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_projection"></a><div class="section">
-<h3 id="method-get-projection-">Method <code>get_projection()</code><a class="anchor" aria-label="anchor" href="#method-get-projection-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_projection"></a><div class="section">
+<h3 id="distributionmodel-get-projection-"><code>DistributionModel$get_projection()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-projection-"></a></h3>
 <p>Get projection of the background.</p><div class="section">
 <h4 id="usage-16">Usage<a class="anchor" aria-label="anchor" href="#usage-16"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_projection</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-16">Returns<a class="anchor" aria-label="anchor" href="#returns-16"></a></h4>
 <p>A geographic projection</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_resolution"></a><div class="section">
-<h3 id="method-get-resolution-">Method <code>get_resolution()</code><a class="anchor" aria-label="anchor" href="#method-get-resolution-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_resolution"></a><div class="section">
+<h3 id="distributionmodel-get-resolution-"><code>DistributionModel$get_resolution()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-resolution-"></a></h3>
 <p>Get the resolution of the projection</p><div class="section">
 <h4 id="usage-17">Usage<a class="anchor" aria-label="anchor" href="#usage-17"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_resolution</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-17">Returns<a class="anchor" aria-label="anchor" href="#returns-17"></a></h4>
 <p><code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> estimates of the distribution.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-rm_threshold"></a><div class="section">
-<h3 id="method-rm-threshold-">Method <code>rm_threshold()</code><a class="anchor" aria-label="anchor" href="#method-rm-threshold-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-rm_threshold"></a><div class="section">
+<h3 id="distributionmodel-rm-threshold-"><code>DistributionModel$rm_threshold()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-rm-threshold-"></a></h3>
 <p>Remove calculated thresholds</p><div class="section">
 <h4 id="usage-18">Usage<a class="anchor" aria-label="anchor" href="#usage-18"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">rm_threshold</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-18">Returns<a class="anchor" aria-label="anchor" href="#returns-18"></a></h4>
 <p>Invisible</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-calc_suitabilityindex"></a><div class="section">
-<h3 id="method-calc-suitabilityindex-">Method <code>calc_suitabilityindex()</code><a class="anchor" aria-label="anchor" href="#method-calc-suitabilityindex-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-calc_suitabilityindex"></a><div class="section">
+<h3 id="distributionmodel-calc-suitabilityindex-"><code>DistributionModel$calc_suitabilityindex()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-calc-suitabilityindex-"></a></h3>
 <p>Calculate a suitability index for a given projection</p><div class="section">
 <h4 id="usage-19">Usage<a class="anchor" aria-label="anchor" href="#usage-19"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">calc_suitabilityindex</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"normalize"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>method</code></dt>
 <dd><p>The method used for normalization.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h4>
 <p>Methods can either be normalized by the minimum and maximum.
 Or the relative total using the sumof values.</p>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-19">Returns<a class="anchor" aria-label="anchor" href="#returns-19"></a></h4>
-<p>Returns a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">terra::SpatRaster</a></code>.</p>
+<p>Returns a <code><a href="https://rspatial.github.io/terra/reference/SpatRaster-class.html" class="external-link">SpatRaster</a></code>.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-get_centroid"></a><div class="section">
-<h3 id="method-get-centroid-">Method <code>get_centroid()</code><a class="anchor" aria-label="anchor" href="#method-get-centroid-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-get_centroid"></a><div class="section">
+<h3 id="distributionmodel-get-centroid-"><code>DistributionModel$get_centroid()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-get-centroid-"></a></h3>
 <p>Get centroids of prediction layers</p><div class="section">
 <h4 id="usage-20">Usage<a class="anchor" aria-label="anchor" href="#usage-20"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">get_centroid</span><span class="op">(</span>patch <span class="op">=</span> <span class="cn">FALSE</span>, layer <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>patch</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> if centroid should be calculated weighted by values.</p></dd>
 
-
-<dt><code>layer</code></dt>
+      <dt><code>layer</code></dt>
 <dd><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> of the layer to use.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-20">Returns<a class="anchor" aria-label="anchor" href="#returns-20"></a></h4>
-<p>Returns a <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf::sf</a></code> object.</p>
+<p>Returns a <code><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">sf</a></code> object.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-has_limits"></a><div class="section">
-<h3 id="method-has-limits-">Method <code>has_limits()</code><a class="anchor" aria-label="anchor" href="#method-has-limits-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-has_limits"></a><div class="section">
+<h3 id="distributionmodel-has-limits-"><code>DistributionModel$has_limits()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-has-limits-"></a></h3>
 <p>Logical indication if the prediction was limited.</p><div class="section">
 <h4 id="usage-21">Usage<a class="anchor" aria-label="anchor" href="#usage-21"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">has_limits</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-21">Returns<a class="anchor" aria-label="anchor" href="#returns-21"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-has_latent"></a><div class="section">
-<h3 id="method-has-latent-">Method <code>has_latent()</code><a class="anchor" aria-label="anchor" href="#method-has-latent-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-has_latent"></a><div class="section">
+<h3 id="distributionmodel-has-latent-"><code>DistributionModel$has_latent()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-has-latent-"></a></h3>
 <p>Logical indication if the prediction has added latent factors.</p><div class="section">
 <h4 id="usage-22">Usage<a class="anchor" aria-label="anchor" href="#usage-22"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">has_latent</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-22">Returns<a class="anchor" aria-label="anchor" href="#returns-22"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-has_offset"></a><div class="section">
-<h3 id="method-has-offset-">Method <code>has_offset()</code><a class="anchor" aria-label="anchor" href="#method-has-offset-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-has_offset"></a><div class="section">
+<h3 id="distributionmodel-has-offset-"><code>DistributionModel$has_offset()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-has-offset-"></a></h3>
 <p>Has a offset been used?</p><div class="section">
 <h4 id="usage-23">Usage<a class="anchor" aria-label="anchor" href="#usage-23"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">has_offset</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-23">Returns<a class="anchor" aria-label="anchor" href="#returns-23"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> flag.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-mask"></a><div class="section">
-<h3 id="method-mask-">Method <code><a href="mask.html">mask()</a></code><a class="anchor" aria-label="anchor" href="#method-mask-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-mask"></a><div class="section">
+<h3 id="distributionmodel-mask-"><code>DistributionModel$mask()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-mask-"></a></h3>
 <p>Convenience function to mask all input datasets.</p><div class="section">
 <h4 id="usage-24">Usage<a class="anchor" aria-label="anchor" href="#usage-24"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">mask</span><span class="op">(</span><span class="va">mask</span>, inverse <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>mask</code></dt>
 <dd><p>A <code>SpatRaster</code> or <code>sf</code> object.</p></dd>
 
-
-<dt><code>inverse</code></dt>
+      <dt><code>inverse</code></dt>
 <dd><p>A <code>logical</code> flag if the inverse should be masked instead.</p></dd>
 
-
-<dt><code>...</code></dt>
+      <dt><code>...</code></dt>
 <dd><p>Any other parameters passed on to mask</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-24">Returns<a class="anchor" aria-label="anchor" href="#returns-24"></a></h4>
 <p>Invisible</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-save"></a><div class="section">
-<h3 id="method-save-">Method <code><a href="https://rdrr.io/r/base/save.html" class="external-link">save()</a></code><a class="anchor" aria-label="anchor" href="#method-save-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-save"></a><div class="section">
+<h3 id="distributionmodel-save-"><code>DistributionModel$save()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-save-"></a></h3>
 <p>Save the prediction as output.</p><div class="section">
 <h4 id="usage-25">Usage<a class="anchor" aria-label="anchor" href="#usage-25"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">save</span><span class="op">(</span><span class="va">fname</span>, type <span class="op">=</span> <span class="st">"gtif"</span>, dt <span class="op">=</span> <span class="st">"FLT4S"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>fname</code></dt>
 <dd><p>An output filename as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
-
-<dt><code>type</code></dt>
+      <dt><code>type</code></dt>
 <dd><p>A format as <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>. Matched against a list of supported formats.</p></dd>
 
-
-<dt><code>dt</code></dt>
+      <dt><code>dt</code></dt>
 <dd><p>The datatype used, such as float64</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-25">Returns<a class="anchor" aria-label="anchor" href="#returns-25"></a></h4>
 <p>Saved spatial prediction on drive.</p>
 </div>
 
-</div><p></p><hr><a id="method-DistributionModel-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DistributionModel-clone"></a><div class="section">
+<h3 id="distributionmodel-clone-"><code>DistributionModel$clone()</code><a class="anchor" aria-label="anchor" href="#distributionmodel-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-26">Usage<a class="anchor" aria-label="anchor" href="#usage-26"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DistributionModel</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-11">Arguments<a class="anchor" aria-label="anchor" href="#arguments-11"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
@@ -572,6 +548,7 @@ Or the relative total using the sumof values.</p>
 </div>
 
 </div>
+
 
     </div>
 

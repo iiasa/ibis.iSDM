@@ -31,7 +31,7 @@ interpolate_gaps(env, date_interpolation = "annual", method = "linear")
 ## Value
 
 [`logical`](https://rdrr.io/r/base/logical.html) indicating if the two
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 objects have the same
 
 ## Examples

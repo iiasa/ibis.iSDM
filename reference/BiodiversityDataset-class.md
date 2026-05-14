@@ -47,7 +47,7 @@ BiodiversityDataset prototype description
 - `data`:
 
   Contains the observational data in
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) format.
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) format.
 
 - `use_intercept`:
 
@@ -62,7 +62,7 @@ BiodiversityDataset prototype description
 
 ### Public methods
 
-- [`BiodiversityDataset$new()`](#method-BiodiversityDataset-new)
+- [`BiodiversityDataset$new()`](#method-BiodiversityDataset-initialize)
 
 - [`BiodiversityDataset$print()`](#method-BiodiversityDataset-print)
 
@@ -96,7 +96,7 @@ BiodiversityDataset prototype description
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `BiodiversityDataset$new()`
 
 Initializes the object and creates an empty list
 
@@ -161,7 +161,7 @@ Initializes the object and creates an empty list
 - `data`:
 
   Contains the observational data in
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) format.
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) format.
 
 - `use_intercept`:
 
@@ -178,7 +178,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `BiodiversityDataset$print()`
 
 Print the names and properties of all Biodiversity datasets contained
 within
@@ -193,7 +193,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `set_equation()`
+### `BiodiversityDataset$set_equation()`
 
 Set new equation and writes it into `formula`
 
@@ -213,7 +213,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `get_equation()`
+### `BiodiversityDataset$get_equation()`
 
 Get equation
 
@@ -228,7 +228,7 @@ object.
 
 ------------------------------------------------------------------------
 
-### Method `show_equation()`
+### `BiodiversityDataset$show_equation()`
 
 Function to print the equation
 
@@ -242,7 +242,7 @@ A message on screen.
 
 ------------------------------------------------------------------------
 
-### Method `get_id()`
+### `BiodiversityDataset$get_id()`
 
 Get Id within the dataset
 
@@ -256,7 +256,7 @@ A [`character`](https://rdrr.io/r/base/character.html) with the id.
 
 ------------------------------------------------------------------------
 
-### Method `get_type()`
+### `BiodiversityDataset$get_type()`
 
 Get type of the dataset.
 
@@ -277,7 +277,7 @@ A [`character`](https://rdrr.io/r/base/character.html) with the type
 
 ------------------------------------------------------------------------
 
-### Method `get_column_occ()`
+### `BiodiversityDataset$get_column_occ()`
 
 Get field with occurrence information
 
@@ -292,7 +292,7 @@ occurence field
 
 ------------------------------------------------------------------------
 
-### Method `get_family()`
+### `BiodiversityDataset$get_family()`
 
 Get family
 
@@ -307,7 +307,7 @@ for the dataset
 
 ------------------------------------------------------------------------
 
-### Method `get_link()`
+### `BiodiversityDataset$get_link()`
 
 Get custom link function
 
@@ -322,7 +322,7 @@ for the dataset
 
 ------------------------------------------------------------------------
 
-### Method [`get_data()`](https://iiasa.github.io/ibis.iSDM/reference/get_data.md)
+### `BiodiversityDataset$get_data()`
 
 Get data from the object
 
@@ -332,12 +332,12 @@ Get data from the object
 
 #### Returns
 
-A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-with the data
+A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object with
+the data
 
 ------------------------------------------------------------------------
 
-### Method `get_weight()`
+### `BiodiversityDataset$get_weight()`
 
 Get weight
 
@@ -352,7 +352,7 @@ within the dataset.
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `BiodiversityDataset$show()`
 
 Print input messages
 
@@ -366,7 +366,7 @@ A message on screen.
 
 ------------------------------------------------------------------------
 
-### Method `get_observations()`
+### `BiodiversityDataset$get_observations()`
 
 Collect info statistics about number of observations
 
@@ -381,7 +381,7 @@ observations.
 
 ------------------------------------------------------------------------
 
-### Method [`mask()`](https://iiasa.github.io/ibis.iSDM/reference/mask.md)
+### `BiodiversityDataset$mask()`
 
 Convenience function to mask all input datasets.
 
@@ -409,7 +409,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `BiodiversityDataset$clone()`
 
 The objects of this class are cloneable with this method.
 

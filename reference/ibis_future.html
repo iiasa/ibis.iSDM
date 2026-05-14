@@ -72,7 +72,7 @@ but not for inference in which case parallel inference should be handled by the 
 
 
 <dl><dt id="arg-plan-exists">plan_exists<a class="anchor" aria-label="anchor" href="#arg-plan-exists"></a></dt>
-<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> check on whether an existing <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future</a></code> plan exists (Default: <code>FALSE</code>).</p></dd>
+<dd><p>A <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></code> check on whether an existing <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></code> plan exists (Default: <code>FALSE</code>).</p></dd>
 
 
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
@@ -81,7 +81,7 @@ but not for inference in which case parallel inference should be handled by the 
 
 <dt id="arg-strategy">strategy<a class="anchor" aria-label="anchor" href="#arg-strategy"></a></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> denoting the strategy to be used for future.
-See help of <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future</a></code> for options. (Default: <code>"multisession"</code>).</p></dd>
+See help of <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></code> for options. (Default: <code>"multisession"</code>).</p></dd>
 
 
 <dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
@@ -103,14 +103,14 @@ Alternatively a <code>"cluster"</code> object can be provided.</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>The <code>'plan'</code> set by <a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future</a> exists after the function has been executed.</p>
+    <p>The <code>'plan'</code> set by <a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a> exists after the function has been executed.</p>
 <p>If the aim is to parallize across many species, this is better done in a scripted solution.
 Make sure not to parallize predictions within existing clusters to avoid out-of-memory
 issues.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future</a></p></div>
+    <div class="dont-index"><p><a href="https://future.futureverse.org/reference/future.html" class="external-link">future</a></p></div>
     </div>
 
     <div class="section level2">

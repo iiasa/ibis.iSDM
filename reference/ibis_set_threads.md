@@ -21,4 +21,4 @@ Invisible
 
 ## See also
 
-[future::future](https://future.futureverse.org/reference/future.html)
+[future](https://future.futureverse.org/reference/future.html)

@@ -1,6 +1,6 @@
 # Log prototype.
 
-Basic [`R6::R6`](https://r6.r-lib.org/reference/R6Class.html) object for
+Basic [`R6`](https://r6.r-lib.org/reference/R6Class.html) object for
 Log, any Log inherit from here
 
 ## Public fields
@@ -18,7 +18,7 @@ Log, any Log inherit from here
 
 ### Public methods
 
-- [`Log$new()`](#method-Log-new)
+- [`Log$new()`](#method-Log-initialize)
 
 - [`Log$print()`](#method-Log-print)
 
@@ -38,7 +38,7 @@ Log, any Log inherit from here
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `Log$new()`
 
 Initializes the object and specifies some default parameters.
 
@@ -63,7 +63,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `Log$print()`
 
 Print message with filename
 
@@ -77,7 +77,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method [`open()`](https://rdrr.io/r/base/connections.html)
+### `Log$open()`
 
 Opens the connection to the output filename.
 
@@ -98,7 +98,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method [`close()`](https://rdrr.io/r/base/connections.html)
+### `Log$close()`
 
 Closes the connection to the output file
 
@@ -112,7 +112,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `get_filename()`
+### `Log$get_filename()`
 
 Get output filename
 
@@ -126,7 +126,7 @@ A [`character`](https://rdrr.io/r/base/character.html) with the filename
 
 ------------------------------------------------------------------------
 
-### Method `set_filename()`
+### `Log$set_filename()`
 
 Set a new output filename
 
@@ -147,7 +147,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `delete()`
+### `Log$delete()`
 
 Delete log file
 
@@ -161,7 +161,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `open_system()`
+### `Log$open_system()`
 
 Open log with system viewer
 
@@ -175,7 +175,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `Log$clone()`
 
 The objects of this class are cloneable with this method.
 

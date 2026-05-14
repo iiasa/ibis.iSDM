@@ -25,7 +25,7 @@ This can likely be beautified further.
 
 ### Public methods
 
-- [`BiodiversityDatasetCollection$new()`](#method-BiodiversityDatasetCollection-new)
+- [`BiodiversityDatasetCollection$new()`](#method-BiodiversityDatasetCollection-initialize)
 
 - [`BiodiversityDatasetCollection$print()`](#method-BiodiversityDatasetCollection-print)
 
@@ -75,7 +75,7 @@ This can likely be beautified further.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `BiodiversityDatasetCollection$new()`
 
 Initializes the object and creates an empty list
 
@@ -89,7 +89,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `BiodiversityDatasetCollection$print()`
 
 Print the names and properties of all Biodiversity datasets contained
 within
@@ -111,7 +111,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `BiodiversityDatasetCollection$show()`
 
 Aliases that calls print.
 
@@ -125,7 +125,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `get_types()`
+### `BiodiversityDatasetCollection$get_types()`
 
 Types of all biodiversity datasets included in this
 
@@ -146,7 +146,7 @@ A [`character`](https://rdrr.io/r/base/character.html) vector.
 
 ------------------------------------------------------------------------
 
-### Method `get_names()`
+### `BiodiversityDatasetCollection$get_names()`
 
 Get names and format them if necessary
 
@@ -167,7 +167,7 @@ A [`character`](https://rdrr.io/r/base/character.html) vector.
 
 ------------------------------------------------------------------------
 
-### Method `set_data()`
+### `BiodiversityDatasetCollection$set_data()`
 
 Add a new Biodiversity dataset to this collection.
 
@@ -192,7 +192,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `get_data_object()`
+### `BiodiversityDatasetCollection$get_data_object()`
 
 Get a specific Biodiversity dataset by id
 
@@ -213,7 +213,7 @@ Returns a BiodiversityDataset.
 
 ------------------------------------------------------------------------
 
-### Method [`get_data()`](https://iiasa.github.io/ibis.iSDM/reference/get_data.md)
+### `BiodiversityDatasetCollection$get_data()`
 
 Get all biodiversity observations from a given dataset.
 
@@ -234,7 +234,7 @@ Returns all data from a set BiodiversityDataset.
 
 ------------------------------------------------------------------------
 
-### Method `get_coordinates()`
+### `BiodiversityDatasetCollection$get_coordinates()`
 
 Get coordinates for a given biodiversity dataset. Else return a wkt
 object
@@ -256,7 +256,7 @@ All coordinates from a given object in `data.frame`.
 
 ------------------------------------------------------------------------
 
-### Method [`mask()`](https://iiasa.github.io/ibis.iSDM/reference/mask.md)
+### `BiodiversityDatasetCollection$mask()`
 
 Convenience function to mask all input datasets.
 
@@ -280,7 +280,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `rm_data()`
+### `BiodiversityDatasetCollection$rm_data()`
 
 Remove a specific biodiversity dataset by id
 
@@ -301,7 +301,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method [`length()`](https://rdrr.io/r/base/length.html)
+### `BiodiversityDatasetCollection$length()`
 
 Number of Biodiversity Datasets in connection
 
@@ -316,7 +316,7 @@ datasets.
 
 ------------------------------------------------------------------------
 
-### Method `get_observations()`
+### `BiodiversityDatasetCollection$get_observations()`
 
 Get number of observations of all datasets
 
@@ -331,7 +331,7 @@ observations across datasets.
 
 ------------------------------------------------------------------------
 
-### Method `get_equations()`
+### `BiodiversityDatasetCollection$get_equations()`
 
 Get equations from all datasets
 
@@ -346,7 +346,7 @@ across datasets.
 
 ------------------------------------------------------------------------
 
-### Method `get_families()`
+### `BiodiversityDatasetCollection$get_families()`
 
 Get families from datasets.
 
@@ -361,7 +361,7 @@ across datasets.
 
 ------------------------------------------------------------------------
 
-### Method `get_links()`
+### `BiodiversityDatasetCollection$get_links()`
 
 Get custom link functions
 
@@ -376,7 +376,7 @@ functions across datasets.
 
 ------------------------------------------------------------------------
 
-### Method `get_columns_occ()`
+### `BiodiversityDatasetCollection$get_columns_occ()`
 
 Get fields with observation columns
 
@@ -391,7 +391,7 @@ observation columns.
 
 ------------------------------------------------------------------------
 
-### Method `get_weights()`
+### `BiodiversityDatasetCollection$get_weights()`
 
 Get the weights across datasets.
 
@@ -406,7 +406,7 @@ set per dataset.
 
 ------------------------------------------------------------------------
 
-### Method `get_ids()`
+### `BiodiversityDatasetCollection$get_ids()`
 
 Get ids of all assets in the collection.
 
@@ -421,7 +421,7 @@ datasets.
 
 ------------------------------------------------------------------------
 
-### Method `get_id_byType()`
+### `BiodiversityDatasetCollection$get_id_byType()`
 
 Search for a specific biodiversity dataset with type
 
@@ -443,7 +443,7 @@ datasets with the given type.
 
 ------------------------------------------------------------------------
 
-### Method `get_id_byName()`
+### `BiodiversityDatasetCollection$get_id_byName()`
 
 Get id by name
 
@@ -465,7 +465,7 @@ datasets with the given name.
 
 ------------------------------------------------------------------------
 
-### Method `show_equations()`
+### `BiodiversityDatasetCollection$show_equations()`
 
 Show equations of all datasets
 
@@ -487,7 +487,7 @@ Shows equations on screen or as
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://iiasa.github.io/ibis.iSDM/reference/plot.md)
+### `BiodiversityDatasetCollection$plot()`
 
 Plot the whole collection
 
@@ -501,7 +501,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `BiodiversityDatasetCollection$clone()`
 
 The objects of this class are cloneable with this method.
 

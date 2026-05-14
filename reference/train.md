@@ -183,7 +183,7 @@ provided
 object creates a new distribution model. The resulting object contains
 both a `"fit_best"` object of the estimated model and, if
 `inference_only` is `FALSE` a
-[terra::SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object named `"prediction"` that contains the spatial prediction of the
 model. These objects can be requested via `object$get_data("fit_best")`.
 
@@ -278,20 +278,20 @@ parameters and not all necessarily make sense or are useful.
         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
         # Use GLM as engine
         engine_glm()
-#> [Setup] 2026-05-10 15:18:31.711454 | Creating distribution object...
-#> [Setup] 2026-05-10 15:18:31.712397 | Adding poipo dataset...
-#> [Setup] 2026-05-10 15:18:31.798274 | Adding predictors...
-#> [Setup] 2026-05-10 15:18:31.804354 | Transforming predictors...
+#> [Setup] 2026-05-14 13:34:21.585612 | Creating distribution object...
+#> [Setup] 2026-05-14 13:34:21.586536 | Adding poipo dataset...
+#> [Setup] 2026-05-14 13:34:21.663541 | Adding predictors...
+#> [Setup] 2026-05-14 13:34:21.669309 | Transforming predictors...
 
  # Train the model, Also filter out co-linear predictors using a pearson threshold
  mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
-#> [Estimation] 2026-05-10 15:18:31.854993 | Collecting input parameters.
-#> [Estimation] 2026-05-10 15:18:31.897939 | Filtering predictors via pearson...
-#> [Estimation] 2026-05-10 15:18:31.904126 | Adding engine-specific parameters.
-#> [Estimation] 2026-05-10 15:18:31.909962 | Engine setup.
-#> [Estimation] 2026-05-10 15:18:32.032676 | Starting fitting: c98370ee
-#> [Estimation] 2026-05-10 15:18:32.080196 | Starting prediction...
-#> [Done] 2026-05-10 15:18:32.1416 | Completed after 0.28 secs
+#> [Estimation] 2026-05-14 13:34:21.718641 | Collecting input parameters.
+#> [Estimation] 2026-05-14 13:34:21.76839 | Filtering predictors via pearson...
+#> [Estimation] 2026-05-14 13:34:21.774093 | Adding engine-specific parameters.
+#> [Estimation] 2026-05-14 13:34:21.779548 | Engine setup.
+#> [Estimation] 2026-05-14 13:34:21.897416 | Starting fitting: a1a471cb
+#> [Estimation] 2026-05-14 13:34:21.939437 | Starting prediction...
+#> [Done] 2026-05-14 13:34:22.002961 | Completed after 0.28 secs
  mod
 #> Trained GLM-Model (Unnamed run)
 #>   Strongest summary effects:

@@ -7,7 +7,7 @@ It is possible to write outputs of fitted
 [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md),
 [`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
 or individual
-[`terra::terra`](https://rspatial.github.io/terra/reference/terra-package.html)
+[`terra`](https://rspatial.github.io/terra/reference/terra-package.html)
 or [`stars`](https://rdrr.io/r/graphics/stars.html) objects. In case a
 [`data.frame`](https://rdrr.io/r/base/data.frame.html) is supplied, the
 output is written as csv file. **For creating summaries of distribution
@@ -78,7 +78,7 @@ write_output(
   Provided
   [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md),
   [`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md),
-  [`terra::terra`](https://rspatial.github.io/terra/reference/terra-package.html)
+  [`terra`](https://rspatial.github.io/terra/reference/terra-package.html)
   or [`stars`](https://rdrr.io/r/graphics/stars.html) object.
 
 - fname:

@@ -27,8 +27,8 @@ add_offset_bias(x, layer, add = TRUE, points = NULL)
 
 - layer:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the range for the target feature.
 
 - add:
@@ -39,11 +39,10 @@ add_offset_bias(x, layer, add = TRUE, points = NULL)
 
 - points:
 
-  An optional
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-  with key points. The location of the points are then used to calculate
-  the probability that a cell has been sampled while accounting for area
-  differences. (Default: `NULL`).
+  An optional [`sf`](https://r-spatial.github.io/sf/reference/sf.html)
+  object with key points. The location of the points are then used to
+  calculate the probability that a cell has been sampled while
+  accounting for area differences. (Default: `NULL`).
 
 ## Value
 

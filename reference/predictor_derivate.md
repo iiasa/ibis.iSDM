@@ -26,7 +26,7 @@ predictor_derivate(
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object.
 
 - option:
@@ -62,7 +62,7 @@ predictor_derivate(
 ## Value
 
 Returns the derived adjusted
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 objects of identical resolution.
 
 ## Details

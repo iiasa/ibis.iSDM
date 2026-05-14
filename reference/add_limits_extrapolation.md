@@ -76,8 +76,8 @@ add_limits_extrapolation(
 - layer:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   that limits the prediction surface when intersected with input data
   (Default: `NULL`).
 

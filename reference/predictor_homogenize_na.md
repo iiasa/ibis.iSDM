@@ -24,7 +24,7 @@ predictor_homogenize_na(
 - env:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the predictors.
 
 - fill:
@@ -46,7 +46,7 @@ predictor_homogenize_na(
 ## Value
 
 A
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object with the same number of layers as the input.
 
 ## Examples

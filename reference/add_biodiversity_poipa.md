@@ -57,7 +57,7 @@ add_biodiversity_poipa(
 - poipa:
 
   A [`data.frame`](https://rdrr.io/r/base/data.frame.html) or
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object of
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object of
   presence-absence point occurrences.
 
 - name:

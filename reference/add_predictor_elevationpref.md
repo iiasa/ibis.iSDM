@@ -25,7 +25,7 @@ add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
 
   A [`character`](https://rdrr.io/r/base/character.html) stating the
   elevational layer in the Distribution object or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object.
 
 - lower:

@@ -55,11 +55,11 @@
 <dd><p>The class name of the engine.</p></dd>
 
 
-<dt><code>name</code></dt>
+    <dt><code>name</code></dt>
 <dd><p>The name of the engine</p></dd>
 
 
-<dt><code>data</code></dt>
+    <dt><code>data</code></dt>
 <dd><p>Any data or parameters necessary to make this engine work.</p></dd>
 
 
@@ -70,8 +70,7 @@
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
-
-<ul><li><p><a href="#method-Engine-new"><code>Engine$new()</code></a></p></li>
+<p></p><ul><li><p><a href="#method-Engine-initialize"><code>Engine$new()</code></a></p></li>
 <li><p><a href="#method-Engine-print"><code>Engine$print()</code></a></p></li>
 <li><p><a href="#method-Engine-show"><code>Engine$show()</code></a></p></li>
 <li><p><a href="#method-Engine-get_class"><code>Engine$get_class()</code></a></p></li>
@@ -80,142 +79,135 @@
 <li><p><a href="#method-Engine-set_data"><code>Engine$set_data()</code></a></p></li>
 <li><p><a href="#method-Engine-get_self"><code>Engine$get_self()</code></a></p></li>
 <li><p><a href="#method-Engine-clone"><code>Engine$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-Engine-new"></a><div class="section">
-<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+</ul></div><p></p><hr><a id="method-Engine-initialize"></a><div class="section">
+<h3 id="engine-new-"><code>Engine$new()</code><a class="anchor" aria-label="anchor" href="#engine-new-"></a></h3>
 <p>Initializes the object and creates an empty list</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/Engine-class.html">Engine</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">engine</span>, <span class="va">name</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>engine</code></dt>
 <dd><p>The class name of the engine.</p></dd>
 
-
-<dt><code>name</code></dt>
+      <dt><code>name</code></dt>
 <dd><p>The name of the engine</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>NULL</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-print"></a><div class="section">
-<h3 id="method-print-">Method <code><a href="print.html">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-print"></a><div class="section">
+<h3 id="engine-print-"><code>Engine$print()</code><a class="anchor" aria-label="anchor" href="#engine-print-"></a></h3>
 <p>Print the Engine name</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>A message on screen</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-show"></a><div class="section">
-<h3 id="method-show-">Method <code>show()</code><a class="anchor" aria-label="anchor" href="#method-show-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-show"></a><div class="section">
+<h3 id="engine-show-"><code>Engine$show()</code><a class="anchor" aria-label="anchor" href="#engine-show-"></a></h3>
 <p>Aliases that calls print.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>A message on screen</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-get_class"></a><div class="section">
-<h3 id="method-get-class-">Method <code>get_class()</code><a class="anchor" aria-label="anchor" href="#method-get-class-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-get_class"></a><div class="section">
+<h3 id="engine-get-class-"><code>Engine$get_class()</code><a class="anchor" aria-label="anchor" href="#engine-get-class-"></a></h3>
 <p>Get class description</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">get_class</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the class as saved in engine</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-get_data"></a><div class="section">
-<h3 id="method-get-data-">Method <code><a href="get_data.html">get_data()</a></code><a class="anchor" aria-label="anchor" href="#method-get-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-get_data"></a><div class="section">
+<h3 id="engine-get-data-"><code>Engine$get_data()</code><a class="anchor" aria-label="anchor" href="#engine-get-data-"></a></h3>
 <p>Get specific data from this engine</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">get_data</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A respecified data to be added to the engine.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> with the data.</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-list_data"></a><div class="section">
-<h3 id="method-list-data-">Method <code>list_data()</code><a class="anchor" aria-label="anchor" href="#method-list-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-list_data"></a><div class="section">
+<h3 id="engine-list-data-"><code>Engine$list_data()</code><a class="anchor" aria-label="anchor" href="#engine-list-data-"></a></h3>
 <p>List all data</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">list_data</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> vector of the data entries.</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-set_data"></a><div class="section">
-<h3 id="method-set-data-">Method <code>set_data()</code><a class="anchor" aria-label="anchor" href="#method-set-data-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-set_data"></a><div class="section">
+<h3 id="engine-set-data-"><code>Engine$set_data()</code><a class="anchor" aria-label="anchor" href="#engine-set-data-"></a></h3>
 <p>Set data for this engine</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">set_data</span><span class="op">(</span><span class="va">x</span>, <span class="va">value</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the name or id of this dataset.</p></dd>
 
-
-<dt><code>value</code></dt>
+      <dt><code>value</code></dt>
 <dd><p>A new <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></code> of parameters.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
 <p>Invisible</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-get_self"></a><div class="section">
-<h3 id="method-get-self-">Method <code>get_self()</code><a class="anchor" aria-label="anchor" href="#method-get-self-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-get_self"></a><div class="section">
+<h3 id="engine-get-self-"><code>Engine$get_self()</code><a class="anchor" aria-label="anchor" href="#engine-get-self-"></a></h3>
 <p>Dummy function to get self object</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">get_self</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-7">Returns<a class="anchor" aria-label="anchor" href="#returns-7"></a></h4>
 <p>This object</p>
 </div>
 
-</div><p></p><hr><a id="method-Engine-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Engine-clone"></a><div class="section">
+<h3 id="engine-clone-"><code>Engine$clone()</code><a class="anchor" aria-label="anchor" href="#engine-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Engine</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
@@ -225,6 +217,7 @@
 </div>
 
 </div>
+
 
     </div>
 

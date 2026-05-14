@@ -9,8 +9,6 @@ covariates within.
 
 [`predictor_transform()`](https://iiasa.github.io/ibis.iSDM/reference/predictor_transform.md)
 
-[`predictor_transform()`](https://iiasa.github.io/ibis.iSDM/reference/predictor_transform.md)
-
 ## Public fields
 
 - `id`:
@@ -21,7 +19,7 @@ covariates within.
 - `data`:
 
   A predictor dataset usually as
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
 
 - `name`:
 
@@ -44,7 +42,7 @@ covariates within.
 
 ### Public methods
 
-- [`PredictorDataset$new()`](#method-PredictorDataset-new)
+- [`PredictorDataset$new()`](#method-PredictorDataset-initialize)
 
 - [`PredictorDataset$print()`](#method-PredictorDataset-print)
 
@@ -96,7 +94,7 @@ covariates within.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `PredictorDataset$new()`
 
 Initializes the object and creates an empty list
 
@@ -114,7 +112,7 @@ Initializes the object and creates an empty list
 - `data`:
 
   A predictor dataset usually as
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
 
 - `transformed`:
 
@@ -131,7 +129,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `PredictorDataset$print()`
 
 Print the names and properties of all Biodiversity datasets contained
 within
@@ -153,7 +151,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `get_name()`
+### `PredictorDataset$get_name()`
 
 Return name of this object
 
@@ -167,7 +165,7 @@ Default [`character`](https://rdrr.io/r/base/character.html) name.
 
 ------------------------------------------------------------------------
 
-### Method `get_id()`
+### `PredictorDataset$get_id()`
 
 Get Id of this object
 
@@ -181,7 +179,7 @@ Default [`character`](https://rdrr.io/r/base/character.html) name.
 
 ------------------------------------------------------------------------
 
-### Method `get_names()`
+### `PredictorDataset$get_names()`
 
 Get names of data
 
@@ -196,7 +194,7 @@ value.
 
 ------------------------------------------------------------------------
 
-### Method `get_predictor_names()`
+### `PredictorDataset$get_predictor_names()`
 
 Alias for get_names
 
@@ -211,7 +209,7 @@ value.
 
 ------------------------------------------------------------------------
 
-### Method [`get_data()`](https://iiasa.github.io/ibis.iSDM/reference/get_data.md)
+### `PredictorDataset$get_data()`
 
 Get a specific dataset
 
@@ -238,12 +236,12 @@ Get a specific dataset
 #### Returns
 
 A
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 or [`data.frame`](https://rdrr.io/r/base/data.frame.html).
 
 ------------------------------------------------------------------------
 
-### Method `get_time()`
+### `PredictorDataset$get_time()`
 
 Get time dimension of object.
 
@@ -264,7 +262,7 @@ of the dataset.
 
 ------------------------------------------------------------------------
 
-### Method `get_projection()`
+### `PredictorDataset$get_projection()`
 
 Get Projection
 
@@ -279,7 +277,7 @@ projection of the object.
 
 ------------------------------------------------------------------------
 
-### Method `get_resolution()`
+### `PredictorDataset$get_resolution()`
 
 Get Resolution
 
@@ -295,7 +293,7 @@ resolution of the data.
 
 ------------------------------------------------------------------------
 
-### Method `get_ext()`
+### `PredictorDataset$get_ext()`
 
 Get Extent of predictors
 
@@ -311,7 +309,7 @@ resolution of the data.
 
 ------------------------------------------------------------------------
 
-### Method `crop_data()`
+### `PredictorDataset$crop_data()`
 
 Utility function to clip the predictor dataset by another dataset
 
@@ -323,8 +321,8 @@ Utility function to clip the predictor dataset by another dataset
 
 - `pol`:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-  used for cropping the data.
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object used
+  for cropping the data.
 
 - `apply_time`:
 
@@ -343,7 +341,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method [`mask()`](https://iiasa.github.io/ibis.iSDM/reference/mask.md)
+### `PredictorDataset$mask()`
 
 Utility function to mask the predictor dataset by another dataset
 
@@ -371,7 +369,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `set_data()`
+### `PredictorDataset$set_data()`
 
 Add a new Predictor dataset to this collection
 
@@ -384,7 +382,7 @@ Add a new Predictor dataset to this collection
 - `value`:
 
   A new
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   or [`stars`](https://rdrr.io/r/graphics/stars.html) object.
 
 #### Returns
@@ -393,7 +391,7 @@ This object
 
 ------------------------------------------------------------------------
 
-### Method `rm_data()`
+### `PredictorDataset$rm_data()`
 
 Remove a specific Predictor by name
 
@@ -414,7 +412,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `PredictorDataset$show()`
 
 Alias for print method
 
@@ -428,7 +426,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
+### `PredictorDataset$summary()`
 
 Collect info statistics with optional decimals
 
@@ -450,7 +448,7 @@ data.
 
 ------------------------------------------------------------------------
 
-### Method `has_derivates()`
+### `PredictorDataset$has_derivates()`
 
 Indication if there are any predictors that are derivates of outers
 
@@ -464,7 +462,7 @@ A [`logical`](https://rdrr.io/r/base/logical.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method `is_transformed()`
+### `PredictorDataset$is_transformed()`
 
 Predictors have been transformed?
 
@@ -478,7 +476,7 @@ A [`logical`](https://rdrr.io/r/base/logical.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method `is_spatial()`
+### `PredictorDataset$is_spatial()`
 
 Is Predictor dataset spatial?
 
@@ -492,7 +490,7 @@ A [`logical`](https://rdrr.io/r/base/logical.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method `get_transformed_params()`
+### `PredictorDataset$get_transformed_params()`
 
 Get transformation params.
 
@@ -506,7 +504,7 @@ A [`matrix`](https://rdrr.io/r/base/matrix.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method [`length()`](https://rdrr.io/r/base/length.html)
+### `PredictorDataset$length()`
 
 Number of Predictors in object
 
@@ -520,7 +518,7 @@ A [`numeric`](https://rdrr.io/r/base/numeric.html) estimate
 
 ------------------------------------------------------------------------
 
-### Method `ncell()`
+### `PredictorDataset$ncell()`
 
 Number of cells or values in object
 
@@ -534,7 +532,7 @@ A [`numeric`](https://rdrr.io/r/base/numeric.html) estimate
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://iiasa.github.io/ibis.iSDM/reference/plot.md)
+### `PredictorDataset$plot()`
 
 Basic Plotting function
 
@@ -548,7 +546,7 @@ A graphical interpretation of the predictors in this object.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `PredictorDataset$clone()`
 
 The objects of this class are cloneable with this method.
 

@@ -63,31 +63,31 @@
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the id of the prior.</p></dd>
 
 
-<dt><code>name</code></dt>
+    <dt><code>name</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the name of the prior.</p></dd>
 
 
-<dt><code>type</code></dt>
+    <dt><code>type</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type of the prior.</p></dd>
 
 
-<dt><code>variable</code></dt>
+    <dt><code>variable</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the variable name for the prior.</p></dd>
 
 
-<dt><code>distribution</code></dt>
+    <dt><code>distribution</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the distribution of the prior if relevant.</p></dd>
 
 
-<dt><code>value</code></dt>
+    <dt><code>value</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the prior value, e.g. the hyper-parameters.</p></dd>
 
 
-<dt><code>prob</code></dt>
+    <dt><code>prob</code></dt>
 <dd><p>Another <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> entry on the prior field. The inclusion probability.</p></dd>
 
 
-<dt><code>lims</code></dt>
+    <dt><code>lims</code></dt>
 <dd><p>A limitation on the lower and upper bounds of a numeric value.</p></dd>
 
 
@@ -98,8 +98,7 @@
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
-
-<ul><li><p><a href="#method-Prior-new"><code>Prior$new()</code></a></p></li>
+<p></p><ul><li><p><a href="#method-Prior-initialize"><code>Prior$new()</code></a></p></li>
 <li><p><a href="#method-Prior-print"><code>Prior$print()</code></a></p></li>
 <li><p><a href="#method-Prior-validate"><code>Prior$validate()</code></a></p></li>
 <li><p><a href="#method-Prior-get"><code>Prior$get()</code></a></p></li>
@@ -107,8 +106,8 @@
 <li><p><a href="#method-Prior-get_id"><code>Prior$get_id()</code></a></p></li>
 <li><p><a href="#method-Prior-get_name"><code>Prior$get_name()</code></a></p></li>
 <li><p><a href="#method-Prior-clone"><code>Prior$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-Prior-new"></a><div class="section">
-<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+</ul></div><p></p><hr><a id="method-Prior-initialize"></a><div class="section">
+<h3 id="prior-new-"><code>Prior$new()</code><a class="anchor" aria-label="anchor" href="#prior-new-"></a></h3>
 <p>Initializes the object and prepared the various prior variables</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/Prior-class.html">Prior</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
@@ -121,153 +120,140 @@
 <span>  prob <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lims <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>id</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the id of the prior.</p></dd>
 
-
-<dt><code>name</code></dt>
+      <dt><code>name</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the name of the prior.</p></dd>
 
-
-<dt><code>variable</code></dt>
+      <dt><code>variable</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the variable name for the prior.</p></dd>
 
-
-<dt><code>value</code></dt>
+      <dt><code>value</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the prior value, e.g. the hyper-parameters.</p></dd>
 
-
-<dt><code>type</code></dt>
+      <dt><code>type</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the type of the prior.</p></dd>
 
-
-<dt><code>distribution</code></dt>
+      <dt><code>distribution</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the distribution of the prior if relevant.</p></dd>
 
-
-<dt><code>prob</code></dt>
+      <dt><code>prob</code></dt>
 <dd><p>Another <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> entry on the prior field. The inclusion probability.</p></dd>
 
-
-<dt><code>lims</code></dt>
+      <dt><code>lims</code></dt>
 <dd><p>A limitation on the lower and upper bounds of a numeric value.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>NULL</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-print"></a><div class="section">
-<h3 id="method-print-">Method <code><a href="print.html">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-print"></a><div class="section">
+<h3 id="prior-print-"><code>Prior$print()</code><a class="anchor" aria-label="anchor" href="#prior-print-"></a></h3>
 <p>Print out the prior type and variable.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>A message on screen</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-validate"></a><div class="section">
-<h3 id="method-validate-">Method <code><a href="validate.html">validate()</a></code><a class="anchor" aria-label="anchor" href="#method-validate-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-validate"></a><div class="section">
+<h3 id="prior-validate-"><code>Prior$validate()</code><a class="anchor" aria-label="anchor" href="#prior-validate-"></a></h3>
 <p>Generic validation function for a provided value.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">validate</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A new prior value.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>Invisible TRUE</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-get"></a><div class="section">
-<h3 id="method-get-">Method <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code><a class="anchor" aria-label="anchor" href="#method-get-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-get"></a><div class="section">
+<h3 id="prior-get-"><code>Prior$get()</code><a class="anchor" aria-label="anchor" href="#prior-get-"></a></h3>
 <p>Get prior values</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>what</code></dt>
 <dd><p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the entry to be returned (Default: <code>value</code>).</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>Invisible TRUE</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-set"></a><div class="section">
-<h3 id="method-set-">Method <code>set()</code><a class="anchor" aria-label="anchor" href="#method-set-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-set"></a><div class="section">
+<h3 id="prior-set-"><code>Prior$set()</code><a class="anchor" aria-label="anchor" href="#prior-set-"></a></h3>
 <p>Set prior</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>x</code></dt>
 <dd><p>A new prior value as <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code>.</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>Invisible TRUE</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-get_id"></a><div class="section">
-<h3 id="method-get-id-">Method <code>get_id()</code><a class="anchor" aria-label="anchor" href="#method-get-id-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-get_id"></a><div class="section">
+<h3 id="prior-get-id-"><code>Prior$get_id()</code><a class="anchor" aria-label="anchor" href="#prior-get-id-"></a></h3>
 <p>Get a specific ID from a prior.</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">get_id</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>A <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> id.</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-get_name"></a><div class="section">
-<h3 id="method-get-name-">Method <code>get_name()</code><a class="anchor" aria-label="anchor" href="#method-get-name-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-get_name"></a><div class="section">
+<h3 id="prior-get-name-"><code>Prior$get_name()</code><a class="anchor" aria-label="anchor" href="#prior-get-name-"></a></h3>
 <p>Get Name of object</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">get_name</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
 <p>Returns a <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></code> with the class name.</p>
 </div>
 
-</div><p></p><hr><a id="method-Prior-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-Prior-clone"></a><div class="section">
+<h3 id="prior-clone-"><code>Prior$clone()</code><a class="anchor" aria-label="anchor" href="#prior-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">Prior</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
@@ -277,6 +263,7 @@
 </div>
 
 </div>
+
 
     </div>
 

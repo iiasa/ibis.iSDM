@@ -43,7 +43,7 @@ Could be further pretified and commands outsourced.
 
 ### Public methods
 
-- [`DistributionModel$new()`](#method-DistributionModel-new)
+- [`DistributionModel$new()`](#method-DistributionModel-initialize)
 
 - [`DistributionModel$get_name()`](#method-DistributionModel-get_name)
 
@@ -99,7 +99,7 @@ Could be further pretified and commands outsourced.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `DistributionModel$new()`
 
 Initializes the object and creates an empty list
 
@@ -120,7 +120,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method `get_name()`
+### `DistributionModel$get_name()`
 
 Return the name of the model
 
@@ -135,7 +135,7 @@ name used.
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `DistributionModel$print()`
 
 Print the names and summarizes the model within
 
@@ -149,7 +149,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `DistributionModel$show()`
 
 Show the name of the Model.
 
@@ -163,7 +163,7 @@ A [`character`](https://rdrr.io/r/base/character.html) of the run name.
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://iiasa.github.io/ibis.iSDM/reference/plot.md)
+### `DistributionModel$plot()`
 
 Plots the prediction if found.
 
@@ -184,7 +184,7 @@ A graphical representation of the prediction
 
 ------------------------------------------------------------------------
 
-### Method `plot_threshold()`
+### `DistributionModel$plot_threshold()`
 
 Plots the thresholded prediction if found.
 
@@ -206,7 +206,7 @@ A graphical representation of the thresholded prediction if found.
 
 ------------------------------------------------------------------------
 
-### Method `show_duration()`
+### `DistributionModel$show_duration()`
 
 Show model run time if settings exist
 
@@ -221,7 +221,7 @@ duration it took to fit the models.
 
 ------------------------------------------------------------------------
 
-### Method [`summary()`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
+### `DistributionModel$summary()`
 
 Get effects or importance tables from model
 
@@ -243,7 +243,7 @@ model, usually its coefficient.
 
 ------------------------------------------------------------------------
 
-### Method [`effects()`](https://iiasa.github.io/ibis.iSDM/reference/effects.md)
+### `DistributionModel$effects()`
 
 Generic plotting function for effect plots
 
@@ -273,7 +273,7 @@ A graphical representation of the coefficents.
 
 ------------------------------------------------------------------------
 
-### Method `get_equation()`
+### `DistributionModel$get_equation()`
 
 Get equation
 
@@ -288,7 +288,7 @@ model.
 
 ------------------------------------------------------------------------
 
-### Method [`get_data()`](https://iiasa.github.io/ibis.iSDM/reference/get_data.md)
+### `DistributionModel$get_data()`
 
 Get specific fit from this Model
 
@@ -306,12 +306,12 @@ Get specific fit from this Model
 #### Returns
 
 A
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object with the prediction.
 
 ------------------------------------------------------------------------
 
-### Method `get_model()`
+### `DistributionModel$get_model()`
 
 Small internal helper function to directly get the model object
 
@@ -325,7 +325,7 @@ A fitted model if existing.
 
 ------------------------------------------------------------------------
 
-### Method `set_data()`
+### `DistributionModel$set_data()`
 
 Set new fit for this Model.
 
@@ -342,7 +342,7 @@ Set new fit for this Model.
 - `value`:
 
   The
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   layer (or model) to be inserted.
 
 #### Returns
@@ -351,7 +351,7 @@ This object.
 
 ------------------------------------------------------------------------
 
-### Method `get_thresholdvalue()`
+### `DistributionModel$get_thresholdvalue()`
 
 Get the threshold value if calculated
 
@@ -365,7 +365,7 @@ A [`numeric`](https://rdrr.io/r/base/numeric.html) threshold value.
 
 ------------------------------------------------------------------------
 
-### Method `get_thresholdtype()`
+### `DistributionModel$get_thresholdtype()`
 
 Get threshold type and format if calculated.
 
@@ -381,7 +381,7 @@ value.
 
 ------------------------------------------------------------------------
 
-### Method `show_rasters()`
+### `DistributionModel$show_rasters()`
 
 List all rasters in object
 
@@ -397,7 +397,7 @@ objects.
 
 ------------------------------------------------------------------------
 
-### Method `get_projection()`
+### `DistributionModel$get_projection()`
 
 Get projection of the background.
 
@@ -411,7 +411,7 @@ A geographic projection
 
 ------------------------------------------------------------------------
 
-### Method `get_resolution()`
+### `DistributionModel$get_resolution()`
 
 Get the resolution of the projection
 
@@ -426,7 +426,7 @@ distribution.
 
 ------------------------------------------------------------------------
 
-### Method `rm_threshold()`
+### `DistributionModel$rm_threshold()`
 
 Remove calculated thresholds
 
@@ -440,7 +440,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method `calc_suitabilityindex()`
+### `DistributionModel$calc_suitabilityindex()`
 
 Calculate a suitability index for a given projection
 
@@ -462,11 +462,11 @@ relative total using the sumof values.
 #### Returns
 
 Returns a
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
 
 ------------------------------------------------------------------------
 
-### Method `get_centroid()`
+### `DistributionModel$get_centroid()`
 
 Get centroids of prediction layers
 
@@ -488,12 +488,12 @@ Get centroids of prediction layers
 
 #### Returns
 
-Returns a [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html)
+Returns a [`sf`](https://r-spatial.github.io/sf/reference/sf.html)
 object.
 
 ------------------------------------------------------------------------
 
-### Method `has_limits()`
+### `DistributionModel$has_limits()`
 
 Logical indication if the prediction was limited.
 
@@ -507,7 +507,7 @@ A [`logical`](https://rdrr.io/r/base/logical.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method `has_latent()`
+### `DistributionModel$has_latent()`
 
 Logical indication if the prediction has added latent factors.
 
@@ -521,7 +521,7 @@ A [`logical`](https://rdrr.io/r/base/logical.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method `has_offset()`
+### `DistributionModel$has_offset()`
 
 Has a offset been used?
 
@@ -535,7 +535,7 @@ A [`logical`](https://rdrr.io/r/base/logical.html) flag.
 
 ------------------------------------------------------------------------
 
-### Method [`mask()`](https://iiasa.github.io/ibis.iSDM/reference/mask.md)
+### `DistributionModel$mask()`
 
 Convenience function to mask all input datasets.
 
@@ -563,7 +563,7 @@ Invisible
 
 ------------------------------------------------------------------------
 
-### Method [`save()`](https://rdrr.io/r/base/save.html)
+### `DistributionModel$save()`
 
 Save the prediction as output.
 
@@ -593,7 +593,7 @@ Saved spatial prediction on drive.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `DistributionModel$clone()`
 
 The objects of this class are cloneable with this method.
 

@@ -31,7 +31,7 @@ emptyraster(x, res = NULL, ...)
 ## Value
 
 an empty
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
 i.e. all cells are `NA`.
 
 ## Examples
@@ -39,7 +39,7 @@ i.e. all cells are `NA`.
 ``` r
 require(terra)
 #> Loading required package: terra
-#> terra 1.9.25
+#> terra 1.9.27
 #> 
 #> Attaching package: ‘terra’
 #> The following object is masked from ‘package:ibis.iSDM’:

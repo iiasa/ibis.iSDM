@@ -57,8 +57,8 @@ add_offset_range(
 
 - layer:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the range for the target feature.
 
 - distance_max:
@@ -108,15 +108,14 @@ add_offset_range(
 - fraction:
 
   An optional
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object that is multiplied with digitized raster layer. Can be used to
   for example to remove or reduce the expected value (Default: `NULL`).
 
 - point:
 
-  An optional
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) layer
-  with points or [`logical`](https://rdrr.io/r/base/logical.html)
+  An optional [`sf`](https://r-spatial.github.io/sf/reference/sf.html)
+  layer with points or [`logical`](https://rdrr.io/r/base/logical.html)
   argument. In the case of the latter the point data is ignored
   (Default: `FALSE`).
 
@@ -135,7 +134,7 @@ object.
 ## Details
 
 The output created by this function creates a
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 to be added to a provided distribution object. Offsets in regression
 models are likelihood specific as they are added directly to the overall
 estimate of `` `y^hat` ``.

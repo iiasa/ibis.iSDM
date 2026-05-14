@@ -57,7 +57,7 @@ This functionality likely is deprecated or checks have been superseeded.
 
 ### Public methods
 
-- [`Prior$new()`](#method-Prior-new)
+- [`Prior$new()`](#method-Prior-initialize)
 
 - [`Prior$print()`](#method-Prior-print)
 
@@ -75,7 +75,7 @@ This functionality likely is deprecated or checks have been superseeded.
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `Prior$new()`
 
 Initializes the object and prepared the various prior variables
 
@@ -140,7 +140,7 @@ NULL
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
+### `Prior$print()`
 
 Print out the prior type and variable.
 
@@ -154,7 +154,7 @@ A message on screen
 
 ------------------------------------------------------------------------
 
-### Method [`validate()`](https://iiasa.github.io/ibis.iSDM/reference/validate.md)
+### `Prior$validate()`
 
 Generic validation function for a provided value.
 
@@ -174,7 +174,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method [`get()`](https://rdrr.io/r/base/get.html)
+### `Prior$get()`
 
 Get prior values
 
@@ -195,7 +195,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `set()`
+### `Prior$set()`
 
 Set prior
 
@@ -216,7 +216,7 @@ Invisible TRUE
 
 ------------------------------------------------------------------------
 
-### Method `get_id()`
+### `Prior$get_id()`
 
 Get a specific ID from a prior.
 
@@ -230,7 +230,7 @@ A [`character`](https://rdrr.io/r/base/character.html) id.
 
 ------------------------------------------------------------------------
 
-### Method `get_name()`
+### `Prior$get_name()`
 
 Get Name of object
 
@@ -245,7 +245,7 @@ class name.
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `Prior$clone()`
 
 The objects of this class are cloneable with this method.
 

@@ -42,7 +42,7 @@ partial_density(mod, x.var, df = FALSE, ...)
 ## Value
 
 A
-[`ggplot2::ggplot2`](https://ggplot2.tidyverse.org/reference/ggplot2-package.html)
+[`ggplot2`](https://ggplot2.tidyverse.org/reference/ggplot2-package.html)
 object showing the marginal response in light of the data.
 
 ## Details

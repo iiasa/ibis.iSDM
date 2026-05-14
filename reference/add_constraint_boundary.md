@@ -1,16 +1,19 @@
-# Adds a boundary constraint to a scenario object
+# Adds a boundary or zone constraint to a scenario object
 
 The purpose of boundary constraints is to limit a future projection
 within a specified area (such as for example a range or ecoregion). This
 can help to limit unreasonable projections into geographic space.
 
-Similar to boundary constraints it is also possible to define a `"zone"`
-for the scenario projections, similar as was done for model training.
-The difference to a boundary constraint is that the boundary constraint
-is applied posthoc as a hard cut on any projection, while the zones
-would allow any projection (and other constraints) to be applied within
-the zone. **Note: Setting a boundary constraint for future projections
-effectively potentially suitable areas!**
+When `method = "zone"` is used, the constraint is applied per projection
+timestep as a mask on the suitability output (before any threshold is
+computed), rather than posthoc on the full stacked result. This allows
+other per-timestep constraints (e.g. dispersal) to interact with the
+zone at each step. Zones can be either static (one layer applied
+identically at every timestep) or time-series (one layer per timestep,
+matched by nearest date).
+
+**Note: Setting a boundary constraint for future projections effectively
+potentially clips suitable areas!**
 
 ## Usage
 
@@ -34,11 +37,17 @@ add_constraint_boundary(mod, layer, method = "boundary", ...)
 
 - layer:
 
-  A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-  with the same extent as the model background. Has to be binary and is
-  used for a posthoc masking of projected grid cells.
+  For `method = "boundary"`: a single-layer
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
+  Has to be binary. For `method = "zone"`: must be a
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html).
+  A single-layer raster is used as a static zone (same mask at every
+  timestep). A multi-layer raster is treated as a time-series zone;
+  layers are matched to projection timesteps either by the raster's time
+  attribute (`terra::has.time(layer) == TRUE`, nearest date selected)
+  or, when no time attribute is present, by layer order
+  (`terra::nlyr(layer)` must equal the number of covariate timesteps).
 
 - ...:
 
@@ -47,9 +56,10 @@ add_constraint_boundary(mod, layer, method = "boundary", ...)
 
 - method:
 
-  A [`character`](https://rdrr.io/r/base/character.html) indicating the
-  type of constraints to be added to the scenario. See details for more
-  information.
+  A [`character`](https://rdrr.io/r/base/character.html) specifying the
+  constraint type. Either `"boundary"` (default, posthoc mask on full
+  stacked projection) or `"zone"` (per-timestep mask applied within the
+  projection loop).
 
 ## See also
 
@@ -67,7 +77,14 @@ Other constraint:
 
 ``` r
 if (FALSE) { # \dontrun{
-# Add scenario constraint
+# Static boundary constraint (posthoc)
 scenario(fit) |> add_constraint_boundary(range)
+
+# Static zone constraint (per-timestep)
+scenario(fit) |> add_constraint_boundary(range, method = "zone")
+
+# Time-series zone: SpatRaster with terra::time() set
+scenario(fit) |> add_constraint_boundary(zone_raster, method = "zone")
+
 } # }
 ```

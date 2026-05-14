@@ -25,7 +25,7 @@ add_offset_elevation(x, elev, pref, rate = 0.0089, add = TRUE)
 - elev:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   with the elevation for a given background.
 
 - pref:
@@ -57,7 +57,7 @@ object.
 
 Specifically this functions calculates a continuous decay and decreasing
 probability of a species to occur from elevation limits. It requires a
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 with elevation information. A generalized logistic transform (aka
 Richard's curve) is used to calculate decay from the suitable
 elevational areas, with the `"rate"` parameter allowing to vary the

@@ -70,15 +70,14 @@ distribution(
 - background:
 
   Specification of the modelling background. Must be a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html)
-  object.
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object.
 
 - limits:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
   [`stars`](https://rdrr.io/r/graphics/stars.html) object that limits
   the prediction surface when intersected with input data (Default:
   `NULL`). In case of a [`stars`](https://rdrr.io/r/graphics/stars.html)
@@ -206,7 +205,7 @@ and other classes.
 background <- terra::rast(system.file("extdata/europegrid_50km.tif",package = "ibis.iSDM"))
 # Define model
 x <- distribution(background)
-#> [Setup] 2026-05-10 15:18:14.83952 | Creating distribution object...
+#> [Setup] 2026-05-14 13:34:04.975837 | Creating distribution object...
 x
 #> <Biodiversity distribution model>
 #> Background extent: 

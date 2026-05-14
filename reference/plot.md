@@ -36,7 +36,7 @@ plot(x, ...)
 - what:
 
   In case a
-  [terra::SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   is supplied, this parameter specifies the layer to be shown (Default:
   `"mean"`).
 

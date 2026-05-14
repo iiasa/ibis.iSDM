@@ -1,4 +1,4 @@
-# Align a [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html) object to another by harmonizing geometry and extend.
+# Align a [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html) object to another by harmonizing geometry and extend.
 
 If the data is not in the same projection as the template, the alignment
 will be computed by reprojection only. If the data has already the same
@@ -15,13 +15,13 @@ alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 
 - data:
 
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object to be resampled.
 
 - template:
 
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
-  or [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  or [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   from which geometry can be extracted.
 
 - method:
@@ -41,7 +41,7 @@ alignRasters(data, template, method = "bilinear", func = mean, cl = TRUE)
 ## Value
 
 New
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object aligned to the supplied template layer.
 
 ## Details

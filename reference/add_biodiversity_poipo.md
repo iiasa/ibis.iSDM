@@ -50,7 +50,7 @@ add_biodiversity_poipo(
 - poipo:
 
   A [`data.frame`](https://rdrr.io/r/base/data.frame.html) or
-  [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object of
+  [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object of
   presence-only point occurrences.
 
 - name:
@@ -164,6 +164,6 @@ package='ibis.iSDM',mustWork = TRUE),'points',quiet = TRUE)
 # Define model
 x <- distribution(background) |>
 add_biodiversity_poipo(virtual_points, field_occurrence = "Observed")
-#> [Setup] 2026-05-10 15:18:09.095542 | Creating distribution object...
-#> [Setup] 2026-05-10 15:18:09.096587 | Adding poipo dataset...
+#> [Setup] 2026-05-14 13:33:59.401693 | Creating distribution object...
+#> [Setup] 2026-05-14 13:33:59.402746 | Adding poipo dataset...
 ```

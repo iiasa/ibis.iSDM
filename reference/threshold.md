@@ -7,10 +7,10 @@ so called *threshold'ing* can be done in various ways which are further
 described in the details.
 
 In case a
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 is provided as input in this function for `obj`, it is furthermore
 necessary to provide a
-[`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object for
+[`sf`](https://r-spatial.github.io/sf/reference/sf.html) object for
 validation as there is no
 [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md)
 to read this information from.
@@ -107,7 +107,7 @@ threshold(
 
 - point:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
   containing observational data used for model training.
 
 - field_occurrence:
@@ -133,9 +133,9 @@ threshold(
 ## Value
 
 A
-[terra::SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 if a
-[terra::SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[SpatRaster](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object as input. Otherwise the threshold is added to the respective
 [`DistributionModel`](https://iiasa.github.io/ibis.iSDM/reference/DistributionModel-class.md)
 or

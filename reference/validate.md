@@ -49,7 +49,7 @@ validate(
   [`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
   object with set predictors. Alternatively one can also provide
   directly a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html),
   however in this case the `point` layer also needs to be provided.
 
 - method:
@@ -65,8 +65,8 @@ validate(
 
 - point:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) object
-  with type `POINT` or `MULTIPOINT`.
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object with
+  type `POINT` or `MULTIPOINT`.
 
 - point_column:
 

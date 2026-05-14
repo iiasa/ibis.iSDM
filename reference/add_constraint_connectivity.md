@@ -38,7 +38,7 @@ add_constraint_connectivity(mod, method, value = NULL, resistance = NULL, ...)
 - resistance:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object describing a resistance surface or barrier for use in
   connectivity constrains (Default: `NULL`).
 

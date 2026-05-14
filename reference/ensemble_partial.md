@@ -67,7 +67,7 @@ ensemble_partial(
 - newdata:
 
   A optional [`data.frame`](https://rdrr.io/r/base/data.frame.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object supplied to the model (DefaultL `NULL`). This object needs to
   have identical names as the original predictors.
 

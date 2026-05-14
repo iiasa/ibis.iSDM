@@ -29,7 +29,7 @@ add_pseudoabsence(
 
 - df:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html),
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html),
   [`data.frame`](https://rdrr.io/r/base/data.frame.html) or
   [`tibble::tibble`](https://tibble.tidyverse.org/reference/tibble.html)
   object containing point data.
@@ -42,12 +42,12 @@ add_pseudoabsence(
 - template:
 
   A
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object that is aligned with the predictors (Default: `NULL`). If set
   to `NULL`, then `background` in the
   [`pseudoabs_settings()`](https://iiasa.github.io/ibis.iSDM/reference/pseudoabs_settings.md)
   has to be a
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object.
 
 - settings:

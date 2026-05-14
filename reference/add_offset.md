@@ -30,8 +30,8 @@ add_offset(x, layer, add = TRUE)
 
 - layer:
 
-  A [`sf::sf`](https://r-spatial.github.io/sf/reference/sf.html) or
-  [`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+  A [`sf`](https://r-spatial.github.io/sf/reference/sf.html) or
+  [`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
   object with the range for the target feature.
 
 - add:
@@ -50,7 +50,7 @@ object.
 
 This function allows to set any specific offset to a regression model.
 The offset has to be provided as spatial
-[`terra::SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
+[`SpatRaster`](https://rspatial.github.io/terra/reference/SpatRaster-class.html)
 object. This function simply adds the layer to a
 [`distribution()`](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
 object. **Note that any transformation of the offset (such as `log`) has
