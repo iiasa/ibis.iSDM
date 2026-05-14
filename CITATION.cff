@@ -9,6 +9,7 @@ type: software
 license: CC-BY-4.0
 title: 'ibis.iSDM: Modelling framework for integrated biodiversity distribution scenarios'
 version: 0.1.8
+doi: 10.1016/j.ecoinf.2023.102127
 abstract: Integrated framework of modelling the distribution of species and ecosystems
   in a suitability framing. This package allows the estimation of integrated species
   distribution models (iSDM) based on several sources of evidence and provided presence-only
@@ -37,6 +38,7 @@ preferred-citation:
   year: '2023'
   url: https://doi.org/10.1016/j.ecoinf.2023.102127
   start: '102127'
+  doi: 10.1016/j.ecoinf.2023.102127
 repository-code: https://github.com/iiasa/ibis.iSDM
 url: https://iiasa.github.io/ibis.iSDM/
 contact:
@@ -174,10 +176,13 @@ references:
   notes: Imports
   authors:
   - name: R Core Team
+    website: https://ror.org/02zz1nj61
   institution:
     name: R Foundation for Statistical Computing
+    website: https://ror.org/05qewa988
     address: Vienna, Austria
   year: '2026'
+  doi: 10.32614/R.manuals
 - type: software
   title: foreach
   abstract: 'foreach: Provides Foreach Looping Construct'
@@ -275,20 +280,26 @@ references:
   notes: Imports
   authors:
   - name: R Core Team
+    website: https://ror.org/02zz1nj61
   institution:
     name: R Foundation for Statistical Computing
+    website: https://ror.org/05qewa988
     address: Vienna, Austria
   year: '2026'
+  doi: 10.32614/R.manuals
 - type: software
   title: methods
   abstract: 'R: A Language and Environment for Statistical Computing'
   notes: Imports
   authors:
   - name: R Core Team
+    website: https://ror.org/02zz1nj61
   institution:
     name: R Foundation for Statistical Computing
+    website: https://ror.org/05qewa988
     address: Vienna, Austria
   year: '2026'
+  doi: 10.32614/R.manuals
 - type: software
   title: Matrix
   abstract: 'Matrix: Sparse and Dense Matrix Classes and Methods'
@@ -334,7 +345,7 @@ references:
     email: paul.buerkner@gmail.com
   - family-names: Gabry
     given-names: Jonah
-    email: jsg2201@columbia.edu
+    email: jgabry@gmail.com
   - family-names: Kay
     given-names: Matthew
     email: mjskay@northwestern.edu
@@ -389,10 +400,13 @@ references:
   notes: Imports
   authors:
   - name: R Core Team
+    website: https://ror.org/02zz1nj61
   institution:
     name: R Foundation for Statistical Computing
+    website: https://ror.org/05qewa988
     address: Vienna, Austria
   year: '2026'
+  doi: 10.32614/R.manuals
 - type: software
   title: terra
   abstract: 'terra: Spatial Data Analysis'
@@ -465,20 +479,26 @@ references:
   notes: Imports
   authors:
   - name: R Core Team
+    website: https://ror.org/02zz1nj61
   institution:
     name: R Foundation for Statistical Computing
+    website: https://ror.org/05qewa988
     address: Vienna, Austria
   year: '2026'
+  doi: 10.32614/R.manuals
 - type: software
   title: 'R: A Language and Environment for Statistical Computing'
   notes: Depends
   url: https://www.R-project.org/
   authors:
   - name: R Core Team
+    website: https://ror.org/02zz1nj61
   institution:
     name: R Foundation for Statistical Computing
+    website: https://ror.org/05qewa988
     address: Vienna, Austria
   year: '2026'
+  doi: 10.32614/R.manuals
   version: '>= 4.1.0'
 - type: software
   title: abind
@@ -608,6 +628,8 @@ references:
     given-names: Noah
   - family-names: Yang
     given-names: James
+  - family-names: Taylor
+    given-names: Jonathan
   year: '2026'
   doi: 10.32614/CRAN.package.glmnet
   version: '>= 4.1'
