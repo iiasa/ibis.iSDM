@@ -70,3 +70,6 @@ tmp/*.*
 inst/doc
 docs
 Rplots.pdf
+
+# Visual code
+.vscode/
