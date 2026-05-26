@@ -449,7 +449,14 @@ methods::setMethod(
         if("connectivity" %in% names(scenario_constraints)){
           # Get the layer for later
           resistance <- scenario_constraints$connectivity$params$resistance
-          # By definition a hard barrier removes all suitable again
+          # Align resistance to current projection extent/resolution if needed
+          if(!terra::compareGeom(resistance, out, stopOnError = FALSE)){
+            resistance <- alignRasters(resistance, out, method = "ngb", func = terra::modal, cl = FALSE)
+            resistance <- terra::extend(resistance, out)
+          }
+          # By definition a hard barrier removes all suitable again, while resistance 
+          # simply multiplies the given suitability with the resistance value. 
+          # If the resistance surface has multiple layers, we assume that it is a time-series and select the layer for the current step.
           if(any(scenario_constraints$connectivity$method == "resistance")){
             if(terra::nlyr(resistance)>1){
               ind <- which( terra::time(resistance) == as.Date(step) ) # Get specific step
@@ -495,14 +502,6 @@ methods::setMethod(
           }
         }
 
-        # Connectivity constraints with hard barriers
-        if("connectivity" %in% names(scenario_constraints)){
-          # By definition a hard barrier removes all suitable again
-          if(any(scenario_constraints$connectivity$method == "hardbarrier")){
-            out[resistance==1] <- 0
-          }
-        }
-
         # Apply zone constraint per timestep if set.
         # Unlike the posthoc "boundary" constraint, zone masking is applied here
         # inside the loop so that any downstream threshold computation inherits
@@ -538,6 +537,9 @@ methods::setMethod(
         }
 
       }
+
+      # Ensure all land cells in the background footprint have a value (0 if not reached)
+      out <- terra::cover(out, terra::mask(terra::init(out, fun = 0), background))
 
       # Recalculate thresholds if set manually
       if(!is.Waiver(scenario_threshold)){

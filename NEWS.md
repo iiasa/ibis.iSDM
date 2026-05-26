@@ -7,6 +7,7 @@
 
 #### Minor improvements and bug fixes
 
+* :bug: fix with regards to scenario hard barriers for dispersal calculations.
 * Minor :bug: fixes with scenario predictons not accounting properly for zone limits.
 * Fixed Log function for both model and scenario fitting.
 

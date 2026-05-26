@@ -373,4 +373,10 @@ test_that('Scenarios and constraints', {
   # Check that stabilization works
   mods <- mod |> project(stabilize = TRUE)
   expect_invisible(mods$verify())
+
+  # --- #
+  # Run ensemble calculations
+  expect_no_error( ens <- ensemble(mod3, mod4, method = "mean", layer = "suitability") )
+  expect_s3_class(ens, "stars")
+
 })

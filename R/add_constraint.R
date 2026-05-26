@@ -218,7 +218,6 @@ methods::setMethod(
   function(mod, method, value = NULL, unit = "m", type = NULL, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.character(method),
       is.character(unit),
       is.null(value) || is.numeric(value),
@@ -336,12 +335,9 @@ methods::setMethod(
                              msg = "Baseline map for fixed kernel has less than 2 values?")
   }
 
-  # Set resistance layer to 0 if set to zero.
+  # Set barrier cells to NA so gridDist cannot route through them (NA = impassable in terra::gridDist)
   if(is.Raster(resistance)){
-    baseline_threshold[resistance == 1] <- 2
-    # Set resistance to the value omitted
-    resistance <- 2
-    baseline_threshold <- terra::mask(baseline_threshold, resistance)
+    baseline_threshold <- terra::mask(baseline_threshold, resistance, maskvalues = 1, updatevalue = NA)
   }
 
   # Warn if value looks like wrong units (gridDist returns meters)
@@ -398,12 +394,9 @@ methods::setMethod(
                              msg = "Baseline map for nexp kernel has less than 2 values?")
   }
 
-  # Set resistance layer to 0 if set to zero.
+  # Set barrier cells to NA so gridDist cannot route through them (NA = impassable in terra::gridDist)
   if(is.Raster(resistance)){
-    baseline_threshold[resistance == 1] <- 2
-    # Set resistance to the value omitted
-    resistance <- 2
-    baseline_threshold <- terra::mask(baseline_threshold, resistance)
+    baseline_threshold <- terra::mask(baseline_threshold, resistance, maskvalues = 1, updatevalue = NA)
   }
 
   # Warn if value looks like wrong units (gridDist returns meters)
@@ -536,7 +529,6 @@ methods::setMethod(
   function(mod, method, value = NULL, resistance = NULL, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.character(method),
       is.null(value) || is.numeric(value),
       is.Raster(resistance) || is.null(resistance)
@@ -667,7 +659,6 @@ methods::setMethod(
            value = 1, value_min = NULL, value_max = NULL, increment = 0, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.character(method),
       is.character(approach),
       is.null(names) || is.character(names),
@@ -911,7 +902,6 @@ methods::setMethod(
   function(mod, value, unit = "km2", establishment_step = FALSE, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.null(value) || is.numeric(value),
       is.character(unit),
       is.logical(establishment_step)

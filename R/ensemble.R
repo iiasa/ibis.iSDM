@@ -488,46 +488,51 @@ methods::setMethod(
           msg = paste("Layer", text_red(layer), "not found in supplied objects!")
         )
         # Get projected suitability from all mods
-        lmat <- stars::st_as_stars(
-          sapply(mods, function(x) x$get_data()[layer])
-        ) |> as.data.frame()
+        # Use parallel loading if a parallel backend is registered
+        if(getOption("ibis.runparallel")){
+          ibis_future(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy"))
+          i <- NULL # suppress R CMD check note
+          data_list <- foreach::foreach(i = seq_along(mods)) %dopar% { mods[[i]]$get_data()[layer] }
+        } else {
+          data_list <- lapply(mods, function(x) x$get_data()[layer])
+        }
+        lmat <- do.call("c", data_list) |> as.data.frame()
         # Get dimensions
         lmat_dim <- stars::st_dimensions(mods[[1]]$get_data())
       }
 
+      # Extract data columns as matrix once — avoids repeated subsetting below
+      # Assumes the first length(lmat_dim) columns are spatial/temporal coordinates
+      data_cols <- (length(lmat_dim) + 1L):ncol(lmat)
+      data_mat  <- as.matrix(lmat[, data_cols])
+
       # Normalize stars files
       if(normalize){
-        # Get overall means and max values
-        ovmin <- min(lmat[,4:ncol(lmat)],na.rm = TRUE)
-        ovmax <- max(lmat[,4:ncol(lmat)],na.rm = TRUE)
-        lmat[,4:ncol(lmat)] <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                                     2, function(x) {
-                                       (x - ovmin) / (ovmax - ovmin )
-                                     })
+        # Get overall min and max values
+        ovmin <- min(data_mat, na.rm = TRUE)
+        ovmax <- max(data_mat, na.rm = TRUE)
+        data_mat <- (data_mat - ovmin) / (ovmax - ovmin)
       }
 
       # Now create the ensemble depending on the option
+      # data_mat columns = one per model; rows = one per grid cell x time step
       if(method == 'mean'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) mean(x, na.rm = TRUE))
+        out <- rowMeans(data_mat, na.rm = TRUE)
       } else if(method == 'median'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) stats::median(x, na.rm = TRUE))
+        out <- apply(data_mat, 1, stats::median, na.rm = TRUE)
       } else if(method == 'max'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) max(x, na.rm = TRUE))
+        # Reduce pmax avoids materialising a full copy per column
+        out <- Reduce(function(a, b) pmax(a, b, na.rm = TRUE), as.data.frame(data_mat))
       } else if(method == 'min'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) min(x, na.rm = TRUE))
+        out <- Reduce(function(a, b) pmin(a, b, na.rm = TRUE), as.data.frame(data_mat))
       } else if(method == 'mode'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) modal(x, na.rm = TRUE))
+        out <- apply(data_mat, 1, function(x) modal(x, na.rm = TRUE))
       } else if(method == 'weighted.mean'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
+        # Keep apply to correctly propagate NA weights
+        out <- apply(data_mat, 1, function(x) weighted.mean(x, w = weights, na.rm = TRUE))
       } else if(method == 'threshold.frequency'){
-        out <- apply(lmat[,4:ncol(lmat)], # On the assumption that col 1-3 are coordinates+time
-                     1, function(x) sum(x, na.rm = TRUE) / (ncol(lmat)-3) )
+        # rowSums is a compiled routine; ncol(data_mat) == number of models
+        out <- rowSums(data_mat, na.rm = TRUE) / ncol(data_mat)
         # Check that thresholds are available
       } else if(method == 'min.sd'){
         cli::cli_abort("This has not been reasonably implemented in this context.")
@@ -589,11 +594,17 @@ methods::setMethod(
         if(uncertainty == "pca") {
           cli::cli_abort("Currently, uncertainty = 'pca' is not implemented for stars input.")
         }
+        # Vectorised row-wise uncertainty — compute sd components once and reuse
+        .row_means <- rowMeans(data_mat, na.rm = TRUE)
+        .n_valid   <- rowSums(!is.na(data_mat))
+        .row_ss    <- rowSums((data_mat - .row_means)^2, na.rm = TRUE)
+        .row_sds   <- sqrt(.row_ss / pmax(.n_valid - 1L, 1L))
         # Add uncertainty
-        out_uncertainty <- switch (uncertainty,
-                                   "sd" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE)),
-                                   "cv" = apply(lmat[,4:ncol(lmat)], 1, function(x) stats::sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)),
-                                   "range" = apply(lmat[,4:ncol(lmat)], 1, function(x) (max(x, na.rm = TRUE) - min(x, na.rm = TRUE)))
+        out_uncertainty <- switch(uncertainty,
+          "sd"    = .row_sds,
+          "cv"    = .row_sds / .row_means,
+          "range" = Reduce(function(a, b) pmax(a, b, na.rm = TRUE), as.data.frame(data_mat)) -
+                    Reduce(function(a, b) pmin(a, b, na.rm = TRUE), as.data.frame(data_mat))
         )
         if(any(is.infinite(out_uncertainty))) out_uncertainty[is.infinite(out_uncertainty)] <- NA
         # Add dimensions to output
