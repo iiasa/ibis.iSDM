@@ -4,7 +4,7 @@ NULL
 #' Create a new monotonic prior for boosted regressions
 #'
 #' @description Function to include prior information as monotonic constrain to
-#' a extreme gradient descent boosting model [`engine_xgboost`]. Monotonic
+#' an extreme gradient descent boosting model [`engine_xgboost`]. Monotonic
 #' priors enforce directionality in direction of certain variables, however
 #' specifying a monotonic constrain does not guarantee that the variable is not
 #' regularized out during model fitting.
@@ -12,8 +12,8 @@ NULL
 #' @param variable A [`character`] matched against existing predictors or latent
 #' effects.
 #' @param hyper A [`character`] object describing the type of constrain. Available
-#' options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
-#' \code{'none'}.
+#' options are \code{'increasing'}, \code{'decreasing'}, \code{'positive'},
+#' \code{'negative'}, \code{'none'}.
 #' @param ... Variables passed on to prior object.
 #'
 #' @references
@@ -106,6 +106,117 @@ methods::setMethod(
     multiple_priors <- list()
     for(k in variable){
       np <- XGBPrior(variable = k,hyper = hyper)
+      multiple_priors[[as.character(np$id)]] <- np
+    }
+    return(multiple_priors)
+  }
+)
+
+#' Create a new interaction prior for XGBoost
+#'
+#' @description Function to include prior information as interaction constraints
+#' in an extreme gradient descent boosting model [`engine_xgboost`]. Interaction
+#' priors define groups of variables that are allowed to interact in the same
+#' tree path. Variables outside the same group are not allowed to interact.
+#'
+#' @param variables A [`character`] vector matched against existing predictors or
+#' latent effects after XGBoost preprocessing.
+#' @param ... Variables passed on to prior object.
+#'
+#' @details XGBoost interaction constraints are only supported by tree boosters.
+#' They can be combined with monotonic constraints supplied through [`XGBPrior`].
+#'
+#' @seealso [`Prior-class`], [`XGBPrior`] and [`engine_xgboost`].
+#' @family prior
+#' @keywords priors
+#'
+#' @examples
+#' \dontrun{
+#'  pp <- XGBInteractionPrior(c("forest", "temperature"))
+#' }
+#'
+#' @name XGBInteractionPrior
+NULL
+
+#' @rdname XGBInteractionPrior
+#' @export
+methods::setGeneric(
+  "XGBInteractionPrior",
+  signature = methods::signature("variables"),
+  function(variables, ...) standardGeneric("XGBInteractionPrior"))
+
+#' @rdname XGBInteractionPrior
+methods::setMethod(
+  "XGBInteractionPrior",
+  methods::signature(variables = "character"),
+  function(variables, ... ) {
+    assertthat::assert_that(!missing(variables),
+                            msg = 'Interaction variables unset.')
+    assertthat::assert_that(
+      is.character(variables),
+      length(variables) > 0,
+      all(nchar(variables) > 0),
+      msg = 'Supply at least one non-empty interaction variable.'
+    )
+    # Sanitize names if specified
+    if(getOption('ibis.cleannames', default = TRUE)) variables <- sanitize_names(variables)
+    assertthat::assert_that(!anyDuplicated(variables),
+                            msg = 'Duplicated variables in interaction prior.')
+
+    # Create a unique synthetic variable name so PriorList deduplication does
+    # not replace monotone priors for the same real predictor.
+    id <- new_id()
+    variable <- paste0("xgb_interaction_", as.character(id))
+
+    # Create new prior object
+    pp <- Prior$new(
+      name = 'XGBInteractionPrior',
+      id = id,
+      variable = variable,
+      value = variables
+    )
+    return(pp)
+  }
+)
+
+#' Helper function when multiple interaction groups are supplied for XGBoost
+#'
+#' @description This is a helper function to specify several
+#' [XGBInteractionPrior] objects from a list of variable groups.
+#'
+#' @param groups A [`list`] of [`character`] vectors. Each vector is one allowed
+#' interaction group.
+#' @param ... Variables passed on to prior object.
+#'
+#' @family prior
+#' @keywords priors
+#'
+#' @name XGBInteractionPriors
+NULL
+
+#' @rdname XGBInteractionPriors
+#' @export
+methods::setGeneric(
+  "XGBInteractionPriors",
+  signature = methods::signature("groups"),
+  function(groups, ...) standardGeneric("XGBInteractionPriors"))
+
+#' @rdname XGBInteractionPriors
+methods::setMethod(
+  "XGBInteractionPriors",
+  methods::signature(groups = "list"),
+  function(groups, ... ) {
+    assertthat::assert_that(!missing(groups),
+                            msg = 'Interaction groups unset.')
+    assertthat::assert_that(
+      length(groups) > 0,
+      all(vapply(groups, is.character, logical(1))),
+      msg = 'Supply a non-empty list of character vectors.'
+    )
+
+    multiple_priors <- list()
+    for(group in groups){
+      np <- XGBInteractionPrior(variables = group)
       multiple_priors[[as.character(np$id)]] <- np
     }
     return(multiple_priors)

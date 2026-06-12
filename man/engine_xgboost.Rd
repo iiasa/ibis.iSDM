@@ -72,8 +72,9 @@ a look at the \link[xgboost:xgb.train]{xgboost::xgb.train} help file and
 The default parameters have been set relatively conservative as to
 reduce overfitting.
 
-XGBoost supports the specification of monotonic constraints on certain
-variables. Within ibis this is possible via \code{\link{XGBPrior}}. However constraints
+XGBoost supports the specification of monotonic constraints and interaction
+constraints on certain variables. Within ibis these are possible via
+\code{\link{XGBPrior}} and \code{\link{XGBInteractionPrior}}, respectively. However constraints
 are available only for the \code{"gbtree"} baselearners.
 }
 \note{

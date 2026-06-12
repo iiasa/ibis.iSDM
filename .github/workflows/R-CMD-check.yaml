@@ -6,23 +6,22 @@ on:
     branches: [master, dev]
   pull_request:
     branches: [master]
+  schedule:
+    - cron: '0 3 1 * *'
   workflow_dispatch:
 
 name: r-cmd-check
 
 jobs:
   r-cmd-check:
-    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip-ci]')
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - {os: macOS-latest, r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest, r: 'release'}
+        config: ${{ fromJSON(github.event_name == 'schedule' && '[{"os":"ubuntu-latest","r":"release"}]' || '[{"os":"macOS-latest","r":"release"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"release"}]') }}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

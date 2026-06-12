@@ -419,6 +419,15 @@ methods::setMethod(
           pred_tmp <- c("x", "y", fit$.internals[[i]]$model$model$predictors_names)
           proj_tmp <- fit$.internals[[i]]$model$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)),
                                                         layer = layer)
+          if(terra::nlyr(proj_tmp) > 1){
+            assertthat::assert_that(
+              layer %in% names(proj_tmp),
+              msg = paste0("Requested projection layer '", layer,
+                           "' not found in internal model. Available layers: ",
+                           paste(names(proj_tmp), collapse = ", "))
+            )
+            proj_tmp <- proj_tmp[[layer]]
+          }
 
           # make sure names match
           names(proj_tmp) <- fit$.internals[[i]]$name
@@ -440,6 +449,15 @@ methods::setMethod(
                        paste(missing_step_preds, collapse = ", ")))
       }
       out <- fit$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)), layer = layer)
+      if(terra::nlyr(out) > 1){
+        assertthat::assert_that(
+          layer %in% names(out),
+          msg = paste0("Requested projection layer '", layer,
+                       "' not found. Available layers: ",
+                       paste(names(out), collapse = ", "))
+        )
+        out <- out[[layer]]
+      }
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
       if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
 
@@ -907,6 +925,15 @@ methods::setMethod(
       cli::cli_alert_danger(paste0("Projection failed: ", err_msg))
       warning(paste0("Projection error details: ", as.character(out)))
       return(template)
+    }
+    if(terra::nlyr(out) > 1){
+      assertthat::assert_that(
+        layer %in% names(out),
+        msg = paste0("Requested projection layer '", layer,
+                     "' not found. Available layers: ",
+                     paste(names(out), collapse = ", "))
+      )
+      out <- out[[layer]]
     }
     names(out) <- paste0("suitability", "_", layer)
     if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( model$background )

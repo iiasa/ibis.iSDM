@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-stan.R
 \name{posterior_predict_stanfit}
 \alias{posterior_predict_stanfit}
-\title{Create a posterior prediction from a rstanfit object}
+\title{Create a posterior prediction from a Stan fit object}
 \usage{
 posterior_predict_stanfit(
   obj,
@@ -11,11 +11,15 @@ posterior_predict_stanfit(
   type = "predictor",
   family = NULL,
   offset = NULL,
-  draws = NULL
+  draws = NULL,
+  intercept = NULL,
+  link = NULL,
+  feature_names = NULL
 )
 }
 \arguments{
-\item{obj}{A \code{"stanfit"} object (as used by rstan).}
+\item{obj}{A \code{"stanfit"} object from rstan or a \code{"CmdStanFit"}
+object from cmdstanr.}
 
 \item{form}{A \code{\link{formula}} object created for the \link{DistributionModel}.}
 
@@ -30,6 +34,14 @@ values (Default: \code{NULL})}
 \item{offset}{A \link{vector} with an optionally specified offset.}
 
 \item{draws}{\link{numeric} indicating whether a specific number of draws should be taken.}
+
+\item{intercept}{Optional intercept parameter name or fixed numeric intercept.}
+
+\item{link}{Optional inverse-link name. Supports \code{"log"}, \code{"logit"},
+\code{"cloglog"}, and \code{"identity"}.}
+
+\item{feature_names}{Optional ordered feature names matching the Stan beta
+vector.}
 }
 \description{
 This function does simulates from the posterior of a created

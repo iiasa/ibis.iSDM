@@ -26,7 +26,8 @@
                              'INLA-Model','STAN-Model','XGBOOST-Model'))
   # Names of priors
   options('ibis.priors' = c('INLAPrior', 'BARTPrior', 'GDBPrior','GLMNETPrior',
-                            'XGBPrior', 'BREGPrior', 'STANPrior'))
+                            'XGBPrior', 'XGBInteractionPrior',
+                            'BREGPrior', 'STANPrior'))
 
   # Use the future package for any options. Default is FALSE
   options('ibis.nthread' = parallel::detectCores() - 1)

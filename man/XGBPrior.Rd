@@ -14,14 +14,14 @@ XGBPrior(variable, hyper = "increasing", ...)
 effects.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
-options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
-\code{'none'}.}
+options are \code{'increasing'}, \code{'decreasing'}, \code{'positive'},
+\code{'negative'}, \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
 \description{
 Function to include prior information as monotonic constrain to
-a extreme gradient descent boosting model \code{\link{engine_xgboost}}. Monotonic
+an extreme gradient descent boosting model \code{\link{engine_xgboost}}. Monotonic
 priors enforce directionality in direction of certain variables, however
 specifying a monotonic constrain does not guarantee that the variable is not
 regularized out during model fitting.
@@ -54,6 +54,8 @@ Other prior:
 \code{\link[=INLAPriors]{INLAPriors()}},
 \code{\link[=STANPrior]{STANPrior()}},
 \code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
 \code{\link[=XGBPriors]{XGBPriors()}},
 \code{\link[=add_priors]{add_priors()}},
 \code{\link[=get_priors]{get_priors()}},

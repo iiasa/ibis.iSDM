@@ -55,6 +55,8 @@ Other prior:
 \code{\link[=INLAPrior]{INLAPrior()}},
 \code{\link[=INLAPriors]{INLAPriors()}},
 \code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
 \code{\link[=XGBPrior]{XGBPrior()}},
 \code{\link[=XGBPriors]{XGBPriors()}},
 \code{\link[=add_priors]{add_priors()}},

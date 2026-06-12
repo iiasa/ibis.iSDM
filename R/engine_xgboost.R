@@ -37,8 +37,9 @@ NULL
 #' @details The default parameters have been set relatively conservative as to
 #' reduce overfitting.
 #'
-#' XGBoost supports the specification of monotonic constraints on certain
-#' variables. Within ibis this is possible via [`XGBPrior`]. However constraints
+#' XGBoost supports the specification of monotonic constraints and interaction
+#' constraints on certain variables. Within ibis these are possible via
+#' [`XGBPrior`] and [`XGBInteractionPrior`], respectively. However constraints
 #' are available only for the \code{"gbtree"} baselearners.
 #'
 #' @note
@@ -400,22 +401,14 @@ engine_xgboost <- function(x,
       params$eval_metric <- "logloss"
     }
 
-    # Process and add priors if set
-    if(!is.Waiver(model$priors)){
-      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
-      # Match position of variables with monotonic constrains
-      mc <- rep(0, ncol(train_cov))
-      names(mc) <- colnames(train_cov)
-      for(v in model$priors$varnames()){
-        mc[v] <- switch (model$priors$get(v),
-                         'increasing' = 1, 'positive' = 1,
-                         'decreasing' = -1, 'negative' = -1,
-                         0
-        )
-      }
-      # Save the monotonic constrain
-      params$monotone_constraints <- mc
-    }
+    # Process and add XGBoost priors if set
+    xgb_prior_params <- format_xgboost_priors(
+      priors = model$priors,
+      feature_names = colnames(train_cov),
+      # The final booster is selected in train() from the only_linear setting.
+      booster = "gbtree"
+    )
+    for(entry in names(xgb_prior_params)) params[[entry]] <- xgb_prior_params[[entry]]
 
     if(!is.Waiver(model$offset) ){
       # Set offset to 1 (log(0)) in case nothing is found
@@ -624,11 +617,17 @@ engine_xgboost <- function(x,
     }
 
     # Remove unneeded parameters
-    if(settings$get('only_linear') && params$booster == "gblinear"){
+    if(params$booster == "gblinear"){
+      tree_constraints <- c("monotone_constraints", "interaction_constraints")
+      existing_tree_constraints <- intersect(tree_constraints, names(params))
+      if(length(existing_tree_constraints) > 0){
+        warning(
+          "XGBoost monotone and interaction constraints are only supported for tree boosters. Ignoring xgboost priors for gblinear.",
+          call. = FALSE
+        )
+        params[existing_tree_constraints] <- NULL
+      }
       params[c("colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample")] <- NULL
-    }
-    if(settings$get('only_linear') && !is.Waiver(model$priors)){
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Monotonic constraints not supported for linear regressor.')
     }
     # Fit the model.
     # watchlist <- list(train = df_train,test = df_test)

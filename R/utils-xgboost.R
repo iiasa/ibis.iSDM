@@ -68,3 +68,79 @@ explode_factor <- function(df, name = "facvar"){
   names(z) <- paste(name, levels(df), sep = ".")
   return(z)
 }
+
+#' Format XGBoost priors for xgb.train
+#'
+#' @param priors A [`PriorList`] object or Waiver.
+#' @param feature_names Feature names after XGBoost preprocessing.
+#' @param booster XGBoost booster type.
+#'
+#' @keywords internal
+#' @noRd
+format_xgboost_priors <- function(priors, feature_names, booster = "gbtree"){
+  assertthat::assert_that(
+    is.Waiver(priors) || inherits(priors, "PriorList"),
+    is.character(feature_names),
+    length(feature_names) > 0,
+    is.character(booster),
+    length(booster) == 1
+  )
+
+  out <- list()
+  if(is.Waiver(priors) || priors$length() == 0) return(out)
+
+  prior_objects <- priors$priors
+  prior_classes <- vapply(prior_objects, function(x) x$get_name(), character(1))
+  monotone_priors <- prior_objects[prior_classes == "XGBPrior"]
+  interaction_priors <- prior_objects[prior_classes == "XGBInteractionPrior"]
+
+  if(booster == "gblinear"){
+    if(length(monotone_priors) > 0 || length(interaction_priors) > 0){
+      warning(
+        "XGBoost monotone and interaction constraints are only supported for tree boosters. Ignoring xgboost priors for gblinear.",
+        call. = FALSE
+      )
+    }
+    return(out)
+  }
+
+  if(length(monotone_priors) > 0){
+    monotone_variables <- vapply(monotone_priors, function(x) x$variable, character(1))
+    missing_monotone <- monotone_variables[!monotone_variables %in% feature_names]
+    assertthat::assert_that(
+      length(missing_monotone) == 0,
+      msg = paste0("XGBoost monotone prior variables missing from model features: ",
+                   paste(missing_monotone, collapse = ", "))
+    )
+
+    mc <- rep(0, length(feature_names))
+    names(mc) <- feature_names
+    for(prior in monotone_priors){
+      mc[prior$variable] <- switch(prior$get(),
+                                   'increasing' = 1, 'positive' = 1,
+                                   'decreasing' = -1, 'negative' = -1,
+                                   0
+      )
+    }
+    out$monotone_constraints <- mc
+  }
+
+  if(length(interaction_priors) > 0){
+    interaction_groups <- unname(lapply(interaction_priors, function(x) x$get()))
+    interaction_variables <- unlist(interaction_groups, use.names = FALSE)
+    missing_interactions <- unique(interaction_variables[
+      !interaction_variables %in% feature_names
+    ])
+    assertthat::assert_that(
+      length(missing_interactions) == 0,
+      msg = paste0("XGBoost interaction prior variables missing from model features: ",
+                   paste(missing_interactions, collapse = ", "))
+    )
+
+    out$interaction_constraints <- unname(lapply(interaction_groups, function(group){
+      as.integer(match(group, feature_names) - 1L)
+    }))
+  }
+
+  return(out)
+}

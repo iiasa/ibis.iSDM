@@ -66,6 +66,8 @@ Other prior:
 \code{\link[=INLAPriors]{INLAPriors()}},
 \code{\link[=STANPrior]{STANPrior()}},
 \code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
 \code{\link[=XGBPrior]{XGBPrior()}},
 \code{\link[=XGBPriors]{XGBPriors()}},
 \code{\link[=add_priors]{add_priors()}},

@@ -1,3 +1,102 @@
+test_that('Create and format XGBoost interaction priors', {
+
+  old_clean_names <- getOption("ibis.cleannames")
+  on.exit(options(ibis.cleannames = old_clean_names), add = TRUE)
+  options(ibis.cleannames = TRUE)
+
+  ip <- XGBInteractionPrior(c("forest cover", "bio-01"))
+  expect_s3_class(ip, 'Prior')
+  expect_equal(ip$get_name(), "XGBInteractionPrior")
+  expect_true(grepl("^xgb_interaction_", ip$variable))
+  expect_equal(ip$get(), sanitize_names(c("forest cover", "bio-01")))
+
+  mp <- XGBPrior(ip$get()[1], "increasing")
+  pp <- priors(mp, ip)
+  expect_equal(pp$length(), 2)
+  expect_true(all(c("XGBPrior", "XGBInteractionPrior") %in% pp$classes()))
+  expect_true(mp$variable %in% pp$varnames())
+  expect_true(ip$variable %in% pp$varnames())
+
+  groups <- XGBInteractionPriors(list(c("forest", "temperature"), c("soil", "slope")))
+  expect_type(groups, "list")
+  expect_length(groups, 2)
+  expect_true(all(vapply(groups, function(x) inherits(x, "Prior"), logical(1))))
+
+  expect_error(XGBInteractionPrior(character(0)))
+  expect_error(XGBInteractionPrior(c("forest", "forest")))
+
+  features <- c("forest", "temperature", "soil", "slope")
+  format_xgboost_priors <- getFromNamespace("format_xgboost_priors", "ibis.iSDM")
+
+  monotone_priors <- priors(XGBPrior("forest", "increasing"))
+  monotone_only <- format_xgboost_priors(monotone_priors, feature_names = features)
+  expect_equal(monotone_only$monotone_constraints,
+               stats::setNames(c(1, 0, 0, 0), features))
+  expect_null(monotone_only$interaction_constraints)
+
+  interaction_priors <- priors(XGBInteractionPrior(c("temperature", "soil")))
+  interaction_only <- format_xgboost_priors(interaction_priors, feature_names = features)
+  expect_null(interaction_only$monotone_constraints)
+  expect_equal(interaction_only$interaction_constraints, list(c(1L, 2L)))
+
+  mixed_priors <- priors(
+    XGBPrior("forest", "decreasing"),
+    XGBInteractionPrior(c("temperature", "soil"))
+  )
+  mixed <- format_xgboost_priors(mixed_priors, feature_names = features)
+  expect_equal(mixed$monotone_constraints,
+               stats::setNames(c(-1, 0, 0, 0), features))
+  expect_equal(mixed$interaction_constraints, list(c(1L, 2L)))
+
+  expect_error(
+    format_xgboost_priors(
+      priors(XGBInteractionPrior(c("temperature", "missing"))),
+      feature_names = features
+    ),
+    "missing from model features"
+  )
+
+  linear_priors <- priors(
+    XGBPrior("forest", "increasing"),
+    XGBInteractionPrior(c("temperature", "soil"))
+  )
+  expect_warning(
+    linear <- format_xgboost_priors(
+      linear_priors,
+      feature_names = features,
+      booster = "gblinear"
+    ),
+    "only supported for tree boosters"
+  )
+  expect_equal(linear, list())
+})
+
+test_that('XGBoost interaction priors can be added to a distribution object', {
+
+  suppressWarnings( requireNamespace("terra", quietly = TRUE) )
+  options("ibis.setupmessages" = FALSE)
+
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM',mustWork = TRUE))
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM',mustWork = TRUE), 'points',quiet = TRUE)
+  ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
+
+  predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
+  pp <- priors(
+    XGBPrior("CLC3_132_mean_50km", hyper = "positive"),
+    XGBInteractionPrior(c("CLC3_132_mean_50km", "bio01_mean_50km"))
+  )
+
+  x <- distribution(background) |>
+    add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |>
+    add_predictors(predictors[[c('bio01_mean_50km','CLC3_132_mean_50km')]],
+                   transform = 'none',derivates = 'none') |>
+    add_priors(pp)
+
+  expect_s3_class(x$get_priors(), "PriorList")
+  expect_true(all(c("CLC3_132_mean_50km", "bio01_mean_50km") %in% x$get_prior_variables()))
+  expect_false(any(grepl("^xgb_interaction_", x$get_prior_variables())))
+})
+
 # First check that INLA works
 test_that('Create and add priors', {
 

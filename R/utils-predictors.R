@@ -1164,6 +1164,85 @@ makeBin <- function(v, n, nknots, cutoffs = NULL){
 
 #### Check predictors ----
 
+#' Split factor predictor columns into numeric indicator columns
+#'
+#' @description
+#' Expands factor columns in an extracted predictor data frame and keeps the
+#' corresponding predictor name/type metadata in sync. When a model-level
+#' predictor object is supplied, the matching raster factor layers are expanded
+#' with the internal function explode_factorized_raster().
+#'
+#' @param obj A list-like model or biodiversity object with `predictors`,
+#'   `predictors_names`, and `predictors_types`.
+#' @param expand_raster Whether raster predictors should also be expanded when
+#'   `obj$predictors_object` is available.
+#' @param verbose Whether to report expanded factor columns.
+#'
+#' @return The updated `obj`.
+#'
+#' @keywords internal
+#' @noRd
+explode_factor_predictors <- function(obj, expand_raster = TRUE, verbose = FALSE){
+  assertthat::assert_that(
+    is.list(obj),
+    assertthat::has_name(obj, "predictors"),
+    assertthat::has_name(obj, "predictors_names"),
+    is.logical(expand_raster),
+    is.logical(verbose)
+  )
+
+  if(is.null(obj$predictors_types)){
+    obj$predictors_types <- predictor_type(obj$predictors[obj$predictors_names])
+  }
+  if(!any(obj$predictors_types$type == "factor")){
+    return(obj)
+  }
+
+  factor_names <- obj$predictors_types$predictors[obj$predictors_types$type == "factor"]
+  for(name in factor_names){
+    if(!name %in% names(obj$predictors)) next
+    if(!is.factor(obj$predictors[[name]])){
+      obj$predictors[[name]] <- as.factor(obj$predictors[[name]])
+    }
+    if(verbose && getOption('ibis.setupmessages', default = TRUE)){
+      cli::cli_alert_warning("Splitting factor {.field {name}} into indicator predictors.")
+    }
+
+    expanded <- explode_factor(obj$predictors[[name]], name = name)
+    obj$predictors <- cbind(obj$predictors, expanded)
+    obj$predictors[[name]] <- NULL
+    obj$predictors_names <- c(obj$predictors_names[obj$predictors_names != name],
+                              colnames(expanded))
+    obj$predictors_types <- subset(obj$predictors_types, predictors != name)
+    obj$predictors_types <- rbind(
+      obj$predictors_types,
+      data.frame(predictors = colnames(expanded), type = "numeric")
+    )
+
+    raster_data <- if(expand_raster &&
+                      assertthat::has_name(obj, "predictors_object") &&
+                      !is.null(obj$predictors_object) &&
+                      !is.Waiver(obj$predictors_object)){
+      try(obj$predictors_object$data, silent = TRUE)
+    } else {
+      NULL
+    }
+    if(!inherits(raster_data, "try-error") &&
+       is.Raster(raster_data) &&
+       name %in% names(raster_data)){
+      obj$predictors_object$data <- c(
+        raster_data,
+        explode_factorized_raster(raster_data[[name]])
+      )
+      obj$predictors_object$data <- terra::subset(obj$predictors_object$data,
+                                                  name,
+                                                  negate = TRUE)
+    }
+  }
+
+  obj
+}
+
 #' Helper function to check extracted predictors for issues
 #' @description
 #' Here we check the variables in a provided [`data.frame`] for known issues.

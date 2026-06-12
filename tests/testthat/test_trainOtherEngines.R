@@ -83,12 +83,23 @@ test_that('Train a distribution model with XGboost', {
   expect_s3_class(tr$get_centroid(), "sf")
 
   # Do priors work
-  pp <- priors(XGBPrior("CLC3_132_mean_50km", hyper = "positive")) # Always retain positive Forest
+  pp <- priors(
+    XGBPrior("CLC3_132_mean_50km", hyper = "positive"), # Always retain positive Forest
+    XGBInteractionPrior(c("CLC3_132_mean_50km", "bio01_mean_50km"))
+  )
   expect_no_error(
     suppressWarnings(
       mod2 <- x |> add_priors(pp) |> train(only_linear = FALSE, verbose = TRUE)
     )
   )
+  expect_equal(
+    mod2$settings$get("interaction_constraints"),
+    list(interaction_constraints = list(c(
+      match("CLC3_132_mean_50km", mod2$model$predictors_names) - 1L,
+      match("bio01_mean_50km", mod2$model$predictors_names) - 1L
+    )))
+  )
+  expect_true("monotone_constraints" %in% names(mod2$settings$data))
 
   # Some partial calculations
   expect_no_error(ex <- partial(mod2, x.var = "CLC3_132_mean_50km"))

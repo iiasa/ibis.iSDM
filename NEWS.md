@@ -2,6 +2,8 @@
 
 #### New features
 
+* Revisted Stan code and fixed to a working state again [`engine_stan()`].
+* Added new XGBoost Interaction Priors to the XGBoost engine.
 * Extended [`add_constraint_boundary()`] with a new `method = "zone"` option for per-timestep spatial zone masking during scenario projections.
 * Replacement of the `st_kde` function with an internal implementation of kernel density estimation in c++ for speed.
 

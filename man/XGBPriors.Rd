@@ -14,8 +14,8 @@ XGBPriors(variable, hyper = "increasing", ...)
 effects.}
 
 \item{hyper}{A \code{\link{character}} object describing the type of constrain. Available
-options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'concave'},
-\code{'none'}.}
+options are \code{'increasing'}, \code{'decreasing'}, \code{'positive'},
+\code{'negative'}, \code{'none'}.}
 
 \item{...}{Variables passed on to prior object.}
 }
@@ -37,6 +37,8 @@ Other prior:
 \code{\link[=INLAPriors]{INLAPriors()}},
 \code{\link[=STANPrior]{STANPrior()}},
 \code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
 \code{\link[=XGBPrior]{XGBPrior()}},
 \code{\link[=add_priors]{add_priors()}},
 \code{\link[=get_priors]{get_priors()}},

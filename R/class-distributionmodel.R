@@ -116,8 +116,7 @@ DistributionModel <- R6::R6Class(
         ))
       } else if( self$get_name() == 'STAN-Model' ) {
         # Calculate variable importance from the posterior
-        vi <- rstan::summary(obj)$summary |> as.data.frame() |>
-          tibble::rownames_to_column(var = "parameter") |> as.data.frame()
+        vi <- stan_fit_summary(obj)
         # Get beta coefficients only
         vi <- vi[grep("beta", vi$parameter,ignore.case = TRUE),]
 
@@ -339,8 +338,7 @@ DistributionModel <- R6::R6Class(
         # Tends to become less informative with higher numbers of splits
         varimp.bart(self$get_data(obj)) |> tibble::remove_rownames()
       } else if( self$get_name() == 'STAN-Model'){
-        vi <- rstan::summary(self$get_data(obj))$summary |> as.data.frame() |>
-          tibble::rownames_to_column(var = "parameter") |> as.data.frame()
+        vi <- stan_fit_summary(self$get_data(obj))
         # Get beta coefficients only
         vi <- vi[grep("beta", vi$parameter,ignore.case = TRUE),]
         # FIXME: This might not work for all possible modelling objects. For instance

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-stan.R
 \name{run_stan}
 \alias{run_stan}
-\title{Fit cmdstanr model and convert to rstan object}
+\title{Fit a cmdstanr model}
 \usage{
 run_stan(
   model_code,
@@ -18,6 +18,7 @@ run_stan(
   force = FALSE,
   path = base::getwd(),
   save_warmup = TRUE,
+  return_stanfit = FALSE,
   ...
 )
 }
@@ -55,10 +56,15 @@ compiler.}
 
 \item{save_warmup}{A \code{\link{logical}} flag whether to save the warmup samples.}
 
+\item{return_stanfit}{A \code{\link{logical}} flag whether to convert sampling output
+to an \code{\link[rstan:rstan]{rstan}} stanfit object. Defaults to \code{FALSE}; the native
+cmdstanr CmdStanFit object is used otherwise.}
+
 \item{...}{Other non-specified parameters.}
 }
 \value{
-A rstan object
+A cmdstanr object by default, or a rstan object when requested and
+conversion succeeds.
 }
 \description{
 This function fits a stan model using the light-weight interface
