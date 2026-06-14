@@ -28,6 +28,18 @@ test_that('Testing data prep functions for spatial-temporal data in stars', {
   expect_true("combined" %in% names(new))
   expect_false("primn" %in% names(new))
 
+  old_parallel <- getOption("ibis.runparallel", default = FALSE)
+  on.exit({
+    future::plan(future::sequential)
+    foreach::registerDoSEQ()
+    options("ibis.runparallel" = old_parallel)
+  }, add = TRUE)
+  options("ibis.runparallel" = FALSE)
+  doFuture::registerDoFuture()
+  future::plan(future::sequential)
+  expect_true(foreach::getDoParRegistered())
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "sum"))
+
   # Other aggregation methods
   expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "mean") )
   expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "multiply") )

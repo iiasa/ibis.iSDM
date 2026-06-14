@@ -199,12 +199,6 @@ st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
                                                      length(vars) == length(weights),
                                                      all(weights %in% names(obj)))
 
-  # Future?
-  if(foreach::getDoParRegistered()){
-    ibis_future(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy"))
-    fut <- TRUE
-  } else { fut <- FALSE }
-  # --- #
   # First get all target variables and non-target variables
   target <- obj |> dplyr::select( dplyr::all_of(vars))
   non_target <- obj |> dplyr::select(-dplyr::all_of(vars))

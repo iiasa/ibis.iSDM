@@ -138,7 +138,6 @@ reference:
       - predictor_summarize_zones
       - interpolate_gaps
       - run_stan
-      - wrap_stanmodel
       - sanitize_names
       - get_data
       - combine_formulas
