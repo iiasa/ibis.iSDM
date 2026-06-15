@@ -529,6 +529,7 @@ test_that('Train a distribution model with inlabru', {
 
   skip_if_not_installed('inlabru')
   skip_if_not_installed('INLA')
+  skip_if_not_installed('sn')
 
   skip_on_cran()
 

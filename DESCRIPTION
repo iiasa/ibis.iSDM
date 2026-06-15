@@ -27,7 +27,7 @@ Description: Integrated framework of modelling the distribution of species and
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
-Additional_repositories: https://inla.r-inla-download.org/R/stable
+Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     R6 (>= 2.5.0),
     Rcpp,
@@ -74,6 +74,7 @@ Suggests:
     INLA,
     inlabru (>= 2.10.0),
     fmesher (>= 0.1.7),
+    sn,
     igraph,
     knitr,
     mboost,
