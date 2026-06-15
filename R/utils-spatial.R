@@ -68,7 +68,7 @@ terra_to_raster <- function(input){
 #'
 #' @param input A [`SpatRaster`] object to convert to [`sf`].
 #' @param dissolve A [`logical`] flag indicating if polygons are to be dissolved (Default: \code{TRUE}).
-#' @param dummy A [`character`] or [`date`] to be added as \code{time} column in cases
+#' @param dummy A [`character`] or [`base::Date`] to be added as \code{time} column in cases
 #' where no time dimension can be found (Default: \code{NULL}, not used).
 #'
 #' @keywords utils
@@ -592,17 +592,18 @@ guess_sf <- function(df, geom_name = 'geometry'){
 #'
 #' @description Takes input point coordinates as [`sf`] layer and estimates the
 #' Gaussian Kernel density over a specified bandwidth for constructing a
-#' bivariate Gaussian kernel (see also [`MASS::kde2d()`]).
+#' bivariate Gaussian kernel.
 #'
 #' @param points A \code{POINTS} [`sf`] object.
 #' @param background A template [`SpatRaster`] object describing the background.
 #' @param bandwidth A [`numeric`] of the input bandwidth (Default \code{2}).
 #'
-#' @details Requires the `MASS` R-package to be installed!
-#'
 #' @returns A [`SpatRaster`] with the density of point observations.
 #'
 #' @keywords utils
+#'
+#' @importFrom Rcpp sourceCpp
+#' @useDynLib ibis.iSDM, .registration = TRUE
 #'
 #' @noRd
 #'
@@ -612,7 +613,6 @@ st_kde <- function(points, background, bandwidth = 3){
     inherits(points, "sf"),
     is.numeric(bandwidth)
   )
-  check_package("MASS")
 
   # Get extent and cellsize
   cellsize <- terra::res(background)[1]
@@ -626,8 +626,10 @@ st_kde <- function(points, background, bandwidth = 3){
 
   # Make
   coords <- sf::st_coordinates(points)
-  matrix <- MASS::kde2d(coords[,1],coords[,2],
-                        h = bandwidth, n = c(n_x, n_y), lims = extent_vec)
+  matrix <- cpp_kde2d(coords[,1], coords[,2],
+                      h = rep(bandwidth, length.out = 2L),
+                      n = as.integer(c(n_x, n_y)),
+                      lims = as.numeric(extent_vec))
 
   out <- expand.grid(x = matrix$x, y = matrix$y, KEEP.OUT.ATTRS = FALSE)
   out$z <- as.vector(matrix$z)*(1e11)
@@ -1363,9 +1365,15 @@ clamp_predictions <- function(model, pred){
 
   # Now clamp the prediction matrix with the clamped variables
   for (v in intersect(vars_clamp$variable, names(pred))) {
+    if(!is.numeric(pred[, v])) next
+
+    clamp_min <- vars_clamp$min[vars_clamp$variable == v]
+    clamp_max <- vars_clamp$max[vars_clamp$variable == v]
+    if(!is.finite(clamp_min) || !is.finite(clamp_max)) next
+
     pred[, v] <- pmin(
-      pmax(pred[, v], vars_clamp$min[vars_clamp$variable==v] ),
-      vars_clamp$max[vars_clamp$variable==v])
+      pmax(pred[, v], clamp_min),
+      clamp_max)
   }
 
   assertthat::assert_that( is.data.frame(pred) || is.matrix(pred),

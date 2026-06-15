@@ -477,13 +477,11 @@ engine_inlabru <- function(x,
         lh_family <- model$biodiversity[[j]]$family
         lh_weights <- c(w, rep(1, length(abs_E)))
         lh_E <- c( rep(0, nrow(model$biodiversity[[j]]$predictors) ), abs_E)
-        lh_mesh <- self$get_data('mesh')
 
         # Formulate the likelihood
         lh <- inlabru::like(formula = lh_formula,
                             family = lh_family,
                             data = new, # Combine presence and absence information
-                            mesh = lh_mesh,
                             weights = lh_weights,
                             # expectation vector (area for integration points/nodes and 0 for presences)
                             E = lh_E,
@@ -498,14 +496,12 @@ engine_inlabru <- function(x,
         # Pre-compute arguments (inlabru >= 2.12 uses NSE on these arguments)
         lh_formula <- model$biodiversity[[j]]$equation
         lh_family <- model$biodiversity[[j]]$family
-        lh_mesh <- self$get_data('mesh')
         lh_Ntrials <- rep(1, nrow(model$biodiversity[[j]]$predictors))
 
         # Formulate the likelihood
         lh <- inlabru::like(formula = lh_formula,
                             family = lh_family,
                             data = df, # Combine presence and absence information
-                            mesh = lh_mesh,
                             weights = w,
                             Ntrials = lh_Ntrials,
                             options = o

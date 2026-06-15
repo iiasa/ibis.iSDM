@@ -12,7 +12,7 @@ scenario(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
 \arguments{
 \item{fit}{A \code{\link{BiodiversityDistribution}} object containing a trained model.}
 
-\item{limits}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object that limits the projection
+\item{limits}{A \code{\link[terra:SpatRaster]{SpatRaster}} or \code{\link[sf:sf]{sf}} object that limits the projection
 surface when intersected with the prediction data (Default: \code{NULL}).
 This can for instance be set as an expert-delineated constrain to limit spatial
 projections.}
@@ -25,7 +25,7 @@ the scenario object. Note that setting this option to \code{TRUE} can increase
 the required amount of memory (Default: \code{FALSE}).}
 }
 \description{
-This function creates a new \linkS4class{BiodiversityScenario} object
+This function creates a new \link[=BiodiversityScenario-class]{BiodiversityScenario} object
 that contains the projections of a model.
 }
 \note{

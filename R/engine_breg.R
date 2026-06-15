@@ -442,10 +442,7 @@ engine_breg <- function(x,
 
       # Now depending on parallization setting use foreach
       if(getOption("ibis.runparallel")){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Prediction function
         out <- predict_boom(obj = fit_breg,
                             newdata = full_sub,
@@ -788,10 +785,7 @@ engine_breg <- function(x,
       fam <- model$biodiversity[[length(model$biodiversity)]]$family
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Prediction function
         out <- predict_boom(obj = mod,
                             newdata = df_sub,

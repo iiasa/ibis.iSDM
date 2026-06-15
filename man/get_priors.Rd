@@ -10,8 +10,8 @@ get_priors(mod, target_engine, ...)
 \S4method{get_priors}{ANY,character}(mod, target_engine, ...)
 }
 \arguments{
-\item{mod}{A fitted \code{\linkS4class{DistributionModel}} object. If instead a
-\code{\linkS4class{BiodiversityDistribution}} object is passed to this function, it simply
+\item{mod}{A fitted \code{\link[=DistributionModel-class]{DistributionModel}} object. If instead a
+\code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}} object is passed to this function, it simply
 returns the contained priors used for estimation (if any).}
 
 \item{target_engine}{A \code{\link{character}} for which the priors should be created.}
@@ -21,8 +21,8 @@ returns the contained priors used for estimation (if any).}
 \description{
 Often it can make sense to fit an additional model to get a
 grasp on the range of values that "beta" parameters can take. This function
-takes an existing \code{\linkS4class{BiodiversityDistribution}} object and creates
-\code{\linkS4class{PriorList}} object from them. The resulting object can be used to add
+takes an existing \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}} object and creates
+\code{\link[=PriorList-class]{PriorList}} object from them. The resulting object can be used to add
 for instance \link{priors} to a new model.
 }
 \note{
@@ -41,23 +41,25 @@ help pages on that topic!
 
 }
 \seealso{
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{priors}()},
-\code{\link{rm_priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPrior]{GDBPrior()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPrior]{INLAPrior()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
+\code{\link[=XGBPrior]{XGBPrior()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=add_priors]{add_priors()}},
+\code{\link[=priors]{priors()}},
+\code{\link[=rm_priors]{rm_priors()}}
 }
 \concept{prior}

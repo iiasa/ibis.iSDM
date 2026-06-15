@@ -7,7 +7,7 @@
 engine_bart(x, iter = 1000, nburn = 250, chains = 4, type = "response", ...)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{iter}{A \code{\link{numeric}} estimate of the number of trees to be used in the
 sum-of-trees formulation (Default: \code{1000}).}
@@ -63,15 +63,15 @@ R package version 0.9-19. https://CRAN.R-project.org/package=dbarts
 }
 }
 \seealso{
-Other engine: 
-\code{\link{engine_breg}()},
-\code{\link{engine_gdb}()},
-\code{\link{engine_glm}()},
-\code{\link{engine_glmnet}()},
-\code{\link{engine_inla}()},
-\code{\link{engine_inlabru}()},
-\code{\link{engine_scampr}()},
-\code{\link{engine_stan}()},
-\code{\link{engine_xgboost}()}
+Other engine:
+\code{\link[=engine_breg]{engine_breg()}},
+\code{\link[=engine_gdb]{engine_gdb()}},
+\code{\link[=engine_glm]{engine_glm()}},
+\code{\link[=engine_glmnet]{engine_glmnet()}},
+\code{\link[=engine_inla]{engine_inla()}},
+\code{\link[=engine_inlabru]{engine_inlabru()}},
+\code{\link[=engine_scampr]{engine_scampr()}},
+\code{\link[=engine_stan]{engine_stan()}},
+\code{\link[=engine_xgboost]{engine_xgboost()}}
 }
 \concept{engine}

@@ -35,13 +35,13 @@ names equivalent to the vital stages that are to be estimated.}
 
 \item{replicates}{A \code{\link{numeric}} vector of the number of replicates (Default: \code{1}).}
 
-\item{carrying_capacity}{Either \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or a \code{\link{numeric}} estimate of the
+\item{carrying_capacity}{Either \code{\link[terra:SpatRaster]{SpatRaster}} or a \code{\link{numeric}} estimate of the
 maximum carrying capacity, e.g. how many adult individual are likely to occur
 per grid cell. If set to \code{\link{numeric}}, then carrying capacity is estimated up
 to a maximum set (\emph{Note: a more clever way would be to use a species-area relationship
 for scaling. This is not yet implemented}).}
 
-\item{initial}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} giving the initial population size. If not
+\item{initial}{A \code{\link[terra:SpatRaster]{SpatRaster}} giving the initial population size. If not
 provided, then initial populations are guessed (see details) from the projected
 suitability rasters (Default: \code{NULL}).}
 
@@ -59,7 +59,7 @@ Adds flag to a \code{\link{BiodiversityScenario}} object to indicate that
 further simulations are added during projection.
 }
 \description{
-This function adds a flag to a \code{\linkS4class{BiodiversityScenario}} object
+This function adds a flag to a \code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object
 to indicate that species abundances are to be simulated based on the expected
 habitat suitability, as well as demography, density-dependence and dispersal
 information. The simulation is done using the \emph{steps} package (Visintin et
@@ -83,7 +83,7 @@ The \emph{steps} package has multiple options for simulating species population 
 not all possible options are represented in this wrapper.
 
 Furthermore, the package still makes use of the \code{raster} package for much
-of its internal data processing. Since \emph{ibis.iSDM} switched to \link[terra:terra-package]{terra::terra} a while
+of its internal data processing. Since \emph{ibis.iSDM} switched to \link[terra:terra]{terra} a while
 ago, there can be efficiency problems as layers need to be translated between
 packages.
 }
@@ -115,15 +115,15 @@ temporally explicit population simulations. Methods in Ecology and Evolution,
 }
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint}()},
-\code{\link{add_constraint_MigClim}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_boundary}()},
-\code{\link{add_constraint_connectivity}()},
-\code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint_threshold}()}
+Other constraint:
+\code{\link[=add_constraint]{add_constraint()}},
+\code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_boundary]{add_constraint_boundary()}},
+\code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}},
+\code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}},
+\code{\link[=add_constraint_minsize]{add_constraint_minsize()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}}
 }
 \concept{constraint}
 \keyword{scenario}

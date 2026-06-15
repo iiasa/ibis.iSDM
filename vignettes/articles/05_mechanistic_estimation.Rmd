@@ -21,7 +21,9 @@ h <- 5.5
 w <- 5.5
 is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
-knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
+article_packages <- c("glmnet", "glmnetUtils", "kissmig", "stars", "terra", "sf", "ggplot2", "dplyr")
+run_examples <- !is_check && all(vapply(article_packages, requireNamespace, logical(1), quietly = TRUE))
+knitr::opts_chunk$set(fig.align = "center", eval = run_examples)
 ```
 
 # Mechanistic species distribution modelling
@@ -70,23 +72,6 @@ usually required so that outputs are meaningful. It is beyond the scope of this 
 an introduction to the various models. Rather, it is only demonstrated how linkages
 between *ibis.iSDM* and other models can be made, and the reader is referred to the original
 publication underlying each approach (see help page for references).
-
-```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-# Install for this vignette if not present
-# Function to check for installed packages and install them if they are not installed
-install <- function(packages){
-  new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]  
-  if (length(new.packages)) 
-    install.packages(new.packages,quiet = TRUE, dependencies = TRUE)
-  sapply(packages, require, character.only = TRUE)
-}
-invisible( install(c("glmnet", "kissmig", "remotes")) )
-op <- try({
-  remotes::install_github("steps-dev/steps",
-                        quiet = TRUE,
-                        build_vignettes = FALSE) # For steps
-},silent = TRUE)
-```
 
 ### Adding dispersal to scenarios with `KISSMig`
 

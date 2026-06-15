@@ -1,12 +1,16 @@
-/* Efficient computation of the horseshoe prior
- * see Appendix C.1 in https://projecteuclid.org/euclid.ejs/1513306866
+/* Regularized horseshoe prior for shared covariate effects.
+ *
+ * See Appendix C.1 in Piironen and Vehtari (2017):
+ * https://projecteuclid.org/euclid.ejs/1513306866
+ *
  * Args:
  *   z: standardized population-level coefficients
  *   lambda: local shrinkage parameters
  *   tau: global shrinkage parameter
- *   c2: slap regularization parameter
+ *   c2: slab regularization parameter
+ *
  * Returns:
- *   population-level coefficients following the horseshoe prior
+ *   population-level coefficients following the regularized horseshoe prior
  */
 vector horseshoe(vector z, vector lambda, real tau, real c2) {
   int K = rows(z);

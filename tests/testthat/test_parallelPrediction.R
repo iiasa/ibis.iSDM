@@ -6,6 +6,7 @@ test_that('Testing parallel setup', {
   # Set to verbose
   options("ibis.setupmessages" = FALSE)
 
+  skip_on_covr()
   skip_if_not_installed("future")
   skip_if_not_installed("doFuture")
 

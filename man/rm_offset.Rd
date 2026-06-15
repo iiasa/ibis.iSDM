@@ -10,7 +10,7 @@ rm_offset(x, layer = NULL)
 \S4method{rm_offset}{BiodiversityDistribution}(x, layer = NULL)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{layer}{A \code{character} pointing to the specific layer to be removed. If
 set to \code{NULL}, then all offsets are removed from the object.}
@@ -20,7 +20,7 @@ Removes an offset from a \code{\link{distribution}} object.
 }
 \description{
 This is just a wrapper function for removing specified offsets
-from a \code{\linkS4class{BiodiversityDistribution}}) object.
+from a \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.
 }
 \examples{
 \dontrun{
@@ -29,11 +29,11 @@ from a \code{\linkS4class{BiodiversityDistribution}}) object.
 
 }
 \seealso{
-Other offset: 
-\code{\link{add_offset}()},
-\code{\link{add_offset_bias}()},
-\code{\link{add_offset_elevation}()},
-\code{\link{add_offset_range}()}
+Other offset:
+\code{\link[=add_offset]{add_offset()}},
+\code{\link[=add_offset_bias]{add_offset_bias()}},
+\code{\link[=add_offset_elevation]{add_offset_elevation()}},
+\code{\link[=add_offset_range]{add_offset_range()}}
 }
 \concept{offset}
 \keyword{offset}

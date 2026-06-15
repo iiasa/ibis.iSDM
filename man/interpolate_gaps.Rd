@@ -16,7 +16,7 @@ should be interpolated. See \code{\link[=project]{project()}}.}
 \code{"linear"} (Default) or \code{"constant"} through a step function.}
 }
 \value{
-\code{\link{logical}} indicating if the two \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} objects have the same
+\code{\link{logical}} indicating if the two \code{\link[terra:SpatRaster-class]{SpatRaster}} objects have the same
 }
 \description{
 This function linearly approximates shares between time steps,

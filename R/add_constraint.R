@@ -57,6 +57,11 @@ NULL
 #' disallowing an expansion of a range outside the provide layer. Similar as specifying
 #' projection limits (see [`distribution`]), but can be used to specifically constrain a
 #' projection within a certain area (e.g. a species range or an island).
+#' * \code{zone} - Applies a per-timestep zone mask within the projection loop (before
+#' threshold computation). Supports a static layer (single [`SpatRaster`] or [`sf`])
+#' applied identically at every timestep, or a time-series layer (multi-layer
+#' [`SpatRaster`] with a time dimension, or [`sf`] with a \code{time} column) where
+#' the layer closest in time to each projection step is selected automatically.
 #' * \code{minsize} - Allows to specify a certain size that must be satisfied in
 #' order for a thresholded patch to be occupied. Can be thought of as a minimum
 #' size requirement. See `add_constraint_minsize()` for the required parameters.
@@ -108,11 +113,14 @@ methods::setMethod(
       !is.Waiver(mod$get_predictors()),
       is.character(method)
     )
+    # Normalize common shorthand aliases before matching
+    method <- switch(method, "sdd_fix" = "sdd_fixed", "sdd_nexp" = "sdd_nexpkernel",
+                     "nexp" = "sdd_nexpkernel", "nexpkernel" = "sdd_nexpkernel", method)
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim",
                                     "hardbarrier","resistance",
-                                    "boundary", "minsize", "threshold",
+                                    "boundary", "zone", "minsize", "threshold",
                                     "nichelimit", "fixedlimit"), several.ok = FALSE)
 
     # Now call the respective functions individually
@@ -136,6 +144,8 @@ methods::setMethod(
                   # --- #
                   "boundary" = add_constraint_boundary(mod, ...),
                   # --- #
+                  "zone" = add_constraint_boundary(mod, method = "zone", ...),
+                  # --- #
                   "threshold" = add_constraint_threshold(mod, ...),
                   # --- #
                   "minsize" = add_constraint_minsize(mod, ...)
@@ -156,6 +166,8 @@ methods::setMethod(
 #' iteration steps (or within year migration steps). For adaptability
 #' constraints this parameter specifies the extent (in units of standard
 #' deviation) to which extrapolations should be performed.
+#' @param unit A [`character`] indicating the unit of the value parameter.
+#' Available are meter (\code{"m"}) and kilometre (\code{"km"}) (Default: \code{"m"}).
 #' @param type A [`character`] indicating the type used in the method. See for
 #' instance \code{`kissmig`}.
 #'
@@ -197,23 +209,28 @@ NULL
 #' @export
 methods::setGeneric("add_constraint_dispersal",
                     signature = methods::signature("mod"),
-                    function(mod, method, value = NULL, type = NULL, ...) standardGeneric("add_constraint_dispersal"))
+                    function(mod, method, value = NULL, unit = "m", type = NULL, ...) standardGeneric("add_constraint_dispersal"))
 
 #' @rdname add_constraint_dispersal
 methods::setMethod(
   "add_constraint_dispersal",
   methods::signature(mod = "BiodiversityScenario"),
-  function(mod, method, value = NULL, type = NULL, ...){
+  function(mod, method, value = NULL, unit = "m", type = NULL, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.character(method),
+      is.character(unit),
       is.null(value) || is.numeric(value),
       is.null(type) || is.character(type)
     )
+    method <- switch(method, "sdd_fix" = "sdd_fixed", "sdd_nexp" = "sdd_nexpkernel",
+                     "nexp" = "sdd_nexpkernel", "nexpkernel" = "sdd_nexpkernel", method)
     # Match method
     method <- match.arg(arg = method,
                         choices = c("sdd_fixed", "sdd_nexpkernel", "kissmig", "migclim"), several.ok = FALSE)
+
+    # Match units
+    unit <- match.arg(arg = unit, choices = c("m", "km"), several.ok = FALSE)
 
     # Other arguments supplied
     dots <- list(...)
@@ -233,17 +250,19 @@ methods::setMethod(
     if(method == "sdd_fixed"){
       # Short-distance dispersal (Fixed)
       assertthat::assert_that(
-        is.numeric(value), msg = "Fixed short distance dispersal needs an annual mean dispersal distance value."
+        is.numeric(value), msg = "Fixed short distance dispersal needs a per-step dispersal distance value."
       )
       cr[['dispersal']] <- list(method = method,
-                                params = c("mean_dispersal_distance" = value))
+                                params = c("mean_dispersal_distance" = value,
+                                           "unit" = unit))
     } else if(method == "sdd_nexpkernel") {
       # Negative exponential kernel
       assertthat::assert_that(
-        is.numeric(value), msg = "Short distance negative exponential kernel dispersal needs an annual mean dispersal distance value."
+        is.numeric(value), msg = "Short distance negative exponential kernel dispersal needs a per-step dispersal distance value."
       )
       cr[['dispersal']] <- list(method = method,
-                                params = c("mean_dispersal_distance" = value))
+                                params = c("mean_dispersal_distance" = value,
+                                           "unit" = unit))
     } else if(method == "kissmig"){
       # Check parameters to be correct
       check_package("kissmig")
@@ -265,7 +284,8 @@ methods::setMethod(
                                            "type" = type,
                                            "signed" = FALSE,
                                            "pext" = pext,
-                                           "pcor" = pcor
+                                           "pcor" = pcor,
+                                           "unit" = unit
                                            ))
 
     }
@@ -287,28 +307,25 @@ methods::setMethod(
 #' @param baseline_threshold The [`SpatRaster`] with presence/absence
 #' information from a previous year.
 #' @param new_suit A new [`SpatRaster`] object.
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit
-#' \code{'meters'}.
+#' @param value A [`numeric`] value of the fixed dispersal threshold.
+#' @param unit A [`character`] indicating the unit of the value parameter.
+#'  Available are meter (\code{"m"}) and kilometre (\code{"km"}) (Default: \code{"m"}).
 #' @param resistance A resistance [`SpatRaster`] object with values to be
 #' omitted during distance calculation (Default: \code{NULL}).
 #'
 #' @noRd
 #'
 #' @keywords internal
-.sdd_fixed <- function(baseline_threshold, new_suit, value, resistance = NULL){
+.sdd_fixed <- function(baseline_threshold, new_suit, value, unit = "m", resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
-    is.numeric(value),
+    is.numeric(as.numeric(value)),
+    is.character(unit),
     is.null(resistance) || is.Raster(resistance)
   )
 
-  # Check for small lon-lat values
-  if(terra::is.lonlat(baseline_threshold)){
-    if(value < 1){
-      cli::cli_alert_warning('Very small average dispersal value provided. Check that they are in unit m!')
-    }
-  }
+  if(is.character(value)) value <- as.numeric(value)
 
   # Check that baseline threshold raster is binomial
   if(length(unique(baseline_threshold)[,1])==1){
@@ -318,19 +335,22 @@ methods::setMethod(
                              msg = "Baseline map for fixed kernel has less than 2 values?")
   }
 
-  # Set resistance layer to 0 if set to zero.
+  # Set barrier cells to NA so gridDist cannot route through them (NA = impassable in terra::gridDist)
   if(is.Raster(resistance)){
-    baseline_threshold[resistance == 1] <- 2
-    # Set resistance to the value omitted
-    resistance <- 2
-    baseline_threshold <- terra::mask(baseline_threshold, resistance)
+    baseline_threshold <- terra::mask(baseline_threshold, resistance, maskvalues = 1, updatevalue = NA)
   }
-  # Grow baseline raster by the amount of value at max
-  # Furthermore divide by value to get a normalized distance
-  dis <- terra::gridDist(baseline_threshold, target = 1)
-  ras_dis <- terra::clamp(dis, lower = 0, upper = value) / value
-  # Invert
-  ras_dis <- abs(ras_dis - 1)
+
+  # Warn if value looks like wrong units (gridDist returns meters)
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1) cli::cli_alert_warning('Very small dispersal value provided. Check that units are in m, not degrees!')
+    else if(value > 1e7) cli::cli_alert_warning('Very large dispersal value provided. Check that units are in m, not km!')
+  }
+
+  # Constrain expansion to cells that fall within the previous thresholded range.
+  dis <- terra::gridDist(baseline_threshold,
+                         target = 1,
+                         scale = ifelse(unit == "m",1,1000))
+  ras_dis <- terra::ifel(dis <= value, 1, 0)
 
   # Now multiply the net suitability projection with this mask
   # Thus removing any grid cells outside
@@ -343,23 +363,28 @@ methods::setMethod(
 #' @param baseline_threshold The [`SpatRaster`] with presence/absence information
 #' from a previous year.
 #' @param new_suit A new [`SpatRaster`] object.
-#' @param value A [`numeric`] value of the fixed dispersal threshold. In unit \code{'meters'}.
+#' @param value A [`numeric`] value of the fixed dispersal threshold.
+#' @param unit A [`character`] indicating the unit of the value parameter.
+#' Available are meter (\code{"m"}) and kilometre (\code{"km"}) (Default: \code{"m"}).
 #' @param normalize Should a normalising constant be used for the exponential
-#' dispersal parameter (Default: \code{FALSE}).
+#' dispersal parameter (Default: \code{TRUE}).
 #' @param resistance A resistance [`SpatRaster`] object with values to be omitted
 #' during distance calculation (Default: \code{NULL}).
 #'
 #' @noRd
 #'
 #' @keywords internal
-.sdd_nexpkernel <- function(baseline_threshold, new_suit, value, normalize = TRUE, resistance = NULL){
+.sdd_nexpkernel <- function(baseline_threshold, new_suit, value, unit = "m",
+                            normalize = TRUE, resistance = NULL){
   assertthat::assert_that(
     is.Raster(baseline_threshold), is.Raster(new_suit),
     is_comparable_raster(baseline_threshold, new_suit),
-    is.numeric(value),
+    is.numeric(as.numeric(value)),
+    is.character(unit),
     is.logical(normalize),
     is.null(resistance) || is.Raster(resistance)
   )
+  if(is.character(value)) value <- as.numeric(value)
 
   # Check that baseline threshold raster is binomial
   if(length(unique(baseline_threshold)[,1])==1){
@@ -369,33 +394,27 @@ methods::setMethod(
                              msg = "Baseline map for nexp kernel has less than 2 values?")
   }
 
-  # Check for small lon-lat values
-  if(terra::is.lonlat(baseline_threshold)){
-    if(value < 1){
-      message('Very small average dispersal value provided. Check that they are in unit m!')
-    }
-  }
-
-  # Set resistance layer to 0 if set to zero.
+  # Set barrier cells to NA so gridDist cannot route through them (NA = impassable in terra::gridDist)
   if(is.Raster(resistance)){
-    baseline_threshold[resistance == 1] <- 2
-    # Set resistance to the value omitted
-    resistance <- 2
-    baseline_threshold <- terra::mask(baseline_threshold, resistance)
+    baseline_threshold <- terra::mask(baseline_threshold, resistance, maskvalues = 1, updatevalue = NA)
   }
 
-  # Divide alpha values by 2
+  # Warn if value looks like wrong units (gridDist returns meters)
+  if(terra::is.lonlat(baseline_threshold)){
+    if(value < 1) cli::cli_alert_warning('Very small dispersal value provided. Check that units are in m, not degrees!')
+    else if(value > 1e7) cli::cli_alert_warning('Very large dispersal value provided. Check that units are in m, not km!')
+  }
+
+  # Use the supplied per-step dispersal distance as the maximum reach and
+  # apply a negative exponential decay within that radius.
   alpha <- value/2
 
-  # Scale value for different projections
-  value_scale <- ifelse(terra::is.lonlat(baseline_threshold), terra::res(baseline_threshold)[1] * 10000, 1)
-
   # Grow baseline raster by using an exponentially weighted kernel
-  ras_dis <- terra::gridDist(baseline_threshold, target = 1, scale = value_scale)
+  dis <- terra::gridDist(baseline_threshold, target = 1,
+                         scale = ifelse(unit == "m",1,1000))
   # Normalized (with a constant) negative exponential kernel
-  ras_dis <- terra::app(ras_dis, fun = function(x) (1 / (2 * pi * value ^ 2)) * exp(-x / value) )
-  # Equivalent to alpha = 1/value and
-  # ras_dis <- terra::app(ras_dis, fun = function(x) exp(-alpha * x))
+  ras_dis <- terra::app(dis, fun = function(x) (1 / (2 * pi * alpha ^ 2)) * exp(-x / alpha) )
+  ras_dis[dis > value] <- 0
   if(normalize){
     ras_dis <- predictor_transform(ras_dis, option = 'norm')
   }
@@ -510,7 +529,6 @@ methods::setMethod(
   function(mod, method, value = NULL, resistance = NULL, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.character(method),
       is.null(value) || is.numeric(value),
       is.Raster(resistance) || is.null(resistance)
@@ -641,7 +659,6 @@ methods::setMethod(
            value = 1, value_min = NULL, value_max = NULL, increment = 0, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.character(method),
       is.character(approach),
       is.null(names) || is.character(names),
@@ -676,7 +693,7 @@ methods::setMethod(
         msg = "Ensure that variable limits are correctly set!"
       )
       if(is.null(names)) names <- NA
-      if(length(names)!=length(value_min)) cli::cli_alert_warning("More variable names that limits provided...")
+      if(length(names)!=length(value_min)) cli::cli_alert_warning("More variable names than limits provided...")
       co[['adaptability']] <- list(method = method,
                                    params = c("names" = names,
                                               "approach" = approach,
@@ -762,7 +779,8 @@ methods::setMethod(
 #' predictors and biodiversity predictors.
 #' @param approach [`character`] on whether thresholds or hinges are to be calculated (Default: \code{'thresh'}).
 #' @param names A [`character`] or \code{NULL} of the names of predictors.
-#' @param value A [`numeric`] value of the preferred
+#' @param value A [`numeric`] preferred (optimal) value for the variable; currently unused in the calculation but
+#'   reserved for future bell-curve / optimum response implementations.
 #' @param value_min A [`numeric`] minimum value used for method \code{"fixedlimit"}.
 #' @param value_max A [`numeric`] maximum value used for method \code{"fixedlimit"}.
 #'
@@ -884,7 +902,6 @@ methods::setMethod(
   function(mod, value, unit = "km2", establishment_step = FALSE, ...){
     assertthat::assert_that(
       inherits(mod, "BiodiversityScenario"),
-      !is.Waiver(mod$get_predictors()),
       is.null(value) || is.numeric(value),
       is.character(unit),
       is.logical(establishment_step)
@@ -915,32 +932,51 @@ methods::setMethod(
 # ------------------------ #
 #### Boundary constraints ####
 
-#' Adds a boundary constraint to a scenario object
+#' Adds a boundary or zone constraint to a scenario object
 #'
 #' @description The purpose of boundary constraints is to limit a future
 #' projection within a specified area (such as for example a range or
 #' ecoregion). This can help to limit unreasonable projections into geographic
 #' space.
 #'
-#' Similar to boundary constraints it is also possible to define a \code{"zone"}
-#' for the scenario projections, similar as was done for model training. The
-#' difference to a boundary constraint is that the boundary constraint is
-#' applied posthoc as a hard cut on any projection, while the zones would allow
-#' any projection (and other constraints) to be applied within the zone.
-#' **Note: Setting a boundary constraint for future projections effectively potentially suitable areas!**
+#' When \code{method = "zone"} is used, the constraint is applied per
+#' projection timestep as a mask on the suitability output (before any
+#' threshold is computed), rather than posthoc on the full stacked result.
+#' This allows other per-timestep constraints (e.g. dispersal) to interact
+#' with the zone at each step. Zones can be either static (one layer applied
+#' identically at every timestep) or time-series (one layer per timestep,
+#' matched by nearest date).
+#'
+#' **Note: Setting a boundary constraint for future projections effectively potentially clips suitable areas!**
 #'
 #' @inheritParams add_constraint
-#' @param layer A [`SpatRaster`] or [`sf`] object with the same extent as the
-#'   model background. Has to be binary and is used for a posthoc masking of
-#'   projected grid cells.
+#' @param method A [`character`] specifying the constraint type. Either
+#'   \code{"boundary"} (default, posthoc mask on full stacked projection) or
+#'   \code{"zone"} (per-timestep mask applied within the projection loop).
+#' @param layer For \code{method = "boundary"}: a single-layer [`SpatRaster`]
+#'   or [`sf`] object. Has to be binary.
+#'   For \code{method = "zone"}: must be a [`SpatRaster`]. A single-layer
+#'   raster is used as a static zone (same mask at every timestep). A
+#'   multi-layer raster is treated as a time-series zone; layers are matched
+#'   to projection timesteps either by the raster's time attribute
+#'   (\code{terra::has.time(layer) == TRUE}, nearest date selected) or, when
+#'   no time attribute is present, by layer order (\code{terra::nlyr(layer)}
+#'   must equal the number of covariate timesteps).
 #'
 #' @family constraint
 #' @keywords scenario
 #'
 #' @examples
 #' \dontrun{
-#' # Add scenario constraint
+#' # Static boundary constraint (posthoc)
 #' scenario(fit) |> add_constraint_boundary(range)
+#'
+#' # Static zone constraint (per-timestep)
+#' scenario(fit) |> add_constraint_boundary(range, method = "zone")
+#'
+#' # Time-series zone: SpatRaster with terra::time() set
+#' scenario(fit) |> add_constraint_boundary(zone_raster, method = "zone")
+#'
 #' }
 #'
 #' @name add_constraint_boundary
@@ -962,9 +998,17 @@ methods::setMethod(
       inherits(layer, "sf"),
       is.character(method)
     )
+    method <- match.arg(method, c("boundary", "zone"), several.ok = FALSE)
 
-    # Rasterize the layer
-    # First try and dig out a layer from a predictor dataset if found
+    # Zone method only accepts SpatRaster layers.
+    if(method == "zone"){
+      cli::cli_abort(c(
+        "Zone constraints require a {.cls SpatRaster} layer, not {.cls sf}.",
+        "i" = "Supply a single-layer {.cls SpatRaster} for a static zone, or a multi-layer {.cls SpatRaster} (with {.code terra::time()} set, or with {.code terra::nlyr()} equal to the number of covariate timesteps) for a time-series zone."
+      ))
+    }
+
+    # Boundary sf: rasterize then dispatch to the ANY method.
     if(inherits( mod$get_predictors(), "PredictorDataset")){
       ras <- mod$get_predictors()$get_data()
       if(inherits(ras, 'stars')){
@@ -996,29 +1040,37 @@ methods::setMethod(
       is.Raster(layer),
       is.character(method)
     )
-
-    # Check that layer is a single SpatRaster
-    if(!inherits(layer, "SpatRaster")){
-      assertthat::assert_that(terra::nlyr(layer) == 1)
-      layer <- layer[[1]]
-    }
+    method <- match.arg(method, c("boundary", "zone"), several.ok = FALSE)
 
     # Add processing method #
     # --- #
     co <- list()
     if(method == "boundary"){
-      # Add a constrain on parameter space, e.g. max 1 SD from training data
-      # covariates
+      # boundary requires a single binary layer
+      if(!inherits(layer, "SpatRaster")){
+        assertthat::assert_that(terra::nlyr(layer) == 1)
+        layer <- layer[[1]]
+      }
       assertthat::assert_that(
-        length( unique( layer )) <=2
+        length( unique( layer )) <= 2
       )
       # If length of values is greater than 1, remove everything else by setting
       # it to NA
-      if( length( unique( layer )) >1 ){
-        layer[layer<1] <- NA
+      if( length( unique( layer )) > 1 ){
+        layer[layer < 1] <- NA
+      }
+      co[[method]] <- list(method = method,
+                           params = c("layer" = layer))
     }
-      co[['boundary']] <- list(method = method,
-                                   params = c("layer" = layer))
+
+    if(method == "zone"){
+      # Zone supports a single static layer (nlyr == 1) or a multi-layer
+      # SpatRaster for time-series zones. Time-series can be specified via:
+      #   (a) terra::time() attribute — matched by nearest date per step.
+      #   (b) nlyr > 1 without time attribute — layers matched sequentially
+      #       to covariate timesteps (layer order must match covariate order).
+      type <- ifelse(terra::nlyr(layer) == 1, "static", "timeseries")
+      co[["zone"]] <- list(method = "zone", params = list(layer = layer, type = type))
     }
     # --- #
     new <- mod$clone(deep = TRUE)

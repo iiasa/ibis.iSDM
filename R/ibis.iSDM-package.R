@@ -19,7 +19,9 @@
 ## usethis namespace: start
 #' @import terra
 #' @importFrom foreach %do% %dopar%
+#' @importFrom Rcpp sourceCpp
 #' @importFrom stats effects
+#' @useDynLib ibis.iSDM, .registration = TRUE
 ## usethis namespace: end
 NULL
 

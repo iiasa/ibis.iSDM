@@ -25,7 +25,7 @@ add_latent_spatial(
 \S4method{add_latent_spatial}{BiodiversityScenario}(x, layer = NULL, reuse_latent = TRUE, ...)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{method}{A \code{\link{character}} describing what kind of spatial effect is to be
 added to the model. See details.}
@@ -39,7 +39,7 @@ Default (\code{FALSE}) uses a copy of the first added likelihood.}
 
 \item{...}{Other parameters passed down}
 
-\item{layer}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer describing alternative latent effects to be used instead
+\item{layer}{A \code{\link[terra:SpatRaster]{SpatRaster}} layer describing alternative latent effects to be used instead
 if \code{"reuse_latent"} is set to \code{FALSE}.}
 
 \item{reuse_latent}{A \code{\link{logical}} flag on whether any latent effects found
@@ -87,7 +87,7 @@ distribution. This method does not interact with species occurrences.
 \item \code{"nnd"} - nearest neighbour distance. This function calculates the euclidean
 distance from each point to the nearest other grid cell with known species occurrence.
 Originally proposed by Allouche et al. (2008) and can be applied across all
-datasets in the \code{\linkS4class{BiodiversityDistribution}}) object.
+datasets in the \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.
 }
 }
 \examples{

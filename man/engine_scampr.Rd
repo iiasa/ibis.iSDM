@@ -7,7 +7,7 @@
 engine_scampr(x, type = "response", dens = "posterior", maxit = 500, ...)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{type}{The mode used for creating (posterior or prior) predictions. Either setting
 \code{"link"} or \code{"response"} (Default: \code{"response"}).}
@@ -64,15 +64,15 @@ x <- distribution(background) |> engine_scampr()
 }
 }
 \seealso{
-Other engine: 
-\code{\link{engine_bart}()},
-\code{\link{engine_breg}()},
-\code{\link{engine_gdb}()},
-\code{\link{engine_glm}()},
-\code{\link{engine_glmnet}()},
-\code{\link{engine_inla}()},
-\code{\link{engine_inlabru}()},
-\code{\link{engine_stan}()},
-\code{\link{engine_xgboost}()}
+Other engine:
+\code{\link[=engine_bart]{engine_bart()}},
+\code{\link[=engine_breg]{engine_breg()}},
+\code{\link[=engine_gdb]{engine_gdb()}},
+\code{\link[=engine_glm]{engine_glm()}},
+\code{\link[=engine_glmnet]{engine_glmnet()}},
+\code{\link[=engine_inla]{engine_inla()}},
+\code{\link[=engine_inlabru]{engine_inlabru()}},
+\code{\link[=engine_stan]{engine_stan()}},
+\code{\link[=engine_xgboost]{engine_xgboost()}}
 }
 \concept{engine}

@@ -26,7 +26,7 @@ add_predictors_model(
 )
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{model}{A \code{\link{DistributionModel}} object.}
 
@@ -39,14 +39,14 @@ in any way (Options: \code{'none'},\code{'pca'}, \code{'scale'}, \code{'norm'})}
 \item{threshold_only}{A \code{\link{logical}} flag indicating whether to add thresholded
 layers from the fitted model (if existing) instead (Default: \code{FALSE}).}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL} which
+\item{priors}{A \code{\link[=PriorList-class]{PriorList}} object. Default is set to \code{NULL} which
 uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
 \description{
 This function is a convenience wrapper to add the output from a
-previous fitted \code{\link{DistributionModel}} to another \code{\linkS4class{BiodiversityDistribution}}
+previous fitted \code{\link{DistributionModel}} to another \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}
 object. Obviously only works if a prediction was fitted in the model. Options
 to instead add thresholds, or to transform / derivate the model outputs are
 also supported.

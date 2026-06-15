@@ -10,7 +10,7 @@ add_control_esm(x, n_covs = 2)
 \S4method{add_control_esm}{BiodiversityDistribution}(x, n_covs = 2)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{n_covs}{A \code{\link{numeric}} on the number of covariates in each small model (Default: \code{2}).}
 }

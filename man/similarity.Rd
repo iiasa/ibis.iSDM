@@ -41,7 +41,7 @@ similarity(
 }
 \arguments{
 \item{obj}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively
-a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object.}
+a \code{\link[terra:SpatRaster]{SpatRaster}} object.}
 
 \item{ref}{A \code{\link{BiodiversityDistribution}}, \code{\link{DistributionModel}} or alternatively
 a \code{\link{data.frame}} with extracted values (corresponding to those given in \code{obj}).}

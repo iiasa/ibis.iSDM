@@ -4,7 +4,7 @@
 \alias{add_constraint_boundary}
 \alias{add_constraint_boundary,BiodiversityScenario,sf-method}
 \alias{add_constraint_boundary,BiodiversityScenario,ANY-method}
-\title{Adds a boundary constraint to a scenario object}
+\title{Adds a boundary or zone constraint to a scenario object}
 \usage{
 add_constraint_boundary(mod, layer, ...)
 
@@ -15,15 +15,22 @@ add_constraint_boundary(mod, layer, ...)
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
 
-\item{layer}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or \code{\link[sf:sf]{sf::sf}} object with the same extent as the
-model background. Has to be binary and is used for a posthoc masking of
-projected grid cells.}
+\item{layer}{For \code{method = "boundary"}: a single-layer \code{\link[terra:SpatRaster]{SpatRaster}}
+or \code{\link[sf:sf]{sf}} object. Has to be binary.
+For \code{method = "zone"}: must be a \code{\link[terra:SpatRaster]{SpatRaster}}. A single-layer
+raster is used as a static zone (same mask at every timestep). A
+multi-layer raster is treated as a time-series zone; layers are matched
+to projection timesteps either by the raster's time attribute
+(\code{terra::has.time(layer) == TRUE}, nearest date selected) or, when
+no time attribute is present, by layer order (\code{terra::nlyr(layer)}
+must equal the number of covariate timesteps).}
 
 \item{...}{passed on parameters. See also the specific methods for adding
 constraints.}
 
-\item{method}{A \code{\link{character}} indicating the type of constraints to be added
-to the scenario. See details for more information.}
+\item{method}{A \code{\link{character}} specifying the constraint type. Either
+\code{"boundary"} (default, posthoc mask on full stacked projection) or
+\code{"zone"} (per-timestep mask applied within the projection loop).}
 }
 \description{
 The purpose of boundary constraints is to limit a future
@@ -31,30 +38,40 @@ projection within a specified area (such as for example a range or
 ecoregion). This can help to limit unreasonable projections into geographic
 space.
 
-Similar to boundary constraints it is also possible to define a \code{"zone"}
-for the scenario projections, similar as was done for model training. The
-difference to a boundary constraint is that the boundary constraint is
-applied posthoc as a hard cut on any projection, while the zones would allow
-any projection (and other constraints) to be applied within the zone.
-\strong{Note: Setting a boundary constraint for future projections effectively potentially suitable areas!}
+When \code{method = "zone"} is used, the constraint is applied per
+projection timestep as a mask on the suitability output (before any
+threshold is computed), rather than posthoc on the full stacked result.
+This allows other per-timestep constraints (e.g. dispersal) to interact
+with the zone at each step. Zones can be either static (one layer applied
+identically at every timestep) or time-series (one layer per timestep,
+matched by nearest date).
+
+\strong{Note: Setting a boundary constraint for future projections effectively potentially clips suitable areas!}
 }
 \examples{
 \dontrun{
-# Add scenario constraint
+# Static boundary constraint (posthoc)
 scenario(fit) |> add_constraint_boundary(range)
+
+# Static zone constraint (per-timestep)
+scenario(fit) |> add_constraint_boundary(range, method = "zone")
+
+# Time-series zone: SpatRaster with terra::time() set
+scenario(fit) |> add_constraint_boundary(zone_raster, method = "zone")
+
 }
 
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint}()},
-\code{\link{add_constraint_MigClim}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_connectivity}()},
-\code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint_threshold}()},
-\code{\link{simulate_population_steps}()}
+Other constraint:
+\code{\link[=add_constraint]{add_constraint()}},
+\code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}},
+\code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}},
+\code{\link[=add_constraint_minsize]{add_constraint_minsize()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}},
+\code{\link[=simulate_population_steps]{simulate_population_steps()}}
 }
 \concept{constraint}
 \keyword{scenario}

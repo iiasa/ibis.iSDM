@@ -369,10 +369,7 @@ engine_glm <- function(x,
 
       # Attempt prediction
       if( getOption('ibis.runparallel',default = FALSE) ){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
 
         # Prediction function
         do_run <- function() {
@@ -681,10 +678,7 @@ engine_glm <- function(x,
 
       # Run in parallel if specified or not.
       if( getOption('ibis.runparallel',default = FALSE) ){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
 
         # Prediction function
         do_run <- function() {

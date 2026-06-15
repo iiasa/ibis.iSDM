@@ -618,10 +618,11 @@ methods::setMethod(
 
         # Ignore variables for which we have priors
         if(!is.Waiver(x$priors)){
-          keep <- unique( as.character(x$priors$varnames()) )
+          keep <- unique( as.character(x$get_prior_variables()) )
           if('spde'%in% keep) keep <- keep[which(keep!='spde')] # Remove SPDE where existing
-          test <- test[,-which(names(test) %in% keep)]
-          assertthat::assert_that(!any(keep %in% names(test)))
+          drop_keep <- names(test)[names(test) %in% keep]
+          if(length(drop_keep) > 0) test <- test[, !names(test) %in% drop_keep, drop = FALSE]
+          assertthat::assert_that(!any(drop_keep %in% names(test)))
         } else {keep <- NULL}
         # Add bias variable to keep as we risk filtering it out otherwise
         if(!is.Waiver(settings$get("bias_variable"))) keep <- c(keep, settings$get("bias_variable") )
@@ -735,7 +736,7 @@ methods::setMethod(
       spec_priors <- switch(
         x$engine$name,
         "<GDB>" = x$priors$classes() == 'GDBPrior',
-        "<XGBOOST>" = x$priors$classes() == 'XGBPrior',
+        "<XGBOOST>" = x$priors$classes() == 'XGBPrior' | x$priors$classes() == 'XGBInteractionPrior',
         "<BART>" = x$priors$classes() == 'BARTPrior',
         "<INLA>" = x$priors$classes() == 'INLAPrior',
         "<GLMNET>" = x$priors$classes() == "GLMNETPrior",
@@ -747,8 +748,12 @@ methods::setMethod(
       # Check whether prior objects match the used engine, otherwise raise warning
       if(spec_priors$length() != x$priors$length()) warning('Some specified priors do not match the engine...')
       # Check whether all priors variables do exist as predictors, otherwise remove
-      if(any(spec_priors$varnames() %notin% c( model$predictors_names, 'spde' ))){
-        vv <- spec_priors$varnames()[which(spec_priors$varnames() %notin% model$predictors_names)]
+      prior_varnames <- spec_priors$varnames()
+      if(x$engine$name == "<XGBOOST>"){
+        prior_varnames <- prior_varnames[spec_priors$classes() != "XGBInteractionPrior"]
+      }
+      if(any(prior_varnames %notin% c( model$predictors_names, 'spde' ))){
+        vv <- prior_varnames[which(prior_varnames %notin% model$predictors_names)]
         if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','red',paste0('Some specified priors (',paste(vv, collapse = "|"),') do not match any variable names!') )
         rm_id <- spec_priors$exists(vv)
         for (i in 1:length(rm_id)) spec_priors$rm(rm_id[[i]])
@@ -853,7 +858,7 @@ methods::setMethod(
       }
 
       # Also clip the predictors if set
-      if(x$get_limits()$limits_clip && nrow(zones)>0){
+      if(x$get_limits()$limits_clip && !is.null(zones) && nrow(zones)>0){
         # Now clip all predictors and background to this
         model$background <- suppressMessages(
           suppressWarnings( sf::st_union(
@@ -897,9 +902,10 @@ methods::setMethod(
         zones <- subset(x$get_limits()$layer, limit %in% unique(zones$limit) )
       }
 
-      l <- list("layer" = zones, "limits_method" = x$limits$limits_method,
-                "mcp_buffer" = x$limits$mcp_buffer,
-                "limits_clip" = x$limits$limits_clip)
+      l <- list("layer" = zones, "limits_method" = x$get_limits()$limits_method,
+                "mcp_buffer" = x$get_limits()$mcp_buffer,
+                "limits_clip" = x$get_limits()$limits_clip,
+                "novel" = x$get_limits()$novel)
       settings$set("limits", l)
       # Save the zones categories for later too!
       settings$set("limits_zones_categories", unique(zones$limit))
@@ -1226,11 +1232,11 @@ methods::setMethod(
         # Remove those not part of the modelling
         model2 <- model
         model2$biodiversity <- NULL; model2$biodiversity[[id]] <- model$biodiversity[[id]]
+        pred_tmp <- model2$biodiversity[[1]]$predictors_names
 
         # Work around for cases with non-spatial predictors
         if(x$predictors$is_spatial()){
           # remove unused predictors
-          pred_tmp <- model2$biodiversity[[1]]$predictors_names
           pred_prs <- model$predictors_object$get_names()
           model2$predictors_object <- model$predictors_object$clone(deep = TRUE)
           model2$predictors_names <- pred_tmp
@@ -1246,7 +1252,10 @@ methods::setMethod(
         # remove unused priors
         if(!is.Waiver(model$priors)) {
           model2$priors <- model$priors$clone(deep = TRUE)
-          ids_rm <- model2$priors$ids()[!model2$priors$varnames() %in% pred_tmp]
+          ids_rm <- model2$priors$ids()[vapply(model2$priors$priors, function(prior){
+            if(identical(prior$get_name(), "XGBInteractionPrior")) return(FALSE)
+            !prior$variable %in% pred_tmp
+          }, logical(1))]
           if (length(ids_rm) == model2$priors$length()) {
             model2$priors <- new_waiver()
           } else if (length(ids_rm) > 0 && length(ids_rm) < model2$priors$length()) {
@@ -1488,9 +1497,6 @@ methods::setMethod(
 
       # Process per supplied dataset
       for(id in ids) {
-        # TODO
-        if(length(model$biodiversity)>1) cli::cli_abort("Not yet implemented")
-
         # Update model formula in the model container
         model$biodiversity[[id]]$equation <- built_formula_stan(model = model,
                                                                 id = id,
@@ -2148,7 +2154,7 @@ methods::setMethod(
           o <- terra::mask(out$get_data("prediction"), layer)
         } else {
           # Default! Leaves rest of background to 0
-          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = NA)
+          o <- terra::mask(out$get_data("prediction"), layer, updatevalue = 0)
         }
         out <- out$set_data("prediction", o)
         try({ rm(layer, o) })

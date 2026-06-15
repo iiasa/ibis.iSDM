@@ -123,9 +123,9 @@ add_predictors(
 )
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
-\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}}, \code{\link{stars}} or \code{\link{data.frame}} object.}
+\item{env}{A \code{\link[terra:SpatRaster]{SpatRaster}}, \code{\link{stars}} or \code{\link{data.frame}} object.}
 
 \item{names}{A \code{\link{vector}} of character names describing the environmental
 stack in case they should be renamed.}
@@ -151,7 +151,7 @@ should be harmonized among predictors (Default: \code{FALSE}).}
 \item{explode_factors}{\code{\link{logical}} of whether any factor variables should be
 split up into binary variables (one per class). (Default: \code{FALSE}).}
 
-\item{priors}{A \code{\linkS4class{PriorList}} object. Default is set to \code{NULL}
+\item{priors}{A \code{\link[=PriorList-class]{PriorList}} object. Default is set to \code{NULL}
 which uses default prior assumptions.}
 
 \item{state}{A \code{\link{matrix}} with one value per variable (column) providing either a ( \code{stats::mean()}, \code{stats::sd()} )

@@ -109,8 +109,8 @@ interpolate_gaps <- function(env, date_interpolation = "annual", method = "linea
 #' Small helper function to find the closest temporal entry (date) in a
 #' vector. Can be used to identify closest matching records.
 #'
-#' @param d A [`Date`] or [`POSIXct`] object.
-#' @param timeseries A vector of [`Date`] or [`POSIXct`] object
+#' @param d A [`base::Date`] or [`base::POSIXct`] object.
+#' @param timeseries A vector of [`base::Date`] or [`base::POSIXct`] object
 #' @param return_index A [`logical`] flag on whether to report an index or the
 #' actual entry of the \code{"timeseries"} (Default: \code{TRUE}).
 #'
@@ -199,12 +199,6 @@ st_reduce <- function(obj, vars, newname, weights = NULL, fun = 'sum'){
                                                      length(vars) == length(weights),
                                                      all(weights %in% names(obj)))
 
-  # Future?
-  if(foreach::getDoParRegistered()){
-    ibis_future(cores = getOption("ibis.nthread"), strategy = getOption("ibis.futurestrategy"))
-    fut <- TRUE
-  } else { fut <- FALSE }
-  # --- #
   # First get all target variables and non-target variables
   target <- obj |> dplyr::select( dplyr::all_of(vars))
   non_target <- obj |> dplyr::select(-dplyr::all_of(vars))
@@ -423,6 +417,13 @@ raster_to_stars <- function(obj){
   terra::time(obj) <- times
   # stars::make_intervals(times[1], times[2]) # For making intervals from start to end
 
+  # Convert all factors to integer first to avoid issues during stars conversion
+  if(any(terra::is.factor(obj))){
+    for(fi in which(terra::is.factor(obj))){
+      obj[[fi]] <- terra::as.int(obj[[fi]])
+    }
+  }
+
   # Convert to stars step by step
   # HACKY: But seems to be the most robust way?
   new_env <- list()
@@ -430,13 +431,7 @@ raster_to_stars <- function(obj){
     oo <- subset(obj, i)
     # Check if times are unique
     if(length(unique(times))==1) terra::time(oo) <- NULL
-    # Factor conversion is buggy in stars thus convert to integer first
-    if(is.factor(oo)){
-      oo <- terra::as.int(oo) # Convert to numeric first
-      suppressWarnings(  o <- stars::st_as_stars(oo) )
-    } else {
-      suppressWarnings(  o <- stars::st_as_stars(oo) )
-    }
+    suppressWarnings(  o <- stars::st_as_stars(oo) )
     # If CRS is NA
     if(is.na(sf::st_crs(o))) sf::st_crs(o) <- prj
 
@@ -448,6 +443,13 @@ raster_to_stars <- function(obj){
     new_env[[ paste0(names(oo),times[i]) ]] <- o
   }
 
+  # Ensure all stars objects have consistent dimensions before merging
+  if(length(new_env) > 1){
+    ref_dims <- stars::st_dimensions(new_env[[1]])
+    for(j in 2:length(new_env)){
+      stars::st_dimensions(new_env[[j]]) <- ref_dims
+    }
+  }
   new_env <- do.call(c, new_env)
   # :fire: Rename just to be sure
   names(new_env) <- unique( names(obj) )

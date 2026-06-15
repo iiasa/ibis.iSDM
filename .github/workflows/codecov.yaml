@@ -43,7 +43,11 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::covr
+          # Coverage tests skip the INLA stack; avoid solving its non-CRAN repo here.
+          extra-packages: |
+            any::covr,
+            INLA=?ignore,
+            inlabru=?ignore
           needs: coverage
 
       - name: Test coverage

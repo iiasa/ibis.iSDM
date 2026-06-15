@@ -44,9 +44,9 @@ add_biodiversity_polpo(
 )
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
-\item{polpo}{A \code{\link[sf:sf]{sf::sf}} polygon object of presence-only occurrences.}
+\item{polpo}{A \code{\link[sf:sf]{sf}} polygon object of presence-only occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -72,7 +72,7 @@ passed to \code{\link{add_biodiversity_poipo}} (Default: \code{FALSE}).}
 \item{simulate_points}{A \code{\link{numeric}} number of points to be created by
 simulation (Default: \code{100}).}
 
-\item{simulate_bias}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} layer describing an eventual preference
+\item{simulate_bias}{A \code{\link[terra:SpatRaster]{SpatRaster}} layer describing an eventual preference
 for simulation (Default: \code{NULL}).}
 
 \item{simulate_strategy}{A \code{\link{character}} stating the strategy for sampling.
@@ -94,7 +94,7 @@ intercept is to be added in shared likelihood models for engines
 Adds biodiversity data to \link{distribution} object.
 }
 \description{
-This function can be used to add a \code{\link[sf:sf]{sf::sf}} polygon dataset to an
+This function can be used to add a \code{\link[sf:sf]{sf}} polygon dataset to an
 existing distribution object. Presence-only polygon data is treated
 differently than point data in some engines, particularly through the way that
 points are generated.
@@ -121,10 +121,10 @@ For an integration of range data as predictor or offset, see
 }
 }
 \seealso{
-Other add_biodiversity: 
-\code{\link{add_biodiversity_poipa}()},
-\code{\link{add_biodiversity_poipo}()},
-\code{\link{add_biodiversity_polpa}()}
+Other add_biodiversity:
+\code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}},
+\code{\link[=add_biodiversity_poipo]{add_biodiversity_poipo()}},
+\code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}}
 }
 \concept{add_biodiversity}
 \keyword{biodiversity}

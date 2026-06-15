@@ -12,7 +12,7 @@ predictor_homogenize_na(
 )
 }
 \arguments{
-\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the predictors.}
+\item{env}{A \code{\link[terra:SpatRaster]{SpatRaster}} object with the predictors.}
 
 \item{fill}{A \code{\link{logical}} value indicating whether missing data are to be
 filled (Default: \code{FALSE}).}
@@ -24,7 +24,7 @@ filled (Default: \code{FALSE}).}
 with NA values is to be returned instead (Default: \code{FALSE}).}
 }
 \value{
-A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the same number of layers as the input.
+A \code{\link[terra:SpatRaster]{SpatRaster}} object with the same number of layers as the input.
 }
 \description{
 This method allows the homogenization of missing data across a

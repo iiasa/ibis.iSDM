@@ -9,174 +9,190 @@ Basic object for engine, all other engines inherit from here.
 }
 \keyword{classes}
 \section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{engine}}{The class name of the engine.}
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{engine}}{The class name of the engine.}
 
-\item{\code{name}}{The name of the engine}
+    \item{\code{name}}{The name of the engine}
 
-\item{\code{data}}{Any data or parameters necessary to make this engine work.}
-}
-\if{html}{\out{</div>}}
+    \item{\code{data}}{Any data or parameters necessary to make this engine work.}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-Engine-new}{\code{Engine$new()}}
-\item \href{#method-Engine-print}{\code{Engine$print()}}
-\item \href{#method-Engine-show}{\code{Engine$show()}}
-\item \href{#method-Engine-get_class}{\code{Engine$get_class()}}
-\item \href{#method-Engine-get_data}{\code{Engine$get_data()}}
-\item \href{#method-Engine-list_data}{\code{Engine$list_data()}}
-\item \href{#method-Engine-set_data}{\code{Engine$set_data()}}
-\item \href{#method-Engine-get_self}{\code{Engine$get_self()}}
-\item \href{#method-Engine-clone}{\code{Engine$clone()}}
-}
+  \itemize{
+    \item \href{#method-Engine-initialize}{\code{Engine$new()}}
+    \item \href{#method-Engine-print}{\code{Engine$print()}}
+    \item \href{#method-Engine-show}{\code{Engine$show()}}
+    \item \href{#method-Engine-get_class}{\code{Engine$get_class()}}
+    \item \href{#method-Engine-get_data}{\code{Engine$get_data()}}
+    \item \href{#method-Engine-list_data}{\code{Engine$list_data()}}
+    \item \href{#method-Engine-set_data}{\code{Engine$set_data()}}
+    \item \href{#method-Engine-get_self}{\code{Engine$get_self()}}
+    \item \href{#method-Engine-clone}{\code{Engine$clone()}}
+  }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Engine-new"></a>}}
-\if{latex}{\out{\hypertarget{method-Engine-new}{}}}
-\subsection{Method \code{new()}}{
-Initializes the object and creates an empty list
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$new(engine, name)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-Engine-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-Engine-initialize}{}}}
+\subsection{\code{Engine$new()}}{
+  Initializes the object and creates an empty list
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$new(engine, name)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{engine}}{The class name of the engine.}
+      \item{\code{name}}{The name of the engine}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    NULL
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{engine}}{The class name of the engine.}
-
-\item{\code{name}}{The name of the engine}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-NULL
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-print"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-print}{}}}
-\subsection{Method \code{print()}}{
-Print the Engine name
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$print()}\if{html}{\out{</div>}}
+\subsection{\code{Engine$print()}}{
+  Print the Engine name
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$print()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A message on screen
+  }
 }
 
-\subsection{Returns}{
-A message on screen
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-show"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-show}{}}}
-\subsection{Method \code{show()}}{
-Aliases that calls print.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$show()}\if{html}{\out{</div>}}
+\subsection{\code{Engine$show()}}{
+  Aliases that calls print.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$show()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A message on screen
+  }
 }
 
-\subsection{Returns}{
-A message on screen
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-get_class"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-get_class}{}}}
-\subsection{Method \code{get_class()}}{
-Get class description
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$get_class()}\if{html}{\out{</div>}}
+\subsection{\code{Engine$get_class()}}{
+  Get class description
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$get_class()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} with the class as saved in engine
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{character}} with the class as saved in engine
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-get_data"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-get_data}{}}}
-\subsection{Method \code{get_data()}}{
-Get specific data from this engine
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$get_data(x)}\if{html}{\out{</div>}}
+\subsection{\code{Engine$get_data()}}{
+  Get specific data from this engine
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$get_data(x)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{x}}{A respecified data to be added to the engine.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{list}} with the data.
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{A respecified data to be added to the engine.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A \code{\link{list}} with the data.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-list_data"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-list_data}{}}}
-\subsection{Method \code{list_data()}}{
-List all data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$list_data()}\if{html}{\out{</div>}}
+\subsection{\code{Engine$list_data()}}{
+  List all data
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$list_data()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A \code{\link{character}} vector of the data entries.
+  }
 }
 
-\subsection{Returns}{
-A \code{\link{character}} vector of the data entries.
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-set_data"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-set_data}{}}}
-\subsection{Method \code{set_data()}}{
-Set data for this engine
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$set_data(x, value)}\if{html}{\out{</div>}}
+\subsection{\code{Engine$set_data()}}{
+  Set data for this engine
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$set_data(x, value)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{x}}{A \code{\link{character}} with the name or id of this dataset.}
+      \item{\code{value}}{A new \code{\link{list}} of parameters.}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Invisible
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{A \code{\link{character}} with the name or id of this dataset.}
-
-\item{\code{value}}{A new \code{\link{list}} of parameters.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-Invisible
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-get_self"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-get_self}{}}}
-\subsection{Method \code{get_self()}}{
-Dummy function to get self object
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$get_self()}\if{html}{\out{</div>}}
+\subsection{\code{Engine$get_self()}}{
+  Dummy function to get self object
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$get_self()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    This object
+  }
 }
 
-\subsection{Returns}{
-This object
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Engine-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-Engine-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Engine$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{Engine$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{Engine$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

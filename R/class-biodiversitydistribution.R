@@ -312,7 +312,18 @@ BiodiversityDistribution <- R6::R6Class(
     #' @return A [`character`] with the variable names for which priors have been added.
     get_prior_variables = function(){
       if(is.Waiver(self$priors)) return(NULL)
-      self$priors$varnames()
+      vars <- self$priors$varnames()
+      if(is.Waiver(self$priors$priors)) return(vars)
+
+      interaction_vars <- unlist(lapply(self$priors$priors, function(x){
+        if(identical(x$get_name(), "XGBInteractionPrior")) x$get() else character(0)
+      }), use.names = FALSE)
+      synthetic_vars <- unlist(lapply(self$priors$priors, function(x){
+        if(identical(x$get_name(), "XGBInteractionPrior")) x$variable else character(0)
+      }), use.names = FALSE)
+
+      vars <- vars[!vars %in% synthetic_vars]
+      unique(as.character(c(vars, interaction_vars)))
     },
 
     #' @description

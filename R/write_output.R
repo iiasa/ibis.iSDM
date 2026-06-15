@@ -219,10 +219,6 @@ writeGeoTiff <- function(file, fname, dt = "FLT4S", varNA = -9999, ...){
 
   if(file.exists(fname)) warning('Overwritting existing file...')
 
-  # Assign some basic metadata
-  terra::metags(file) <- c("model=ibis.iSDM",
-                           "model_version" = utils::packageVersion("ibis.iSDM"))
-
   # Save output
   terra::writeRaster(
     x = file,

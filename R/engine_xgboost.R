@@ -37,8 +37,9 @@ NULL
 #' @details The default parameters have been set relatively conservative as to
 #' reduce overfitting.
 #'
-#' XGBoost supports the specification of monotonic constraints on certain
-#' variables. Within ibis this is possible via [`XGBPrior`]. However constraints
+#' XGBoost supports the specification of monotonic constraints and interaction
+#' constraints on certain variables. Within ibis these are possible via
+#' [`XGBPrior`] and [`XGBInteractionPrior`], respectively. However constraints
 #' are available only for the \code{"gbtree"} baselearners.
 #'
 #' @note
@@ -308,7 +309,12 @@ engine_xgboost <- function(x,
       model$biodiversity[[1]]$predictors <- train_cov # Save new in model object
       model$biodiversity[[1]]$predictors_types <- dplyr::filter(model$biodiversity[[1]]$predictors_types,
                                                                 !predictors %in% vf)
+      # Update biodiversity-level predictor names to match exploded training columns
+      model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
     }
+    # Save the feature names used for training (after factor explosion)
+    # model$predictors_names is updated later after model$predictors is also exploded
+    train_feature_names <- colnames(train_cov)
     train_cov <- as.matrix( train_cov )
     labels <- model$biodiversity[[1]]$observations$observed
 
@@ -333,8 +339,9 @@ engine_xgboost <- function(x,
     # --- #
     # If predictions are to be used, define here
     if(!settings$get('inference_only')){
-      # Prediction container
-      pred_cov <- model$predictors[,model$biodiversity[[1]]$predictors_names]
+      # Prediction container - use model$predictors_names (pre-explosion) since model$predictors
+      # still has the original factor columns at this point
+      pred_cov <- model$predictors[,model$predictors_names]
       if(any(model$predictors_types$type=='factor')){
         vf <- model$predictors_types$predictors[which(model$predictors_types$type == "factor")]
         # Get factors
@@ -349,9 +356,8 @@ engine_xgboost <- function(x,
 
         model$predictors <- pred_cov # Save new in model object
 
-        model$biodiversity[[1]]$predictors_names <- colnames(train_cov)
         model$predictors_names <- colnames(pred_cov)
-        assertthat::assert_that(all( colnames(train_cov) %in% colnames(pred_cov) ))
+        assertthat::assert_that(all( train_feature_names %in% colnames(pred_cov) ))
       }
       pred_cov <- as.matrix( pred_cov )
       # Ensure that the column names are identical for both
@@ -373,6 +379,10 @@ engine_xgboost <- function(x,
       df_pred <- xgboost::xgb.DMatrix(data = as.matrix(pred_cov))
       assertthat::assert_that(all(colnames(df_train) == colnames(df_pred)))
 
+    } else {
+      # inference_only: still update model$predictors_names to match the
+      # exploded training features so that later projection uses correct names
+      model$predictors_names <- train_feature_names
     }
 
     if(fam == "count:poisson"){
@@ -391,22 +401,14 @@ engine_xgboost <- function(x,
       params$eval_metric <- "logloss"
     }
 
-    # Process and add priors if set
-    if(!is.Waiver(model$priors)){
-      assertthat::assert_that(all(model$priors$varnames() %in% model$predictors_names))
-      # Match position of variables with monotonic constrains
-      mc <- rep(0, ncol(train_cov))
-      names(mc) <- colnames(train_cov)
-      for(v in model$priors$varnames()){
-        mc[v] <- switch (model$priors$get(v),
-                         'increasing' = 1, 'positive' = 1,
-                         'decreasing' = -1, 'negative' = -1,
-                         0
-        )
-      }
-      # Save the monotonic constrain
-      params$monotone_constraints <- mc
-    }
+    # Process and add XGBoost priors if set
+    xgb_prior_params <- format_xgboost_priors(
+      priors = model$priors,
+      feature_names = colnames(train_cov),
+      # The final booster is selected in train() from the only_linear setting.
+      booster = "gbtree"
+    )
+    for(entry in names(xgb_prior_params)) params[[entry]] <- xgb_prior_params[[entry]]
 
     if(!is.Waiver(model$offset) ){
       # Set offset to 1 (log(0)) in case nothing is found
@@ -519,10 +521,12 @@ engine_xgboost <- function(x,
     df_pred <- self$get_data("df_pred")
     w <- model$biodiversity[[1]]$expect # The expected weight
 
-    assertthat::assert_that(
-      !is.null(df_pred),
-      all( colnames(df_pred) %in% colnames(df_train) )
-    )
+    if(!settings$get('inference_only')){
+      assertthat::assert_that(
+        !is.null(df_pred),
+        all( colnames(df_pred) %in% colnames(df_train) )
+      )
+    }
 
     # Get number of rounds from parameters
     nrounds <- params$nrounds;params$nrounds <- NULL
@@ -613,11 +617,17 @@ engine_xgboost <- function(x,
     }
 
     # Remove unneeded parameters
-    if(settings$get('only_linear') && params$booster == "gblinear"){
+    if(params$booster == "gblinear"){
+      tree_constraints <- c("monotone_constraints", "interaction_constraints")
+      existing_tree_constraints <- intersect(tree_constraints, names(params))
+      if(length(existing_tree_constraints) > 0){
+        warning(
+          "XGBoost monotone and interaction constraints are only supported for tree boosters. Ignoring xgboost priors for gblinear.",
+          call. = FALSE
+        )
+        params[existing_tree_constraints] <- NULL
+      }
       params[c("colsample_bytree", "gamma", "max_depth", "min_child_weight", "subsample")] <- NULL
-    }
-    if(settings$get('only_linear') && !is.Waiver(model$priors)){
-      if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Estimation]','red','Monotonic constraints not supported for linear regressor.')
     }
     # Fit the model.
     # watchlist <- list(train = df_train,test = df_test)
@@ -848,8 +858,43 @@ engine_xgboost <- function(x,
       if(!inherits(newdata, "xgb.DMatrix")){
         # Feature names from the model (xgboost 3.x no longer stores feature_names on the booster)
         fn <- model$predictors_names
+
+        # Explode factor variables in newdata to match training (if factors were exploded during setup)
+        if(!is.null(model$biodiversity[[1]]$predictors_types)){
+          fac_types <- model$biodiversity[[1]]$predictors_types
+          # Check if any exploded factor columns are expected (pattern: "name.level")
+          # by testing if fn contains names not in newdata but that look like exploded factors
+          missing_fn <- fn[!fn %in% colnames(newdata)]
+          if(length(missing_fn) > 0){
+            # Try to identify original factor columns that need explosion
+            for(col in colnames(newdata)){
+              if(is.factor(newdata[[col]]) || is.character(newdata[[col]])){
+                potential_names <- paste(col, levels(as.factor(newdata[[col]])), sep = ".")
+                if(any(potential_names %in% missing_fn)){
+                  z <- explode_factor(as.factor(newdata[[col]]), name = col)
+                  newdata[[col]] <- NULL
+                  newdata <- cbind(newdata, z)
+                }
+              }
+            }
+          }
+        }
+
+        # Check for predictor mismatches and provide informative warnings
+        missing_in_newdata <- fn[!fn %in% colnames(newdata)]
+        extra_in_newdata <- colnames(newdata)[!colnames(newdata) %in% c("x", "y", fn)]
+        if(length(missing_in_newdata) > 0){
+          warning(paste0("Predictors expected by model but missing in newdata: ",
+                         paste(missing_in_newdata, collapse = ", ")))
+        }
+        if(length(extra_in_newdata) > 0 && getOption('ibis.setupmessages', default = TRUE)){
+          myLog('[Estimation]','yellow',
+                paste0('Extra predictors in newdata ignored: ', paste(extra_in_newdata, collapse = ", ")))
+        }
         assertthat::assert_that(
-          all( fn %in% colnames(newdata) )
+          all( fn %in% colnames(newdata) ),
+          msg = paste0("Feature name mismatch between model and newdata. Missing: ",
+                       paste(fn[!fn %in% colnames(newdata)], collapse = ", "))
         )
         newdata <- subset(newdata, select = fn)
 
@@ -880,7 +925,12 @@ engine_xgboost <- function(x,
       if(nrow(newdata)==nrow(model$predictors)){
         prediction <- try({model_to_background(model)}, silent = TRUE)
         prediction[] <- pred_xgb
-        mask_tmp <- sum(terra::rast(newdata_copy, crs = terra::crs(prediction)))
+        # Create mask using only numeric columns to avoid issues with factor/character columns
+        mask_df <- newdata_copy[, intersect(c("x", "y", fn), colnames(newdata_copy))]
+        for(mc in names(mask_df)){
+          if(!is.numeric(mask_df[[mc]])) mask_df[[mc]] <- as.numeric(as.factor(mask_df[[mc]]))
+        }
+        mask_tmp <- sum(terra::rast(mask_df, crs = terra::crs(prediction)))
         prediction <- terra::mask(prediction, mask_tmp) # make sure to only use nonNA cells
       } else {
         assertthat::assert_that(utils::hasName(newdata_copy,"x")&&utils::hasName(newdata_copy,"y"),

@@ -455,10 +455,9 @@ engine_glmnet <- function(x,
                                 lower.limits = lowlim,
                                 upper.limits = upplim,
                                 standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                                maxit = (10^5)*2, # Increase the maximum number of passes for lambda
                                 parallel = getOption("ibis.runparallel"),
-                                trace.it = settings$get("verbose"),
-                                nfolds = 10  # number of folds for cross-validation
+                                nfolds = 10,  # number of folds for cross-validation
+                                control = list(maxit = (10^5)*2, trace.it = as.integer(settings$get("verbose")))
         )
       },silent = FALSE)
     } else {
@@ -475,10 +474,9 @@ engine_glmnet <- function(x,
                                lower.limits = lowlim,
                                upper.limits = upplim,
                                standardize = FALSE, # Don't standardize to avoid doing anything to weights
-                               maxit = (10^5)*2, # Increase the maximum number of passes for lambda
                                parallel = getOption("ibis.runparallel"),
-                               trace.it = settings$get("verbose"),
-                               nfolds = 10  # number of folds for cross-validation
+                               nfolds = 10,  # number of folds for cross-validation
+                               control = list(maxit = (10^5)*2, trace.it = as.integer(settings$get("verbose")))
         )
       },silent = FALSE)
     }
@@ -506,10 +504,7 @@ engine_glmnet <- function(x,
       assertthat::assert_that((nrow(full_sub) == length(w_full_sub)) || is.null(w_full_sub) )
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Chunk the data
         splits <- chunk_data(full_sub, N = getOption("ibis.nthread",default = 10),
                              index_only = TRUE)
@@ -869,10 +864,7 @@ engine_glmnet <- function(x,
       assertthat::assert_that(nrow(df_sub)>0)
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Chunk the data
         splits <- chunk_data(df_sub, N = getOption("ibis.nthread",default = 10),
                              index_only = TRUE)

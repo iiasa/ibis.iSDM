@@ -64,26 +64,28 @@ priors. Statistical science, 32(1), 1-28.
 }
 }
 \seealso{
-\code{\linkS4class{Prior}}.
+\code{\link[=Prior-class]{Prior}}.
 
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{get_priors}()},
-\code{\link{priors}()},
-\code{\link{rm_priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPrior]{GDBPrior()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
+\code{\link[=XGBPrior]{XGBPrior()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=add_priors]{add_priors()}},
+\code{\link[=get_priors]{get_priors()}},
+\code{\link[=priors]{priors()}},
+\code{\link[=rm_priors]{rm_priors()}}
 }
 \concept{prior}
 \keyword{priors}

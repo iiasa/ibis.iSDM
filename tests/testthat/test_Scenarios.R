@@ -28,6 +28,18 @@ test_that('Testing data prep functions for spatial-temporal data in stars', {
   expect_true("combined" %in% names(new))
   expect_false("primn" %in% names(new))
 
+  old_parallel <- getOption("ibis.runparallel", default = FALSE)
+  on.exit({
+    future::plan(future::sequential)
+    foreach::registerDoSEQ()
+    options("ibis.runparallel" = old_parallel)
+  }, add = TRUE)
+  options("ibis.runparallel" = FALSE)
+  doFuture::registerDoFuture()
+  future::plan(future::sequential)
+  expect_true(foreach::getDoParRegistered())
+  expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "sum"))
+
   # Other aggregation methods
   expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "mean") )
   expect_no_error(st_reduce(pred_future, c("primf","primn"), newname = "combined",fun = "multiply") )
@@ -373,4 +385,10 @@ test_that('Scenarios and constraints', {
   # Check that stabilization works
   mods <- mod |> project(stabilize = TRUE)
   expect_invisible(mods$verify())
+
+  # --- #
+  # Run ensemble calculations
+  expect_no_error( ens <- ensemble(mod3, mod4, method = "mean", layer = "suitability") )
+  expect_s3_class(ens, "stars")
+
 })

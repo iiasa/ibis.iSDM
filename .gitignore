@@ -53,6 +53,9 @@ log_*
 .RData
 .Ruserdata
 
+# Visual code
+.vscode
+
 # Ignore Ibis logo
 logo.svg
 
@@ -67,3 +70,6 @@ tmp/*.*
 inst/doc
 docs
 Rplots.pdf
+
+# Visual code
+.vscode/

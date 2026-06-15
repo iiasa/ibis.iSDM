@@ -10,16 +10,16 @@ add_offset_bias(x, layer, add = TRUE, points = NULL)
 \S4method{add_offset_bias}{BiodiversityDistribution,SpatRaster}(x, layer, add = TRUE, points = NULL)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the range for the target
+\item{layer}{A \code{\link[sf:sf]{sf}} or \code{\link[terra:SpatRaster]{SpatRaster}} object with the range for the target
 feature.}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
 this parameter to \code{FALSE} replaces the current offsets with the new
 one (Default: \code{TRUE}).}
 
-\item{points}{An optional \code{\link[sf:sf]{sf::sf}} object with key points. The location of the
+\item{points}{An optional \code{\link[sf:sf]{sf}} object with key points. The location of the
 points are then used to calculate the probability that a cell has been
 sampled while accounting for area differences. (Default: \code{NULL}).}
 }
@@ -64,11 +64,11 @@ spatially explicit information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://d
 }
 }
 \seealso{
-Other offset: 
-\code{\link{add_offset}()},
-\code{\link{add_offset_elevation}()},
-\code{\link{add_offset_range}()},
-\code{\link{rm_offset}()}
+Other offset:
+\code{\link[=add_offset]{add_offset()}},
+\code{\link[=add_offset_elevation]{add_offset_elevation()}},
+\code{\link[=add_offset_range]{add_offset_range()}},
+\code{\link[=rm_offset]{rm_offset()}}
 }
 \concept{offset}
 \keyword{offset}

@@ -36,9 +36,9 @@ add_biodiversity_poipo(
 )
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
-\item{poipo}{A \code{\link{data.frame}} or \code{\link[sf:sf]{sf::sf}} object of presence-only point occurrences.}
+\item{poipo}{A \code{\link{data.frame}} or \code{\link[sf:sf]{sf}} object of presence-only point occurrences.}
 
 \item{name}{The name of the biodiversity dataset used as internal identifier.}
 
@@ -110,10 +110,10 @@ Methods in Ecology and Evolution 6:366–379.
 }
 }
 \seealso{
-Other add_biodiversity: 
-\code{\link{add_biodiversity_poipa}()},
-\code{\link{add_biodiversity_polpa}()},
-\code{\link{add_biodiversity_polpo}()}
+Other add_biodiversity:
+\code{\link[=add_biodiversity_poipa]{add_biodiversity_poipa()}},
+\code{\link[=add_biodiversity_polpa]{add_biodiversity_polpa()}},
+\code{\link[=add_biodiversity_polpo]{add_biodiversity_polpo()}}
 }
 \concept{add_biodiversity}
 \keyword{biodiversity}

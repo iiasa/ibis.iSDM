@@ -26,6 +26,6 @@ Currently supported strategies are:
 }
 }
 \seealso{
-\link[future:future]{future::future}, \link{ibis_future}
+\link[future:future]{future}, \link{ibis_future}
 }
 \keyword{misc}

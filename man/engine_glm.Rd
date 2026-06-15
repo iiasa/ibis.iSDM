@@ -7,7 +7,7 @@
 engine_glm(x, control = NULL, type = "response", ...)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{control}{A \code{\link{list}} containing parameters for controlling the fitting
 process (Default: \code{NULL}).}
@@ -35,7 +35,7 @@ However basic GLMs can in some cases be useful for quick projections or
 for \code{\link[=ensemble]{ensemble()}} of small models (a practice common for rare species).
 }
 \details{
-This engine is essentially a wrapper for \code{\link[stats:glm]{stats::glm.fit()}}, however with customized
+This engine is essentially a wrapper for \code{\link[stats:glm.fit]{stats::glm.fit()}}, however with customized
 settings to support offsets and weights.
 
 If \code{"optim_hyperparam"} is set to \code{TRUE} in \code{\link[=train]{train()}}, then a AIC
@@ -60,15 +60,15 @@ Statistical Models in S eds J. M. Chambers and T. J. Hastie, Wadsworth & Brooks/
 }
 }
 \seealso{
-Other engine: 
-\code{\link{engine_bart}()},
-\code{\link{engine_breg}()},
-\code{\link{engine_gdb}()},
-\code{\link{engine_glmnet}()},
-\code{\link{engine_inla}()},
-\code{\link{engine_inlabru}()},
-\code{\link{engine_scampr}()},
-\code{\link{engine_stan}()},
-\code{\link{engine_xgboost}()}
+Other engine:
+\code{\link[=engine_bart]{engine_bart()}},
+\code{\link[=engine_breg]{engine_breg()}},
+\code{\link[=engine_gdb]{engine_gdb()}},
+\code{\link[=engine_glmnet]{engine_glmnet()}},
+\code{\link[=engine_inla]{engine_inla()}},
+\code{\link[=engine_inlabru]{engine_inlabru()}},
+\code{\link[=engine_scampr]{engine_scampr()}},
+\code{\link[=engine_stan]{engine_stan()}},
+\code{\link[=engine_xgboost]{engine_xgboost()}}
 }
 \concept{engine}

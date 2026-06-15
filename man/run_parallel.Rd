@@ -36,7 +36,7 @@ This function provides a helper wrapper for running functions of the
 }
 \details{
 By default, the \link{parallel} package is used for parallel computation,
-however an option exists to use the \link[future:future]{future::future} package instead.
+however an option exists to use the \link[future:future]{future} package instead.
 }
 \examples{
 \dontrun{

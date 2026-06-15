@@ -6,29 +6,29 @@ on:
     branches: [master, dev]
   pull_request:
     branches: [master]
+  schedule:
+    - cron: '0 3 1 * *'
   workflow_dispatch:
 
 name: r-cmd-check
 
 jobs:
   r-cmd-check:
-    if: "!contains(github.event.commits[0].message, '[skip-ci]')"
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip-ci]')
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
 
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - {os: macOS-latest, r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest, r: 'release'}
+        config: ${{ fromJSON(github.event_name == 'schedule' && '[{"os":"ubuntu-latest","r":"release"}]' || '[{"os":"macOS-latest","r":"release"},{"os":"windows-latest","r":"release"},{"os":"ubuntu-latest","r":"release"}]') }}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       _R_REMOTES_NO_ERRORS_FROM_WARNINGS_: true
       _R_CHECK_TIMINGS_: 10
       R_KEEP_PKG_SOURCE: yes
+      INLA_REPO: https://inla.r-inla-download.org/R/testing
 
     steps:
       - uses: actions/checkout@v3
@@ -40,7 +40,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
-          extra-repositories: "https://inla.r-inla-download.org/R/testing"
+          extra-repositories: ${{ env.INLA_REPO }}
 
       - name: Install gdal and igraph dependencies on Linux (gdal)
         run: |
@@ -61,6 +61,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           dependencies: '"all"'
+          # Install INLA separately below; pak is brittle with R-INLA binaries on Windows.
           extra-packages: |
             any::rcmdcheck,
             any::glmnet,
@@ -73,13 +74,29 @@ jobs:
             any::xgboost,
             any::dbarts,
             any::mboost,
+            INLA=?ignore,
             any::inlabru,
             any::BoomSpikeSlab
           needs: check
 
+      - name: Install INLA from R-INLA repository
+        continue-on-error: true
+        run: |
+          repos <- c(getOption("repos"), INLA = Sys.getenv("INLA_REPO"))
+          pkg_type <- if (.Platform$OS.type == "windows") "win.binary" else getOption("pkgType")
+          install.packages(
+            "INLA",
+            repos = repos,
+            type = pkg_type,
+            dependencies = c("Depends", "Imports", "LinkingTo")
+          )
+          stopifnot(requireNamespace("INLA", quietly = TRUE))
+        shell: Rscript {0}
+
       - uses: r-lib/actions/check-r-package@v2
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          _R_CHECK_FORCE_SUGGESTS_: false
         with:
           args: 'c("--no-manual", "--as-cran", "--no-build-vignettes")'
           error-on: '"error"'

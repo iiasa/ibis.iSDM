@@ -21,7 +21,7 @@ engine_xgboost(
 )
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{booster}{A \code{\link{character}} of the booster to use. Either \code{"gbtree"}
 or \code{"gblinear"} (Default: \code{gblinear})}
@@ -72,8 +72,9 @@ a look at the \link[xgboost:xgb.train]{xgboost::xgb.train} help file and
 The default parameters have been set relatively conservative as to
 reduce overfitting.
 
-XGBoost supports the specification of monotonic constraints on certain
-variables. Within ibis this is possible via \code{\link{XGBPrior}}. However constraints
+XGBoost supports the specification of monotonic constraints and interaction
+constraints on certain variables. Within ibis these are possible via
+\code{\link{XGBPrior}} and \code{\link{XGBInteractionPrior}}, respectively. However constraints
 are available only for the \code{"gbtree"} baselearners.
 }
 \note{
@@ -96,15 +97,15 @@ https://arxiv.org/abs/1603.02754
 \seealso{
 \link[xgboost:xgb.train]{xgboost::xgb.train}
 
-Other engine: 
-\code{\link{engine_bart}()},
-\code{\link{engine_breg}()},
-\code{\link{engine_gdb}()},
-\code{\link{engine_glm}()},
-\code{\link{engine_glmnet}()},
-\code{\link{engine_inla}()},
-\code{\link{engine_inlabru}()},
-\code{\link{engine_scampr}()},
-\code{\link{engine_stan}()}
+Other engine:
+\code{\link[=engine_bart]{engine_bart()}},
+\code{\link[=engine_breg]{engine_breg()}},
+\code{\link[=engine_gdb]{engine_gdb()}},
+\code{\link[=engine_glm]{engine_glm()}},
+\code{\link[=engine_glmnet]{engine_glmnet()}},
+\code{\link[=engine_inla]{engine_inla()}},
+\code{\link[=engine_inlabru]{engine_inlabru()}},
+\code{\link[=engine_scampr]{engine_scampr()}},
+\code{\link[=engine_stan]{engine_stan()}}
 }
 \concept{engine}

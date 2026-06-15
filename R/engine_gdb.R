@@ -477,10 +477,7 @@ engine_gdb <- function(x,
       }
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
 
         # Chunk the data
         splits <- chunk_data(full, N = getOption("ibis.nthread",default = 10), index_only = TRUE)
@@ -567,10 +564,7 @@ engine_gdb <- function(x,
       }
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
         # Chunk the data
         splits <- chunk_data(newdata_sub, N = getOption("ibis.nthread",default = 10),
                              index_only = TRUE)

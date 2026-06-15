@@ -23,12 +23,12 @@ Adds constraints data to a \code{\link{BiodiversityScenario}} object.
 }
 \description{
 This function adds a constraint to a
-\code{\linkS4class{BiodiversityScenario}} object to constrain (future) projections.
+\code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object to constrain (future) projections.
 These constraints can for instance be constraints on a possible dispersal
 distance, connectivity between identified patches or limitations on species
 adaptability.
 
-\strong{Most constraints require pre-calculated thresholds to be present in the \code{\linkS4class{BiodiversityScenario}} object!}
+\strong{Most constraints require pre-calculated thresholds to be present in the \code{\link[=BiodiversityScenario-class]{BiodiversityScenario}} object!}
 }
 \details{
 Constraints can be added to scenario objects to increase or decrease
@@ -78,6 +78,11 @@ constrain future climatically-forced projections by the thermal limit of a speci
 disallowing an expansion of a range outside the provide layer. Similar as specifying
 projection limits (see \code{\link{distribution}}), but can be used to specifically constrain a
 projection within a certain area (e.g. a species range or an island).
+\item \code{zone} - Applies a per-timestep zone mask within the projection loop (before
+threshold computation). Supports a static layer (single \code{\link[terra:SpatRaster]{SpatRaster}} or \code{\link[sf:sf]{sf}})
+applied identically at every timestep, or a time-series layer (multi-layer
+\code{\link[terra:SpatRaster]{SpatRaster}} with a time dimension, or \code{\link[sf:sf]{sf}} with a \code{time} column) where
+the layer closest in time to each projection step is selected automatically.
 \item \code{minsize} - Allows to specify a certain size that must be satisfied in
 order for a thresholded patch to be occupied. Can be thought of as a minimum
 size requirement. See \code{add_constraint_minsize()} for the required parameters.
@@ -108,15 +113,15 @@ constraints can improve model accuracy. Ecological Modelling, 431, 109180.
 }
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint_MigClim}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_boundary}()},
-\code{\link{add_constraint_connectivity}()},
-\code{\link{add_constraint_dispersal}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint_threshold}()},
-\code{\link{simulate_population_steps}()}
+Other constraint:
+\code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_boundary]{add_constraint_boundary()}},
+\code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}},
+\code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}},
+\code{\link[=add_constraint_minsize]{add_constraint_minsize()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}},
+\code{\link[=simulate_population_steps]{simulate_population_steps()}}
 }
 \concept{constraint}
 \keyword{scenario}

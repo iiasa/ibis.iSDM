@@ -5,9 +5,23 @@
 \alias{add_constraint_dispersal,BiodiversityScenario-method}
 \title{Add dispersal constraint to an existing \code{scenario}}
 \usage{
-add_constraint_dispersal(mod, method, value = NULL, type = NULL, ...)
+add_constraint_dispersal(
+  mod,
+  method,
+  value = NULL,
+  unit = "m",
+  type = NULL,
+  ...
+)
 
-\S4method{add_constraint_dispersal}{BiodiversityScenario}(mod, method, value = NULL, type = NULL, ...)
+\S4method{add_constraint_dispersal}{BiodiversityScenario}(
+  mod,
+  method,
+  value = NULL,
+  unit = "m",
+  type = NULL,
+  ...
+)
 }
 \arguments{
 \item{mod}{A \code{\link{BiodiversityScenario}} object with specified predictors.}
@@ -21,6 +35,9 @@ value specifying a fixed constrain or constant in units \code{"m"}
 iteration steps (or within year migration steps). For adaptability
 constraints this parameter specifies the extent (in units of standard
 deviation) to which extrapolations should be performed.}
+
+\item{unit}{A \code{\link{character}} indicating the unit of the value parameter.
+Available are meter (\code{"m"}) and kilometre (\code{"km"}) (Default: \code{"m"}).}
 
 \item{type}{A \code{\link{character}} indicating the type used in the method. See for
 instance \code{`kissmig`}.}
@@ -68,15 +85,15 @@ modelling. Diversity and Distributions, 19(10), 1224-1234.
 }
 }
 \seealso{
-Other constraint: 
-\code{\link{add_constraint}()},
-\code{\link{add_constraint_MigClim}()},
-\code{\link{add_constraint_adaptability}()},
-\code{\link{add_constraint_boundary}()},
-\code{\link{add_constraint_connectivity}()},
-\code{\link{add_constraint_minsize}()},
-\code{\link{add_constraint_threshold}()},
-\code{\link{simulate_population_steps}()}
+Other constraint:
+\code{\link[=add_constraint]{add_constraint()}},
+\code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}},
+\code{\link[=add_constraint_adaptability]{add_constraint_adaptability()}},
+\code{\link[=add_constraint_boundary]{add_constraint_boundary()}},
+\code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}},
+\code{\link[=add_constraint_minsize]{add_constraint_minsize()}},
+\code{\link[=add_constraint_threshold]{add_constraint_threshold()}},
+\code{\link[=simulate_population_steps]{simulate_population_steps()}}
 }
 \concept{constraint}
 \keyword{scenario}

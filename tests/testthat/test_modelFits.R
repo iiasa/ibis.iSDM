@@ -31,18 +31,27 @@ test_that('Add further tests for model fits', {
     add_predictors(predictors, transform = 'none',derivates = 'none') |>
     engine_glm()
 
-  # Train 2 model
+  # Train 2 models
   suppressWarnings(
     mod <- train(x |> add_biodiversity_poipa(train_data, field_occurrence = 'Observed',
                                              name = 'Virtual points',docheck = F),
-                 "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+                 "test", inference_only = FALSE, only_linear = TRUE, filter_predictors = "none", verbose = FALSE)
   )
   suppressWarnings(
     mod_poipo <- train(x |> add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed',
                                                    name = 'Virtual points',docheck = F),
-                 "test", inference_only = FALSE, only_linear = TRUE, varsel = "none", verbose = FALSE)
+                 "test", inference_only = FALSE, only_linear = TRUE,filter_predictors = "none", verbose = FALSE)
   )
   expect_s4_class(mod$get_data(), "SpatRaster")
+
+  # Check for latent spatial constraints
+  expect_false(mod$has_latent())
+  expect_no_error(
+    mod_lat <- train(x |> add_biodiversity_poipa(train_data, field_occurrence = 'Observed',
+                                                 name = 'Virtual points',docheck = F) |>
+                       add_latent_spatial(method = "kde"),
+                     inference_only = FALSE)
+  )
 
   # Threshold with independent data
   suppressMessages(
@@ -133,4 +142,49 @@ test_that('Add further tests for model fits', {
   expect_no_error(write_summary(mod, paste0(tf, ".rds")))
   expect_no_error(write_model(mod, paste0(tf, ".rds")))
 
+})
+
+test_that("Log file is written and has content", {
+
+  options("ibis.setupmessages" = TRUE)
+
+  # Load test data
+  background <- terra::rast(system.file('extdata/europegrid_50km.tif', package = 'ibis.iSDM', mustWork = TRUE))
+  virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package = 'ibis.iSDM', mustWork = TRUE),
+                                'points', quiet = TRUE)
+  ll <- list.files(system.file('extdata/predictors/', package = 'ibis.iSDM', mustWork = TRUE), full.names = TRUE)
+  predictors <- terra::rast(ll); names(predictors) <- tools::file_path_sans_ext(basename(ll))
+
+  abs <- pseudoabs_settings(nrpoints = 0, min_ratio = 1, method = "mcp")
+  suppressMessages(
+    virtual_points2 <- add_pseudoabsence(virtual_points, template = background,
+                                         field_occurrence = "Observed", settings = abs)
+  )
+
+  # Set up a temporary log file
+  log_file <- tempfile(fileext = ".txt")
+  on.exit(if (file.exists(log_file)) file.remove(log_file), add = TRUE)
+
+  # Build distribution object with log attached
+  x <- distribution(background) |>
+    add_biodiversity_poipa(virtual_points2, field_occurrence = 'Observed',
+                           name = 'Virtual points', docheck = FALSE) |>
+    add_predictors(predictors, transform = 'none', derivates = 'none') |>
+    engine_glm() |>
+    add_log(log_file)
+
+  # Log should be registered but file not yet created
+  expect_false(is.Waiver(x$log))
+  expect_equal(x$get_log(), basename(log_file))
+
+  # Train: this should open the log, write messages, then close it
+  suppressWarnings(
+    mod <- train(x, "test_log", inference_only = FALSE, only_linear = TRUE,
+                 filter_predictors = "none", verbose = TRUE)
+  )
+
+  # Log file must exist and be non-empty
+  expect_true(file.exists(log_file))
+  log_content <- readLines(log_file)
+  expect_gt(length(log_content), 0)
 })

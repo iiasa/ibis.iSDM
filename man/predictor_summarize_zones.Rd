@@ -13,19 +13,19 @@ predictor_summarize_zones(
 )
 }
 \arguments{
-\item{env}{A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the predictors.}
+\item{env}{A \code{\link[terra:SpatRaster]{SpatRaster}} object with the predictors.}
 
-\item{layer}{Either a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} or a \code{\link[sf:sf]{sf::sf}} object.}
+\item{layer}{Either a \code{\link[terra:SpatRaster]{SpatRaster}} or a \code{\link[sf:sf]{sf}} object.}
 
 \item{fun}{A custom function or \code{\link{character}}. A range of methods
 are supported by default such as \code{"mean"}, \code{"sum"}, \code{"min"} or \code{"max"} (Default: \code{"mean"}).}
 
-\item{target_layer}{(Optional) \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with categorical zones for which the summarized value is to be set.}
+\item{target_layer}{(Optional) \code{\link[terra:SpatRaster]{SpatRaster}} object with categorical zones for which the summarized value is to be set.}
 
 \item{value}{(Optional) \code{\link{numeric}} value instead of the layer.}
 }
 \value{
-A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the same number of layers as the input.
+A \code{\link[terra:SpatRaster]{SpatRaster}} object with the same number of layers as the input.
 }
 \description{
 This function supports the aggregation and specification of

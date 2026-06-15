@@ -40,26 +40,28 @@ distribution models. Ecology, 92(10), 1895-1901.
 }
 }
 \seealso{
-\code{\linkS4class{Prior}}, \code{\link{XGBPrior}}
+\code{\link[=Prior-class]{Prior}}, \code{\link{XGBPrior}}
 
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{get_priors}()},
-\code{\link{priors}()},
-\code{\link{rm_priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPrior]{INLAPrior()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
+\code{\link[=XGBPrior]{XGBPrior()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=add_priors]{add_priors()}},
+\code{\link[=get_priors]{get_priors()}},
+\code{\link[=priors]{priors()}},
+\code{\link[=rm_priors]{rm_priors()}}
 }
 \concept{prior}
 \keyword{priors}

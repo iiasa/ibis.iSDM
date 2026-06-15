@@ -36,7 +36,7 @@ train(
 )
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object).}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object).}
 
 \item{runname}{A \code{\link{character}} name of the trained run.}
 
@@ -67,7 +67,7 @@ relationships between observations and covariates, often increasing processing
 time (Default: \code{TRUE}). How non-linearity is captured depends on the used engine.}
 
 \item{method_integration}{A \code{\link{character}} with the type of integration that
-should be applied if more than one \code{\linkS4class{BiodiversityDataset}} object is
+should be applied if more than one \code{\link[=BiodiversityDataset-class]{BiodiversityDataset}} object is
 provided in \code{x}. Particular relevant for engines that do not support the
 integration of more than one dataset. Integration methods are generally sensitive
 to the order in which they have been added to the \code{\link{BiodiversityDistribution}} object.
@@ -121,9 +121,9 @@ on how the estimation is being done.
 }
 \details{
 This function acts as a generic training function that - based on the
-provided \code{\linkS4class{BiodiversityDistribution}} object creates a new distribution model.
+provided \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}} object creates a new distribution model.
 The resulting object contains both a \code{"fit_best"} object of the estimated
-model and, if \code{inference_only} is \code{FALSE} a \link[terra:SpatRaster-class]{terra::SpatRaster} object named
+model and, if \code{inference_only} is \code{FALSE} a \link[terra:SpatRaster]{SpatRaster} object named
 \code{"prediction"} that contains the spatial prediction of the model. These
 objects can be requested via \code{object$get_data("fit_best")}.
 

@@ -14,9 +14,9 @@ priors(x, ...)
 \S4method{priors}{ANY}(x, ...)
 }
 \arguments{
-\item{x}{A \code{\linkS4class{Prior}} object added to the list.}
+\item{x}{A \code{\link[=Prior-class]{Prior}} object added to the list.}
 
-\item{...}{One or multiple additional \code{\linkS4class{Prior}} object added to the list.}
+\item{...}{One or multiple additional \code{\link[=Prior-class]{Prior}} object added to the list.}
 }
 \value{
 A \code{\link{PriorList}} object.
@@ -25,15 +25,15 @@ A \code{\link{PriorList}} object.
 }
 \description{
 A \code{\link{PriorList}} object is essentially a list that contains
-individual \code{\linkS4class{Prior}} objects. In order to use priors for any of the
-engines, the respective \code{\linkS4class{Prior}} has to be identified (e.g.
+individual \code{\link[=Prior-class]{Prior}} objects. In order to use priors for any of the
+engines, the respective \code{\link[=Prior-class]{Prior}} has to be identified (e.g.
 \code{\link{INLAPrior}}) and embedded in a \code{\link{PriorList}} object. Afterwards these
 objects can then be added to a \link{distribution} object with the \link{add_priors}
 function.
 
 A \code{\link{PriorList}} object is essentially a list that contains
-individual \code{\linkS4class{Prior}} objects. In order to use priors for any of the
-engines, the respective \code{\linkS4class{Prior}} has to be identified (e.g.
+individual \code{\link[=Prior-class]{Prior}} objects. In order to use priors for any of the
+engines, the respective \code{\link[=Prior-class]{Prior}} has to be identified (e.g.
 \code{\link{INLAPrior}}) and embedded in a \code{\link{PriorList}} object. Afterwards these
 objects can then be added to a \link{distribution} object with the \link{add_priors}
 function.
@@ -51,46 +51,27 @@ priors(p1, p2)
 
 }
 \seealso{
-\code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
+\code{\link[=Prior-class]{Prior}}, \code{\link[=PriorList-class]{PriorList}}
 
-\code{\linkS4class{Prior}}, \code{\linkS4class{PriorList}}
-
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{get_priors}()},
-\code{\link{rm_priors}()}
-
-Other prior: 
-\code{\link{BARTPrior}()},
-\code{\link{BARTPriors}()},
-\code{\link{BREGPrior}()},
-\code{\link{BREGPriors}()},
-\code{\link{GDBPrior}()},
-\code{\link{GDBPriors}()},
-\code{\link{GLMNETPrior}()},
-\code{\link{GLMNETPriors}()},
-\code{\link{INLAPrior}()},
-\code{\link{INLAPriors}()},
-\code{\link{STANPrior}()},
-\code{\link{STANPriors}()},
-\code{\link{XGBPrior}()},
-\code{\link{XGBPriors}()},
-\code{\link{add_priors}()},
-\code{\link{get_priors}()},
-\code{\link{rm_priors}()}
+Other prior:
+\code{\link[=BARTPrior]{BARTPrior()}},
+\code{\link[=BARTPriors]{BARTPriors()}},
+\code{\link[=BREGPrior]{BREGPrior()}},
+\code{\link[=BREGPriors]{BREGPriors()}},
+\code{\link[=GDBPrior]{GDBPrior()}},
+\code{\link[=GDBPriors]{GDBPriors()}},
+\code{\link[=GLMNETPrior]{GLMNETPrior()}},
+\code{\link[=GLMNETPriors]{GLMNETPriors()}},
+\code{\link[=INLAPrior]{INLAPrior()}},
+\code{\link[=INLAPriors]{INLAPriors()}},
+\code{\link[=STANPrior]{STANPrior()}},
+\code{\link[=STANPriors]{STANPriors()}},
+\code{\link[=XGBInteractionPrior]{XGBInteractionPrior()}},
+\code{\link[=XGBInteractionPriors]{XGBInteractionPriors()}},
+\code{\link[=XGBPrior]{XGBPrior()}},
+\code{\link[=XGBPriors]{XGBPriors()}},
+\code{\link[=add_priors]{add_priors()}},
+\code{\link[=get_priors]{get_priors()}},
+\code{\link[=rm_priors]{rm_priors()}}
 }
 \concept{prior}

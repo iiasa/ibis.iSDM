@@ -13,9 +13,9 @@ add_offset(x, layer, add = TRUE)
 \S4method{add_offset}{BiodiversityDistribution,sf}(x, layer, add = TRUE)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
-\item{layer}{A \code{\link[sf:sf]{sf::sf}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object with the range for the target
+\item{layer}{A \code{\link[sf:sf]{sf}} or \code{\link[terra:SpatRaster]{SpatRaster}} object with the range for the target
 feature.}
 
 \item{add}{\code{\link{logical}} specifying whether new offset is to be added. Setting
@@ -35,7 +35,7 @@ spatial-explicit layers.
 }
 \details{
 This function allows to set any specific offset to a regression
-model. The offset has to be provided as spatial \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object. This
+model. The offset has to be provided as spatial \code{\link[terra:SpatRaster]{SpatRaster}} object. This
 function simply adds the layer to a \code{\link[=distribution]{distribution()}} object.
 \strong{Note that any transformation of the offset (such as \code{log}) has do be done externally!}
 
@@ -65,11 +65,11 @@ information. Glob. Ecol. Biogeogr. 25, 1022–1036. https://doi.org/10.1111/geb.
 }
 }
 \seealso{
-Other offset: 
-\code{\link{add_offset_bias}()},
-\code{\link{add_offset_elevation}()},
-\code{\link{add_offset_range}()},
-\code{\link{rm_offset}()}
+Other offset:
+\code{\link[=add_offset_bias]{add_offset_bias()}},
+\code{\link[=add_offset_elevation]{add_offset_elevation()}},
+\code{\link[=add_offset_range]{add_offset_range()}},
+\code{\link[=rm_offset]{rm_offset()}}
 }
 \concept{offset}
 \keyword{offset}

@@ -477,10 +477,7 @@ engine_bart <- function(x,
       if(is.Waiver(model$offset)) of <- NULL else of <- scales::rescale(model$offset[full$cellid, "spatial_offset"], to = c(1e-6, 1))
 
       if(getOption("ibis.runparallel",default = FALSE)){
-        check_package("doFuture")
-        if(!("doFuture" %in% loadedNamespaces()) || ('doFuture' %notin% utils::sessionInfo()$otherPkgs) ) {
-          try({requireNamespace('doFuture');attachNamespace("doFuture")},silent = TRUE)
-        }
+        ensure_doFuture()
 
         out <- predict_bart(obj = fit_bart,
                             newdata = full[, model$biodiversity[[1]]$predictors_names],

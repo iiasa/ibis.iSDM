@@ -14,7 +14,7 @@ add_predictors_globiom(x, ...)
 \S4method{add_predictors_globiom}{BiodiversityScenario}(x, ...)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{...}{Other parameters passed down}
 }

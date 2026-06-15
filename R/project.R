@@ -115,6 +115,9 @@ methods::setMethod(
     stabilize_method <- match.arg(stabilize_method, c("loess"), several.ok = FALSE)
     if(!is.Waiver(mod$get_data())) if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Scenario]','red','Overwriting existing scenarios...')
 
+    # Set up logging if specified
+    if(!is.Waiver(mod$log)) mod$log$open()
+
     # Get the model object
     fit <- mod$get_model(copy = TRUE)
     # Get background
@@ -206,20 +209,21 @@ methods::setMethod(
         }
       }
       # MJ: This code below is necessary for some engine predictions
-      # However by default is not done unless limits_clip is set to TRUE.
-      # Also adjust the model container
-      fit$model$background <- limits
-      # Clip the predictor object
-      fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
-      fit$model$predictors_object$crop_data(limits)
-      fit$model$predictors_object$mask(limits)
-      fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
-      # And offset if found
-      if(!is.null(fit$model$offset_object)){
-        fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
-        fit$model$offset_object <- terra::crop(fit$model$offset_object, limits)
-        fit$model$offset_object <- terra::mask(fit$model$offset_object, limits)
-        fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
+      # Only done when limits_clip is set to TRUE; by default the background is not clipped.
+      if(isTRUE(settings$get("limits")$limits_clip)){
+        fit$model$background <- limits
+        # Clip the predictor object
+        fit$model$predictors_object <- fit$model$predictors_object$clone(deep = TRUE)
+        fit$model$predictors_object$crop_data(limits)
+        fit$model$predictors_object$mask(limits)
+        fit$model$predictors <- fit$model$predictors_object$get_data(df = TRUE, na.rm = FALSE)
+        # And offset if found
+        if(!is.null(fit$model$offset_object)){
+          fit$model$offset_object <- terra::deepcopy(fit$model$offset_object)
+          fit$model$offset_object <- terra::crop(fit$model$offset_object, limits)
+          fit$model$offset_object <- terra::mask(fit$model$offset_object, limits)
+          fit$model$offset <- terra::as.data.frame(fit$model$offset_object, xy = TRUE, na.rm = FALSE)
+        }
       }
     }
 
@@ -342,9 +346,21 @@ methods::setMethod(
                             utils::hasName(df,'x'), utils::hasName(df,'y'), utils::hasName(df,'time'),
                             msg = "Error: Projection data and training data are not of equal size and format!")
 
-    df <- dplyr::select(df, dplyr::any_of(c("x", "y", "cell", "time",
-                                            unlist(int_pred_names, use.names = FALSE),
-                                            mod_pred_names)))
+    expected_cols <- c("x", "y", "cell", "time",
+                       unlist(int_pred_names, use.names = FALSE),
+                       mod_pred_names)
+    missing_cols <- expected_cols[!expected_cols %in% colnames(df)]
+    if(length(missing_cols) > 0){
+      # Filter out structural columns (cell is optional) from warning
+      missing_preds <- missing_cols[!missing_cols %in% c("cell")]
+      if(length(missing_preds) > 0){
+        warning(paste0("Model predictors missing from scenario data: ",
+                       paste(missing_preds, collapse = ", "),
+                       ". Available columns: ",
+                       paste(colnames(df), collapse = ", ")))
+      }
+    }
+    df <- dplyr::select(df, dplyr::any_of(expected_cols))
 
     df$time <- to_POSIXct(df$time)
     # Convert all units classes to numeric or character to avoid problems
@@ -385,6 +401,7 @@ methods::setMethod(
         if(scenario_constraints[["adaptability"]]$method == "fixedlimit") {
           nd <- .fixedlimit(newdata = nd, model = mod$get_model()[['model']],
                             names = scenario_constraints[["adaptability"]]$params['names'],
+                            approach = scenario_constraints[["adaptability"]]$params['approach'],
                             value = scenario_constraints[["adaptability"]]$params['value'] |> as.numeric(),
                             value_min = scenario_constraints[["adaptability"]]$params['value_min'] |> as.numeric(),
                             value_max = scenario_constraints[["adaptability"]]$params['value_max'] |> as.numeric()
@@ -402,6 +419,15 @@ methods::setMethod(
           pred_tmp <- c("x", "y", fit$.internals[[i]]$model$model$predictors_names)
           proj_tmp <- fit$.internals[[i]]$model$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)),
                                                         layer = layer)
+          if(terra::nlyr(proj_tmp) > 1){
+            assertthat::assert_that(
+              layer %in% names(proj_tmp),
+              msg = paste0("Requested projection layer '", layer,
+                           "' not found in internal model. Available layers: ",
+                           paste(names(proj_tmp), collapse = ", "))
+            )
+            proj_tmp <- proj_tmp[[layer]]
+          }
 
           # make sure names match
           names(proj_tmp) <- fit$.internals[[i]]$name
@@ -413,9 +439,25 @@ methods::setMethod(
         }
       }
 
-      # Project suitability
+      # --- Project suitability
       pred_tmp <- c("x", "y", fit$model$predictors_names)
+      # Warn if any expected predictors are missing from the data
+      missing_step_preds <- pred_tmp[!pred_tmp %in% colnames(nd)]
+      if(length(missing_step_preds) > 0){
+        warning(paste0("Predictors missing during projection step ",
+                       as.character(step), ": ",
+                       paste(missing_step_preds, collapse = ", ")))
+      }
       out <- fit$project(newdata = dplyr::select(nd, dplyr::any_of(pred_tmp)), layer = layer)
+      if(terra::nlyr(out) > 1){
+        assertthat::assert_that(
+          layer %in% names(out),
+          msg = paste0("Requested projection layer '", layer,
+                       "' not found. Available layers: ",
+                       paste(names(out), collapse = ", "))
+        )
+        out <- out[[layer]]
+      }
       names(out) <- paste0("suitability", "_", layer, "_", as.numeric(step))
       if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( background )
 
@@ -425,7 +467,14 @@ methods::setMethod(
         if("connectivity" %in% names(scenario_constraints)){
           # Get the layer for later
           resistance <- scenario_constraints$connectivity$params$resistance
-          # By definition a hard barrier removes all suitable again
+          # Align resistance to current projection extent/resolution if needed
+          if(!terra::compareGeom(resistance, out, stopOnError = FALSE)){
+            resistance <- alignRasters(resistance, out, method = "ngb", func = terra::modal, cl = FALSE)
+            resistance <- terra::extend(resistance, out)
+          }
+          # By definition a hard barrier removes all suitable again, while resistance 
+          # simply multiplies the given suitability with the resistance value. 
+          # If the resistance surface has multiple layers, we assume that it is a time-series and select the layer for the current step.
           if(any(scenario_constraints$connectivity$method == "resistance")){
             if(terra::nlyr(resistance)>1){
               ind <- which( terra::time(resistance) == as.Date(step) ) # Get specific step
@@ -446,10 +495,12 @@ methods::setMethod(
                            "sdd_fixed" = .sdd_fixed(baseline_threshold,
                                                     new_suit = out,
                                                     value = scenario_constraints$dispersal$params[1],
+                                                    unit = scenario_constraints$dispersal$params[2],
                                                     resistance = resistance ),
                            "sdd_nexpkernel" = .sdd_nexpkernel(baseline_threshold,
                                                               new_suit = out,
                                                               value = scenario_constraints$dispersal$params[1],
+                                                              unit = scenario_constraints$dispersal$params[2],
                                                               resistance = resistance)
             )
             names(out) <-  paste0('suitability_', step)
@@ -469,15 +520,44 @@ methods::setMethod(
           }
         }
 
-        # Connectivity constraints with hard barriers
-        if("connectivity" %in% names(scenario_constraints)){
-          # By definition a hard barrier removes all suitable again
-          if(any(scenario_constraints$connectivity$method == "hardbarrier")){
-            out[resistance==1] <- 0
+        # Apply zone constraint per timestep if set.
+        # Unlike the posthoc "boundary" constraint, zone masking is applied here
+        # inside the loop so that any downstream threshold computation inherits
+        # the mask.
+        if("zone" %in% names(scenario_constraints)){
+          zone_params <- scenario_constraints$zone$params
+          if(zone_params$type == "static"){
+            mask_rast <- zone_params$layer
+          } else {
+            # Time-series zone: select the layer for this projection step.
+            if(terra::has.time(zone_params$layer)){
+              # Match by time attribute (nearest date)
+              zi <- get_nearest_date(step, terra::time(zone_params$layer), return_index = TRUE)
+            } else {
+              # Match by sequential layer index (layer order = covariate timestep order)
+              zi <- which(times == step)
+              assertthat::assert_that(
+                length(zi) == 1 && zi <= terra::nlyr(zone_params$layer),
+                msg = paste0("Zone layer index ", zi, " exceeds zone SpatRaster layer count (",
+                             terra::nlyr(zone_params$layer), "). Ensure terra::nlyr() matches the number of covariate timesteps.")
+              )
+            }
+            mask_rast <- zone_params$layer[[zi]]
           }
+          # Align geometries if needed
+          if(!terra::compareGeom(out, mask_rast, stopOnError = FALSE)){
+            mask_rast <- alignRasters(mask_rast, out, method = "ngb", func = terra::modal, cl = FALSE)
+            mask_rast <- terra::extend(mask_rast, out)
+          }
+          out <- terra::mask(out, mask_rast)
+          out[is.na(out)] <- 0
+          out <- terra::mask(out, background)
         }
 
       }
+
+      # Ensure all land cells in the background footprint have a value (0 if not reached)
+      out <- terra::cover(out, terra::mask(terra::init(out, fun = 0), background))
 
       # Recalculate thresholds if set manually
       if(!is.Waiver(scenario_threshold)){
@@ -757,6 +837,10 @@ methods::setMethod(
     out <- mod$clone(deep = TRUE)
     out$scenarios <- proj
     out$scenarios_migclim <- mc
+
+    # Stop logging if specified
+    if(!is.Waiver(mod$log)) mod$log$close()
+
     return(out)
   }
 )
@@ -792,11 +876,26 @@ methods::setMethod(
       names(env) <- nn
     }
 
-    # Check that all predictor names are present
+    # Check that all predictor names are present and warn about mismatches
+    missing_preds <- co[!co %in% names(env)]
+    if(length(missing_preds) > 0){
+      warning(paste0("Model predictors missing from projection environment: ",
+                     paste(missing_preds, collapse = ", "),
+                     ". Available: ", paste(names(env), collapse = ", ")))
+    }
     assertthat::assert_that(
       all(co %in% names(env)),
-      msg = "Not all coefficients are found in the fitted model..."
+      msg = paste0("Not all model predictors found in the projection data. Missing: ",
+                   paste(co[!co %in% names(env)], collapse = ", "))
     )
+
+    # Also check consistency between biodiversity predictor names and model-level names
+    model_pn <- model$predictors_names
+    if(!is.null(model_pn) && !identical(sort(co), sort(model_pn))){
+      warning(paste0("Inconsistency between biodiversity predictor names and model predictor names. ",
+                     "biodiversity: [", paste(co, collapse = ", "), "] vs model: [",
+                     paste(model_pn, collapse = ", "), "]"))
+    }
 
     # Make a template
     if(is.Raster(env)) {
@@ -822,8 +921,19 @@ methods::setMethod(
     # Now predict
     out <- try({ x$project(newdata = env, layer = layer) })
     if(inherits(out, 'try-error')){
-      cli::cli_alert_danger("Projection failed! Returning emptyraster gracefully")
+      err_msg <- if(!is.null(attr(out, 'condition'))) conditionMessage(attr(out, 'condition')) else as.character(out)
+      cli::cli_alert_danger(paste0("Projection failed: ", err_msg))
+      warning(paste0("Projection error details: ", as.character(out)))
       return(template)
+    }
+    if(terra::nlyr(out) > 1){
+      assertthat::assert_that(
+        layer %in% names(out),
+        msg = paste0("Requested projection layer '", layer,
+                     "' not found. Available layers: ",
+                     paste(names(out), collapse = ", "))
+      )
+      out <- out[[layer]]
     }
     names(out) <- paste0("suitability", "_", layer)
     if(is.na(terra::crs(out))) terra::crs(out) <- terra::crs( model$background )

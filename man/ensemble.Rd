@@ -32,7 +32,7 @@ ensemble(
 )
 }
 \arguments{
-\item{...}{Provided \code{\link{DistributionModel}} or \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} objects.}
+\item{...}{Provided \code{\link{DistributionModel}} or \code{\link[terra:SpatRaster]{SpatRaster}} objects.}
 
 \item{method}{Approach on how the ensemble is to be created. See details for
 available options (Default: \code{'mean'}).}
@@ -56,7 +56,7 @@ standard deviation (\code{"sd"}), the average of all PCA axes except the
 first \code{"pca"}, the coefficient of variation (\code{"cv"}, Default) or
 the range between the lowest and highest value (\code{"range"}).}
 
-\item{point}{A \code{\link[sf:sf]{sf::sf}} object containing observational data used for model training. Used
+\item{point}{A \code{\link[sf:sf]{sf}} object containing observational data used for model training. Used
 for method \code{'superlearner'} only (Default: \code{NULL}).}
 
 \item{field_occurrence}{A \code{\link{character}} location of biodiversity point records (Default: \code{'observed'}).}
@@ -66,7 +66,7 @@ whether threshold values should also be created via \code{"method"}. Only
 applies and works for \code{\link{DistributionModel}} and thresholds found.}
 }
 \value{
-A \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object containing the ensemble of the provided
+A \code{\link[terra:SpatRaster]{SpatRaster}} object containing the ensemble of the provided
 predictions specified by \code{method} and a coefficient of variation
 across all models.
 }

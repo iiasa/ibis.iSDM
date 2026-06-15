@@ -1,12 +1,13 @@
-#' @include class-biodiversitydistribution.R class-log.R
+#' @include class-biodiversitydistribution.R class-biodiversityscenario.R class-log.R
 NULL
 
-#' Adds a log file to distribution object
+#' Adds a log file to distribution or scenario object
 #'
 #' @description This function allows to specify a file as [Log-class] file,
 #' which is used to save all console outputs, prints and messages.
 #'
-#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
+#' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) or
+#' [`BiodiversityScenario-class`] object.
 #' @param filename A [`character`] object. The destination must be writeable and
 #' filename ends with \code{'txt'}.
 #'
@@ -51,6 +52,34 @@ methods::setMethod(
     # Make a clone copy of the object
     y <- x$clone(deep = TRUE)
 
-    x$set_log(l)
+    y$set_log(l)
+    return(y)
+  }
+)
+
+#' @rdname add_log
+methods::setMethod(
+  "add_log",
+  methods::signature(x = "BiodiversityScenario", filename = "character"),
+  function(x, filename) {
+    assertthat::assert_that(inherits(x, "BiodiversityScenario"),
+                            is.character(filename),
+                            assertthat::has_extension(filename, 'txt'))
+
+    # Messenger
+    if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Setup]','green','Adding log file...')
+
+    # Check whether a log is already present
+    if(!is.Waiver(x$log)) myLog('[Setup]','yellow','Overwriting previous set log file.')
+
+    # Create a Log object
+    l <- Log$new(filename = filename,
+                 output = new_waiver())
+
+    # Make a clone copy of the object
+    y <- x$clone(deep = TRUE)
+
+    y$set_log(l)
+    return(y)
   }
 )

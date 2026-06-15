@@ -10,14 +10,14 @@ rm_predictors(x, names)
 \S4method{rm_predictors}{BiodiversityDistribution,character}(x, names)
 }
 \arguments{
-\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\linkS4class{BiodiversityDistribution}}) object.}
+\item{x}{\code{\link[=distribution]{distribution()}} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 
 \item{names}{\code{\link{vector}} A Vector of character names describing the
 environmental stack.}
 }
 \description{
 Remove a particular variable from an \link{distribution} object with
-a \code{\linkS4class{PredictorDataset}}. See Examples.
+a \code{\link[=PredictorDataset-class]{PredictorDataset}}. See Examples.
 }
 \examples{
 \dontrun{

@@ -1,15 +1,30 @@
-# ibis.iSDM 0.1.7 (current dev branch)
+# ibis.iSDM 0.1.8 (current dev branch)
+
+#### New features
+
+* Revisted Stan code and fixed to a working state again [`engine_stan()`].
+* Added new XGBoost Interaction Priors to the XGBoost engine.
+* Extended [`add_constraint_boundary()`] with a new `method = "zone"` option for per-timestep spatial zone masking during scenario projections.
+* Replacement of the `st_kde` function with an internal implementation of kernel density estimation in c++ for speed.
+
+#### Minor improvements and bug fixes
+
+* :bug: fix with regards to scenario hard barriers for dispersal calculations.
+* Minor :bug: fixes with scenario predictons not accounting properly for zone limits.
+* Fixed Log function for both model and scenario fitting.
+
+# ibis.iSDM 0.1.7
 
 #### New features
 * Implementation of small ensemble of models for linear engines (`add_control_esm()`) #141
+
+#### Minor improvements and bug fixes
 * Raise informative error if bias layer has negative values. #148
 * Update `engine_xgboost()` to work with latest development build and remove [pdp] as dependency #149
 * Improvement of document grammar and readability. Few more vignette examples based on latest development.
 * :bug: Fixing of `engine_inlabru()` to work with latest version #150 #145
 * :bug: Fixes to `add_control_bias()` to have it working again.
 * :bug: Refactor code to avoid importing namespaces #95
-
-#### Minor improvements and bug fixes
 
 # ibis.iSDM 0.1.6
 

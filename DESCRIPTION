@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
 Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.1.7
+Version: 0.1.8
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -30,6 +30,7 @@ Encoding: UTF-8
 Additional_repositories: https://inla.r-inla-download.org/R/testing
 Imports: 
     R6 (>= 2.5.0),
+    Rcpp,
     assertthat (>= 0.2.0),
     doFuture (>= 0.12.2),
     future (>= 1.23.0),
@@ -46,13 +47,14 @@ Imports:
     posterior,
     sf (>= 1.0),
     stars (>= 0.5),
-    ncmeta,
     stats,
     terra (>= 1.8-28), 
     tibble (>= 2.0.0),
     uuid,
     cli (>= 3.6.0),
     utils
+LinkingTo:
+    Rcpp
 Depends:
     R (>= 4.1.0)
 Suggests:
@@ -61,6 +63,7 @@ Suggests:
     Boruta,
     covr,
     cubelyr,
+    ncmeta,
     dbarts (>= 0.9-22),
     deldir,
     ellipsis,
@@ -68,8 +71,10 @@ Suggests:
     glmnetUtils,
     gnlm,
     geosphere,
+    INLA,
     inlabru (>= 2.10.0),
     fmesher (>= 0.1.7),
+    sn,
     igraph,
     knitr,
     mboost,
@@ -86,13 +91,13 @@ Suggests:
     xgboost
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
-RoxygenNote: 7.3.3
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 Biarch: true
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Collate: 
+    'RcppExports.R'
     'waiver.R'
     'class-biodiversitydataset.R'
     'class-biodiversitydistribution.R'
@@ -174,3 +179,4 @@ Collate:
     'zzz.R'
 Remotes:
   ElliotDovers/scampr
+Config/roxygen2/version: 8.0.0
