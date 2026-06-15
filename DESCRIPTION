@@ -27,7 +27,7 @@ Description: Integrated framework of modelling the distribution of species and
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
-Additional_repositories: https://inla.r-inla-download.org/R/testing
+Additional_repositories: https://inla.r-inla-download.org/R/stable
 Imports: 
     R6 (>= 2.5.0),
     Rcpp,
@@ -47,7 +47,6 @@ Imports:
     posterior,
     sf (>= 1.0),
     stars (>= 0.5),
-    ncmeta,
     stats,
     terra (>= 1.8-28), 
     tibble (>= 2.0.0),
@@ -64,6 +63,7 @@ Suggests:
     Boruta,
     covr,
     cubelyr,
+    ncmeta,
     dbarts (>= 0.9-22),
     deldir,
     ellipsis,
@@ -71,6 +71,7 @@ Suggests:
     glmnetUtils,
     gnlm,
     geosphere,
+    INLA,
     inlabru (>= 2.10.0),
     fmesher (>= 0.1.7),
     igraph,

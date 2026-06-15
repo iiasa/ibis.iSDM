@@ -21,7 +21,9 @@ h <- 5.5
 w <- 5.5
 is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
-knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
+article_packages <- c("glmnet", "glmnetUtils", "stars", "terra", "sf", "igraph", "ggplot2", "ncdf4", "geosphere", "assertthat")
+run_examples <- !is_check && all(vapply(article_packages, requireNamespace, logical(1), quietly = TRUE))
+knitr::opts_chunk$set(fig.align = "center", eval = run_examples)
 ```
 
 Besides inferring environmental responses and mapping the contemporary distribution of any species (see [Train simple Model](01_train_simple_model.html)), species distribution models (SDMs) are commonly used to make predictions on how biodiversity is expected to change under future conditions. Usually this is being done by first training a model on present observations and then projecting the resulting $\beta$ coefficients to another set of environmental predictors from another time period or spatial region.  
@@ -32,24 +34,11 @@ The `ibis.iSDM` R-package provides direct support for creating such projections.
 Projecting relative suitability estimates into conditions other than the observational records for
 which the SDM was trained comes with a number of assumptions, most importantly that relationships between occurrences and environmental conditions are in equilibrium and similar biases and conditions apply in the future. See [Elith et al. (2010)](https://onlinelibrary.wiley.com/doi/10.1111/j.2041-210X.2010.00036.x) and discussion in [Zurell et al. (2016)](http://doi.wiley.com/10.1111/gcb.13251) for an introduction and comparative overview.
 
-```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-# Install for this vignette if not present
-# Function to check for installed packages and install them if they are not installed
-install <- function(packages){
-  new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]
-  if (length(new.packages)) 
-    install.packages(new.packages, dependencies = TRUE)
-  sapply(packages, require, character.only = TRUE)
-}
-invisible( install(c("xgboost", "igraph", "lwgeom", "kissmig", "stars", "ncdf4","geosphere", "ggplot2","cubelyr")) )
-```
-
 ## Load relevant packages and testing data
-```{r Load the package, message=FALSE, eval=TRUE}
+```{r Load the package, message=FALSE}
 # Load the packages
 library(ibis.iSDM)
 library(stars)
-library(xgboost)
 library(terra)
 library(igraph)
 library(ggplot2)
@@ -63,7 +52,7 @@ options("ibis.setupmessages" = FALSE)
 
 For the purpose of this example we are loading some testing data on species distributions as well as contemporary and future predictors. Note the names of predictors used for building a distribution model have to be consistent with those for creating projections!
 
-```{r Load data, warning=FALSE, eval = TRUE, fig.width = w, fig.height = h}
+```{r Load data, warning=FALSE, fig.width = w, fig.height = h}
 # Background and biodiversity data
 background <- terra::rast(system.file('extdata/europegrid_50km.tif', package='ibis.iSDM'))
 virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points', quiet = TRUE)
@@ -95,7 +84,7 @@ plot(pred_current['secdf'],
 We will make use of the data loaded above to (a) first create a species distribution model for contemporary conditions and (b) project the obtained coefficients into the future using future predictors. 
 For guidance on how distribution models are trained, see other vignettes ([1](01_train_simple_model.html)).
 
-```{r Train a basic model, eval = TRUE}
+```{r Train a basic model}
 # Train model adding the data loaded above
 x <- distribution(background) |> 
   add_biodiversity_poipo(virtual_points, field_occurrence = 'Observed', name = 'Virtual points') |> 
@@ -146,7 +135,7 @@ will summarize the amount of area at each timestep.
 * `get_data()` gets the created scenarios a `stars` object (plus *thresholds* if specified).
 
 
-```{r Plotting and summarizing the created projections, eval = TRUE, fig.width = w, fig.height = h}
+```{r Plotting and summarizing the created projections, fig.width = w, fig.height = h}
 # Plot all scenarios. With a large number of predictors this figure will be messy...
 plot(sc.fit1) # or sc.fit1$plot()
 
@@ -187,7 +176,7 @@ In the simple scenario above we use the naive assumption that any, depending on 
 
 Lastly there are also options to *stabilize* suitability projections via the `project()` function. Specifying a stabilization here results in the projections being smoothed and informed of incremental time steps. This can particularly help for projections that use variables known to make sudden, abrupt jumps between time steps (e.g. precipitation anomalies).  
 
-```{r Add constraints and reproject, eval = TRUE, fig.width = w, fig.height = h}
+```{r Add constraints and reproject, fig.width = w, fig.height = h}
 # Adding a simple negative exponential kernel to constrain the predictions
 sc.fit2 <- sc |>   
    add_constraint(method = "sdd_nex", value = 1e5) |> 
@@ -212,7 +201,7 @@ sc.fit3$plot(which = 40) # With dispersal limit and nichelimitation (within a st
 
 ```
 
-```{r Summarize area of projections, eval = TRUE, fig.width = w, fig.height = h}
+```{r Summarize area of projections, fig.width = w, fig.height = h}
 # Lets compare the difference in projections compared to the naive one defined earlier. 
 o1 <- sc.fit1$summary()
 o2 <- sc.fit2$summary()

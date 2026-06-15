@@ -37,7 +37,7 @@ methods::setMethod(
   "add_predictors_globiom",
   methods::signature(x = "BiodiversityDistribution"),
   function(x, ... ) {
-
+    
     cli::cli_abort(c("add_predictors_globiom() is defunct.",
                      "v" = "Use the BNRTools package directly!"), call = NULL)
 

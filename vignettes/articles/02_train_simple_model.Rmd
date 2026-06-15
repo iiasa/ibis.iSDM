@@ -24,7 +24,9 @@ h <- 5.5
 w <- 5.5
 is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
-knitr::opts_chunk$set(fig.align = "center", eval = !is_check)
+article_packages <- c("INLA", "inlabru", "xgboost", "terra", "sf", "uuid", "assertthat")
+run_examples <- !is_check && all(vapply(article_packages, requireNamespace, logical(1), quietly = TRUE))
+knitr::opts_chunk$set(fig.align = "center", eval = run_examples)
 ```
 
 The examples below demonstrate how to fit a basic model with the ibis.iSDM package using a variety of engines. 
@@ -41,23 +43,7 @@ There are ways to convert for instance presence-only
 
 ### Load package and make a basic model
 
-```{r eval=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-# Install for this vignette if not present
-# Function to check for installed packages and install them if they are not installed
-install <- function(packages){
-  new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]
-  if (length(new.packages)) 
-    install.packages(new.packages, dependencies = TRUE)
-  sapply(packages, require, character.only = TRUE)
-}
-if(!("INLA" %in% installed.packages()[, "Package"])){
-  install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)
-}
-invisible( install(c("inlabru", "lwgeom", "xgboost", "igraph")) )
-```
-
-
-```{r Load the package, warning = FALSE, message=FALSE, eval=TRUE}
+```{r Load the package, warning = FALSE, message=FALSE}
 # Load the package
 library(ibis.iSDM)
 library(inlabru)
@@ -127,7 +113,7 @@ The `print` call at the end now shows some summary statistics contained in this 
 
 Of course all of these steps can also be done in "pipe" using the `|>` syntax.
 
-```{r, eval=TRUE, warning=FALSE}
+```{r, warning=FALSE}
 print("Create model")
 
 mod <- distribution(background) |> 
@@ -153,7 +139,7 @@ names(mod)
 
 Now finally the model can be estimated using the supplied engine. The `train` function has many available parameters that affect how the model is being fitted. Unless not possible, the default way is fitting a linear model based on the provided engine and biodiversity data types.
 
-```{r eval = TRUE}
+```{r}
 print("Fit model")
 
 # Finally train
