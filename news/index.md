@@ -4,6 +4,9 @@
 
 ##### New features
 
+- Revisted Stan code and fixed to a working state again
+  \[[`engine_stan()`](https://iiasa.github.io/ibis.iSDM/reference/engine_stan.md)\].
+- Added new XGBoost Interaction Priors to the XGBoost engine.
 - Extended
   \[[`add_constraint_boundary()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_boundary.md)\]
   with a new `method = "zone"` option for per-timestep spatial zone

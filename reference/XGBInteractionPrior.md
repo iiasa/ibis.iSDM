@@ -1,44 +1,45 @@
-# Add priors to an existing distribution object
+# Create a new interaction prior for XGBoost
 
-This function simply allows to add priors to an existing
-[distribution](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
-object. The supplied priors must be a
-[`PriorList`](https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.md)
-object created through calling
-[priors](https://iiasa.github.io/ibis.iSDM/reference/priors.md).
+Function to include prior information as interaction constraints in an
+extreme gradient descent boosting model
+[`engine_xgboost`](https://iiasa.github.io/ibis.iSDM/reference/engine_xgboost.md).
+Interaction priors define groups of variables that are allowed to
+interact in the same tree path. Variables outside the same group are not
+allowed to interact.
 
 ## Usage
 
 ``` r
-set_priors(x, priors = NULL, ...)
+XGBInteractionPrior(variables, ...)
+
+# S4 method for class 'character'
+XGBInteractionPrior(variables, ...)
 ```
 
 ## Arguments
 
-- x:
+- variables:
 
-  [distribution](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
-  (i.e.
-  [`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md))
-  object.
-
-- priors:
-
-  A
-  [`PriorList`](https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.md)
-  object containing multiple priors.
+  A [`character`](https://rdrr.io/r/base/character.html) vector matched
+  against existing predictors or latent effects after XGBoost
+  preprocessing.
 
 - ...:
 
-  Other parameters passed down.
+  Variables passed on to prior object.
 
-## Note
+## Details
 
-Alternatively priors to environmental predictors can also directly added
-as parameter via
-[add_predictors](https://iiasa.github.io/ibis.iSDM/reference/add_predictors.md)
+XGBoost interaction constraints are only supported by tree boosters.
+They can be combined with monotonic constraints supplied through
+[`XGBPrior`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md).
 
 ## See also
+
+[`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md),
+[`XGBPrior`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md)
+and
+[`engine_xgboost`](https://iiasa.github.io/ibis.iSDM/reference/engine_xgboost.md).
 
 Other prior:
 [`BARTPrior()`](https://iiasa.github.io/ibis.iSDM/reference/BARTPrior.md),
@@ -53,10 +54,10 @@ Other prior:
 [`INLAPriors()`](https://iiasa.github.io/ibis.iSDM/reference/INLAPriors.md),
 [`STANPrior()`](https://iiasa.github.io/ibis.iSDM/reference/STANPrior.md),
 [`STANPriors()`](https://iiasa.github.io/ibis.iSDM/reference/STANPriors.md),
-[`XGBInteractionPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md),
 [`XGBInteractionPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPriors.md),
 [`XGBPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md),
 [`XGBPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.md),
+[`add_priors()`](https://iiasa.github.io/ibis.iSDM/reference/add_priors.md),
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
@@ -65,9 +66,6 @@ Other prior:
 
 ``` r
 if (FALSE) { # \dontrun{
- pp <-  GLMNETPrior("forest")
- x <- distribution(background) |>
-  add_priors(pp)
-
+ pp <- XGBInteractionPrior(c("forest", "temperature"))
 } # }
 ```

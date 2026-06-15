@@ -994,7 +994,7 @@ background <- terra::rast(system.file('extdata/europegrid_50km.tif',
 package='ibis.iSDM',mustWork = TRUE))
 # Define model
 x <- distribution(background)
-#> [Setup] 2026-05-26 20:27:09.204412 | Creating distribution object...
+#> [Setup] 2026-06-15 19:46:24.535712 | Creating distribution object...
 names(x)
 #>  [1] ".__enclos_env__"             "engine"                     
 #>  [3] "log"                         "offset"                     

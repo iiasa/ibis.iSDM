@@ -180,7 +180,7 @@ the data added to this object.
 plot(mod$biodiversity)
 ```
 
-![](02_train_simple_model_files/figure-html/unnamed-chunk-3-1.png)
+![](02_train_simple_model_files/figure-html/unnamed-chunk-2-1.png)
 
 ``` r
 
@@ -378,21 +378,21 @@ gathered data.
 fit$rm_threshold()
 validate(fit, method = "cont")
 #>                                modelid                 name     method
-#> 1 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 2 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 3 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 4 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 5 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 6 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 7 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
-#> 8 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species continuous
+#> 1 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 2 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 3 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 4 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 5 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 6 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 7 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 8 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
 #>       metric       value
 #> 1          n 208.0000000
 #> 2         r2        -Inf
-#> 3       rmse   0.6093356
-#> 4        mae   0.5314864
-#> 5       mape   0.5314864
-#> 6    logloss   1.4549300
+#> 3       rmse   0.6091650
+#> 4        mae   0.5307449
+#> 5       mape   0.5307449
+#> 6    logloss   1.4545333
 #> 7   normgini         NaN
 #> 8 cont.boyce          NA
 
@@ -400,19 +400,19 @@ validate(fit, method = "cont")
 fit <- threshold(fit, method = "percentile", value = 0.5, format = "binary")
 validate(fit, method = "disc")
 #>                                 modelid                 name   method
-#> 1  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 2  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 3  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 4  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 5  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 6  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 7  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 8  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 9  0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 10 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 11 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 12 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
-#> 13 0f560dff-2aff-467f-9c10-0d57c564820b Virtual test species discrete
+#> 1  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 2  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 3  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 4  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 5  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 6  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 7  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 8  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 9  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 10 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 11 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 12 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 13 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
 #>                 metric       value
 #> 1                    n 602.0000000
 #> 2                  auc   0.6954315

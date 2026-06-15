@@ -37,6 +37,11 @@ priors for a model.
 - [`STANPriors()`](https://iiasa.github.io/ibis.iSDM/reference/STANPriors.md)
   : Helper function when multiple variables and types are supplied for
   Stan priors
+- [`XGBInteractionPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md)
+  : Create a new interaction prior for XGBoost
+- [`XGBInteractionPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPriors.md)
+  : Helper function when multiple interaction groups are supplied for
+  XGBoost
 - [`XGBPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md)
   : Create a new monotonic prior for boosted regressions
 - [`XGBPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.md)
@@ -379,7 +384,7 @@ package. Most of them are for internal use, but can be of use if input
 needs to be reformatted.
 
 - [`posterior_predict_stanfit()`](https://iiasa.github.io/ibis.iSDM/reference/posterior_predict_stanfit.md)
-  : Create a posterior prediction from a rstanfit object
+  : Create a posterior prediction from a Stan fit object
 
 - [`alignRasters()`](https://iiasa.github.io/ibis.iSDM/reference/alignRasters.md)
   :
@@ -416,10 +421,7 @@ needs to be reformatted.
   : Approximate missing time steps between dates
 
 - [`run_stan()`](https://iiasa.github.io/ibis.iSDM/reference/run_stan.md)
-  : Fit cmdstanr model and convert to rstan object
-
-- [`wrap_stanmodel()`](https://iiasa.github.io/ibis.iSDM/reference/wrap_stanmodel.md)
-  : Wrap a list with stan model code
+  : Fit a cmdstanr model
 
 - [`sanitize_names()`](https://iiasa.github.io/ibis.iSDM/reference/sanitize_names.md)
   : Sanitize variable names
@@ -589,6 +591,6 @@ Other functions only relevant for development
 - [`render_html()`](https://iiasa.github.io/ibis.iSDM/reference/render_html.md)
   : render_html
 - [`run_stan()`](https://iiasa.github.io/ibis.iSDM/reference/run_stan.md)
-  : Fit cmdstanr model and convert to rstan object
+  : Fit a cmdstanr model
 - [`myLog()`](https://iiasa.github.io/ibis.iSDM/reference/myLog.md) :
   Custom messaging function for scripts

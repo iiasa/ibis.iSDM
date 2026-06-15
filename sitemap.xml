@@ -37,6 +37,8 @@
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/STANPrior.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/STANPriors.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/Settings-class.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.html</loc></url>
+<url><loc>https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPriors.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/add_biodiversity_poipa.html</loc></url>
@@ -154,7 +156,6 @@
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/unwrap_model.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/validate.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/wrap_model.html</loc></url>
-<url><loc>https://iiasa.github.io/ibis.iSDM/reference/wrap_stanmodel.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/write_model.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/write_output.html</loc></url>
 <url><loc>https://iiasa.github.io/ibis.iSDM/reference/write_summary.html</loc></url>

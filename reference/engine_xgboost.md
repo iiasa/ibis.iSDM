@@ -111,10 +111,14 @@ An
 The default parameters have been set relatively conservative as to
 reduce overfitting.
 
-XGBoost supports the specification of monotonic constraints on certain
-variables. Within ibis this is possible via
-[`XGBPrior`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md).
-However constraints are available only for the `"gbtree"` baselearners.
+XGBoost supports the specification of monotonic constraints and
+interaction constraints on certain variables. Within ibis these are
+possible via
+[`XGBPrior`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md)
+and
+[`XGBInteractionPrior`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md),
+respectively. However constraints are available only for the `"gbtree"`
+baselearners.
 
 ## Note
 

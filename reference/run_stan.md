@@ -1,4 +1,4 @@
-# Fit cmdstanr model and convert to rstan object
+# Fit a cmdstanr model
 
 This function fits a stan model using the light-weight interface
 provided by cmdstanr. The code was adapted from McElreath rethinking
@@ -21,6 +21,7 @@ run_stan(
   force = FALSE,
   path = base::getwd(),
   save_warmup = TRUE,
+  return_stanfit = FALSE,
   ...
 )
 ```
@@ -95,13 +96,22 @@ run_stan(
   A [`logical`](https://rdrr.io/r/base/logical.html) flag whether to
   save the warmup samples.
 
+- return_stanfit:
+
+  A [`logical`](https://rdrr.io/r/base/logical.html) flag whether to
+  convert sampling output to an
+  [`rstan`](https://mc-stan.org/rstan/reference/rstan.html) stanfit
+  object. Defaults to `FALSE`; the native cmdstanr CmdStanFit object is
+  used otherwise.
+
 - ...:
 
   Other non-specified parameters.
 
 ## Value
 
-A rstan object
+A cmdstanr object by default, or a rstan object when requested and
+conversion succeeds.
 
 ## See also
 

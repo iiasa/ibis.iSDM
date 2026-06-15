@@ -1,6 +1,6 @@
 # Create a new monotonic prior for boosted regressions
 
-Function to include prior information as monotonic constrain to a
+Function to include prior information as monotonic constrain to an
 extreme gradient descent boosting model
 [`engine_xgboost`](https://iiasa.github.io/ibis.iSDM/reference/engine_xgboost.md).
 Monotonic priors enforce directionality in direction of certain
@@ -27,7 +27,7 @@ XGBPrior(variable, hyper = "increasing", ...)
 
   A [`character`](https://rdrr.io/r/base/character.html) object
   describing the type of constrain. Available options are
-  `'increasing'`, `'decreasing'`, `'convex'`, `'concave'`, `'none'`.
+  `'increasing'`, `'decreasing'`, `'positive'`, `'negative'`, `'none'`.
 
 - ...:
 
@@ -58,6 +58,8 @@ Other prior:
 [`INLAPriors()`](https://iiasa.github.io/ibis.iSDM/reference/INLAPriors.md),
 [`STANPrior()`](https://iiasa.github.io/ibis.iSDM/reference/STANPrior.md),
 [`STANPriors()`](https://iiasa.github.io/ibis.iSDM/reference/STANPriors.md),
+[`XGBInteractionPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md),
+[`XGBInteractionPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPriors.md),
 [`XGBPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.md),
 [`add_priors()`](https://iiasa.github.io/ibis.iSDM/reference/add_priors.md),
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),

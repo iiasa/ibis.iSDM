@@ -1,4 +1,4 @@
-# Create a posterior prediction from a rstanfit object
+# Create a posterior prediction from a Stan fit object
 
 This function does simulates from the posterior of a created stan model,
 therefore providing a fast and efficient way to project coefficients
@@ -14,7 +14,10 @@ posterior_predict_stanfit(
   type = "predictor",
   family = NULL,
   offset = NULL,
-  draws = NULL
+  draws = NULL,
+  intercept = NULL,
+  link = NULL,
+  feature_names = NULL
 )
 ```
 
@@ -22,7 +25,8 @@ posterior_predict_stanfit(
 
 - obj:
 
-  A `"stanfit"` object (as used by rstan).
+  A `"stanfit"` object from rstan or a `"CmdStanFit"` object from
+  cmdstanr.
 
 - form:
 
@@ -54,6 +58,19 @@ posterior_predict_stanfit(
 
   [numeric](https://rdrr.io/r/base/numeric.html) indicating whether a
   specific number of draws should be taken.
+
+- intercept:
+
+  Optional intercept parameter name or fixed numeric intercept.
+
+- link:
+
+  Optional inverse-link name. Supports `"log"`, `"logit"`, `"cloglog"`,
+  and `"identity"`.
+
+- feature_names:
+
+  Optional ordered feature names matching the Stan beta vector.
 
 ## References
 

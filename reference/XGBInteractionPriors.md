@@ -1,42 +1,29 @@
-# Add priors to an existing distribution object
+# Helper function when multiple interaction groups are supplied for XGBoost
 
-This function simply allows to add priors to an existing
-[distribution](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
-object. The supplied priors must be a
-[`PriorList`](https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.md)
-object created through calling
-[priors](https://iiasa.github.io/ibis.iSDM/reference/priors.md).
+This is a helper function to specify several
+[XGBInteractionPrior](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md)
+objects from a list of variable groups.
 
 ## Usage
 
 ``` r
-set_priors(x, priors = NULL, ...)
+XGBInteractionPriors(groups, ...)
+
+# S4 method for class 'list'
+XGBInteractionPriors(groups, ...)
 ```
 
 ## Arguments
 
-- x:
+- groups:
 
-  [distribution](https://iiasa.github.io/ibis.iSDM/reference/distribution.md)
-  (i.e.
-  [`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md))
-  object.
-
-- priors:
-
-  A
-  [`PriorList`](https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.md)
-  object containing multiple priors.
+  A [`list`](https://rdrr.io/r/base/list.html) of
+  [`character`](https://rdrr.io/r/base/character.html) vectors. Each
+  vector is one allowed interaction group.
 
 - ...:
 
-  Other parameters passed down.
-
-## Note
-
-Alternatively priors to environmental predictors can also directly added
-as parameter via
-[add_predictors](https://iiasa.github.io/ibis.iSDM/reference/add_predictors.md)
+  Variables passed on to prior object.
 
 ## See also
 
@@ -54,20 +41,9 @@ Other prior:
 [`STANPrior()`](https://iiasa.github.io/ibis.iSDM/reference/STANPrior.md),
 [`STANPriors()`](https://iiasa.github.io/ibis.iSDM/reference/STANPriors.md),
 [`XGBInteractionPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md),
-[`XGBInteractionPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPriors.md),
 [`XGBPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md),
 [`XGBPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.md),
+[`add_priors()`](https://iiasa.github.io/ibis.iSDM/reference/add_priors.md),
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
-
-## Examples
-
-``` r
-if (FALSE) { # \dontrun{
- pp <-  GLMNETPrior("forest")
- x <- distribution(background) |>
-  add_priors(pp)
-
-} # }
-```

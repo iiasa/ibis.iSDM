@@ -50,6 +50,8 @@ Other prior:
 [`INLAPrior()`](https://iiasa.github.io/ibis.iSDM/reference/INLAPrior.md),
 [`STANPrior()`](https://iiasa.github.io/ibis.iSDM/reference/STANPrior.md),
 [`STANPriors()`](https://iiasa.github.io/ibis.iSDM/reference/STANPriors.md),
+[`XGBInteractionPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPrior.md),
+[`XGBInteractionPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBInteractionPriors.md),
 [`XGBPrior()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPrior.md),
 [`XGBPriors()`](https://iiasa.github.io/ibis.iSDM/reference/XGBPriors.md),
 [`add_priors()`](https://iiasa.github.io/ibis.iSDM/reference/add_priors.md),

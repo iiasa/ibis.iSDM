@@ -158,8 +158,9 @@ necessary for each node (Default: <code>3</code>).</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The default parameters have been set relatively conservative as to
 reduce overfitting.</p>
-<p>XGBoost supports the specification of monotonic constraints on certain
-variables. Within ibis this is possible via <code><a href="XGBPrior.html">XGBPrior</a></code>. However constraints
+<p>XGBoost supports the specification of monotonic constraints and interaction
+constraints on certain variables. Within ibis these are possible via
+<code><a href="XGBPrior.html">XGBPrior</a></code> and <code><a href="XGBInteractionPrior.html">XGBInteractionPrior</a></code>, respectively. However constraints
 are available only for the <code>"gbtree"</code> baselearners.</p>
     </div>
     <div class="section level2">

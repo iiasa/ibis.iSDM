@@ -48,7 +48,6 @@ and comparative overview.
 # Load the packages
 library(ibis.iSDM)
 library(stars)
-library(xgboost)
 library(terra)
 library(igraph)
 library(ggplot2)

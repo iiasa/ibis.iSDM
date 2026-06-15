@@ -62,8 +62,9 @@ ibis_options()
 #> [1] 3
 #> 
 #> $ibis.priors
-#> [1] "INLAPrior"   "BARTPrior"   "GDBPrior"    "GLMNETPrior" "XGBPrior"   
-#> [6] "BREGPrior"   "STANPrior"  
+#> [1] "INLAPrior"           "BARTPrior"           "GDBPrior"           
+#> [4] "GLMNETPrior"         "XGBPrior"            "XGBInteractionPrior"
+#> [7] "BREGPrior"           "STANPrior"          
 #> 
 #> $ibis.pseudoabsence
 #> Background Settings: 5 parameters
@@ -72,7 +73,7 @@ ibis_options()
 #> [1] FALSE
 #> 
 #> $ibis.seed
-#> [1] 13404
+#> [1] 9114
 #> 
 #> $ibis.setupmessages
 #> [1] TRUE

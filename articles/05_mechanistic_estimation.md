@@ -80,6 +80,12 @@ others) to scenario objects.
 
 library(ibis.iSDM)
 library(terra)
+#> terra 1.9.27
+#> 
+#> Attaching package: 'terra'
+#> The following object is masked from 'package:ibis.iSDM':
+#> 
+#>     modal
 library(ggplot2)
 # Don't print out as many messages
 options("ibis.setupmessages" = FALSE)
@@ -119,6 +125,7 @@ fit <- distribution(background) |>
   train(verbose = FALSE) |> 
   # Add simple percentile thresholds
   threshold(method = 'percentile', value = .33)
+#> Loaded glmnet 5.0
 
 # Show the threshold
 fit$plot_threshold()
@@ -296,8 +303,4 @@ if("steps" %in% installed.packages()[,1]){
   plot(scenario2, "population")
 
 }
-#> Loading required package: steps
-#> ! State variable of transformation not found?
 ```
-
-![](05_mechanistic_estimation_files/figure-html/steps-1.png)![](05_mechanistic_estimation_files/figure-html/steps-2.png)
