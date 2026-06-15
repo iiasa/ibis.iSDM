@@ -246,7 +246,7 @@ mod_esm <- distribution(background) |>
       engine_glmnet() |> 
       train(runname = "ESM prediction", only_linear = TRUE)
 #> Training 28 ESM GLMNET-Engine models with 2 predictors each.
-#> [Setup] 2026-06-15 19:48:09.939465 | Replacing currently selected engine.
+#> [Setup] 2026-06-15 20:12:19.511578 | Replacing currently selected engine.
 #> 
 #> ! Overwriting previously defined engine.
 
@@ -329,7 +329,7 @@ p <- INLAPrior(variable = "CLC3_211_mean_50km",
 pp <- priors(p)
 # The variables and values in this object can be queried as well
 pp$varnames()
-#> a3faf6a8-707d-4da7-83d7-520d8c514f45 
+#> 7197f0f7-9143-44f0-b30b-796d2e76a53f 
 #>                 "CLC3_211_mean_50km"
 
 # Priors can then be added via 
@@ -584,8 +584,8 @@ summary(mod1)
 #>    variable                   mean      sd      q05     q50    q95    mode   kld
 #>    <chr>                     <dbl>   <dbl>    <dbl>   <dbl>  <dbl>   <dbl> <dbl>
 #>  1 Intercept               -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
-#>  2 Intercept_a6f3640a_poi… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
-#>  3 Intercept_e4d21f10_poi… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
+#>  2 Intercept_X7f79f2ca_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
+#>  3 Intercept_X4d95674e_po… -0.328  25.8    -42.8    -0.328  42.1   -0.328      0
 #>  4 bio01_mean_50km         -0.109   0.134   -0.330  -0.109   0.112 -0.109      0
 #>  5 bio03_mean_50km         -0.482   0.121   -0.681  -0.482  -0.283 -0.482      0
 #>  6 bio19_mean_50km          0.472   0.0870   0.329   0.472   0.615  0.472      0

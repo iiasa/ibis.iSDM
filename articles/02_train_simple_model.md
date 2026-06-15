@@ -378,21 +378,21 @@ gathered data.
 fit$rm_threshold()
 validate(fit, method = "cont")
 #>                                modelid                 name     method
-#> 1 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 2 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 3 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 4 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 5 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 6 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 7 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
-#> 8 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species continuous
+#> 1 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 2 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 3 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 4 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 5 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 6 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 7 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
+#> 8 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species continuous
 #>       metric       value
 #> 1          n 208.0000000
 #> 2         r2        -Inf
-#> 3       rmse   0.6091650
-#> 4        mae   0.5307449
-#> 5       mape   0.5307449
-#> 6    logloss   1.4545333
+#> 3       rmse   0.6095663
+#> 4        mae   0.5311048
+#> 5       mape   0.5311048
+#> 6    logloss   1.4543744
 #> 7   normgini         NaN
 #> 8 cont.boyce          NA
 
@@ -400,33 +400,33 @@ validate(fit, method = "cont")
 fit <- threshold(fit, method = "percentile", value = 0.5, format = "binary")
 validate(fit, method = "disc")
 #>                                 modelid                 name   method
-#> 1  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 2  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 3  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 4  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 5  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 6  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 7  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 8  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 9  a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 10 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 11 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 12 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
-#> 13 a1e4236f-ec8a-4f94-95f8-c44050d0fd59 Virtual test species discrete
+#> 1  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 2  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 3  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 4  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 5  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 6  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 7  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 8  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 9  7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 10 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 11 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 12 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
+#> 13 7d8fb2cb-97f0-4d66-af2f-040aed8234d5 Virtual test species discrete
 #>                 metric       value
 #> 1                    n 602.0000000
-#> 2                  auc   0.6954315
-#> 3     overall.accuracy   0.7558140
-#> 4  true.presence.ratio   0.4143426
-#> 5            precision   0.7074830
+#> 2                  auc   0.6941624
+#> 3     overall.accuracy   0.7541528
+#> 4  true.presence.ratio   0.4126984
+#> 5            precision   0.7027027
 #> 6          sensitivity   0.5000000
-#> 7          specificity   0.8908629
-#> 8                  tss   0.3908629
-#> 9                   f1   0.5859155
-#> 10             logloss   6.2110178
-#> 11   expected.accuracy   0.5790389
-#> 12               kappa   0.4199321
-#> 13         brier.score   0.2441860
+#> 7          specificity   0.8883249
+#> 8                  tss   0.3883249
+#> 9                   f1   0.5842697
+#> 10             logloss   6.2126790
+#> 11   expected.accuracy   0.5785256
+#> 12               kappa   0.4166972
+#> 13         brier.score   0.2458472
 ```
 
 Validating integrated SDMs, particular those fitted with multiple
