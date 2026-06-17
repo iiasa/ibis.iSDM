@@ -16,6 +16,9 @@ rm_biodiversity(x, name, id)
 
 \item{id}{A \code{\link{character}} with the id of the biodiversity dataset.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with matching biodiversity data removed.
+}
 \description{
 Remove a particular dataset (or all) from an \link{distribution} object with
 a \code{\link[=BiodiversityDatasetCollection-class]{BiodiversityDatasetCollection}}.

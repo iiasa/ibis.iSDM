@@ -28,12 +28,18 @@ NULL
 #' @family prior
 #' @keywords priors
 #'
+#' @return A [`Prior`] object.
+#'
 #' @references
 #' * Chipman, H., George, E., and McCulloch, R. (2009) BART: Bayesian Additive
 #' Regression Trees.
 #' * Chipman, H., George, E., and McCulloch R. (2006) Bayesian Ensemble Learning.
 #' Advances in Neural Information Processing Systems 19, Scholkopf, Platt and Hoffman,
 #' Eds., MIT Press, Cambridge, MA, 265-272.
+#'
+#' @examples
+#' prior <- BARTPrior("forest", hyper = 0.75)
+#' prior$get("value")
 #'
 #' @name BARTPrior
 NULL
@@ -82,6 +88,12 @@ methods::setMethod(
 #'
 #' @family prior
 #' @keywords priors
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- BARTPriors(c("forest", "temperature"), hyper = 0.75)
+#' length(priors)
 #'
 #' @name BARTPriors
 NULL

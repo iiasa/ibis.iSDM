@@ -151,6 +151,14 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
 #' @return Invisible
 #' @seealso [future], [ibis_future]
 #' @keywords misc
+#'
+#' @examples
+#' old_parallel <- getOption("ibis.runparallel")
+#' old_threads <- getOption("ibis.nthread")
+#' options(ibis.nthread = max(2, getOption("ibis.nthread", 2)))
+#' ibis_enable_parallel()
+#' options(ibis.runparallel = old_parallel, ibis.nthread = old_threads)
+#'
 #' @export
 ibis_enable_parallel <- function(){
   options('ibis.runparallel' = TRUE)
@@ -175,6 +183,12 @@ ibis_enable_parallel <- function(){
 #' @return Invisible
 #' @seealso [future], [ibis_future]
 #' @keywords misc
+#'
+#' @examples
+#' old_strategy <- getOption("ibis.futurestrategy")
+#' ibis_set_strategy("sequential")
+#' options(ibis.futurestrategy = old_strategy)
+#'
 #' @export
 ibis_set_strategy <- function(strategy = "sequential"){
   assertthat::assert_that(is.character(strategy))
@@ -192,6 +206,12 @@ ibis_set_strategy <- function(strategy = "sequential"){
 #' @return Invisible
 #' @seealso [future]
 #' @keywords misc
+#'
+#' @examples
+#' old_threads <- getOption("ibis.nthread")
+#' ibis_set_threads(2)
+#' options(ibis.nthread = old_threads)
+#'
 #' @export
 ibis_set_threads <- function(threads = 2){
   assertthat::assert_that(is.numeric(threads),
@@ -377,10 +397,10 @@ chunk_data <- function(X, N = NULL, cores = parallel::detectCores(), index_only 
 #'
 #' @keywords utils
 #'
+#' @return A [`list`] with one result per element or row in `X`.
+#'
 #' @examples
-#' \dontrun{
-#'  run_parallel(list, mean, cores = 4)
-#' }
+#' run_parallel(list(1:3, 4:6), mean, cores = 1)
 #'
 #' @export
 run_parallel <- function(X, FUN, cores = 1, approach = "future", export_packages = NULL, ...) {

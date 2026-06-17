@@ -79,7 +79,7 @@
 #'
 #' @seealso [add_limits_extrapolation()]
 #' @keywords bias offset control
-#' @concept The spatial bias weighting was inspired by code in the \code{enmSdmX} package.
+#' @concept spatial bias weighting
 #'
 #' @examples
 #' \dontrun{
@@ -171,6 +171,8 @@ methods::setMethod(
 #'
 #' @family control
 #' @seealso [add_control_bias()]
+#'
+#' @return A [`BiodiversityDistribution`] object with matching control settings removed.
 #'
 #' @examples
 #' \dontrun{

@@ -23,6 +23,12 @@ This helper function shows the code from a trained
 after a similar functionality in the brms R-package.
 \strong{It only works with models inferred with stan!}
 }
+\examples{
+\dontrun{
+stancode(fitted_stan_model)
+}
+
+}
 \seealso{
 rstan, cmdstanr, brms
 }

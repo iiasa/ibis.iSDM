@@ -54,6 +54,14 @@ NULL
 #' @keywords priors
 #' @family prior
 #'
+#' @return A [`Prior`] object.
+#'
+#' @examples
+#' \dontrun{
+#' prior <- INLAPrior("forest", type = "normal", hyper = c(0, 0.001))
+#' prior$get("value")
+#' }
+#'
 #' @name INLAPrior
 NULL
 
@@ -120,6 +128,14 @@ methods::setMethod(
 #'
 #' @keywords priors
 #' @family prior
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' \dontrun{
+#' priors <- INLAPriors(c("forest", "temperature"), type = "normal")
+#' length(priors)
+#' }
 #'
 #' @name INLAPriors
 NULL

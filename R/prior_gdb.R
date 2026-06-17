@@ -30,6 +30,12 @@ NULL
 #' @keywords priors
 #' @family prior
 #'
+#' @return A [`Prior`] object.
+#'
+#' @examples
+#' prior <- GDBPrior("forest", hyper = "increasing")
+#' prior$get("value")
+#'
 #' @name GDBPrior
 NULL
 
@@ -78,6 +84,12 @@ methods::setMethod(
 #'
 #' @keywords priors
 #' @family prior
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- GDBPriors(c("forest", "temperature"), hyper = "increasing")
+#' length(priors)
 #'
 #' @name GDBPriors
 NULL

@@ -15,4 +15,9 @@ Boolean evaluation with \link{logical} output.
 \description{
 Tests if an input is a stars object.
 }
+\examples{
+x <- stars::st_as_stars(matrix(1, nrow = 1, ncol = 1))
+is.stars(x)
+
+}
 \keyword{misc}

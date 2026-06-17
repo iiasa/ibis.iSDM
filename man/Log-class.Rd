@@ -4,8 +4,16 @@
 \alias{Log-class}
 \alias{Log}
 \title{Log prototype.}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 Basic \code{\link[R6:R6]{R6}} object for Log, any Log inherit from here
+}
+\examples{
+log <- Log$new(tempfile(fileext = ".txt"), new_waiver())
+log$get_filename()
+
 }
 \keyword{classes}
 \section{Public fields}{

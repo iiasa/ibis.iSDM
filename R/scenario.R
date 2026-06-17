@@ -22,6 +22,8 @@ NULL
 #' an extrapolation limit [add_limits_extrapolation()], this zonal layer can be
 #' reused for the projections. **Note: This effectively fixes the projections to certain areas.**
 #'
+#' @return A [`BiodiversityScenario`] object.
+#'
 #' @examples
 #' \dontrun{
 #'   scenario(fit, limits = island_area)

@@ -1609,6 +1609,8 @@ explode_factorized_raster <- function(ras, name = NULL){
 #'
 #' @keywords utils
 #'
+#' @return An [`sf`] object containing the thinned observations.
+#'
 #' @examples
 #' \dontrun{
 #'  # Thin a certain number of observations

@@ -4,6 +4,9 @@
 \alias{BiodiversityDistribution-class}
 \alias{BiodiversityDistribution}
 \title{Biodiversity Distribution master class}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 Base \code{\link[R6:R6]{R6}} class for any biodiversity distribution objects.
 Serves as container that supplies data and functions to other \code{\link[R6:R6]{R6}}

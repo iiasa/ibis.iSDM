@@ -19,6 +19,9 @@ options are \code{'increasing'}, \code{'decreasing'}, \code{'positive'},
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 Function to include prior information as monotonic constrain to
 an extreme gradient descent boosting model \code{\link{engine_xgboost}}. Monotonic
@@ -27,9 +30,7 @@ specifying a monotonic constrain does not guarantee that the variable is not
 regularized out during model fitting.
 }
 \examples{
-\dontrun{
  pp <- XGBPrior("forest", "increasing")
-}
 
 }
 \references{

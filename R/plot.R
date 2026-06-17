@@ -104,6 +104,14 @@ plot.BiodiversityScenario <- function(x,...) x$plot(...)
 #' @seealso [partial], [plot.DistributionModel]
 #' @keywords misc
 #'
+#' @examples
+#' \dontrun{
+#' prediction <- terra::rast(nrows = 3, ncols = 3, nlyrs = 2)
+#' terra::values(prediction) <- cbind(mean = seq_len(9), sd = seq_len(9) / 9)
+#' names(prediction) <- c("mean", "sd")
+#' bivplot(prediction)
+#' }
+#'
 #' @export
 #' @name bivplot
 NULL

@@ -18,6 +18,9 @@ effects.}
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 Function to include prior information as split probability for
 the Bayesian additive regression tree model added via \link{engine_bart}.
@@ -34,6 +37,11 @@ classification tree, this does not necessarily mean that the prediction
 changes if the value is non-informative (as the split can occur early on). It
 does however affect any variable importance estimates calculated from the
 model.
+}
+\examples{
+prior <- BARTPrior("forest", hyper = 0.75)
+prior$get("value")
+
 }
 \references{
 \itemize{

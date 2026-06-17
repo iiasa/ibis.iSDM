@@ -10,12 +10,10 @@ if (!methods::isClass("PriorList")) methods::setOldClass("PriorList")
 #'
 #' @name PriorList-class
 #' @examples
-#' \dontrun{
 #' priors(
-#'     INLAPrior('var1','normal',c(0,0.1)),
-#'     INLAPrior('var2','normal',c(0,0.1))
+#'     GDBPrior("var1", "increasing"),
+#'     GDBPrior("var2", "decreasing")
 #'    )
-#' }
 #' @return A PriorList object.
 #' @aliases PriorList
 #' @keywords classes

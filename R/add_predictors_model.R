@@ -47,6 +47,8 @@ NULL
 #' * \code{'hinge'} - Add hinge transformed predictors.
 #' * \code{'bin'} - Add predictors binned by their percentiles.
 #'
+#' @return A [`BiodiversityDistribution`] object with model prediction layers added as predictors.
+#'
 #' @examples
 #' \dontrun{
 #'  # Fit first model

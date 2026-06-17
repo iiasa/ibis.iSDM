@@ -15,4 +15,9 @@ Boolean evaluation with \link{logical} output.
 \description{
 Check whether a formula is valid
 }
+\examples{
+f <- y ~ x
+is.formula(f)
+
+}
 \keyword{misc}

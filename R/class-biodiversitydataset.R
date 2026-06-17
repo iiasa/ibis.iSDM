@@ -13,6 +13,12 @@ if (!methods::isClass("BiodiversityDataset")) methods::setOldClass("Biodiversity
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' collection <- BiodiversityDatasetCollection$new()
+#' collection$length()
+#'
 #' @name BiodiversityDatasetCollection-class
 NULL
 
@@ -324,6 +330,24 @@ BiodiversityDatasetCollection <- R6::R6Class(
 #' BiodiversityDataset prototype description
 #'
 #' @keywords classes
+#'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' records <- data.frame(x = 0, y = 0, observed = 1)
+#' dataset <- BiodiversityDataset$new(
+#'   name = "Example records",
+#'   id = "example-dataset",
+#'   equation = observed ~ 1,
+#'   family = "binomial",
+#'   link = NULL,
+#'   type = "poipa",
+#'   weight = NULL,
+#'   field_occurrence = "observed",
+#'   data = records,
+#'   use_intercept = TRUE
+#' )
+#' dataset$get_type(short = TRUE)
 #'
 #' @name BiodiversityDataset-class
 NULL

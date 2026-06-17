@@ -18,9 +18,17 @@ effects.}
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A named \code{\link{list}} of \code{\link{Prior}} objects.
+}
 \description{
 This is a helper function to specify several \link{BARTPrior} objects
 with the same hyper-parameters, but different variables.
+}
+\examples{
+priors <- BARTPriors(c("forest", "temperature"), hyper = 0.75)
+length(priors)
+
 }
 \seealso{
 Other prior:

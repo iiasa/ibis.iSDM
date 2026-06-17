@@ -15,6 +15,9 @@ rm_predictors(x, names)
 \item{names}{\code{\link{vector}} A Vector of character names describing the
 environmental stack.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with the selected predictors removed.
+}
 \description{
 Remove a particular variable from an \link{distribution} object with
 a \code{\link[=PredictorDataset-class]{PredictorDataset}}. See Examples.

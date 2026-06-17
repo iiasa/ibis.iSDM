@@ -7,6 +7,12 @@ if (!methods::isClass("Engine")) methods::setOldClass("Engine")
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' engine <- Engine$new("GLM-Model", "GLM")
+#' engine$get_class()
+#'
 #' @name Engine-class
 NULL
 

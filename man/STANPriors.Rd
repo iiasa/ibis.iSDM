@@ -19,9 +19,17 @@ predictors or latent effects.}
 
 \item{...}{Variables passed on to prior object}
 }
+\value{
+A named \code{\link{list}} of \code{\link{Prior}} objects.
+}
 \description{
 This is a helper function to specify several \link{STANPrior} with
 the same hyper-parameters, but different variables.
+}
+\examples{
+priors <- STANPriors(c("forest", "temperature"), type = "normal")
+length(priors)
+
 }
 \seealso{
 Other prior:

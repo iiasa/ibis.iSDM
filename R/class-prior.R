@@ -9,6 +9,10 @@ if (!methods::isClass("Prior")) methods::setOldClass("Prior")
 #' @return Defines a Prior object.
 #' @aliases Prior
 #' @keywords classes
+#'
+#' @examples
+#' prior <- Prior$new(name = "ExamplePrior", variable = "temperature", value = 1)
+#' prior$get("value")
 NULL
 
 #' @rdname Prior-class

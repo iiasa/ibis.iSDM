@@ -38,6 +38,12 @@ new_id <- function() {
 #'
 #' @keywords misc
 #'
+#' @return An object of class `"Id"`.
+#'
+#' @examples
+#' id <- as.Id("example-id")
+#' is.Id(id)
+#'
 #' @name as.Id
 NULL
 
@@ -60,6 +66,10 @@ as.Id.character <- function(x, ...) {
 #'
 #' @keywords misc
 #'
+#' @examples
+#' id <- as.Id("example-id")
+#' is.Id(id)
+#'
 #' @export
 is.Id <- function(x) inherits(x, "Id")
 
@@ -70,6 +80,9 @@ is.Id <- function(x) inherits(x, "Id")
 #' @return Boolean evaluation with [logical] output.
 #'
 #' @keywords misc
+#'
+#' @examples
+#' is.Waiver(new_waiver())
 #'
 #' @export
 is.Waiver <- function(x) inherits(x, "Waiver")
@@ -82,6 +95,10 @@ is.Waiver <- function(x) inherits(x, "Waiver")
 #'
 #' @keywords misc
 #'
+#' @examples
+#' f <- y ~ x
+#' is.formula(f)
+#'
 #' @export
 is.formula <- function(x) inherits(x, "formula")
 
@@ -92,6 +109,10 @@ is.formula <- function(x) inherits(x, "formula")
 #' @return Boolean evaluation with [logical] output.
 #'
 #' @keywords misc
+#'
+#' @examples
+#' r <- terra::rast(nrows = 1, ncols = 1, vals = 1)
+#' is.Raster(r)
 #'
 #' @export
 is.Raster <- function(x)
@@ -106,6 +127,10 @@ is.Raster <- function(x)
 #' @return Boolean evaluation with [logical] output.
 #'
 #' @keywords misc
+#'
+#' @examples
+#' x <- stars::st_as_stars(matrix(1, nrow = 1, ncol = 1))
+#' is.stars(x)
 #'
 #' @export
 is.stars <- function(x)

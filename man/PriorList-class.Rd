@@ -12,12 +12,10 @@ This class represents a collection of \code{\link[=Prior-class]{Prior}} objects.
 methods for accessing, adding and removing priors from the list
 }
 \examples{
-\dontrun{
 priors(
-    INLAPrior('var1','normal',c(0,0.1)),
-    INLAPrior('var2','normal',c(0,0.1))
+    GDBPrior("var1", "increasing"),
+    GDBPrior("var2", "decreasing")
    )
-}
 }
 \keyword{classes}
 \section{Public fields}{

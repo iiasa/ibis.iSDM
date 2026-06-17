@@ -79,6 +79,15 @@ Although a work around without the package could be developed, it was not
 deemed necessary at this point. See also this
 \href{https://gist.github.com/scbrown86/2779137a9378df7b60afd23e0c45c188}{gist}.
 }
+\examples{
+\dontrun{
+prediction <- terra::rast(nrows = 3, ncols = 3, nlyrs = 2)
+terra::values(prediction) <- cbind(mean = seq_len(9), sd = seq_len(9) / 9)
+names(prediction) <- c("mean", "sd")
+bivplot(prediction)
+}
+
+}
 \seealso{
 \link{partial}, \link{plot.DistributionModel}
 }

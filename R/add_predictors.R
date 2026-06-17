@@ -82,6 +82,8 @@ NULL
 #' Some engines use binary variables regardless of the parameter \code{"explode_factors"}
 #' set here.
 #'
+#' @return A [`BiodiversityDistribution`] or [`BiodiversityScenario`] object with predictors added.
+#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>
@@ -371,6 +373,8 @@ methods::setMethod(
 #' @param transform [`character`] Any optional transformation to be applied.
 #' Usually not needed (Default: \code{"none"}).
 #'
+#' @return A [`BiodiversityDistribution`] object with elevation preference predictors added.
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
@@ -501,6 +505,8 @@ methods::setMethod(
 #' expected value (Default: \code{NULL}).
 #' @param priors A [`PriorList-class`] object. Default is set to NULL which uses
 #' default prior assumptions.
+#'
+#' @return A [`BiodiversityDistribution`] object with range predictors added.
 #'
 #' @references
 #' * Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence data and
@@ -693,6 +699,8 @@ methods::setMethod(
 #' @param names [`vector`] A Vector of character names describing the
 #' environmental stack.
 #'
+#' @return A [`BiodiversityDistribution`] object with the selected predictors removed.
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>
@@ -742,6 +750,8 @@ methods::setMethod(
 #' @param x [distribution()] (i.e. [`BiodiversityDistribution-class`]) object.
 #' @param names [`vector`] A Vector of character names describing the
 #'   environmental stack.
+#'
+#' @return A [`BiodiversityDistribution`] object containing only the selected predictors.
 #'
 #' @examples
 #' \dontrun{

@@ -4,12 +4,20 @@
 \alias{DistributionModel-class}
 \alias{DistributionModel}
 \title{Class for the trained Model object}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 All trained Models inherit the options here plus any additional ones defined
 by the engine and inference.
 }
 \note{
 Could be further pretified and commands outsourced.
+}
+\examples{
+model <- DistributionModel$new("Example model")
+model$get_name()
+
 }
 \keyword{classes}
 \section{Public fields}{

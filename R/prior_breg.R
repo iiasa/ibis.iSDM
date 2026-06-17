@@ -42,15 +42,15 @@ NULL
 #' @family prior
 #' @keywords priors
 #'
+#' @return A [`Prior`] object.
+#'
 #' @examples
-#' \dontrun{
 #' # Positive coefficient
 #' p1 <- BREGPrior(variable = "forest", hyper = 2, ip = NULL)
 #' p1
 #' # Coefficient and direction unknown but variable def. important
 #' p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
 #' p2
-#' }
 #'
 #' @name BREGPrior
 NULL
@@ -105,6 +105,12 @@ methods::setMethod(
 #'
 #' @family prior
 #' @keywords priors
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- BREGPriors(c("forest", "cropland"), hyper = 1, ip = 0.5)
+#' length(priors)
 #'
 #' @name BREGPriors
 NULL

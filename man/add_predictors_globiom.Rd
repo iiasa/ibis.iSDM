@@ -18,6 +18,9 @@ add_predictors_globiom(x, ...)
 
 \item{...}{Other parameters passed down}
 }
+\value{
+No return value; this function is defunct and always errors.
+}
 \description{
 \strong{This function is defunct! Use the BNRTools package for formatting input data!}
 }

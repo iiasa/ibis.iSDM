@@ -23,4 +23,4 @@ modal(trees$Girth)
 
 }
 \keyword{misc}
-\keyword{utils,}
+\keyword{utils}

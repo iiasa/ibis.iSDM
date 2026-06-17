@@ -4,9 +4,18 @@
 \alias{Settings-class}
 \alias{Settings}
 \title{Prototype for model settings object}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 Basic \code{\link[R6:R6]{R6}} object for Settings object, a List that stores settings used
 related to model training.
+}
+\examples{
+settings <- Settings$new()
+settings$set("type", "response")
+settings$get("type")
+
 }
 \keyword{classes}
 \section{Public fields}{

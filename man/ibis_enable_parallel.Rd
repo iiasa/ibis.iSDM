@@ -15,6 +15,14 @@ to \code{TRUE}, then parallel inference (if supported by engines) and projection
 enabled across the package.
 For enabling prediction support beyond sequential prediction see the \code{\link{ibis_future}} function.
 }
+\examples{
+old_parallel <- getOption("ibis.runparallel")
+old_threads <- getOption("ibis.nthread")
+options(ibis.nthread = max(2, getOption("ibis.nthread", 2)))
+ibis_enable_parallel()
+options(ibis.runparallel = old_parallel, ibis.nthread = old_threads)
+
+}
 \seealso{
 \link[future:future]{future}, \link{ibis_future}
 }

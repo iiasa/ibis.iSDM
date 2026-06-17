@@ -70,6 +70,17 @@ conversion succeeds.
 This function fits a stan model using the light-weight interface
 provided by cmdstanr. The code was adapted from McElreath rethinking package.
 }
+\examples{
+\dontrun{
+stan_file <- tempfile(fileext = ".stan")
+writeLines(
+  "parameters { real y; } model { y ~ normal(0, 1); }",
+  stan_file
+)
+fit <- run_stan(stan_file, data = list(), chains = 1, cores = 1, iter = 100)
+}
+
+}
 \seealso{
 rethinking R package
 }

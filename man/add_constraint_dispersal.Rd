@@ -45,6 +45,9 @@ instance \code{`kissmig`}.}
 \item{...}{passed on parameters. See also the specific methods for adding
 constraints.}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object with the dispersal constraint added.
+}
 \description{
 Add dispersal constraint to an existing \code{scenario}
 }
@@ -76,6 +79,16 @@ colonized cell becomes uncolonised, i.e., the species gets locally extinct
 \note{
 Unless otherwise stated, the default unit of supplied distance values (e.g. average dispersal
 distance) should be in \code{"m"}.
+}
+\examples{
+scenario_obj <- BiodiversityScenario$new()
+constrained <- add_constraint_dispersal(
+  scenario_obj,
+  method = "sdd_fixed",
+  value = 1000
+)
+names(constrained$get_constraints())
+
 }
 \references{
 \itemize{

@@ -116,7 +116,7 @@ interpolate_gaps <- function(env, date_interpolation = "annual", method = "linea
 #'
 #' @return [`numeric`] index of the closest
 #'
-#' @keywords internal, utils
+#' @keywords internal utils
 #'
 #' @examples
 #' \dontrun{
@@ -168,7 +168,7 @@ get_nearest_date <- function(d, timeseries, return_index = TRUE){
 #'
 #' @note Currently only works via matrix manipulation
 #'
-#' @keywords scenario, internal
+#' @keywords scenario internal
 #'
 #' @examples
 #' \dontrun{

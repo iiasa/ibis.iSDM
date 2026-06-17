@@ -18,6 +18,9 @@ options are \code{'increasing'}, \code{'decreasing'}, \code{'convex'}, \code{'co
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 Monotonic constrains for gradient descent boosting models do not
 work in the same way as other priors where a specific coefficient or
@@ -32,6 +35,11 @@ regularized out.
 \note{
 Similar priors can also be defined for the \code{\link{engine_xgboost}} via
 \code{\link[=XGBPrior]{XGBPrior()}}.
+}
+\examples{
+prior <- GDBPrior("forest", hyper = "increasing")
+prior$get("value")
+
 }
 \references{
 \itemize{

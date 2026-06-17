@@ -17,6 +17,9 @@ BREGPrior(variable, hyper = NULL, ip = NULL)
 \item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability
 of the target variable (Default: \code{NULL}).}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 Function to include prior information via Zellner-style spike
 and slab prior for generalized linear models used in \link{engine_breg}. These
@@ -47,14 +50,12 @@ inclusion probability. In other words:
 \strong{The hyperparameters 'hyper' and 'ip' can't be both \code{NULL}.}
 }
 \examples{
-\dontrun{
 # Positive coefficient
 p1 <- BREGPrior(variable = "forest", hyper = 2, ip = NULL)
 p1
 # Coefficient and direction unknown but variable def. important
 p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
 p2
-}
 
 }
 \references{

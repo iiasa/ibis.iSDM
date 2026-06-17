@@ -8,6 +8,12 @@ if (!methods::isClass("DistributionModel")) methods::setOldClass("DistributionMo
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' model <- DistributionModel$new("Example model")
+#' model$get_name()
+#'
 #' @name DistributionModel-class
 NULL
 

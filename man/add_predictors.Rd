@@ -162,6 +162,9 @@ the predictor ranges used for model inferrence (Default: \code{NULL}).}
 
 \item{...}{Other parameters passed down}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} or \code{\link{BiodiversityScenario}} object with predictors added.
+}
 \description{
 This function allows to add predictors to \link{distribution} or
 \link{BiodiversityScenario} objects. Predictors are covariates that in spatial

@@ -63,6 +63,9 @@ Absence points will be preferentially sampled in areas with higher (!) bias. (De
 
 \item{...}{Any other settings to be added to the pseudoabs settings.}
 }
+\value{
+A \code{\link{Settings}} object containing pseudo-absence sampling settings.
+}
 \description{
 This function defines the settings for pseudo-absence sampling
 of the background. For many engines such points are necessary to model
@@ -103,7 +106,6 @@ cells with non-zero values.
 }
 }
 \examples{
-\dontrun{
 # This setting generates 10000 pseudo-absence points outside the
 # minimum convex polygon of presence points
 ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
@@ -111,6 +113,7 @@ ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
 # This setting would match the number of presence-absence points directly.
 ass2 <- pseudoabs_settings(nrpoints = 0, min_ratio = 1)
 
+\dontrun{
 # These settings can then be used to add pseudo-absence data to a
 # presence-only dataset. This effectively adds these simulated absence
 # points to the resulting model

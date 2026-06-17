@@ -202,6 +202,17 @@ methods::setMethod(
 #' @family constraint
 #' @keywords scenario
 #'
+#' @return A [`BiodiversityScenario`] object with the dispersal constraint added.
+#'
+#' @examples
+#' scenario_obj <- BiodiversityScenario$new()
+#' constrained <- add_constraint_dispersal(
+#'   scenario_obj,
+#'   method = "sdd_fixed",
+#'   value = 1000
+#' )
+#' names(constrained$get_constraints())
+#'
 #'@name add_constraint_dispersal
 NULL
 
@@ -513,6 +524,18 @@ methods::setMethod(
 #' @family constraint
 #' @keywords scenario
 #'
+#' @return A [`BiodiversityScenario`] object with the connectivity constraint added.
+#'
+#' @examples
+#' resistance <- terra::rast(nrows = 2, ncols = 2)
+#' terra::values(resistance) <- c(0, 0.2, 0.8, 1)
+#' constrained <- add_constraint_connectivity(
+#'   BiodiversityScenario$new(),
+#'   method = "resistance",
+#'   resistance = resistance
+#' )
+#' names(constrained$get_constraints())
+#'
 #'@name add_constraint_connectivity
 NULL
 
@@ -634,6 +657,8 @@ methods::setMethod(
 #'
 #' @family constraint
 #' @keywords scenario
+#'
+#' @return A [`BiodiversityScenario`] object with the adaptability constraint added.
 #'
 #' @examples
 #' \dontrun{
@@ -877,6 +902,8 @@ methods::setMethod(
 #' @family constraint
 #' @keywords scenario
 #'
+#' @return A [`BiodiversityScenario`] object with the minimum-size constraint added.
+#'
 #' @examples
 #' \dontrun{
 #' scenario(fit) |>
@@ -965,6 +992,8 @@ methods::setMethod(
 #'
 #' @family constraint
 #' @keywords scenario
+#'
+#' @return A [`BiodiversityScenario`] object with the boundary or zone constraint added.
 #'
 #' @examples
 #' \dontrun{
@@ -1103,6 +1132,8 @@ methods::setMethod(
 #'
 #' @family constraint
 #' @keywords scenario
+#'
+#' @return A [`BiodiversityScenario`] object with the threshold constraint added.
 #'
 #' @examples
 #' \dontrun{

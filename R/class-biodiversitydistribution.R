@@ -11,6 +11,9 @@ if (!methods::isClass("BiodiversityDistribution")) methods::setOldClass("Biodive
 #'
 #' @details Run [`names()`] on a [`distribution`] object to show all available
 #' functions.
+#'
+#' @return An [`R6::R6Class`] generator object.
+#'
 #' @examples
 #' # Query available functions and entries
 #' background <- terra::rast(system.file('extdata/europegrid_50km.tif',

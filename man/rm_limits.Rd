@@ -12,6 +12,9 @@ rm_limits(x)
 \arguments{
 \item{x}{\link{distribution} (i.e. \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}) object.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with extrapolation limits removed.
+}
 \description{
 This function allows to remove set limits from an existing \link{distribution}
 object.

@@ -83,6 +83,13 @@ summary.Settings <- function(object, ...) object$summary()
 #' @seealso [stats::coef()].
 #' @keywords coef
 #'
+#' @examples
+#' model <- DistributionModel$new("Example model")
+#' model$get_coefficients <- function() {
+#'   data.frame(variable = "temperature", coefficient = 1)
+#' }
+#' coef(model)
+#'
 #' @name coef
 NULL
 

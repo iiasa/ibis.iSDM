@@ -15,6 +15,9 @@ rm_control(x, type)
 \item{type}{A \code{\link{character}} vector describing the type of control to be removed.
 Can be missing.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with matching control settings removed.
+}
 \description{
 This function allows to remove set control options from an existing \link{distribution}
 object.

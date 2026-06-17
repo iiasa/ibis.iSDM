@@ -32,6 +32,9 @@ constraints.}
 \code{"boundary"} (default, posthoc mask on full stacked projection) or
 \code{"zone"} (per-timestep mask applied within the projection loop).}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object with the boundary or zone constraint added.
+}
 \description{
 The purpose of boundary constraints is to limit a future
 projection within a specified area (such as for example a range or

@@ -15,6 +15,8 @@ NULL
 #' @seealso [add_predictors]
 #' @references [https://github.com/iiasa/BNRTools](https://github.com/iiasa/BNRTools)
 #'
+#' @return No return value; this function is defunct and always errors.
+#'
 #' @examples
 #' \dontrun{
 #'  obj <- distribution(background) |>

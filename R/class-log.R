@@ -7,6 +7,12 @@ if (!methods::isClass("Log")) methods::setOldClass("Log")
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' log <- Log$new(tempfile(fileext = ".txt"), new_waiver())
+#' log$get_filename()
+#'
 #' @name Log-class
 NULL
 

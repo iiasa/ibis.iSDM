@@ -55,6 +55,20 @@ This method removes all columns from the input \code{df} object other
 than the \code{field_occurrence} column and the coordinate columns (which
 will be created if not already present).
 }
+\examples{
+template <- terra::rast(nrows = 5, ncols = 5, xmin = 0, xmax = 5, ymin = 0, ymax = 5)
+terra::values(template) <- 1
+points <- sf::st_as_sf(
+  data.frame(x = c(1, 2), y = c(1, 2), observed = 1),
+  coords = c("x", "y"),
+  remove = FALSE
+)
+settings <- pseudoabs_settings(background = template, nrpoints = 3)
+set.seed(1)
+pseudoabs <- add_pseudoabsence(points, template = template, settings = settings)
+table(pseudoabs$observed)
+
+}
 \references{
 \itemize{
 \item Stolar, J., & Nielsen, S. E. (2015). Accounting for spatially biased sampling effort in

@@ -4,12 +4,20 @@
 \alias{BiodiversityDatasetCollection-class}
 \alias{BiodiversityDatasetCollection}
 \title{BiodiversityDatasetCollection super class description}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 Acts a container for a specified set of BiodiversityDataset contained within.
 Functions are provided to summarize across the BiodiversityDataset-class objects.
 }
 \note{
 This can likely be beautified further.
+}
+\examples{
+collection <- BiodiversityDatasetCollection$new()
+collection$length()
+
 }
 \keyword{classes}
 \section{Public fields}{

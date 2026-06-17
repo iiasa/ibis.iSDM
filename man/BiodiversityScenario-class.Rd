@@ -4,6 +4,9 @@
 \alias{BiodiversityScenario-class}
 \alias{BiodiversityScenario}
 \title{Class for a biodiversity scenario from a trained model}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 Base \code{\link[R6:R6]{R6}} class for any biodiversity scenario objects. Serves as
 container that supplies data and functions to other \code{\link[R6:R6]{R6}} classes and functions.
@@ -19,6 +22,11 @@ This requires the \code{"gganimate"} package.
 This requires a set \code{\link[=threshold]{threshold()}} to the scenario object.
 
 This requires set \code{\link{threshold}} prior to projection.
+}
+\examples{
+scenario_obj <- BiodiversityScenario$new()
+scenario_obj$get_constraints()
+
 }
 \seealso{
 \code{\link[=threshold]{threshold()}}

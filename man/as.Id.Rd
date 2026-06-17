@@ -14,7 +14,15 @@ as.Id(x, ...)
 
 \item{...}{Other arguements}
 }
+\value{
+An object of class \code{"Id"}.
+}
 \description{
 As Id
+}
+\examples{
+id <- as.Id("example-id")
+is.Id(id)
+
 }
 \keyword{misc}

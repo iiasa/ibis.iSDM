@@ -15,6 +15,9 @@ sel_predictors(x, names)
 \item{names}{\code{\link{vector}} A Vector of character names describing the
 environmental stack.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object containing only the selected predictors.
+}
 \description{
 This function allows - out of a \code{\link{character}} vector with the
 names of an already added \code{\link[=PredictorDataset-class]{PredictorDataset}} object - to select a

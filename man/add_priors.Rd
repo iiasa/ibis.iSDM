@@ -16,6 +16,9 @@ add_priors(x, priors = NULL, ...)
 
 \item{...}{Other parameters passed down.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with priors added.
+}
 \description{
 This function simply allows to add priors to an existing
 \link{distribution} object. The supplied priors must be a \code{\link[=PriorList-class]{PriorList}}

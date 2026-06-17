@@ -21,14 +21,15 @@ variation (Default: \code{2}) of a Gaussian distribution on the respective coeff
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 Function to create a new prior for \link{engine_stan} models. Priors
 currently can be set on specific environmental predictors.
 }
 \examples{
-\dontrun{
  pp <- STANPrior("forest", "normal", c(0,1))
-}
 
 }
 \references{

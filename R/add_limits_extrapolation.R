@@ -219,6 +219,8 @@ methods::setMethod(
 #' @family control
 #' @seealso [add_limits_extrapolation()]
 #'
+#' @return A [`BiodiversityDistribution`] object with extrapolation limits removed.
+#'
 #' @examples
 #' \dontrun{
 #'  x <- distribution(background) |>

@@ -19,9 +19,17 @@ options are \code{'increasing'}, \code{'decreasing'}, \code{'positive'},
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A named \code{\link{list}} of \code{\link{Prior}} objects.
+}
 \description{
 This is a helper function to specify several \link{XGBPrior} with the
 same hyper-parameters, but different variables.
+}
+\examples{
+priors <- XGBPriors(c("forest", "temperature"), hyper = "increasing")
+length(priors)
+
 }
 \seealso{
 Other prior:

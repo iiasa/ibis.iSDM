@@ -20,6 +20,9 @@ See description. The default values are set to a mean of \code{0} and a precisio
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 For any fixed and random effect INLA supports a range of
 different priors of exponential distributions.
@@ -53,6 +56,13 @@ priors related to more stringent parameter regularization such as Laplace or
 Horseshoe priors, which limits the capability of \code{\link{engine_inla}} for
 regularization. That being said many of the default uninformative priors act
 already regularize the coefficients to some degree.
+}
+\examples{
+\dontrun{
+prior <- INLAPrior("forest", type = "normal", hyper = c(0, 0.001))
+prior$get("value")
+}
+
 }
 \references{
 \itemize{

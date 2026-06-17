@@ -71,8 +71,9 @@
 #'
 #' @keywords train
 #'
+#' @return A [`Settings`] object containing pseudo-absence sampling settings.
+#'
 #' @examples
-#' \dontrun{
 #' # This setting generates 10000 pseudo-absence points outside the
 #' # minimum convex polygon of presence points
 #' ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
@@ -80,6 +81,7 @@
 #' # This setting would match the number of presence-absence points directly.
 #' ass2 <- pseudoabs_settings(nrpoints = 0, min_ratio = 1)
 #'
+#' \dontrun{
 #' # These settings can then be used to add pseudo-absence data to a
 #' # presence-only dataset. This effectively adds these simulated absence
 #' # points to the resulting model
@@ -188,6 +190,19 @@ methods::setMethod(
 #' Biological Conservation, 173, pp.144-154.
 #'
 #' @keywords train
+#'
+#' @examples
+#' template <- terra::rast(nrows = 5, ncols = 5, xmin = 0, xmax = 5, ymin = 0, ymax = 5)
+#' terra::values(template) <- 1
+#' points <- sf::st_as_sf(
+#'   data.frame(x = c(1, 2), y = c(1, 2), observed = 1),
+#'   coords = c("x", "y"),
+#'   remove = FALSE
+#' )
+#' settings <- pseudoabs_settings(background = template, nrpoints = 3)
+#' set.seed(1)
+#' pseudoabs <- add_pseudoabsence(points, template = template, settings = settings)
+#' table(pseudoabs$observed)
 #'
 #' @export
 add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL, settings = getOption("ibis.pseudoabsence")){

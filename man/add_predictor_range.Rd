@@ -50,6 +50,9 @@ expected value (Default: \code{NULL}).}
 \item{priors}{A \code{\link[=PriorList-class]{PriorList}} object. Default is set to NULL which uses
 default prior assumptions.}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with range predictors added.
+}
 \description{
 This function allows to add a species range which is usually
 drawn by experts in a separate process as spatial explicit prior. Both \code{\link[sf:sf]{sf}}

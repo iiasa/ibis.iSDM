@@ -18,6 +18,9 @@ the threshold should become (Default: \code{NA}).}
 \item{...}{passed on parameters. See also the specific methods for adding
 constraints.}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object with the threshold constraint added.
+}
 \description{
 This option adds a \code{\link[=threshold]{threshold()}} constraint to a scenario projection,
 thus effectively applying the threshold as mask to each projection step made

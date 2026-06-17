@@ -21,7 +21,7 @@ h <- 5.5
 w <- 5.5
 is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
              "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
-article_packages <- c("glmnet", "glmnetUtils", "stars", "terra", "sf", "igraph", "ggplot2", "ncdf4", "geosphere", "assertthat")
+article_packages <- c("glmnet", "glmnetUtils", "stars", "terra", "lwgeom", "sf", "igraph", "ggplot2", "ncdf4", "geosphere", "assertthat")
 run_examples <- !is_check && all(vapply(article_packages, requireNamespace, logical(1), quietly = TRUE))
 knitr::opts_chunk$set(fig.align = "center", eval = run_examples)
 ```
@@ -43,6 +43,7 @@ library(terra)
 library(igraph)
 library(ggplot2)
 library(ncdf4)
+library(lwgeom)
 library(assertthat)
 
 # Don't print out as many messages

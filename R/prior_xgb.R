@@ -24,10 +24,10 @@ NULL
 #' @family prior
 #' @keywords priors
 #'
+#' @return A [`Prior`] object.
+#'
 #' @examples
-#' \dontrun{
 #'  pp <- XGBPrior("forest", "increasing")
-#' }
 #'
 #' @name XGBPrior
 NULL
@@ -77,6 +77,12 @@ methods::setMethod(
 #'
 #' @family prior
 #' @keywords priors
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- XGBPriors(c("forest", "temperature"), hyper = "increasing")
+#' length(priors)
 #'
 #' @name XGBPriors
 NULL
@@ -130,10 +136,10 @@ methods::setMethod(
 #' @family prior
 #' @keywords priors
 #'
+#' @return A [`Prior`] object.
+#'
 #' @examples
-#' \dontrun{
 #'  pp <- XGBInteractionPrior(c("forest", "temperature"))
-#' }
 #'
 #' @name XGBInteractionPrior
 NULL
@@ -190,6 +196,12 @@ methods::setMethod(
 #'
 #' @family prior
 #' @keywords priors
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- XGBInteractionPriors(list(c("forest", "temperature"), c("forest", "rainfall")))
+#' length(priors)
 #'
 #' @name XGBInteractionPriors
 NULL

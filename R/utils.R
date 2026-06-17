@@ -24,6 +24,8 @@
 #'
 #' @keywords utils
 #'
+#' @noRd
+#'
 #' @examples
 #' \dontrun{
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
@@ -65,7 +67,7 @@ text_green <- function(text) { paste0('\033[32m',text,'\033[39m') }
 #' @param x A [`vector`] of values or characters.
 #' @param na.rm [`logical`] whether \code{NA} values are to be removed (Default: \code{TRUE})
 #'
-#' @keywords utils, misc
+#' @keywords utils misc
 #' @examples
 #' # Example
 #' modal(trees$Girth)
@@ -318,7 +320,7 @@ thresholdval <- function(x, knot, sense = "gte") {
 #' @param method A [`character`] on which option to applied.
 #'
 #' @returns A [`vector`] of rescaled numeric values.
-#' @keywords utils, internal
+#' @keywords utils internal
 #'
 #' @noRd
 scale_weight <- function(v, method = "scale"){
@@ -357,7 +359,7 @@ scale_weight <- function(v, method = "scale"){
 #' @returns A [`vector`] of sanitized [`character`].
 #'
 #' @keywords utils
-#' @concept Inspired from [`inlabru`] \code{"bru_standardise_names"} function.
+#' @concept name sanitizing
 #'
 #' @examples
 #' # Correct variable names
@@ -631,7 +633,7 @@ ensure_doFuture <- function() {
 #'
 #' @description Computes the marginal effect of a predictor variable by
 #' averaging model predictions across the training data while varying the focal
-#' variable over a grid. 
+#' variable over a grid.
 #'
 #' @param object A fitted model object.
 #' @param pred.var A \code{character} name of the predictor variable.

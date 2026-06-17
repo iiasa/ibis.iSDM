@@ -21,6 +21,14 @@ For models trained with machine-learning approaches (e.g. \code{\link{engine_bar
 etc) this function will return variable importance estimates rather than
 linear coefficients. Similar can be said for trained non-linear models.
 }
+\examples{
+model <- DistributionModel$new("Example model")
+model$get_coefficients <- function() {
+  data.frame(variable = "temperature", coefficient = 1)
+}
+coef(model)
+
+}
 \seealso{
 \code{\link[stats:coef]{stats::coef()}}.
 }

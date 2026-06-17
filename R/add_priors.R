@@ -16,6 +16,8 @@ NULL
 #'
 #' @family prior
 #'
+#' @return A [`BiodiversityDistribution`] object with priors added.
+#'
 #' @examples
 #' \dontrun{
 #'  pp <-  GLMNETPrior("forest")
@@ -62,6 +64,7 @@ methods::setMethod(
 #' @inheritParams add_priors
 #'
 #' @keywords deprecated
+#' @noRd
 methods::setGeneric(
   "set_priors",
   signature = methods::signature("x"),
@@ -71,6 +74,7 @@ methods::setGeneric(
 #' @inheritParams add_priors
 #'
 #' @keywords deprecated
+#' @noRd
 methods::setMethod(
   "set_priors",
   methods::signature(x = "BiodiversityDistribution"),
@@ -93,6 +97,8 @@ methods::setMethod(
 #' @param ... Other parameters passed down
 #'
 #' @family prior
+#'
+#' @return A [`BiodiversityDistribution`] object with matching priors removed.
 #'
 #' @examples
 #' \dontrun{
@@ -151,6 +157,8 @@ methods::setMethod(
 #' help pages on that topic!
 #'
 #' @family prior
+#'
+#' @return A [`PriorList`] object, or `NULL` when no compatible priors can be created.
 #'
 #' @examples
 #' \dontrun{

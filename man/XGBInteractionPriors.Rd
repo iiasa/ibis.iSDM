@@ -15,9 +15,17 @@ interaction group.}
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A named \code{\link{list}} of \code{\link{Prior}} objects.
+}
 \description{
 This is a helper function to specify several
 \link{XGBInteractionPrior} objects from a list of variable groups.
+}
+\examples{
+priors <- XGBInteractionPriors(list(c("forest", "temperature"), c("forest", "rainfall")))
+length(priors)
+
 }
 \seealso{
 Other prior:

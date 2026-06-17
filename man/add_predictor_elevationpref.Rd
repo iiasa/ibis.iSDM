@@ -23,6 +23,9 @@ object or \code{\link[terra:SpatRaster]{SpatRaster}} object.}
 \item{transform}{\code{\link{character}} Any optional transformation to be applied.
 Usually not needed (Default: \code{"none"}).}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with elevation preference predictors added.
+}
 \description{
 Create lower and upper limits for an elevational range and add them as
 separate predictors

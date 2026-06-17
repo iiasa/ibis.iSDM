@@ -44,6 +44,9 @@ uses default prior assumptions.}
 
 \item{...}{Other parameters passed down}
 }
+\value{
+A \code{\link{BiodiversityDistribution}} object with model prediction layers added as predictors.
+}
 \description{
 This function is a convenience wrapper to add the output from a
 previous fitted \code{\link{DistributionModel}} to another \code{\link[=BiodiversityDistribution-class]{BiodiversityDistribution}}

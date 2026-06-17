@@ -10,6 +10,15 @@ if (!methods::isClass("PredictorDataset")) methods::setOldClass("PredictorDatase
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' predictors <- PredictorDataset$new(
+#'   id = "example-predictors",
+#'   data = data.frame(temperature = c(1, 2), forest = c(0.2, 0.4))
+#' )
+#' predictors$get_names()
+#'
 #' @name PredictorDataset-class
 NULL
 

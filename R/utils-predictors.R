@@ -1341,7 +1341,7 @@ predictor_check <- function(env){
 #' # Example
 #' predictor_type(datasets::trees)
 #'
-#' @keywords utils, internal
+#' @keywords utils internal
 #'
 #' @author Martin Jung
 #' @noRd

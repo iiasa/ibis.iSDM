@@ -18,6 +18,9 @@ returns the contained priors used for estimation (if any).}
 
 \item{...}{Other parameters passed down.}
 }
+\value{
+A \code{\link{PriorList}} object, or \code{NULL} when no compatible priors can be created.
+}
 \description{
 Often it can make sense to fit an additional model to get a
 grasp on the range of values that "beta" parameters can take. This function

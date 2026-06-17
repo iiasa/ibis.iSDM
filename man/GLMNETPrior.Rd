@@ -21,6 +21,9 @@ coefficient (Default: \code{c(-Inf, Inf)}).}
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 The \code{\link{engine_glmnet}} engine does not support priors in a
 typical sense, however it is possible to specify so called penalty factors as
@@ -40,14 +43,12 @@ For a regularized regression that supports a few more options on the priors,
 check out the Bayesian \code{\link{engine_breg}}.
 }
 \examples{
-\dontrun{
 # Retain variable
 p1 <- GLMNETPrior(variable = "forest", hyper = 0)
 p1
 # Smaller chance to be regularized
 p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(0, Inf))
 p2
-}
 
 }
 \seealso{

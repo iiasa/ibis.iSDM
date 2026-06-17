@@ -125,7 +125,7 @@ from opportunistic presence‐only data. Methods in Ecology and Evolution, 12(5)
 \seealso{
 \code{\link[=add_limits_extrapolation]{add_limits_extrapolation()}}
 }
-\concept{The spatial bias weighting was inspired by code in the \code{enmSdmX} package.}
+\concept{spatial bias weighting}
 \keyword{bias}
 \keyword{control}
 \keyword{offset}

@@ -8,6 +8,13 @@ if (!methods::isClass("Settings")) methods::setOldClass("Settings")
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' settings <- Settings$new()
+#' settings$set("type", "response")
+#' settings$get("type")
+#'
 #' @name Settings-class
 NULL
 

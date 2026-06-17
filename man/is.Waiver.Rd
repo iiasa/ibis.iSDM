@@ -15,4 +15,8 @@ Boolean evaluation with \link{logical} output.
 \description{
 Is the provided object of type waiver?
 }
+\examples{
+is.Waiver(new_waiver())
+
+}
 \keyword{misc}

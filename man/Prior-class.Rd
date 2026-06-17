@@ -13,6 +13,10 @@ This class sets up the base class for priors which will be inherited by all prio
 \note{
 This functionality likely is deprecated or checks have been superseeded.
 }
+\examples{
+prior <- Prior$new(name = "ExamplePrior", variable = "temperature", value = 1)
+prior$get("value")
+}
 \keyword{classes}
 \section{Public fields}{
   \if{html}{\out{<div class="r6-fields">}}

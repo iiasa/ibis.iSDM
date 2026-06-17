@@ -24,6 +24,9 @@ trained \code{\link{BiodiversityDistribution}} object (Default: \code{FALSE}). S
 the scenario object. Note that setting this option to \code{TRUE} can increase
 the required amount of memory (Default: \code{FALSE}).}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object.
+}
 \description{
 This function creates a new \link[=BiodiversityScenario-class]{BiodiversityScenario} object
 that contains the projections of a model.

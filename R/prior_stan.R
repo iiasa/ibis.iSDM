@@ -25,10 +25,10 @@ NULL
 #' @family prior
 #' @keywords priors
 #'
+#' @return A [`Prior`] object.
+#'
 #' @examples
-#' \dontrun{
 #'  pp <- STANPrior("forest", "normal", c(0,1))
-#' }
 #'
 #' @name STANPrior
 NULL
@@ -85,6 +85,12 @@ methods::setMethod(
 #'
 #' @family prior
 #' @keywords priors
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- STANPriors(c("forest", "temperature"), type = "normal")
+#' length(priors)
 #'
 #' @name STANPriors
 NULL

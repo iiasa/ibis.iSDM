@@ -29,6 +29,9 @@ nodes (Default: \code{NULL}).}
 
 \item{...}{Any other parameter passed on.}
 }
+\value{
+A \code{\link{list}} with one result per element or row in \code{X}.
+}
 \description{
 Some computations take considerable amount of time to execute.
 This function provides a helper wrapper for running functions of the
@@ -39,9 +42,7 @@ By default, the \link{parallel} package is used for parallel computation,
 however an option exists to use the \link[future:future]{future} package instead.
 }
 \examples{
-\dontrun{
- run_parallel(list, mean, cores = 4)
-}
+run_parallel(list(1:3, 4:6), mean, cores = 1)
 
 }
 \keyword{utils}

@@ -25,6 +25,12 @@ Currently supported strategies are:
 \item \code{"slurm"} = To be implemented: Slurm linkage via batchtools.
 }
 }
+\examples{
+old_strategy <- getOption("ibis.futurestrategy")
+ibis_set_strategy("sequential")
+options(ibis.futurestrategy = old_strategy)
+
+}
 \seealso{
 \link[future:future]{future}, \link{ibis_future}
 }

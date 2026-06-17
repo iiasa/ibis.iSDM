@@ -714,6 +714,8 @@ methods::setMethod(
 #' @param name A [`character`] with the name of the biodiversity dataset.
 #' @param id A [`character`] with the id of the biodiversity dataset.
 #'
+#' @return A [`BiodiversityDistribution`] object with matching biodiversity data removed.
+#'
 #' @examples
 #' \dontrun{
 #' distribution(background) |>

@@ -745,6 +745,16 @@ write_stanmodel <- function( mod, dir = tempdir() ) {
 #'
 #' @keywords misc stan
 #'
+#' @examples
+#' \dontrun{
+#' stan_file <- tempfile(fileext = ".stan")
+#' writeLines(
+#'   "parameters { real y; } model { y ~ normal(0, 1); }",
+#'   stan_file
+#' )
+#' fit <- run_stan(stan_file, data = list(), chains = 1, cores = 1, iter = 100)
+#' }
+#'
 #' @export
 run_stan <- function( model_code, data = list(),
                       algorithm = "sampling",
@@ -902,6 +912,20 @@ stan_fit_summary <- function(obj){
 #' * [https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed](https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed).
 #' * The brms R-package.
 #'
+#' @return A [`data.frame`] of posterior predictions summarized over draws.
+#'
+#' @examples
+#' \dontrun{
+#' newdata <- data.frame(temperature = c(0.1, 0.4, 0.8))
+#' posterior_predict_stanfit(
+#'   obj = stan_fit,
+#'   form = observed ~ temperature,
+#'   newdata = newdata,
+#'   family = "binomial",
+#'   type = "response"
+#' )
+#' }
+#'
 #' @export
 posterior_predict_stanfit <- function(obj, form, newdata, type = "predictor",
                                       family = NULL, offset = NULL, draws = NULL,
@@ -1055,6 +1079,11 @@ posterior_predict_stanfit <- function(obj, form, newdata, type = "predictor",
 #'
 #' @seealso rstan, cmdstanr, brms
 #' @keywords engine
+#'
+#' @examples
+#' \dontrun{
+#' stancode(fitted_stan_model)
+#' }
 #'
 #' @name stancode
 NULL

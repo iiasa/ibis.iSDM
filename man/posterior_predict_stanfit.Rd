@@ -43,10 +43,26 @@ values (Default: \code{NULL})}
 \item{feature_names}{Optional ordered feature names matching the Stan beta
 vector.}
 }
+\value{
+A \code{\link{data.frame}} of posterior predictions summarized over draws.
+}
 \description{
 This function does simulates from the posterior of a created
 stan model, therefore providing a fast and efficient way to project coefficients
 obtained from Bayesian models to new/novel contexts.
+}
+\examples{
+\dontrun{
+newdata <- data.frame(temperature = c(0.1, 0.4, 0.8))
+posterior_predict_stanfit(
+  obj = stan_fit,
+  form = observed ~ temperature,
+  newdata = newdata,
+  family = "binomial",
+  type = "response"
+)
+}
+
 }
 \references{
 \itemize{

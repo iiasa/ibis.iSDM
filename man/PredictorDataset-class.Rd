@@ -4,8 +4,19 @@
 \alias{PredictorDataset-class}
 \alias{PredictorDataset}
 \title{PredictorDataset class description}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 This class describes the PredictorDataset and is used to store covariates within.
+}
+\examples{
+predictors <- PredictorDataset$new(
+  id = "example-predictors",
+  data = data.frame(temperature = c(1, 2), forest = c(0.2, 0.4))
+)
+predictors$get_names()
+
 }
 \seealso{
 \code{\link[=predictor_derivate]{predictor_derivate()}}

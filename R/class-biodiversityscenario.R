@@ -8,6 +8,12 @@ if (!methods::isClass("BiodiversityScenario")) methods::setOldClass("Biodiversit
 #'
 #' @keywords classes
 #'
+#' @return An [`R6::R6Class`] generator object.
+#'
+#' @examples
+#' scenario_obj <- BiodiversityScenario$new()
+#' scenario_obj$get_constraints()
+#'
 #' @name BiodiversityScenario-class
 NULL
 

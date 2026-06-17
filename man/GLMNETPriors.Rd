@@ -19,9 +19,17 @@ provided is not regularized at all.}
 \item{lims}{A \code{\link{numeric}} \code{\link{vector}} of the lower and upper limits for each
 coefficient (Default: \code{c(-Inf, Inf)}).}
 }
+\value{
+A named \code{\link{list}} of \code{\link{Prior}} objects.
+}
 \description{
 This is a helper function to specify several \link{GLMNETPrior} with
 the same hyper-parameters, but different variables.
+}
+\examples{
+priors <- GLMNETPriors(c("forest", "temperature"), hyper = 0)
+length(priors)
+
 }
 \seealso{
 Other prior:

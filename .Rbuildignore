@@ -1,4 +1,10 @@
 ^\.travis\.yml$
+^\.git
+^\.vscode$
+^\.Rhistory$
+^.*[.]Rcheck$
+^[.]+Rcheck$
+^test$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 man-roxygen/*

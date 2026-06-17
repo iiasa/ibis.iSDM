@@ -15,6 +15,12 @@ Invisible
 \description{
 Small helper function to respecify the number of threads for parallel processing.
 }
+\examples{
+old_threads <- getOption("ibis.nthread")
+ibis_set_threads(2)
+options(ibis.nthread = old_threads)
+
+}
 \seealso{
 \link[future:future]{future}
 }

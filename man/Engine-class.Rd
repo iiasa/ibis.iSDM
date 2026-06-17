@@ -4,8 +4,16 @@
 \alias{Engine-class}
 \alias{Engine}
 \title{Engine class description}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 Basic object for engine, all other engines inherit from here.
+}
+\examples{
+engine <- Engine$new("GLM-Model", "GLM")
+engine$get_class()
+
 }
 \keyword{classes}
 \section{Public fields}{

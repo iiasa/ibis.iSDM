@@ -15,4 +15,9 @@ Boolean evaluation with \link{logical} output.
 \description{
 Tests if an input is a SpatRaster object.
 }
+\examples{
+r <- terra::rast(nrows = 1, ncols = 1, vals = 1)
+is.Raster(r)
+
+}
 \keyword{misc}

@@ -15,6 +15,9 @@ latent effects after XGBoost preprocessing.}
 
 \item{...}{Variables passed on to prior object.}
 }
+\value{
+A \code{\link{Prior}} object.
+}
 \description{
 Function to include prior information as interaction constraints
 in an extreme gradient descent boosting model \code{\link{engine_xgboost}}. Interaction
@@ -26,9 +29,7 @@ XGBoost interaction constraints are only supported by tree boosters.
 They can be combined with monotonic constraints supplied through \code{\link{XGBPrior}}.
 }
 \examples{
-\dontrun{
  pp <- XGBInteractionPrior(c("forest", "temperature"))
-}
 
 }
 \seealso{

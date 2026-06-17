@@ -15,4 +15,9 @@ Boolean evaluation with \link{logical} output.
 \description{
 Check whether a provided object is truly of a specific type
 }
+\examples{
+id <- as.Id("example-id")
+is.Id(id)
+
+}
 \keyword{misc}

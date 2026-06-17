@@ -1,7 +1,7 @@
 Package: ibis.iSDM
 Type: Package
-Title: Modelling framework for integrated biodiversity distribution scenarios
-Version: 0.1.8
+Title: Integrated Biodiversity Distribution ProjectionS
+Version: 0.1.9
 Authors@R: 
     c(person(given = "Martin",
            family = "Jung",
@@ -15,15 +15,15 @@ Authors@R:
            comment = c(ORCID = "0000-0003-1125-9918"))
       )
 Maintainer: Martin Jung <jung@iiasa.ac.at>
-Description: Integrated framework of modelling the distribution of species and 
-  ecosystems in a suitability framing. This package allows the estimation of integrated 
-  species distribution models (iSDM) based on several sources of evidence and provided
-  presence-only and presence-absence datasets. It makes heavy use of point-process models
-  for estimating habitat suitability and allows to include spatial latent effects and 
-  priors in the estimation. To do so 'ibis.iSDM' supports a number of engines for 
-  Bayesian and more non-parametric machine learning estimation. Further, the 'ibis.iSDM' 
-  is specifically customized to support spatial-temporal projections of habitat suitability 
-  into the future.
+Description: Model the distribution of species and ecosystems in a suitability
+  framing using the integrated species distribution modelling (iSDM) workflow
+  described in Jung (2023) <doi:10.1016/j.ecoinf.2023.102127>. It estimates
+  iSDMs from several sources of evidence, including presence-only and
+  presence-absence datasets. Point-process models are used for estimating habitat
+  suitability, with support for spatial latent effects and priors. The
+  'ibis.iSDM' framework supports Bayesian and non-parametric machine learning
+  engines, and spatial-temporal projections of habitat suitability into the
+  future.
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
@@ -89,13 +89,14 @@ Suggests:
     rstantools (>= 2.1.1),
     testthat (>= 3.0.0),
     xgboost
+Remotes:
+    ElliotDovers/scampr
 URL: https://iiasa.github.io/ibis.iSDM/
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 Biarch: true
 SystemRequirements: GNU make
-VignetteBuilder: knitr
 Collate: 
     'RcppExports.R'
     'waiver.R'
@@ -177,6 +178,4 @@ Collate:
     'validate.R'
     'write_output.R'
     'zzz.R'
-Remotes:
-  ElliotDovers/scampr
 Config/roxygen2/version: 8.0.0

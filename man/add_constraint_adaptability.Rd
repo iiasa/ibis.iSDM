@@ -56,6 +56,9 @@ thus opening constraints.}
 \item{...}{passed on parameters. See also the specific methods for adding
 constraints.}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object with the adaptability constraint added.
+}
 \description{
 Adaptability constraints assume that suitable habitat for
 species in (future) projections might be unsuitable if it is outside the

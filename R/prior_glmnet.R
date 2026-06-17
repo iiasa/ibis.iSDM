@@ -32,15 +32,15 @@ NULL
 #' @keywords priors
 #' @family prior
 #'
+#' @return A [`Prior`] object.
+#'
 #' @examples
-#' \dontrun{
 #' # Retain variable
 #' p1 <- GLMNETPrior(variable = "forest", hyper = 0)
 #' p1
 #' # Smaller chance to be regularized
 #' p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(0, Inf))
 #' p2
-#' }
 #'
 #' @name GLMNETPrior
 NULL
@@ -99,6 +99,12 @@ methods::setMethod(
 #'
 #' @family prior
 #' @keywords priors
+#'
+#' @return A named [`list`] of [`Prior`] objects.
+#'
+#' @examples
+#' priors <- GLMNETPriors(c("forest", "temperature"), hyper = 0)
+#' length(priors)
 #'
 #' @name GLMNETPriors
 NULL

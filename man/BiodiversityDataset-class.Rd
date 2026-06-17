@@ -4,8 +4,28 @@
 \alias{BiodiversityDataset-class}
 \alias{BiodiversityDataset}
 \title{BiodiversityDataset prototype description}
+\value{
+An \code{\link[R6:R6Class]{R6::R6Class}} generator object.
+}
 \description{
 BiodiversityDataset prototype description
+}
+\examples{
+records <- data.frame(x = 0, y = 0, observed = 1)
+dataset <- BiodiversityDataset$new(
+  name = "Example records",
+  id = "example-dataset",
+  equation = observed ~ 1,
+  family = "binomial",
+  link = NULL,
+  type = "poipa",
+  weight = NULL,
+  field_occurrence = "observed",
+  data = records,
+  use_intercept = TRUE
+)
+dataset$get_type(short = TRUE)
+
 }
 \keyword{classes}
 \section{Public fields}{

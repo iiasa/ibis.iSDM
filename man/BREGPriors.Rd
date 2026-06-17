@@ -17,9 +17,17 @@ BREGPriors(variable, hyper = NULL, ip = NULL)
 \item{ip}{A \code{\link{numeric}} estimate between 0 and 1 of the inclusion probability
 of the target variable (Default: \code{NULL}).}
 }
+\value{
+A named \code{\link{list}} of \code{\link{Prior}} objects.
+}
 \description{
 This is a helper function to specify several \link{BREGPrior} with
 the same hyper-parameters, but different variables.
+}
+\examples{
+priors <- BREGPriors(c("forest", "cropland"), hyper = 1, ip = 0.5)
+length(priors)
+
 }
 \seealso{
 Other prior:

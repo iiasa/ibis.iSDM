@@ -37,6 +37,9 @@ implemented!)}
 \item{...}{passed on parameters. See also the specific methods for adding
 constraints.}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object with the minimum-size constraint added.
+}
 \description{
 This function applies a minimum size constraint on a \code{scenario()} created
 object. The rationale here is that for a given species isolated habitat patches

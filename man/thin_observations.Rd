@@ -53,6 +53,9 @@ or local (extracted at point locations) bias values are used as for quantile thr
 \item{verbose}{\code{\link{logical}} of whether to print some statistics about the thinning
 outcome (Default: \code{TRUE}).}
 }
+\value{
+An \code{\link[sf:sf]{sf}} object containing the thinned observations.
+}
 \description{
 For most species distribution modelling approaches it is assumed
 that occurrence records are unbiased, which is rarely the case. While

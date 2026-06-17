@@ -28,6 +28,9 @@ barrier for use in connectivity constrains (Default: \code{NULL}).}
 \item{...}{passed on parameters. See also the specific methods for adding
 constraints.}
 }
+\value{
+A \code{\link{BiodiversityScenario}} object with the connectivity constraint added.
+}
 \description{
 Adds a connectivity constraint to a scenario object.
 }
@@ -44,6 +47,17 @@ The respective layer(s) have to be provided through the \code{"resistance"} para
 Provided layers are incorporated as \code{abs(resistance - 1)} and multiplied with
 the prediction.
 }
+}
+\examples{
+resistance <- terra::rast(nrows = 2, ncols = 2)
+terra::values(resistance) <- c(0, 0.2, 0.8, 1)
+constrained <- add_constraint_connectivity(
+  BiodiversityScenario$new(),
+  method = "resistance",
+  resistance = resistance
+)
+names(constrained$get_constraints())
+
 }
 \seealso{
 Other constraint:

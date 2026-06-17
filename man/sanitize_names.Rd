@@ -24,5 +24,5 @@ vars <- c("Climate-temperature2015", "Elevation__sealevel", "Landuse.forest..mea
 sanitize_names(vars)
 
 }
-\concept{Inspired from [`inlabru`] \code{"bru_standardise_names"} function.}
+\concept{name sanitizing}
 \keyword{utils}
