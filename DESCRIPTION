@@ -91,7 +91,7 @@ Suggests:
     xgboost
 Remotes:
     ElliotDovers/scampr
-URL: https://iiasa.github.io/ibis.iSDM/
+URL: https://iiasa.github.io/ibis.iSDM/, https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
