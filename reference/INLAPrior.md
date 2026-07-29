@@ -61,6 +61,11 @@ INLAPrior(variable, type = "normal", hyper = c(0, 0.001), ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## Note
 
 Compared to other engines, INLA does unfortunately does not support
@@ -104,3 +109,12 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+prior <- INLAPrior("forest", type = "normal", hyper = c(0, 0.001))
+prior$get("value")
+} # }
+```

@@ -43,6 +43,12 @@ add_constraint_threshold(mod, updatevalue = NA, ...)
   passed on parameters. See also the specific methods for adding
   constraints.
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with the threshold constraint added.
+
 ## Note
 
 Threshold values are taken from the original fitted model.

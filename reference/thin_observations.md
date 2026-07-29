@@ -95,6 +95,11 @@ thin_observations(
   [`logical`](https://rdrr.io/r/base/logical.html) of whether to print
   some statistics about the thinning outcome (Default: `TRUE`).
 
+## Value
+
+An [`sf`](https://r-spatial.github.io/sf/reference/sf.html) object
+containing the thinned observations.
+
 ## Details
 
 All methods only remove points from "over-sampled" grid cells/areas.

@@ -6,6 +6,11 @@ and functions to other
 [`R6`](https://r6.r-lib.org/reference/R6Class.html) classes and
 functions.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Note
 
 This sets the threshold method internally to `'fixed'`.
@@ -998,3 +1003,13 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+scenario_obj <- BiodiversityScenario$new()
+scenario_obj$get_constraints()
+#> list()
+#> attr(,"class")
+#> [1] "Waiver"
+```

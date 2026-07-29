@@ -33,6 +33,11 @@ XGBPrior(variable, hyper = "increasing", ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## References
 
 - Chen, T., He, T., Benesty, M., Khotilovich, V., Tang, Y., & Cho, H.
@@ -69,7 +74,5 @@ Other prior:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
  pp <- XGBPrior("forest", "increasing")
-} # }
 ```

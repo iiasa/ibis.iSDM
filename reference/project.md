@@ -115,6 +115,9 @@ constraints, see the relevant `constrain` functions, respectively:
   for specifying dispersal constraint on the temporal projections at
   each step.
 
+- add_constraint_dispersal_spop() for specifying dispersal constraint on
+  the temporal projections at each step using the ibis.SPOP package.\]
+
 - [`add_constraint_MigClim()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_MigClim.md)
   Using the MigClim R-package to simulate dispersal in projections.
 

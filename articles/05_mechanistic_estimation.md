@@ -80,7 +80,7 @@ others) to scenario objects.
 
 library(ibis.iSDM)
 library(terra)
-#> terra 1.9.27
+#> terra 1.9.34
 #> 
 #> Attaching package: 'terra'
 #> The following object is masked from 'package:ibis.iSDM':

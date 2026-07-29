@@ -2,6 +2,11 @@
 
 Basic object for engine, all other engines inherit from here.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Public fields
 
 - `engine`:
@@ -194,3 +199,11 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+engine <- Engine$new("GLM-Model", "GLM")
+engine$get_class()
+#> [1] "GLM-Model"
+```

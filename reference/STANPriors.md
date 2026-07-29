@@ -36,6 +36,12 @@ STANPriors(variables, type, hyper = c(0, 2), ...)
 
   Variables passed on to prior object
 
+## Value
+
+A named [`list`](https://rdrr.io/r/base/list.html) of
+[`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+objects.
+
 ## See also
 
 Other prior:
@@ -58,3 +64,11 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+priors <- STANPriors(c("forest", "temperature"), type = "normal")
+length(priors)
+#> [1] 2
+```

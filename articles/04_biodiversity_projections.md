@@ -52,6 +52,7 @@ library(terra)
 library(igraph)
 library(ggplot2)
 library(ncdf4)
+library(lwgeom)
 library(assertthat)
 
 # Don't print out as many messages
@@ -393,18 +394,18 @@ sc.fit2$summary_beforeafter()
 #>    runname    category                  period        value unit      
 #>    <chr>      <chr>                     <chr>         <dbl> <chr>     
 #>  1 Simple PPM Current range             2016-01-01  433.    ha        
-#>  2 Simple PPM Future range              2100-01-01  329.    ha        
+#>  2 Simple PPM Future range              2100-01-01  330.    ha        
 #>  3 Simple PPM Unsuitable                84 years    859.    ha        
 #>  4 Simple PPM Loss                      84 years    103.    ha        
 #>  5 Simple PPM Gain                      84 years      0     ha        
-#>  6 Simple PPM Stable                    84 years    329.    ha        
-#>  7 Simple PPM Percent loss              84 years     23.9   %         
+#>  6 Simple PPM Stable                    84 years    330.    ha        
+#>  7 Simple PPM Percent loss              84 years     23.8   %         
 #>  8 Simple PPM Percent gain              84 years      0     %         
 #>  9 Simple PPM Range change              84 years   -103.    ha        
 #> 10 Simple PPM Percent change            84 years    -10.7   %         
-#> 11 Simple PPM Sorensen index            84 years      0.875 similarity
-#> 12 Simple PPM Centroid distance         84 years    116.    km        
-#> 13 Simple PPM Centroid change direction 84 years     32.3   deg
+#> 11 Simple PPM Sorensen index            84 years      0.876 similarity
+#> 12 Simple PPM Centroid distance         84 years    115.    km        
+#> 13 Simple PPM Centroid change direction 84 years     32.7   deg
 ```
 
 Another option for constraining prediction is also by imposing a zonal

@@ -3,6 +3,11 @@
 Basic [`R6`](https://r6.r-lib.org/reference/R6Class.html) object for
 Log, any Log inherit from here
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Public fields
 
 - `filename`:
@@ -188,3 +193,11 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+log <- Log$new(tempfile(fileext = ".txt"), new_waiver())
+log$get_filename()
+#> [1] "file1f5d1db17f5.txt"
+```

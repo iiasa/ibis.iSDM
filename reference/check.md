@@ -71,7 +71,7 @@ Different checks are implemented depending on the supplied object
 
 &nbsp;
 
-- 
+- Check if scenario layers are valid
 
 ## Note
 

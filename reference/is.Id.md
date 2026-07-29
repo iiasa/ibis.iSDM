@@ -18,3 +18,11 @@ is.Id(x)
 
 Boolean evaluation with [logical](https://rdrr.io/r/base/logical.html)
 output.
+
+## Examples
+
+``` r
+id <- as.Id("example-id")
+is.Id(id)
+#> [1] TRUE
+```

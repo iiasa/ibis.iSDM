@@ -29,6 +29,12 @@ rm_predictors(x, names)
   [`vector`](https://rdrr.io/r/base/vector.html) A Vector of character
   names describing the environmental stack.
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with the selected predictors removed.
+
 ## Examples
 
 ``` r

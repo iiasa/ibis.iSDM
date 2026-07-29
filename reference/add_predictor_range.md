@@ -90,6 +90,12 @@ add_predictor_range(
   [`PriorList`](https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.md)
   object. Default is set to NULL which uses default prior assumptions.
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with range predictors added.
+
 ## References
 
 - Merow, C., Wilson, A. M., & Jetz, W. (2017). Integrating occurrence

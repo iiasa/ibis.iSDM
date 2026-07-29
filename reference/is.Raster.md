@@ -18,3 +18,11 @@ is.Raster(x)
 
 Boolean evaluation with [logical](https://rdrr.io/r/base/logical.html)
 output.
+
+## Examples
+
+``` r
+r <- terra::rast(nrows = 1, ncols = 1, vals = 1)
+is.Raster(r)
+#> [1] TRUE
+```

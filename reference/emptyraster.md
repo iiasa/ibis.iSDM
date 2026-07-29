@@ -39,7 +39,7 @@ i.e. all cells are `NA`.
 ``` r
 require(terra)
 #> Loading required package: terra
-#> terra 1.9.27
+#> terra 1.9.34
 #> 
 #> Attaching package: ‘terra’
 #> The following object is masked from ‘package:ibis.iSDM’:

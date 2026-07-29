@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,6 +108,10 @@ constraints.</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <code><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></code> object with the dispersal constraint added.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><strong>Dispersal</strong>:
 Parameters for <code>'method'</code>:</p><ul><li><p><code>sdd_fixed</code> - Applies a fixed uniform dispersal distance per modelling timestep.</p></li>
@@ -150,6 +154,19 @@ modelling. Diversity and Distributions, 19(10), 1224-1234.</p></li>
 <code><a href="simulate_population_steps.html">simulate_population_steps()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">scenario_obj</span> <span class="op">&lt;-</span> <span class="va"><a href="BiodiversityScenario-class.html">BiodiversityScenario</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">constrained</span> <span class="op">&lt;-</span> <span class="fu">add_constraint_dispersal</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">scenario_obj</span>,</span></span>
+<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"sdd_fixed"</span>,</span></span>
+<span class="r-in"><span>  value <span class="op">=</span> <span class="fl">1000</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">constrained</span><span class="op">$</span><span class="fu">get_constraints</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "dispersal"</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
@@ -159,7 +176,7 @@ modelling. Diversity and Distributions, 19(10), 1224-1234.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

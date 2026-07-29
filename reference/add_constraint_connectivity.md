@@ -47,6 +47,12 @@ add_constraint_connectivity(mod, method, value = NULL, resistance = NULL, ...)
   passed on parameters. See also the specific methods for adding
   constraints.
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with the connectivity constraint added.
+
 ## Details
 
 - `hardbarrier` - Defines a hard barrier to any dispersal events. By
@@ -73,3 +79,17 @@ Other constraint:
 [`add_constraint_minsize()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_minsize.md),
 [`add_constraint_threshold()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_threshold.md),
 [`simulate_population_steps()`](https://iiasa.github.io/ibis.iSDM/reference/simulate_population_steps.md)
+
+## Examples
+
+``` r
+resistance <- terra::rast(nrows = 2, ncols = 2)
+terra::values(resistance) <- c(0, 0.2, 0.8, 1)
+constrained <- add_constraint_connectivity(
+  BiodiversityScenario$new(),
+  method = "resistance",
+  resistance = resistance
+)
+names(constrained$get_constraints())
+#> [1] "connectivity"
+```

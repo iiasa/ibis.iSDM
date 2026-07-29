@@ -3,6 +3,11 @@
 This class describes the PredictorDataset and is used to store
 covariates within.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## See also
 
 [`predictor_derivate()`](https://iiasa.github.io/ibis.iSDM/reference/predictor_derivate.md)
@@ -559,3 +564,14 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+predictors <- PredictorDataset$new(
+  id = "example-predictors",
+  data = data.frame(temperature = c(1, 2), forest = c(0.2, 0.4))
+)
+predictors$get_names()
+#> [1] "temperature" "forest"     
+```

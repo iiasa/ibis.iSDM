@@ -32,6 +32,12 @@ GLMNETPriors(variable, hyper = 0, lims = c(-Inf, Inf))
   [`vector`](https://rdrr.io/r/base/vector.html) of the lower and upper
   limits for each coefficient (Default: `c(-Inf, Inf)`).
 
+## Value
+
+A named [`list`](https://rdrr.io/r/base/list.html) of
+[`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+objects.
+
 ## See also
 
 Other prior:
@@ -54,3 +60,11 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+priors <- GLMNETPriors(c("forest", "temperature"), hyper = 0)
+length(priors)
+#> [1] 2
+```

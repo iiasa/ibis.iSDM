@@ -76,6 +76,12 @@ add_predictors_model(
 
   Other parameters passed down
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with model prediction layers added as predictors.
+
 ## Details
 
 A transformation takes the provided rasters and for instance rescales

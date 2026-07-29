@@ -3,6 +3,11 @@
 All trained Models inherit the options here plus any additional ones
 defined by the engine and inference.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Note
 
 Could be further pretified and commands outsourced.
@@ -606,3 +611,11 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+model <- DistributionModel$new("Example model")
+model$get_name()
+#> [1] "Example model"
+```

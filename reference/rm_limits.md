@@ -22,6 +22,12 @@ rm_limits(x)
   [`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md))
   object.
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with extrapolation limits removed.
+
 ## See also
 
 [`add_limits_extrapolation()`](https://iiasa.github.io/ibis.iSDM/reference/add_limits_extrapolation.md)

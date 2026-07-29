@@ -33,3 +33,15 @@ linear coefficients. Similar can be said for trained non-linear models.
 ## See also
 
 [`stats::coef()`](https://rdrr.io/r/stats/coef.html).
+
+## Examples
+
+``` r
+model <- DistributionModel$new("Example model")
+model$get_coefficients <- function() {
+  data.frame(variable = "temperature", coefficient = 1)
+}
+coef(model)
+#>      variable coefficient
+#> 1 temperature           1
+```

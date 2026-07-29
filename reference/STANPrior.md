@@ -38,6 +38,11 @@ STANPrior(variable, type, hyper = c(0, 2), ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## References
 
 - Lemoine, N. P. (2019). Moving beyond noninformative priors: why and
@@ -76,7 +81,5 @@ Other prior:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
  pp <- STANPrior("forest", "normal", c(0,1))
-} # }
 ```

@@ -61,6 +61,12 @@ add_constraint_boundary(mod, layer, method = "boundary", ...)
   stacked projection) or `"zone"` (per-timestep mask applied within the
   projection loop).
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with the boundary or zone constraint added.
+
 ## See also
 
 Other constraint:

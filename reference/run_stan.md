@@ -116,3 +116,16 @@ conversion succeeds.
 ## See also
 
 rethinking R package
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+stan_file <- tempfile(fileext = ".stan")
+writeLines(
+  "parameters { real y; } model { y ~ normal(0, 1); }",
+  stan_file
+)
+fit <- run_stan(stan_file, data = list(), chains = 1, cores = 1, iter = 100)
+} # }
+```

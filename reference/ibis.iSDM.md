@@ -18,16 +18,18 @@ Useful links:
 
 - <https://iiasa.github.io/ibis.iSDM/>
 
+- <https://github.com/iiasa/ibis.iSDM>
+
 - Report bugs at <https://github.com/iiasa/ibis.iSDM/issues>
 
 ## Author
 
-**Maintainer**: Martin Jung <jung@iiasa.ac.at>
+**Maintainer**: Martin Jung <martinjung@zoho.com>
 ([ORCID](https://orcid.org/0000-0002-7569-1390)) \[copyright holder\]
 
 Authors:
 
-- Martin Jung <jung@iiasa.ac.at>
+- Martin Jung <martinjung@zoho.com>
   ([ORCID](https://orcid.org/0000-0002-7569-1390)) \[copyright holder\]
 
 Other contributors:

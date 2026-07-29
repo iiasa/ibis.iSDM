@@ -6,6 +6,11 @@ data and functions to other
 [`R6`](https://r6.r-lib.org/reference/R6Class.html) classes. Generally
 stores all objects and parameters added to a model.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Details
 
 Run [`names()`](https://rdrr.io/r/base/names.html) on a
@@ -994,7 +999,7 @@ background <- terra::rast(system.file('extdata/europegrid_50km.tif',
 package='ibis.iSDM',mustWork = TRUE))
 # Define model
 x <- distribution(background)
-#> [Setup] 2026-06-15 20:10:36.246561 | Creating distribution object...
+#> [Setup] 2026-07-29 18:28:18.464832 | Creating distribution object...
 names(x)
 #>  [1] ".__enclos_env__"             "engine"                     
 #>  [3] "log"                         "offset"                     

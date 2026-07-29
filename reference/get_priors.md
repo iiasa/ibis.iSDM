@@ -39,6 +39,12 @@ get_priors(mod, target_engine, ...)
 
   Other parameters passed down.
 
+## Value
+
+A
+[`PriorList`](https://iiasa.github.io/ibis.iSDM/reference/PriorList-class.md)
+object, or `NULL` when no compatible priors can be created.
+
 ## Note
 
 Not all engines support priors in similar ways. See the vignettes and

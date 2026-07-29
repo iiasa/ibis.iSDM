@@ -4,6 +4,11 @@ Acts a container for a specified set of BiodiversityDataset contained
 within. Functions are provided to summarize across the
 BiodiversityDataset-class objects.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Note
 
 This can likely be beautified further.
@@ -514,3 +519,11 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+collection <- BiodiversityDatasetCollection$new()
+collection$length()
+#> [1] 0
+```

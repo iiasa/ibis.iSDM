@@ -31,6 +31,12 @@ BREGPriors(variable, hyper = NULL, ip = NULL)
   and 1 of the inclusion probability of the target variable (Default:
   `NULL`).
 
+## Value
+
+A named [`list`](https://rdrr.io/r/base/list.html) of
+[`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+objects.
+
 ## See also
 
 Other prior:
@@ -53,3 +59,11 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+priors <- BREGPriors(c("forest", "cropland"), hyper = 1, ip = 0.5)
+length(priors)
+#> [1] 2
+```

@@ -22,3 +22,11 @@ Invisible
 ## See also
 
 [future](https://future.futureverse.org/reference/future.html)
+
+## Examples
+
+``` r
+old_threads <- getOption("ibis.nthread")
+ibis_set_threads(2)
+options(ibis.nthread = old_threads)
+```

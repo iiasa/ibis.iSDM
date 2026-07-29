@@ -35,6 +35,12 @@ add_priors(x, priors = NULL, ...)
 
   Other parameters passed down.
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with priors added.
+
 ## Note
 
 Alternatively priors to environmental predictors can also directly added

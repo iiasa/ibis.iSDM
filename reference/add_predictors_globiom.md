@@ -28,6 +28,10 @@ add_predictors_globiom(x, ...)
 
   Other parameters passed down
 
+## Value
+
+No return value; this function is defunct and always errors.
+
 ## Details
 
 See

@@ -109,3 +109,14 @@ necessary at this point. See also this
 
 [partial](https://iiasa.github.io/ibis.iSDM/reference/partial.md),
 [plot.DistributionModel](https://iiasa.github.io/ibis.iSDM/reference/plot.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+prediction <- terra::rast(nrows = 3, ncols = 3, nlyrs = 2)
+terra::values(prediction) <- cbind(mean = seq_len(9), sd = seq_len(9) / 9)
+names(prediction) <- c("mean", "sd")
+bivplot(prediction)
+} # }
+```

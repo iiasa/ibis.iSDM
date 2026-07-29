@@ -52,6 +52,11 @@ run_parallel(
 
   Any other parameter passed on.
 
+## Value
+
+A [`list`](https://rdrr.io/r/base/list.html) with one result per element
+or row in `X`.
+
 ## Details
 
 By default, the parallel package is used for parallel computation,
@@ -62,7 +67,12 @@ instead.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
- run_parallel(list, mean, cores = 4)
-} # }
+run_parallel(list(1:3, 4:6), mean, cores = 1)
+#> The run_parallel function is likely deprecated and is only kept for reference...
+#> [[1]]
+#> [1] 2
+#> 
+#> [[2]]
+#> [1] 5
+#> 
 ```

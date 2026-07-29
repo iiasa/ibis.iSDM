@@ -87,6 +87,12 @@ add_constraint_adaptability(
   passed on parameters. See also the specific methods for adding
   constraints.
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with the adaptability constraint added.
+
 ## Details
 
 Currently implemented are the following approaches:

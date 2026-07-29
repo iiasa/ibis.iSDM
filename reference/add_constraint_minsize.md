@@ -60,6 +60,12 @@ add_constraint_minsize(
   passed on parameters. See also the specific methods for adding
   constraints.
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with the minimum-size constraint added.
+
 ## Details
 
 Area values in a specific unit need to be supplied.

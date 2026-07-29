@@ -72,8 +72,28 @@ posterior_predict_stanfit(
 
   Optional ordered feature names matching the Stan beta vector.
 
+## Value
+
+A [`data.frame`](https://rdrr.io/r/base/data.frame.html) of posterior
+predictions summarized over draws.
+
 ## References
 
 - <https://medium.com/@alex.pavlakis/making-predictions-from-stan-models-in-r-3e349dfac1ed>.
 
 - The brms R-package.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+newdata <- data.frame(temperature = c(0.1, 0.4, 0.8))
+posterior_predict_stanfit(
+  obj = stan_fit,
+  form = observed ~ temperature,
+  newdata = newdata,
+  family = "binomial",
+  type = "response"
+)
+} # }
+```

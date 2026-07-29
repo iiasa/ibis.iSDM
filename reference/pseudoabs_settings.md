@@ -107,6 +107,12 @@ pseudoabs_settings(
 
   Any other settings to be added to the pseudoabs settings.
 
+## Value
+
+A
+[`Settings`](https://iiasa.github.io/ibis.iSDM/reference/Settings-class.md)
+object containing pseudo-absence sampling settings.
+
 ## Details
 
 There are multiple methods available for sampling a biased background
@@ -158,7 +164,6 @@ layer. Possible parameters for `method` are:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 # This setting generates 10000 pseudo-absence points outside the
 # minimum convex polygon of presence points
 ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
@@ -166,6 +171,7 @@ ass1 <- pseudoabs_settings(nrpoints = 10000, method = 'mcp', inside = FALSE)
 # This setting would match the number of presence-absence points directly.
 ass2 <- pseudoabs_settings(nrpoints = 0, min_ratio = 1)
 
+if (FALSE) { # \dontrun{
 # These settings can then be used to add pseudo-absence data to a
 # presence-only dataset. This effectively adds these simulated absence
 # points to the resulting model

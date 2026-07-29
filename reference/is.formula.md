@@ -18,3 +18,11 @@ is.formula(x)
 
 Boolean evaluation with [logical](https://rdrr.io/r/base/logical.html)
 output.
+
+## Examples
+
+``` r
+f <- y ~ x
+is.formula(f)
+#> [1] TRUE
+```

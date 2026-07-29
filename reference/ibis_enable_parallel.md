@@ -21,3 +21,13 @@ Invisible
 
 [future](https://future.futureverse.org/reference/future.html),
 [ibis_future](https://iiasa.github.io/ibis.iSDM/reference/ibis_future.md)
+
+## Examples
+
+``` r
+old_parallel <- getOption("ibis.runparallel")
+old_threads <- getOption("ibis.nthread")
+options(ibis.nthread = max(2, getOption("ibis.nthread", 2)))
+ibis_enable_parallel()
+options(ibis.runparallel = old_parallel, ibis.nthread = old_threads)
+```

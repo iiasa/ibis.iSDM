@@ -43,6 +43,12 @@ add_predictor_elevationpref(x, layer, lower, upper, transform = "none")
   [`character`](https://rdrr.io/r/base/character.html) Any optional
   transformation to be applied. Usually not needed (Default: `"none"`).
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with elevation preference predictors added.
+
 ## Examples
 
 ``` r

@@ -33,6 +33,12 @@ rm_priors(x, names = NULL, ...)
 
   Other parameters passed down
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with matching priors removed.
+
 ## See also
 
 Other prior:

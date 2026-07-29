@@ -351,10 +351,9 @@ The objects of this class are cloneable with this method.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 priors(
-    INLAPrior('var1','normal',c(0,0.1)),
-    INLAPrior('var2','normal',c(0,0.1))
+    GDBPrior("var1", "increasing"),
+    GDBPrior("var2", "decreasing")
    )
-} # }
+#> Set priors: 2
 ```

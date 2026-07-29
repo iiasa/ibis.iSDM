@@ -36,6 +36,12 @@ INLAPriors(variables, type, hyper = c(0, 0.001), ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A named [`list`](https://rdrr.io/r/base/list.html) of
+[`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+objects.
+
 ## See also
 
 Other prior:
@@ -58,3 +64,12 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+priors <- INLAPriors(c("forest", "temperature"), type = "normal")
+length(priors)
+} # }
+```

@@ -4,6 +4,11 @@ Basic [`R6`](https://r6.r-lib.org/reference/R6Class.html) object for
 Settings object, a List that stores settings used related to model
 training.
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Public fields
 
 - `name`:
@@ -196,3 +201,12 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+settings <- Settings$new()
+settings$set("type", "response")
+settings$get("type")
+#> [1] "response"
+```

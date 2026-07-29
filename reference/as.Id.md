@@ -21,3 +21,15 @@ as.Id(x, ...)
 - ...:
 
   Other arguements
+
+## Value
+
+An object of class `"Id"`.
+
+## Examples
+
+``` r
+id <- as.Id("example-id")
+is.Id(id)
+#> [1] TRUE
+```

@@ -19,7 +19,7 @@ the scenario object are applied during the projection."><meta property="og:image
 
     <a class="navbar-brand me-2" href="../index.html">ibis.iSDM</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -148,6 +148,8 @@ information during the model fitting (Default: <code>FALSE</code>).</p></dd>
 model object is called, where <code>x</code> is fitted model object. For specifics
 on the constraints, see the relevant <code>constrain</code> functions, respectively:</p><ul><li><p><code><a href="add_constraint.html">add_constraint()</a></code> for generic wrapper to add any of the available constrains.</p></li>
 <li><p><code><a href="add_constraint_dispersal.html">add_constraint_dispersal()</a></code> for specifying dispersal constraint on the temporal projections at each step.</p></li>
+<li><p>add_constraint_dispersal_spop() for specifying dispersal constraint on the temporal projections at each step
+using the ibis.SPOP package.]</p></li>
 <li><p><code><a href="add_constraint_MigClim.html">add_constraint_MigClim()</a></code> Using the <span class="pkg">MigClim</span> R-package to simulate dispersal in projections.</p></li>
 <li><p><code><a href="add_constraint_connectivity.html">add_constraint_connectivity()</a></code> Apply a connectivity constraint at the projection, for instance by adding
 a barrier that prevents migration.</p></li>
@@ -209,7 +211,7 @@ thresholds will be recalculated afterwards.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

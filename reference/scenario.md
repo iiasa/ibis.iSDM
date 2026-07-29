@@ -44,6 +44,12 @@ scenario(fit, limits = NULL, reuse_limits = FALSE, copy_model = FALSE)
   this option to `TRUE` can increase the required amount of memory
   (Default: `FALSE`).
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object.
+
 ## Note
 
 If a limit has been defined already during

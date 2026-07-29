@@ -214,6 +214,14 @@ add_predictors(
 
   Other parameters passed down
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+or
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with predictors added.
+
 ## Details
 
 A transformation takes the provided rasters and for instance rescales

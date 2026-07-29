@@ -33,6 +33,12 @@ rm_biodiversity(x, name, id)
   A [`character`](https://rdrr.io/r/base/character.html) with the id of
   the biodiversity dataset.
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with matching biodiversity data removed.
+
 ## Examples
 
 ``` r

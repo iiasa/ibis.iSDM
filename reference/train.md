@@ -239,7 +239,7 @@ parameters and not all necessarily make sense or are useful.
   National Academy of Sciences, 117(52), 33117-33123.
 
 - Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new
-  baseline for countrywide α‐diversity and species distributions:
+  baseline for countrywide alpha-diversity and species distributions:
   illustration using \>6,000 plant species in Panama. Ecol. Appl. 29,
   1–13 (2019).
 
@@ -278,20 +278,20 @@ parameters and not all necessarily make sense or are useful.
         add_predictors(env = predictors, transform = "scale", derivates = "none") |>
         # Use GLM as engine
         engine_glm()
-#> [Setup] 2026-06-15 20:11:06.364705 | Creating distribution object...
-#> [Setup] 2026-06-15 20:11:06.365693 | Adding poipo dataset...
-#> [Setup] 2026-06-15 20:11:06.448258 | Adding predictors...
-#> [Setup] 2026-06-15 20:11:06.455093 | Transforming predictors...
+#> [Setup] 2026-07-29 18:28:51.442816 | Creating distribution object...
+#> [Setup] 2026-07-29 18:28:51.443787 | Adding poipo dataset...
+#> [Setup] 2026-07-29 18:28:51.530222 | Adding predictors...
+#> [Setup] 2026-07-29 18:28:51.537257 | Transforming predictors...
 
  # Train the model, Also filter out co-linear predictors using a pearson threshold
  mod <- train(x, only_linear = TRUE, filter_predictors = 'pearson')
-#> [Estimation] 2026-06-15 20:11:06.506564 | Collecting input parameters.
-#> [Estimation] 2026-06-15 20:11:06.561747 | Filtering predictors via pearson...
-#> [Estimation] 2026-06-15 20:11:06.567531 | Adding engine-specific parameters.
-#> [Estimation] 2026-06-15 20:11:06.573036 | Engine setup.
-#> [Estimation] 2026-06-15 20:11:06.703845 | Starting fitting: 8d79c807
-#> [Estimation] 2026-06-15 20:11:06.750269 | Starting prediction...
-#> [Done] 2026-06-15 20:11:06.825961 | Completed after 0.32 secs
+#> [Estimation] 2026-07-29 18:28:51.58938 | Collecting input parameters.
+#> [Estimation] 2026-07-29 18:28:51.633811 | Filtering predictors via pearson...
+#> [Estimation] 2026-07-29 18:28:51.639852 | Adding engine-specific parameters.
+#> [Estimation] 2026-07-29 18:28:51.645825 | Engine setup.
+#> [Estimation] 2026-07-29 18:28:51.79327 | Starting fitting: 791370d0
+#> [Estimation] 2026-07-29 18:28:51.831908 | Starting prediction...
+#> [Done] 2026-07-29 18:28:51.896993 | Completed after 0.31 secs
  mod
 #> Trained GLM-Model (Unnamed run)
 #>   Strongest summary effects:

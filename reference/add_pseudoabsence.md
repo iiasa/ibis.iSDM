@@ -91,3 +91,22 @@ created if not already present).
   Stuart-Smith, J.F. and Pecl, G.T., 2014. Statistical solutions for
   error and bias in global citizen science datasets. Biological
   Conservation, 173, pp.144-154.
+
+## Examples
+
+``` r
+template <- terra::rast(nrows = 5, ncols = 5, xmin = 0, xmax = 5, ymin = 0, ymax = 5)
+terra::values(template) <- 1
+points <- sf::st_as_sf(
+  data.frame(x = c(1, 2), y = c(1, 2), observed = 1),
+  coords = c("x", "y"),
+  remove = FALSE
+)
+settings <- pseudoabs_settings(background = template, nrpoints = 3)
+set.seed(1)
+pseudoabs <- add_pseudoabsence(points, template = template, settings = settings)
+table(pseudoabs$observed)
+#> 
+#> 0 1 
+#> 3 2 
+```

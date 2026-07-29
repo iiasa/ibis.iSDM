@@ -42,3 +42,11 @@ Currently supported strategies are:
 
 [future](https://future.futureverse.org/reference/future.html),
 [ibis_future](https://iiasa.github.io/ibis.iSDM/reference/ibis_future.md)
+
+## Examples
+
+``` r
+old_strategy <- getOption("ibis.futurestrategy")
+ibis_set_strategy("sequential")
+options(ibis.futurestrategy = old_strategy)
+```

@@ -36,6 +36,11 @@ BARTPrior(variable, hyper = 0.75, ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## Note
 
 Even if a given variable is included as split in the regression or
@@ -77,3 +82,11 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+prior <- BARTPrior("forest", hyper = 0.75)
+prior$get("value")
+#> [1] 0.75
+```

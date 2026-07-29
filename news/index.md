@@ -1,6 +1,15 @@
 # Changelog
 
-## ibis.iSDM 0.1.8 (current dev branch)
+## ibis.iSDM 0.1.9 (current dev branch)
+
+##### New features
+
+- Preparing for CRAN release, including documentation and minor code
+  fixes [\#154](https://github.com/iiasa/ibis.iSDM/issues/154)
+
+##### Minor improvements and bug fixes
+
+## ibis.iSDM 0.1.8
 
 ##### New features
 

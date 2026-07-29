@@ -35,6 +35,11 @@ BREGPrior(variable, hyper = NULL, ip = NULL)
   and 1 of the inclusion probability of the target variable (Default:
   `NULL`).
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## Details
 
 The Zellner-style spike and slab prior for generalized linear models are
@@ -95,12 +100,12 @@ Other prior:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 # Positive coefficient
 p1 <- BREGPrior(variable = "forest", hyper = 2, ip = NULL)
 p1
+#> BREGPrior:  prior for 'forest'
 # Coefficient and direction unknown but variable def. important
 p2 <- BREGPrior(variable = "forest", hyper = NULL, ip = 1)
 p2
-} # }
+#> BREGPrior:  prior for 'forest'
 ```

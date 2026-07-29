@@ -27,6 +27,12 @@ rm_control(x, type)
   A [`character`](https://rdrr.io/r/base/character.html) vector
   describing the type of control to be removed. Can be missing.
 
+## Value
+
+A
+[`BiodiversityDistribution`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityDistribution-class.md)
+object with matching control settings removed.
+
 ## See also
 
 [`add_control_bias()`](https://iiasa.github.io/ibis.iSDM/reference/add_control_bias.md)

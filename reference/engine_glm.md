@@ -93,7 +93,7 @@ package='ibis.iSDM',mustWork = TRUE))
 
 # Add GLM as an engine
 x <- distribution(background) |> engine_glm()
-#> [Setup] 2026-06-15 20:10:48.397126 | Creating distribution object...
+#> [Setup] 2026-07-29 18:28:32.503735 | Creating distribution object...
 print(x)
 #> <Biodiversity distribution model>
 #> Background extent: 

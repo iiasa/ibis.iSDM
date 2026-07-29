@@ -258,3 +258,11 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+prior <- Prior$new(name = "ExamplePrior", variable = "temperature", value = 1)
+prior$get("value")
+#> [1] 1
+```

@@ -52,6 +52,11 @@ GLMNETPrior(variable, hyper = 0, lims = c(-Inf, Inf), ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## See also
 
 [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
@@ -80,12 +85,12 @@ Other prior:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 # Retain variable
 p1 <- GLMNETPrior(variable = "forest", hyper = 0)
 p1
+#> GLMNETPrior:  prior for 'forest'
 # Smaller chance to be regularized
 p2 <- GLMNETPrior(variable = "forest", hyper = 0.2, lims = c(0, Inf))
 p2
-} # }
+#> GLMNETPrior:  prior for 'forest'
 ```

@@ -2,6 +2,11 @@
 
 BiodiversityDataset prototype description
 
+## Value
+
+An [`R6::R6Class`](https://r6.r-lib.org/reference/R6Class.html)
+generator object.
+
 ## Public fields
 
 - `name`:
@@ -422,3 +427,23 @@ The objects of this class are cloneable with this method.
 - `deep`:
 
   Whether to make a deep clone.
+
+## Examples
+
+``` r
+records <- data.frame(x = 0, y = 0, observed = 1)
+dataset <- BiodiversityDataset$new(
+  name = "Example records",
+  id = "example-dataset",
+  equation = observed ~ 1,
+  family = "binomial",
+  link = NULL,
+  type = "poipa",
+  weight = NULL,
+  field_occurrence = "observed",
+  data = records,
+  use_intercept = TRUE
+)
+dataset$get_type(short = TRUE)
+#> [1] "poipa"
+```

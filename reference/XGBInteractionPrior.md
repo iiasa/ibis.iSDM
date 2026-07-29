@@ -28,6 +28,11 @@ XGBInteractionPrior(variables, ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## Details
 
 XGBoost interaction constraints are only supported by tree boosters.
@@ -65,7 +70,5 @@ Other prior:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
  pp <- XGBInteractionPrior(c("forest", "temperature"))
-} # }
 ```

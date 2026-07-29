@@ -14,7 +14,7 @@ Source:
 [`inst/CITATION`](https://github.com/iiasa/ibis.iSDM/blob/dev/inst/CITATION)
 
 Jung, M. (2023). An integrated species distribution modelling framework
-for heterogeneous biodiversity data. Ecological Informatics, 102127.
+for heterogeneous biodiversity data. Ecological Informatics, 76, 102127.
 
     @Article{,
       title = {An integrated species distribution modelling framework for heterogeneous biodiversity data},
@@ -23,16 +23,16 @@ for heterogeneous biodiversity data. Ecological Informatics, 102127.
       volume = {76},
       year = {2023},
       pages = {102127},
-      url = {https://doi.org/10.1016/j.ecoinf.2023.102127},
+      doi = {10.1016/j.ecoinf.2023.102127},
     }
 
-Jung, M., Hesselbarth, H.K.M. (2023). An integrated species distribution
-modelling framework for heterogeneous biodiversity data. R package
-version 0.0.5
+Jung, M. and Hesselbarth, M.H.K. (2026). ibis.iSDM: Integrated
+Biodiversity Distribution Scenario Modelling. R package version 0.1.9.
 
-    @Misc{,
-      title = {An integrated species distribution modelling framework for heterogeneous biodiversity data},
+    @Manual{,
+      title = {ibis.iSDM: Integrated Biodiversity Distribution Scenario Modelling},
       author = {Martin Jung and Maximilian H.K. Hesselbarth},
-      year = {2023},
-      version = {0.0.9},
+      year = {2026},
+      note = {R package version 0.1.9},
+      url = {https://iiasa.github.io/ibis.iSDM/},
     }

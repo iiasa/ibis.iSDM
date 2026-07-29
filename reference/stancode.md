@@ -32,3 +32,11 @@ None.
 ## See also
 
 rstan, cmdstanr, brms
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+stancode(fitted_stan_model)
+} # }
+```

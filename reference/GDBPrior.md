@@ -38,6 +38,11 @@ GDBPrior(variable, hyper = "increasing", ...)
 
   Variables passed on to prior object.
 
+## Value
+
+A [`Prior`](https://iiasa.github.io/ibis.iSDM/reference/Prior-class.md)
+object.
+
 ## Note
 
 Similar priors can also be defined for the
@@ -75,3 +80,11 @@ Other prior:
 [`get_priors()`](https://iiasa.github.io/ibis.iSDM/reference/get_priors.md),
 [`priors()`](https://iiasa.github.io/ibis.iSDM/reference/priors.md),
 [`rm_priors()`](https://iiasa.github.io/ibis.iSDM/reference/rm_priors.md)
+
+## Examples
+
+``` r
+prior <- GDBPrior("forest", hyper = "increasing")
+prior$get("value")
+#> [1] "increasing"
+```

@@ -242,12 +242,6 @@ in various forms.
 - [`add_pseudoabsence()`](https://iiasa.github.io/ibis.iSDM/reference/add_pseudoabsence.md)
   : Add pseudo-absence points to a point data set
 
-- [`set_priors(`*`<BiodiversityDistribution>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/set_priors-BiodiversityDistribution-method.md)
-  : Add priors to an existing distribution object
-
-- [`set_priors()`](https://iiasa.github.io/ibis.iSDM/reference/set_priors.md)
-  : Add priors to an existing distribution object
-
 - [`sel_predictors()`](https://iiasa.github.io/ibis.iSDM/reference/sel_predictors.md)
   :
 
@@ -510,8 +504,8 @@ needs to be reformatted.
   [`mask.BiodiversityScenario()`](https://iiasa.github.io/ibis.iSDM/reference/mask.md)
   : Mask data with an external layer
 
-- [`myLog()`](https://iiasa.github.io/ibis.iSDM/reference/myLog.md) :
-  Custom messaging function for scripts
+- [`modal()`](https://iiasa.github.io/ibis.iSDM/reference/modal.md) :
+  Calculate the mode of a provided vector
 
 - [`predictor_homogenize_na()`](https://iiasa.github.io/ibis.iSDM/reference/predictor_homogenize_na.md)
   : Homogenize NA values across a set of predictors.
@@ -648,8 +642,6 @@ Other functions only relevant for development
   : render_html
 - [`run_stan()`](https://iiasa.github.io/ibis.iSDM/reference/run_stan.md)
   : Fit a cmdstanr model
-- [`myLog()`](https://iiasa.github.io/ibis.iSDM/reference/myLog.md) :
-  Custom messaging function for scripts
 
 # Articles
 

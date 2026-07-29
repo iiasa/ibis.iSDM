@@ -65,6 +65,12 @@ add_constraint_dispersal(
   passed on parameters. See also the specific methods for adding
   constraints.
 
+## Value
+
+A
+[`BiodiversityScenario`](https://iiasa.github.io/ibis.iSDM/reference/BiodiversityScenario-class.md)
+object with the dispersal constraint added.
+
 ## Details
 
 **Dispersal**: Parameters for `'method'`:
@@ -121,3 +127,16 @@ Other constraint:
 [`add_constraint_minsize()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_minsize.md),
 [`add_constraint_threshold()`](https://iiasa.github.io/ibis.iSDM/reference/add_constraint_threshold.md),
 [`simulate_population_steps()`](https://iiasa.github.io/ibis.iSDM/reference/simulate_population_steps.md)
+
+## Examples
+
+``` r
+scenario_obj <- BiodiversityScenario$new()
+constrained <- add_constraint_dispersal(
+  scenario_obj,
+  method = "sdd_fixed",
+  value = 1000
+)
+names(constrained$get_constraints())
+#> [1] "dispersal"
+```

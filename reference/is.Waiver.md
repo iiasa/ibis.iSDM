@@ -18,3 +18,10 @@ is.Waiver(x)
 
 Boolean evaluation with [logical](https://rdrr.io/r/base/logical.html)
 output.
+
+## Examples
+
+``` r
+is.Waiver(new_waiver())
+#> [1] TRUE
+```
