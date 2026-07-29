@@ -163,7 +163,6 @@ methods::setMethod(
 
     # Check whether biscale package is available
     check_package('biscale')
-    check_package("cowplot")
     if(!("biscale" %in% loadedNamespaces()) || ('biscale' %notin% utils::sessionInfo()$otherPkgs) ) {
       try({requireNamespace('biscale');attachNamespace("biscale")},silent = TRUE)
     }
@@ -209,17 +208,23 @@ methods::setMethod(
       ) +
       ggplot2::theme(legend.position = "none")
 
-    # Add legend with cowplot
-    finalPlot <- cowplot::ggdraw() +
-      cowplot::draw_plot(map, 0, 0, 1, 1) +
-      cowplot::draw_plot(legend, 0.2, .65, 0.2, 0.2)
+    # Add legend using grid (replaces cowplot)
+    finalPlot <- grid::grobTree(
+      ggplot2::ggplotGrob(map),
+      grid::grobTree(
+        ggplot2::ggplotGrob(legend),
+        vp = grid::viewport(x = 0.2, y = 0.65, width = 0.2, height = 0.2,
+                             just = c("left", "bottom"))
+      )
+    )
 
     # Print the plot
     if(plot){
-      print(finalPlot)
+      grid::grid.newpage()
+      grid::grid.draw(finalPlot)
     }
     if(is.character(fname)){
-      cowplot::ggsave2(filename = fname, plot = finalPlot)
+      ggplot2::ggsave(filename = fname, plot = finalPlot)
     }
 
     return(finalPlot)
@@ -525,7 +530,7 @@ methods::setMethod(
       return(viz)
     }
     if(is.character(fname)){
-      cowplot::ggsave2(filename = fname, plot = viz)
+      ggplot2::ggsave(filename = fname, plot = viz)
     }
   }
 )

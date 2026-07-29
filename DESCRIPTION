@@ -6,7 +6,7 @@ Authors@R:
     c(person(given = "Martin",
            family = "Jung",
            role = c("aut", "cre", "cph"),
-           email = "jung@iiasa.ac.at",
+           email = "martinjung@zoho.com",
            comment = c(ORCID = "0000-0002-7569-1390")),
       person(given = "Maximilian H.K.",
            family = "Hesselbarth",
@@ -14,7 +14,7 @@ Authors@R:
            email = "hesselbarth@iiasa.ac.at",
            comment = c(ORCID = "0000-0003-1125-9918"))
       )
-Maintainer: Martin Jung <jung@iiasa.ac.at>
+Maintainer: Martin Jung <martinjung@zoho.com>
 Description: Model the distribution of species and ecosystems in a suitability
   framing using the integrated species distribution modelling (iSDM) workflow
   described in Jung (2023) <doi:10.1016/j.ecoinf.2023.102127>. It estimates
@@ -51,6 +51,7 @@ Imports:
     terra (>= 1.8-28), 
     tibble (>= 2.0.0),
     uuid,
+    units,
     cli (>= 3.6.0),
     utils
 LinkingTo:
@@ -58,7 +59,10 @@ LinkingTo:
 Depends:
     R (>= 4.1.0)
 Suggests:
+    abess,
     abind,
+    BiocManager,
+    biscale,
     BoomSpikeSlab (>= 1.2.4),
     Boruta,
     covr,
@@ -71,6 +75,7 @@ Suggests:
     glmnetUtils,
     gnlm,
     geosphere,
+    gdalUtilities,
     INLA,
     inlabru (>= 2.10.0),
     fmesher (>= 0.1.7),
@@ -87,7 +92,9 @@ Suggests:
     lubridate (>= 1.9.0),
     rstan (>= 2.21.0),
     rstantools (>= 2.1.1),
+    cmdstanr,
     testthat (>= 3.0.0),
+    tidyr,
     xgboost
 Remotes:
     ElliotDovers/scampr

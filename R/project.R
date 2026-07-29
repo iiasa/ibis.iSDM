@@ -34,6 +34,8 @@ NULL
 #'
 #' * [`add_constraint()`] for generic wrapper to add any of the available constrains.
 #' * [`add_constraint_dispersal()`] for specifying dispersal constraint on the temporal projections at each step.
+#' * add_constraint_dispersal_spop() for specifying dispersal constraint on the temporal projections at each step
+#' using the ibis.SPOP package.]
 #' * [`add_constraint_MigClim()`] Using the \pkg{MigClim} R-package to simulate dispersal in projections.
 #' * [`add_constraint_connectivity()`] Apply a connectivity constraint at the projection, for instance by adding
 #' a barrier that prevents migration.
@@ -472,8 +474,8 @@ methods::setMethod(
             resistance <- alignRasters(resistance, out, method = "ngb", func = terra::modal, cl = FALSE)
             resistance <- terra::extend(resistance, out)
           }
-          # By definition a hard barrier removes all suitable again, while resistance 
-          # simply multiplies the given suitability with the resistance value. 
+          # By definition a hard barrier removes all suitable again, while resistance
+          # simply multiplies the given suitability with the resistance value.
           # If the resistance surface has multiple layers, we assume that it is a time-series and select the layer for the current step.
           if(any(scenario_constraints$connectivity$method == "resistance")){
             if(terra::nlyr(resistance)>1){
@@ -503,6 +505,15 @@ methods::setMethod(
                                                               unit = scenario_constraints$dispersal$params[2],
                                                               resistance = resistance)
             )
+            names(out) <-  paste0('suitability_', step)
+          }
+          # For ibis.SPOP (external depedency)
+          if(scenario_constraints$dispersal$method == "spop"){
+            check_package("ibis.SPOP")
+            out <- ibis.SPOP:::.spop_ibis_dispersal(baseline_threshold,
+                                   new_suit = out,
+                                   resistance = resistance,
+                                   params = scenario_constraints$dispersal$params)
             names(out) <-  paste0('suitability_', step)
           }
           # For kissmig generate threshold and masked suitabilities

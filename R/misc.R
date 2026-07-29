@@ -110,15 +110,20 @@ ibis_dependencies <- function(deps = getOption("ibis.dependencies"), update = TR
     )
   }
 
-  # Addition of rangeShifter
-  check_package("devtools")
-  try({
-    devtools::install_github("https://github.com/RangeShifter/RangeShiftR-package", ref = "main")
-  })
-  # Try and Add steps
-  try({
-    remotes::install_github("steps-dev/steps", build_vignettes = TRUE)
-  })
+  # Raise info warning to install rangeShifter if not installed
+  if(!requireNamespace("rangeShifter", quietly = TRUE)){
+    myLog('[Setup]','yellow',
+    'The rangeShifter package is not installed. Please install it manually from:',
+    "RangeShifter/RangeShiftR-pkg/RangeShiftR@main"
+    )
+  }
+  # And for steps
+  if(!requireNamespace("steps", quietly = TRUE)){
+    myLog('[Setup]','yellow',
+          'The steps package is not installed. Please install it manually from:',
+          "install.packages('steps')"
+    )
+  }
 
   # Update packages if set
   if(update){

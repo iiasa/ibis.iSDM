@@ -26,7 +26,7 @@
 #' - Check if threshold is larger than layer
 #'
 #' * [`BiodiversityScenario`]
-#' -
+#' - Check if scenario layers are valid
 #'
 #' @note This function will likely be expanded with additional checks in the
 #' future. If you have ideas, please let them know per issue.

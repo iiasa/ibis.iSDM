@@ -22,7 +22,7 @@
 #' are \code{'green'} / \code{'yellow'} / \code{'red'}
 #' @param ... Any additional outputs or words for display
 #'
-#' @keywords utils
+#' @keywords internal
 #'
 #' @noRd
 #'
@@ -30,8 +30,6 @@
 #' \dontrun{
 #' myLog("[Setup]", "red", "Some error occurred during data preparation.")
 #' }
-#'
-#' @keywords internal
 myLog <- function(title = "[Processing]", col = 'green', ...) {
   assertthat::assert_that(col %in% c('green','yellow','red'))
   textwrap <- switch (col,

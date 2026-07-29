@@ -109,7 +109,7 @@ NULL
 #' * Zhu, J., Wen, C., Zhu, J., Zhang, H., & Wang, X. (2020). A polynomial algorithm
 #' for best-subset selection problem. Proceedings of the National Academy of Sciences, 117(52), 33117-33123.
 #' * Leung, B., Hudgins, E. J., Potapova, A. & Ruiz‐Jaen, M. C. A new baseline for
-#'  countrywide α‐diversity and species distributions: illustration using &gt;6,000
+#'  countrywide alpha-diversity and species distributions: illustration using &gt;6,000
 #'  plant species in Panama. Ecol. Appl. 29, 1–13 (2019).
 #'
 #' @seealso [engine_gdb], [engine_xgboost], [engine_bart], [engine_inla],

@@ -75,6 +75,8 @@ on the constraints, see the relevant \code{constrain} functions, respectively:
 \itemize{
 \item \code{\link[=add_constraint]{add_constraint()}} for generic wrapper to add any of the available constrains.
 \item \code{\link[=add_constraint_dispersal]{add_constraint_dispersal()}} for specifying dispersal constraint on the temporal projections at each step.
+\item add_constraint_dispersal_spop() for specifying dispersal constraint on the temporal projections at each step
+using the ibis.SPOP package.]
 \item \code{\link[=add_constraint_MigClim]{add_constraint_MigClim()}} Using the \pkg{MigClim} R-package to simulate dispersal in projections.
 \item \code{\link[=add_constraint_connectivity]{add_constraint_connectivity()}} Apply a connectivity constraint at the projection, for instance by adding
 a barrier that prevents migration.

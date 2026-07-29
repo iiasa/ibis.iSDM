@@ -13,7 +13,7 @@ to be supplied.}
 
 \item{res}{(Optional) \code{\link{numeric}} estimate on the resolution of the output (Default: \code{NULL}).}
 
-\item{...}{other arguments that can be passed to \code{\link{terra}}}
+\item{...}{other arguments that can be passed to \code{\link[terra]{terra}}}
 }
 \value{
 an empty \code{\link[terra:SpatRaster]{SpatRaster}}, i.e. all cells are \code{NA}.

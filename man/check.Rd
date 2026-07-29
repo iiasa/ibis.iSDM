@@ -50,7 +50,7 @@ Different checks are implemented depending on the supplied object
 \item \code{\link{BiodiversityScenario}}
 }
 \itemize{
-\item 
+\item Check if scenario layers are valid
 }
 }
 \note{

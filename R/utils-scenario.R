@@ -380,8 +380,8 @@ stars_to_sf <- function(obj){
 #' @description This is a small helper function to convert a to a [`SpatRaster`]
 #' object.
 #'
-#' @param obj A [`SpatRaster`] object with a \code{"time"} dimension at least
-#' (checked via [`time`]).
+#' @param obj A [`SpatRaster`] object with a \code{"terra::time"} dimension at least
+#' (checked via [`terra::time`]).
 #'
 #' @returns A [`stars`] object with the formatted data.
 #'

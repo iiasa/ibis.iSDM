@@ -910,7 +910,7 @@ alignRasters <- function(data, template, method = "bilinear", func = mean, cl = 
 #' can be obtained. Note that for \code{sf} objects the parameter \code{res} needs
 #' to be supplied.
 #' @param res (Optional) [`numeric`] estimate on the resolution of the output (Default: \code{NULL}).
-#' @param ... other arguments that can be passed to \code{\link{terra}}
+#' @param ... other arguments that can be passed to \code{\link[terra]{terra}}
 #'
 #' @return an empty [`SpatRaster`], i.e. all cells are \code{NA}.
 #'

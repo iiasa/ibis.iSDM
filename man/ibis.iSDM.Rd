@@ -20,16 +20,17 @@ projections of habitat suitability into the future.
 Useful links:
 \itemize{
   \item \url{https://iiasa.github.io/ibis.iSDM/}
+  \item \url{https://github.com/iiasa/ibis.iSDM}
   \item Report bugs at \url{https://github.com/iiasa/ibis.iSDM/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Martin Jung \email{jung@iiasa.ac.at} (\href{https://orcid.org/0000-0002-7569-1390}{ORCID}) [copyright holder]
+\strong{Maintainer}: Martin Jung \email{martinjung@zoho.com} (\href{https://orcid.org/0000-0002-7569-1390}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Martin Jung \email{jung@iiasa.ac.at} (\href{https://orcid.org/0000-0002-7569-1390}{ORCID}) [copyright holder]
+  \item Martin Jung \email{martinjung@zoho.com} (\href{https://orcid.org/0000-0002-7569-1390}{ORCID}) [copyright holder]
 }
 
 Other contributors:
