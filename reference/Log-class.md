@@ -199,5 +199,5 @@ The objects of this class are cloneable with this method.
 ``` r
 log <- Log$new(tempfile(fileext = ".txt"), new_waiver())
 log$get_filename()
-#> [1] "file1f5d1db17f5.txt"
+#> [1] "file1e945753904c.txt"
 ```
