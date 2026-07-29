@@ -47,7 +47,8 @@ jobs:
           extra-packages: |
             any::covr,
             INLA=?ignore,
-            inlabru=?ignore
+            inlabru=?ignore,
+            cmdstanr=?ignore
           needs: coverage
 
       - name: Test coverage

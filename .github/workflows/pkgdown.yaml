@@ -46,7 +46,8 @@ jobs:
             any::ncdf4,
             any::geosphere,
             any::kissmig,
-            local::.
+            local::.,
+            cmdstanr=?ignore
           needs: website
 
       - name: Check INLA

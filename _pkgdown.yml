@@ -184,7 +184,6 @@ reference:
       - check
       - has_keyword("misc")
       - print
-      - myLog
       - modal
       - new_id
       - new_waiver
