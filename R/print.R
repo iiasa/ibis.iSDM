@@ -88,7 +88,3 @@ print.Id <- function(x, ...) message("id: ", x)
 
 #' @rdname print
 methods::setMethod("print", "Id", function(x, ...) print.Id(x))
-
-#' @rdname print
-#' @keywords misc
-methods::setMethod("print", "tbl_df", function(x, ...) base::print(x, ...))
