@@ -47,9 +47,6 @@ print(x, ...)
 
 # S4 method for class 'Id'
 print(x, ...)
-
-# S4 method for class 'tbl_df'
-print(x, ...)
 ```
 
 ## Arguments

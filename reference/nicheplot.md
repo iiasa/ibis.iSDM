@@ -126,8 +126,12 @@ Saved niche plot in `'fname'` if specified, otherwise plot.
 # Make quick prediction
 background <- terra::rast(system.file('extdata/europegrid_50km.tif',
 package='ibis.iSDM',mustWork = TRUE))
-virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
-ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
+virtual_points <- sf::st_read(
+  system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',
+  quiet = TRUE)
+ll <- list.files(
+  system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),
+  full.names = TRUE)
 
 # Load them as rasters
 predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))
@@ -139,15 +143,15 @@ name = 'Virtual points',docheck = FALSE) |>
 add_predictors(predictors, transform = 'none',derivates = 'none') |>
 engine_glm() |>
 train()
-#> [Setup] 2026-07-29 18:51:41.235528 | Creating distribution object...
-#> [Setup] 2026-07-29 18:51:41.236463 | Adding poipo dataset...
-#> [Setup] 2026-07-29 18:51:41.241765 | Adding predictors...
-#> [Estimation] 2026-07-29 18:51:41.362018 | Collecting input parameters.
-#> [Estimation] 2026-07-29 18:51:41.525861 | Adding engine-specific parameters.
-#> [Estimation] 2026-07-29 18:51:41.530279 | Engine setup.
-#> [Estimation] 2026-07-29 18:51:41.751868 | Starting fitting: Virtual points
-#> [Estimation] 2026-07-29 18:51:41.819083 | Starting prediction...
-#> [Done] 2026-07-29 18:51:41.940077 | Completed after 0.58 secs
+#> [Setup] 2026-07-30 07:06:38.7857 | Creating distribution object...
+#> [Setup] 2026-07-30 07:06:38.7867 | Adding poipo dataset...
+#> [Setup] 2026-07-30 07:06:38.792062 | Adding predictors...
+#> [Estimation] 2026-07-30 07:06:38.903927 | Collecting input parameters.
+#> [Estimation] 2026-07-30 07:06:39.060494 | Adding engine-specific parameters.
+#> [Estimation] 2026-07-30 07:06:39.064998 | Engine setup.
+#> [Estimation] 2026-07-30 07:06:39.278858 | Starting fitting: Virtual points
+#> [Estimation] 2026-07-30 07:06:39.351021 | Starting prediction...
+#> [Done] 2026-07-30 07:06:39.467749 | Completed after 0.56 secs
 
 # Plot niche for prediction for temperature and forest cover
 nicheplot(fit, xvar = "bio01_mean_50km", yvar = "CLC3_312_mean_50km" )

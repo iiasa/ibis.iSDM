@@ -66,7 +66,6 @@ priors for a model.
   [`print(`*`<Settings>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Log>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Id>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
-  [`print(`*`<tbl_df>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   : Print
 - [`summary(`*`<distribution>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
   [`summary(`*`<DistributionModel>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
@@ -332,7 +331,6 @@ models.
   [`print(`*`<Settings>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Log>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Id>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
-  [`print(`*`<tbl_df>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   : Print
 - [`summary(`*`<distribution>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
   [`summary(`*`<DistributionModel>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
@@ -580,7 +578,6 @@ Other functions only relevant for development
   [`print(`*`<Settings>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Log>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Id>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
-  [`print(`*`<tbl_df>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   : Print
 - [`render_html()`](https://iiasa.github.io/ibis.iSDM/reference/render_html.md)
   : render_html

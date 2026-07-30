@@ -127,7 +127,10 @@ predictor_derivate
 
 ``` r
 # Dummy raster
-r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .01,sd = .1))
+r_ori <- terra::rast(
+  nrows = 10, ncols = 10, res = 0.05,
+  xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
+  vals = rnorm(3600, mean = .01, sd = .1))
 
 # Normalize
 r_norm <- predictor_transform(r_ori, option = 'norm')

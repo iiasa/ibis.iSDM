@@ -47,10 +47,9 @@ Systems Analysis (IIASA), Austria.
 ## Contributors
 
 All contributions to this project are gratefully acknowledged using the
-[`allcontributors`
-package](https://github.com/ropenscilabs/allcontributors) following the
-[all-contributors](https://allcontributors.org) specification.
-Contributions of any kind are welcome!
+[`allcontributors` package](https://github.com/ropensci/allcontributors)
+following the [all-contributors](https://allcontributors.org)
+specification. Contributions of any kind are welcome!
 
 [TABLE]
 
@@ -122,7 +121,6 @@ priors for a model.
   [`print(`*`<Settings>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Log>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Id>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
-  [`print(`*`<tbl_df>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   : Print
 - [`summary(`*`<distribution>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
   [`summary(`*`<DistributionModel>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
@@ -388,7 +386,6 @@ models.
   [`print(`*`<Settings>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Log>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Id>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
-  [`print(`*`<tbl_df>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   : Print
 - [`summary(`*`<distribution>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
   [`summary(`*`<DistributionModel>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/summary.md)
@@ -636,7 +633,6 @@ Other functions only relevant for development
   [`print(`*`<Settings>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Log>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   [`print(`*`<Id>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
-  [`print(`*`<tbl_df>`*`)`](https://iiasa.github.io/ibis.iSDM/reference/print.md)
   : Print
 - [`render_html()`](https://iiasa.github.io/ibis.iSDM/reference/render_html.md)
   : render_html
