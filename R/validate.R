@@ -593,7 +593,7 @@ methods::setMethod(
     # FIXME: Hacky. This likely won't work with specific formulations
     if(!is.null(mod)){
       if( any( sapply(mod$model$biodiversity, function(x) x$family) == "binomial" ) ){
-        LogLoss <- function(y_pred, y_true, eps = NULL) {
+        LogLoss <- function(y_pred, y_true, eps = 1e-15) {
           LogLoss <- -mean(y_true * log(y_pred) + (1 - y_true) * log(1 - y_pred))
           return(LogLoss)
         }

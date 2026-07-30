@@ -392,7 +392,7 @@ DistributionModel <- R6::R6Class(
         # Use the base plotting
         par.ori <- graphics::par(no.readonly = TRUE)
         graphics::par(mfrow = c(ceiling(n/3),3))
-        mboost:::plot.mboost(x = obj, type = 'b',cex.axis=1.5, cex.lab=1.5)
+        plot(x = obj, type = 'b',cex.axis=1.5, cex.lab=1.5)
         graphics::par(par.ori)#dev.off()
       } else if( self$get_name() == 'INLA-Model') {
         plot_inla_marginals(obj, what = what)
@@ -406,7 +406,7 @@ DistributionModel <- R6::R6Class(
         } else{ plot(obj) }
       } else if( self$get_name() == 'GLM-Model') {
         if(what == "fixed"){
-          glmnet:::plot.glmnet(obj$glmnet.fit, xvar = "lambda") # Deviance explained
+          plot(obj$glmnet.fit, xvar = "lambda") # Deviance explained
         } else{ plot(obj) }
       } else if( self$get_name() == 'STAN-Model') {
         # Get true beta parameters

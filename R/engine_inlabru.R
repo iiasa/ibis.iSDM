@@ -267,7 +267,7 @@ engine_inlabru <- function(x,
       if(inherits(self$get_data('mesh'), "fm_mesh_2d")){
         self$get_data('mesh')
       } else {
-        INLA:::plot.inla.mesh( self$get_data('mesh') )
+        plot( self$get_data('mesh') )
       }
     }
   },overwrite = TRUE)
@@ -896,7 +896,7 @@ engine_inlabru <- function(x,
       cores <- if(getOption("ibis.runparallel")) getOption("ibis.nthread") else NULL
       # Make a prediction
       suppressWarnings(
-        pred_bru <- inlabru:::predict.bru(
+        pred_bru <- predict(
           object = fit_bru,
           num.threads = cores,
           newdata = preds,
@@ -1014,7 +1014,7 @@ engine_inlabru <- function(x,
 
       # Perform the projection
       suppressWarnings(
-        out <- inlabru:::predict.bru(
+        out <- predict(
           object = mod,
           newdata = newdata,
           formula = form,
@@ -1227,7 +1227,7 @@ engine_inlabru <- function(x,
       }
 
       fun <- ifelse(length(model$biodiversity) == 1 && model$biodiversity[[1]]$type == 'poipa', "logistic", "exp")
-      pred_cov <- inlabru:::predict.bru(mod,
+      pred_cov <- predict(mod,
                                         df_partial,
                                         stats::as.formula( paste("~ ",fun,"( Intercept + ", x.var ,")") ),
                                         n.samples = 100,
@@ -1321,13 +1321,13 @@ engine_inlabru <- function(x,
 
         # Predict the spatial intensity surface
         if(is.null(spat)){
-          spat <- inlabru::pixels(mesh, mask = domain)
+          spat <- fmesher::fm_pixels(mesh, mask = domain)
         }
         # FIXME: Does not work for other link functions
         if(type == "response") fun <- 'exp' else fun <- ''
 
         suppressWarnings(
-          lambda <- inlabru:::predict.bru(mod,
+          lambda <- predict(mod,
                                           spat,
                                           stats::as.formula(paste0("~ ",fun,"(",what," + Intercept)"))
           )
@@ -1337,9 +1337,9 @@ engine_inlabru <- function(x,
         lambda <- terra::rast(lambda)
 
         # Also get SPDE posteriors of the matern correlation and coveriance function
-        corplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.correlation")) +
+        corplot <- plot(inlabru::spde.posterior(mod, what, what = "matern.correlation")) +
           ggplot2::ggtitle("Matern correlation")
-        covplot <- inlabru:::plot.prediction(inlabru::spde.posterior(mod, what, what = "matern.covariance")) +
+        covplot <- plot(inlabru::spde.posterior(mod, what, what = "matern.covariance")) +
           ggplot2::ggtitle("Matern covariance")
         inlabru::multiplot(covplot, corplot)
 

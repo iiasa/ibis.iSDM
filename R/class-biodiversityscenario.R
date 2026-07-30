@@ -453,17 +453,17 @@ BiodiversityScenario <- R6::R6Class(
         assertthat::assert_that(what %in% names( self$get_data() ),
                                 msg = paste(what, "not found in scenario projections?"))
         # Get unique number of data values. Surely there must be an easier val
-        vals <- self$get_data()[what] |> stars:::pull.stars() |> as.vector() |> unique()
+        vals <- self$get_data()[[what]] |> as.vector() |> unique()
         vals <- base::length(stats::na.omit(vals))
         if(vals>2) col <- ibis_colours$sdm_colour else col <- c('grey25','coral')
         if(is.null(which)){
-          stars:::plot.stars( self$get_data()[what], breaks = "equal", col = col )
+          plot( self$get_data()[what], breaks = "equal", col = col )
         } else {
           # Assert that which is actually within the dimensions
           assertthat::assert_that(which <= dim(self$get_data())[3],
                                   msg = "Band selection out of bounds.")
           obj <- self$get_data()[what,,,which]
-          stars:::plot.stars( obj, breaks = "equal", col = col,
+          plot( obj, breaks = "equal", col = col,
                               main = paste0(what," for ", stars::st_get_dimension_values(obj, "band") )  )
         }
       }
@@ -592,8 +592,14 @@ BiodiversityScenario <- R6::R6Class(
       time <- stars::st_get_dimension_values(scenario, which = 3) # 3 assumed to be time band
       if(is.numeric(position)) position <- time[position]
       if(is.null(position)) position <- time[base::length(time)]
-      final <- scenario |>
-        stars:::filter.stars(time == position) |>
+      # Dimension aware combination
+      idx <- which(stars::st_get_dimension_values(scenario, 3) == position)
+      nd <- length(dim(scenario))
+      # stars [.stars(x, i, j, ...) needs nd+1 positional args
+      # time is at dim position 3 → bracket position 4
+      parts <- character(nd + 1)
+      for (i in seq_len(nd + 1)) parts[i] <- if (i == 4) "idx" else ""
+      final <- eval(parse(text = paste0("scenario[", paste(parts, collapse = ", "), ", drop = TRUE]"))) |>
         terra::rast()
       if(is.na(terra::crs(final))) terra::crs(final) <- terra::crs(baseline)
       # -- #
@@ -651,13 +657,13 @@ BiodiversityScenario <- R6::R6Class(
         time <- stars::st_get_dimension_values(scenario, which = 3) # Assuming band 3 is the time dimension
         assertthat::assert_that(!is.na(sf::st_crs(scenario)), msg = "Scenario not correctly projected.")
         # HACK: Add area to stars
-        ar <- stars:::st_area.stars(scenario)
+        ar <- sf::st_area(scenario)
         # Get the unit
         ar_unit <- units::deparse_unit(ar$area)
         new <- (scenario |> terra::rast()) * (ar |> terra::rast())
         terra::time(new) <- time
         # Convert to scenarios to data.frame
-        df <- stars:::as.data.frame.stars(stars:::st_as_stars(new)) |> (\(.) subset(., stats::complete.cases(.)))()
+        df <- as.data.frame(stars::st_as_stars(new)) |> (\(.) subset(., stats::complete.cases(.)))()
         # Rename
         names(df)[3:4] <- c("band", "area")
         # --- #
@@ -706,7 +712,7 @@ BiodiversityScenario <- R6::R6Class(
           cli::cli_abort("Summary without time dimension not yet implemented!")
         }
         # Get area
-        ar <- stars:::st_area.stars(scenario)
+        ar <- sf::st_area(scenario)
         # Get the unit
         ar_unit <- units::deparse_unit(ar$area)
 
@@ -799,7 +805,7 @@ BiodiversityScenario <- R6::R6Class(
       if(oftype == "stars"){
         if(plot){
           suppressWarnings(
-            stars:::plot.stars(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey85",ibis_colours$divg_bluered[11:20]))
+            plot(out, breaks = "fisher", col = c(ibis_colours$divg_bluered[1:10],"grey85",ibis_colours$divg_bluered[11:20]))
           )
         }
       } else {

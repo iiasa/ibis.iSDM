@@ -1,4 +1,4 @@
-#' Built formula for INLA model
+﻿#' Built formula for INLA model
 #'
 #' @description This function built a formula for a `engine_inla()` model.
 #'
@@ -495,7 +495,7 @@ mesh_barrier <- function(mesh, region.poly){
 coords_in_mesh <- function(mesh, coords) {
   assertthat::assert_that(
     inherits(mesh,'inla.mesh'),
-    inherits(coords,'sf') || inherits(region.poly,'Spatial') || inherits(coords, 'matrix') || inherits(coords, 'data.frame')
+    inherits(coords,'sf') || inherits(coords,'Spatial') || inherits(coords, 'matrix') || inherits(coords, 'data.frame')
   )
 
   # Get coordinates depending on type
@@ -662,309 +662,311 @@ post_prediction <- function(mod, nsamples = 100,
     is.numeric(seed) || is.null(seed),
     msg = 'Not all data and parameters needed for prediction are present!'
   )
-  check_package("inlabru")
+  .Deprecated('post_prediction','This function is deprecated and will be removed in future versions. Please use the `predict()` method instead.')
+  invisible(NULL)
+  # check_package("inlabru")
 
-  # Get data from object #
-  model <- mod$get_data('fit_best')
-  mesh <- mod$get_data('mesh')
-  # Get formula
-  form <- mod$get_data('fit_best_equation')
-  # Some checks on the form
-  if(length(grep(pattern = '\\*',deparse(form)))) cli::cli_abort('Interactions are not (yet) supported!')
-  # Check whether any rw1 effects are in the formula. If so return error
-  te <- attr(stats::terms.formula(form),'term.label')
-  if(length(grep(pattern = '\"rw',x = te))>0) cli::cli_abort('This function does not work with INLA rw effects!')
+  # # Get data from object #
+  # model <- mod$get_data('fit_best')
+  # mesh <- mod$get_data('mesh')
+  # # Get formula
+  # form <- mod$get_data('fit_best_equation')
+  # # Some checks on the form
+  # if(length(grep(pattern = '\\*',deparse(form)))) cli::cli_abort('Interactions are not (yet) supported!')
+  # # Check whether any rw1 effects are in the formula. If so return error
+  # te <- attr(stats::terms.formula(form),'term.label')
+  # if(length(grep(pattern = '\"rw',x = te))>0) cli::cli_abort('This function does not work with INLA rw effects!')
 
-  # Covariates for prediction points
-  preds <- mod$model$predictors
-  # Set any other existing intercept variables
-  preds[,grep('Intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
-  preds <- sp::SpatialPixelsDataFrame(preds[,c('x','y')],data=preds)
-  preds_names <- mod$model$predictors_names
-  preds_types <- mod$model$predictors_types
-  ofs <- mod$model$offset
+  # # Covariates for prediction points
+  # preds <- mod$model$predictors
+  # # Set any other existing intercept variables
+  # preds[,grep('Intercept',rownames(model$summary.fixed),value = TRUE)] <- 1
+  # preds <- sp::SpatialPixelsDataFrame(preds[,c('x','y')],data=preds)
+  # preds_names <- mod$model$predictors_names
+  # preds_types <- mod$model$predictors_types
+  # ofs <- mod$model$offset
 
-  # See:
-  # https://groups.google.com/g/r-inla-discussion-group/c/TjRwP6tB0nk/m/FSD39whVBgAJ
-  # https://groups.google.com/g/r-inla-discussion-group/c/Lw2fI-u-EvU/m/rB_-gwWAAgAJ
-  # --- #
-  # Simulate from approximated posterior
-  samples <- INLA::inla.posterior.sample(n = nsamples,
-                                         result = model,
-                                         # seed = seed,
-                                         use.improved.mean = TRUE, # marginal means?
-                                         num.threads = ifelse(getOption("ibis.nthread")>1, getOption("ibis.nthread"),NULL),
-                                         parallel.configs = TRUE,
-                                         verbose = TRUE
-  )
+  # # See:
+  # # https://groups.google.com/g/r-inla-discussion-group/c/TjRwP6tB0nk/m/FSD39whVBgAJ
+  # # https://groups.google.com/g/r-inla-discussion-group/c/Lw2fI-u-EvU/m/rB_-gwWAAgAJ
+  # # --- #
+  # # Simulate from approximated posterior
+  # samples <- INLA::inla.posterior.sample(n = nsamples,
+  #                                        result = model,
+  #                                        # seed = seed,
+  #                                        use.improved.mean = TRUE, # marginal means?
+  #                                        num.threads = ifelse(getOption("ibis.nthread")>1, getOption("ibis.nthread"),NULL),
+  #                                        parallel.configs = TRUE,
+  #                                        verbose = TRUE
+  # )
 
-  # inlabru extract entries function and names standardization functions
-  standardise.names <- function (x) {
-    new_names <- vapply(x, function(x) {
-      gsub("[-() ]", "_", x = x, fixed = FALSE)
-    }, "name")
-    not_ok <- grepl("__", x = new_names)
-    while (any(not_ok)) {
-      new_names[not_ok] <- vapply(new_names[not_ok], function(x) {
-        gsub("__", "_", x = x, fixed = FALSE)
-      }, "name")
-      not_ok <- grepl("__", x = new_names)
-    }
-    new_names
-  }
+  # # inlabru extract entries function and names standardization functions
+  # standardise.names <- function (x) {
+  #   new_names <- vapply(x, function(x) {
+  #     gsub("[-() ]", "_", x = x, fixed = FALSE)
+  #   }, "name")
+  #   not_ok <- grepl("__", x = new_names)
+  #   while (any(not_ok)) {
+  #     new_names[not_ok] <- vapply(new_names[not_ok], function(x) {
+  #       gsub("__", "_", x = x, fixed = FALSE)
+  #     }, "name")
+  #     not_ok <- grepl("__", x = new_names)
+  #   }
+  #   new_names
+  # }
 
-  # Format the prior outputs to get the predictor values
-  ssmpl <- list()
-  for (i in seq_along(samples)) {
-    smpl.latent <- samples[[i]]$latent
-    smpl.hyperpar <- samples[[i]]$hyperpar
-    vals <- list()
+  # # Format the prior outputs to get the predictor values
+  # ssmpl <- list()
+  # for (i in seq_along(samples)) {
+  #   smpl.latent <- samples[[i]]$latent
+  #   smpl.hyperpar <- samples[[i]]$hyperpar
+  #   vals <- list()
 
-    # Extract simulated predictor and fixed effects
-    for (name in unique(c("Predictor", preds_names))) {
-      vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
-    }
-    # Remove any variables with no values (removed during model fit)
-    vals <- vals[which(lapply(vals, length)>0)]
+  #   # Extract simulated predictor and fixed effects
+  #   for (name in unique(c("Predictor", preds_names))) {
+  #     vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
+  #   }
+  #   # Remove any variables with no values (removed during model fit)
+  #   vals <- vals[which(lapply(vals, length)>0)]
 
-    # For fixed effects that were modelled via factors we attach an extra vector holding the samples
-    fac.names <- subset(preds_types, type == 'factor')
-    if(nrow(fac.names)>0){
-      for (name in fac.names$predictors) {
-        vals[[name]] <- smpl.latent[startsWith(rownames(smpl.latent), name), ]
-        names(vals[[name]]) <- lapply(names(vals[[name]]), function(nm) {substring(nm, nchar(name) + 1)})
-      }
-    }
+  #   # For fixed effects that were modelled via factors we attach an extra vector holding the samples
+  #   fac.names <- subset(preds_types, type == 'factor')
+  #   if(nrow(fac.names)>0){
+  #     for (name in fac.names$predictors) {
+  #       vals[[name]] <- smpl.latent[startsWith(rownames(smpl.latent), name), ]
+  #       names(vals[[name]]) <- lapply(names(vals[[name]]), function(nm) {substring(nm, nchar(name) + 1)})
+  #     }
+  #   }
 
-    # Extract simulated latent variables.
-    # If the model is "clinear", however, we might extract the realisations
-    # from the hyperpar field. TODO: check if all the special models now have
-    # their results available as latent random effects, and avoid special code,
-    # since the hyperpar name definition has changed
-    if (length(model$summary.random) > 0) {
-      for (k in seq_along(model$summary.random)) {
-        name <- unlist(names(model$summary.random[k]))
-        vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
-      }
-    }
-    if (length(smpl.hyperpar) > 0) {
-      ## Sanitize the variable names; replace problems with "_".
-      ## Needs to handle whatever INLA uses to describe the hyperparameters.
-      ## Known to include " " and "-" and potentially "(" and ")".
-      names(smpl.hyperpar) <- standardise.names(names(smpl.hyperpar))
-    }
-    ssmpl[[i]] <- c(vals, smpl.hyperpar)
-  }
-  vals <- ssmpl;rm(ssmpl)
-  # Equivalent of inlabru:::inla.posterior.sample.structured
-  myLog('[Summary]','green',paste('Formatted', length(vals), 'posterior samples'))
+  #   # Extract simulated latent variables.
+  #   # If the model is "clinear", however, we might extract the realisations
+  #   # from the hyperpar field. TODO: check if all the special models now have
+  #   # their results available as latent random effects, and avoid special code,
+  #   # since the hyperpar name definition has changed
+  #   if (length(model$summary.random) > 0) {
+  #     for (k in seq_along(model$summary.random)) {
+  #       name <- unlist(names(model$summary.random[k]))
+  #       vals[[name]] <- inlabru:::extract.entries(name, smpl.latent)
+  #     }
+  #   }
+  #   if (length(smpl.hyperpar) > 0) {
+  #     ## Sanitize the variable names; replace problems with "_".
+  #     ## Needs to handle whatever INLA uses to describe the hyperparameters.
+  #     ## Known to include " " and "-" and potentially "(" and ")".
+  #     names(smpl.hyperpar) <- standardise.names(names(smpl.hyperpar))
+  #   }
+  #   ssmpl[[i]] <- c(vals, smpl.hyperpar)
+  # }
+  # vals <- ssmpl;rm(ssmpl)
+  # # Equivalent of inlabru:::inla.posterior.sample.structured
+  # myLog('[Summary]','green',paste('Formatted', length(vals), 'posterior samples'))
 
-  # evaluate_model Function
-  A <- inlabru:::ibm_amatrix(model, data = preds)
-  A <- x$engine$data$stk_pred$stk_proj$A
+  # # evaluate_model Function
+  # A <- inlabru:::ibm_amatrix(model, data = preds)
+  # A <- x$engine$data$stk_pred$stk_proj$A
 
-  effects <- inlabru::evaluate_effect_multi_state(
-    model$effects[included],
-    state = vals,
-    data = preds,
-    A = A
-  )
-
-
-  if (is.null(predictor)) {
-    return(effects)
-  }
-
-  values <- inlabru:::evaluate_predictor(
-    model,
-    state = state,
-    data = data,
-    effects = effects,
-    predictor = predictor,
-    format = format
-  )
+  # effects <- inlabru:::evaluate_effect_multi_state(
+  #   model$effects[included],
+  #   state = vals,
+  #   data = preds,
+  #   A = A
+  # )
 
 
-  # --- #
-  # Summarise Functions
-  expand_to_dataframe <- function (x, data = NULL) {
-    if (is.null(data)) {
-      data <- data.frame(matrix(nrow = NROW(x), ncol = 0))
-    }
-    only_x <- setdiff(names(x), names(data))
-    if (length(only_x) < length(names(x))) {
-      x <- x[!(names(x) %in% names(data))]
-    }
-    if (inherits(x, "SpatialPixels") && !inherits(x, "SpatialPixelsDataFrame")) {
-      result <- sp::SpatialPixelsDataFrame(x, data = data)
-    }
-    else if (inherits(x, "SpatialGrid") && !inherits(x, "SpatialGridDataFrame")) {
-      result <- sp::SpatialGridDataFrame(x, data = data)
-    }
-    else if (inherits(x, "SpatialLines") && !inherits(x, "SpatialLinesDataFrame")) {
-      result <- sp::SpatialLinesDataFrame(x, data = data)
-    }
-    else if (inherits(x, "SpatialPolygons") && !inherits(x, "SpatialPolygonsDataFrame")) {
-      result <- sp::SpatialPolygonsDataFrame(x, data = data)
-    }
-    else if (inherits(x, "SpatialPoints") && !inherits(x, "SpatialPointsDataFrame")) {
-      result <- sp::SpatialPointsDataFrame(x, data = data)
-    }
-    else if (inherits(x, "Spatial")) {
-      result <- sp::cbind.Spatial(x, data)
-    }
-    else {
-      result <- cbind(x, data)
-    }
-    result
-  }
-  post_summarize <- function(data, x = NULL, cbind.only = FALSE) {
-    if (is.list(data)) {
-      data <- do.call(cbind, data)
-    }
-    if (cbind.only) {
-      smy <- data.frame(data)
-      colnames(smy) <- paste0("sample.", 1:ncol(smy))
-    }
-    else {
-      smy <- data.frame(apply(data, MARGIN = 1, mean, na.rm = TRUE),
-                        apply(data, MARGIN = 1, stats::sd, na.rm = TRUE),
-                        t(apply(data,MARGIN = 1, quantile, prob = c(0.025, 0.5, 0.975),na.rm = TRUE)),
-                        apply(data, MARGIN = 1, min, na.rm = TRUE),
-                        apply(data, MARGIN = 1, max, na.rm = TRUE))
-      colnames(smy) <- c("mean", "sd", "q0.025",
-                         "median", "q0.975", "smin", "smax")
-      smy$cv <- smy$sd/smy$mean
-      smy$var <- smy$sd^2
-    }
-    if (!is.null(x)) {
-      smy <- expand_to_dataframe(x, smy)
-    }
-    return(smy)
-  }
+  # if (is.null(predictor)) {
+  #   return(effects)
+  # }
 
-  drop <- FALSE # FIXME: Make parameter after finding out what this does
+  # values <- inlabru:::evaluate_predictor(
+  #   model,
+  #   state = state,
+  #   data = data,
+  #   effects = effects,
+  #   predictor = predictor,
+  #   format = format
+  # )
 
-  if(is.data.frame(vals[[1]])){
-    vals.names <- names(vals[[1]])
-    covar <- intersect(vals.names, names(preds))
-    estim <- setdiff(vals.names, covar)
-    smy <- list()
 
-    for (nm in estim) {
-      smy[[nm]] <- post_summarize(
-        lapply(
-          vals,
-          function(v) v[[nm]]
-        ),
-        x = vals[[1]][, covar, drop = FALSE]
-      )
-    }
-    is.annot <- vapply(names(smy), function(v) all(smy[[v]]$sd == 0), TRUE)
-    annot <- do.call(cbind, lapply(smy[is.annot], function(v) v[, 1]))
-    smy <- smy[!is.annot]
-    if (!is.null(annot)) {
-      smy <- lapply(smy, function(v) cbind(data.frame(annot), v))
-    }
+  # # --- #
+  # # Summarise Functions
+  # expand_to_dataframe <- function (x, data = NULL) {
+  #   if (is.null(data)) {
+  #     data <- data.frame(matrix(nrow = NROW(x), ncol = 0))
+  #   }
+  #   only_x <- setdiff(names(x), names(data))
+  #   if (length(only_x) < length(names(x))) {
+  #     x <- x[!(names(x) %in% names(data))]
+  #   }
+  #   if (inherits(x, "SpatialPixels") && !inherits(x, "SpatialPixelsDataFrame")) {
+  #     result <- sp::SpatialPixelsDataFrame(x, data = data)
+  #   }
+  #   else if (inherits(x, "SpatialGrid") && !inherits(x, "SpatialGridDataFrame")) {
+  #     result <- sp::SpatialGridDataFrame(x, data = data)
+  #   }
+  #   else if (inherits(x, "SpatialLines") && !inherits(x, "SpatialLinesDataFrame")) {
+  #     result <- sp::SpatialLinesDataFrame(x, data = data)
+  #   }
+  #   else if (inherits(x, "SpatialPolygons") && !inherits(x, "SpatialPolygonsDataFrame")) {
+  #     result <- sp::SpatialPolygonsDataFrame(x, data = data)
+  #   }
+  #   else if (inherits(x, "SpatialPoints") && !inherits(x, "SpatialPointsDataFrame")) {
+  #     result <- sp::SpatialPointsDataFrame(x, data = data)
+  #   }
+  #   else if (inherits(x, "Spatial")) {
+  #     result <- sp::cbind.Spatial(x, data)
+  #   }
+  #   else {
+  #     result <- cbind(x, data)
+  #   }
+  #   result
+  # }
+  # post_summarize <- function(data, x = NULL, cbind.only = FALSE) {
+  #   if (is.list(data)) {
+  #     data <- do.call(cbind, data)
+  #   }
+  #   if (cbind.only) {
+  #     smy <- data.frame(data)
+  #     colnames(smy) <- paste0("sample.", 1:ncol(smy))
+  #   }
+  #   else {
+  #     smy <- data.frame(apply(data, MARGIN = 1, mean, na.rm = TRUE),
+  #                       apply(data, MARGIN = 1, stats::sd, na.rm = TRUE),
+  #                       t(apply(data,MARGIN = 1, quantile, prob = c(0.025, 0.5, 0.975),na.rm = TRUE)),
+  #                       apply(data, MARGIN = 1, min, na.rm = TRUE),
+  #                       apply(data, MARGIN = 1, max, na.rm = TRUE))
+  #     colnames(smy) <- c("mean", "sd", "q0.025",
+  #                        "median", "q0.975", "smin", "smax")
+  #     smy$cv <- smy$sd/smy$mean
+  #     smy$var <- smy$sd^2
+  #   }
+  #   if (!is.null(x)) {
+  #     smy <- expand_to_dataframe(x, smy)
+  #   }
+  #   return(smy)
+  # }
 
-    if (!drop) {
-      smy <- lapply(
-        smy,
-        function(tmp) {
-          if (NROW(preds) == NROW(tmp)) {
-            expand_to_dataframe(preds, tmp)
-          } else {
-            tmp
-          }
-        }
-      )
-    }
+  # drop <- FALSE # FIXME: Make parameter after finding out what this does
 
-    if (length(smy) == 1) smy <- smy[[1]]
-  } else if(is.list(vals[[1]])) {
-    vals.names <- names(vals[[1]])
-    if (any(vals.names == "")) {
-      cli::cli_alert_warning("Some generated list elements are unnamed")
-    }
-    smy <- list()
-    for(nm in vals.names) {
-      tmp <- post_summarize(
-        lapply(
-          vals,
-          function(v) v[[nm]]
-        )
-      )
-      if(!drop &&
-         (NROW(preds) == NROW(tmp))) {
-        smy[[nm]] <- expand_to_dataframe(preds, tmp)
-      } else {
-        smy[[nm]] <- tmp
-      }
-    }
-  } else {
-    tmp <- post_summarize(vals)
-    if (!drop &&
-        (NROW(preds) == NROW(tmp))) {
-      smy <- expand_to_dataframe(preds, tmp)
-    } else {
-      smy <- tmp
-    }
-  }
-  # Multiply ?
+  # if(is.data.frame(vals[[1]])){
+  #   vals.names <- names(vals[[1]])
+  #   covar <- intersect(vals.names, names(preds))
+  #   estim <- setdiff(vals.names, covar)
+  #   smy <- list()
 
-  # Output raster
-  if(is.null(coords)) coords <- preds[,c('x','y')]
-  if(nrow(coords)!= nrow(preds)){
-    # Recalculate average predictors for new coordinates
-    preds <- get_ngbvalue(coords = coords,
-                          env = preds,
-                          longlat = terra::is.lonlat(mesh$crs),
-                          field_space = c('x','y'))
-  }
-  temp = terra::rast(coords, type = "xyz")
+  #   for (nm in estim) {
+  #     smy[[nm]] <- post_summarize(
+  #       lapply(
+  #         vals,
+  #         function(v) v[[nm]]
+  #       ),
+  #       x = vals[[1]][, covar, drop = FALSE]
+  #     )
+  #   }
+  #   is.annot <- vapply(names(smy), function(v) all(smy[[v]]$sd == 0), TRUE)
+  #   annot <- do.call(cbind, lapply(smy[is.annot], function(v) v[, 1]))
+  #   smy <- smy[!is.annot]
+  #   if (!is.null(annot)) {
+  #     smy <- lapply(smy, function(v) cbind(data.frame(annot), v))
+  #   }
 
-  # remake the A matrix for prediction
-  Aprediction <- INLA::inla.spde.make.A(mesh = mesh,
-                                        loc = as.matrix( coords ))
+  #   if (!drop) {
+  #     smy <- lapply(
+  #       smy,
+  #       function(tmp) {
+  #         if (NROW(preds) == NROW(tmp)) {
+  #           expand_to_dataframe(preds, tmp)
+  #         } else {
+  #           tmp
+  #         }
+  #       }
+  #     )
+  #   }
 
-  # make empty matrix to fill predictions
-  out <- matrix(0, nrow = dim(Aprediction)[1], ncol = 1)
-  assertthat::assert_that(nrow(out)==nrow(preds))
-  for( n in rownames(model$summary.fixed) ) {
-    # If nrow(out) differ with preds, calculate nearest neighbours
-    out[,1] <- out[,1] + (model$summary.fixed[n, type] %*% preds[,n])
-  }
+  #   if (length(smy) == 1) smy <- smy[[1]]
+  # } else if(is.list(vals[[1]])) {
+  #   vals.names <- names(vals[[1]])
+  #   if (any(vals.names == "")) {
+  #     cli::cli_alert_warning("Some generated list elements are unnamed")
+  #   }
+  #   smy <- list()
+  #   for(nm in vals.names) {
+  #     tmp <- post_summarize(
+  #       lapply(
+  #         vals,
+  #         function(v) v[[nm]]
+  #       )
+  #     )
+  #     if(!drop &&
+  #        (NROW(preds) == NROW(tmp))) {
+  #       smy[[nm]] <- expand_to_dataframe(preds, tmp)
+  #     } else {
+  #       smy[[nm]] <- tmp
+  #     }
+  #   }
+  # } else {
+  #   tmp <- post_summarize(vals)
+  #   if (!drop &&
+  #       (NROW(preds) == NROW(tmp))) {
+  #     smy <- expand_to_dataframe(preds, tmp)
+  #   } else {
+  #     smy <- tmp
+  #   }
+  # }
+  # # Multiply ?
 
-  # create the spatial structure if existing
-  if( length(model$summary.random) >0){
-    assertthat::assert_that(length(model$summary.random) == 1, # FIXME: If multiple spatial latent effects this needs adapting
-                            'spatial.field1' %in% names(model$summary.random),
-                            msg = 'Spatial random effect wrongly specified!')
-    # Check that type is present, otherwise use 'mean'
-    sfield_nodes <- model$summary.random[[1]][,type]
-    field <- (Aprediction %*% as.data.frame(sfield_nodes)[, 1] )
-    out <- out + field
-  }
+  # # Output raster
+  # if(is.null(coords)) coords <- preds[,c('x','y')]
+  # if(nrow(coords)!= nrow(preds)){
+  #   # Recalculate average predictors for new coordinates
+  #   preds <- get_ngbvalue(coords = coords,
+  #                         env = preds,
+  #                         longlat = terra::is.lonlat(mesh$crs),
+  #                         field_space = c('x','y'))
+  # }
+  # temp = terra::rast(coords, type = "xyz")
 
-  # Add offset if specified
-  if(length(grep('offset\\(', deparse1(form)))>0 && !is.Waiver(ofs)){
-    if(nrow(coords)!= nrow(ofs)){
-      # Recalculate average predictors for new coordinates
-      ofs <- get_ngbvalue(coords = coords,
-                          env = ofs,
-                          longlat = terra::is.lonlat(mesh$crs),
-                          field_space = c('x','y'))
-    }
-    out <- out + ofs[,"spatial_offset"]
-  }
+  # # remake the A matrix for prediction
+  # Aprediction <- INLA::inla.spde.make.A(mesh = mesh,
+  #                                       loc = as.matrix( coords ))
 
-  # Fill output raster
-  temp[] <- out[, 1]
-  if(!is.null(backtransf)){
-    temp <- terra::app(temp, backtransf)
-  }
-  # plot(temp, col = cols)
-  return( temp )
+  # # make empty matrix to fill predictions
+  # out <- matrix(0, nrow = dim(Aprediction)[1], ncol = 1)
+  # assertthat::assert_that(nrow(out)==nrow(preds))
+  # for( n in rownames(model$summary.fixed) ) {
+  #   # If nrow(out) differ with preds, calculate nearest neighbours
+  #   out[,1] <- out[,1] + (model$summary.fixed[n, type] %*% preds[,n])
+  # }
+
+  # # create the spatial structure if existing
+  # if( length(model$summary.random) >0){
+  #   assertthat::assert_that(length(model$summary.random) == 1, # FIXME: If multiple spatial latent effects this needs adapting
+  #                           'spatial.field1' %in% names(model$summary.random),
+  #                           msg = 'Spatial random effect wrongly specified!')
+  #   # Check that type is present, otherwise use 'mean'
+  #   sfield_nodes <- model$summary.random[[1]][,type]
+  #   field <- (Aprediction %*% as.data.frame(sfield_nodes)[, 1] )
+  #   out <- out + field
+  # }
+
+  # # Add offset if specified
+  # if(length(grep('offset\\(', deparse1(form)))>0 && !is.Waiver(ofs)){
+  #   if(nrow(coords)!= nrow(ofs)){
+  #     # Recalculate average predictors for new coordinates
+  #     ofs <- get_ngbvalue(coords = coords,
+  #                         env = ofs,
+  #                         longlat = terra::is.lonlat(mesh$crs),
+  #                         field_space = c('x','y'))
+  #   }
+  #   out <- out + ofs[,"spatial_offset"]
+  # }
+
+  # # Fill output raster
+  # temp[] <- out[, 1]
+  # if(!is.null(backtransf)){
+  #   temp <- terra::app(temp, backtransf)
+  # }
+  # # plot(temp, col = cols)
+  # return( temp )
 }
 
 #' Make Integration stack

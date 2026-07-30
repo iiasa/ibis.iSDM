@@ -911,10 +911,10 @@ methods::setMethod(
     } else if(inherits(model$background, "SpatRaster")){
       # Check that they align
       assertthat::assert_that(terra::crs(model$background) == sf::st_crs(env), msg = "CRS of model background and scenario predictors do not match!")
-      # Now crop
+      # Now crop via bracket indexing (stars does not export st_crop)
       env <- suppressMessages(
         suppressWarnings(
-          stars::st_crop(env, stars::st_as_sfc(stars::st_bbox(model$background)))
+          env[sf::st_bbox(model$background), crop = TRUE]
         )
       )
     }

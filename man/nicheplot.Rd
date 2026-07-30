@@ -79,8 +79,12 @@ or supplied separately).
 # Make quick prediction
 background <- terra::rast(system.file('extdata/europegrid_50km.tif',
 package='ibis.iSDM',mustWork = TRUE))
-virtual_points <- sf::st_read(system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',quiet = TRUE)
-ll <- list.files(system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),full.names = TRUE)
+virtual_points <- sf::st_read(
+  system.file('extdata/input_data.gpkg', package='ibis.iSDM'), 'points',
+  quiet = TRUE)
+ll <- list.files(
+  system.file('extdata/predictors/',package = 'ibis.iSDM',mustWork = TRUE),
+  full.names = TRUE)
 
 # Load them as rasters
 predictors <- terra::rast(ll);names(predictors) <- tools::file_path_sans_ext(basename(ll))

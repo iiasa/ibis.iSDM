@@ -52,7 +52,10 @@
 #'
 #' @examples
 #' # Dummy raster
-#' r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rnorm(3600,mean = .01,sd = .1))
+#' r_ori <- terra::rast(
+#'   nrows = 10, ncols = 10, res = 0.05,
+#'   xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
+#'   vals = rnorm(3600, mean = .01, sd = .1))
 #'
 #' # Normalize
 #' r_norm <- predictor_transform(r_ori, option = 'norm')
@@ -293,7 +296,7 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
     }
     # Convert list back to stars
     out <- do.call(
-      stars:::c.stars,
+      c,
       lapply(out, function(x) stars::st_as_stars(x))
     )
     # Reset names of attributes
@@ -366,7 +369,10 @@ predictor_transform <- function(env, option, windsor_props = c(.05,.95), pca.var
 #'
 #' @examples
 #' # Dummy raster
-#' r_ori <- terra::rast(nrows = 10, ncols = 10, res = 0.05, xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5, vals = rpois(3600, 10))
+#' r_ori <- terra::rast(
+#'   nrows = 10, ncols = 10, res = 0.05,
+#'   xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
+#'   vals = rpois(3600, 10))
 #'
 #' # Create a hinge transformation with 4 knots of one or multiple SpatRaster.
 #' new <- predictor_derivate(r_ori, option = "hinge", knots = 4)

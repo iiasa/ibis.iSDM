@@ -298,7 +298,7 @@ add_pseudoabsence <- function(df, field_occurrence = "observed", template = NULL
   } else if(method == "buffer"){
     assertthat::assert_that(is.numeric(buffer_distance),msg = "Buffer distance parameter not numeric!")
     # Get units of projection and print for
-    un <- sf:::crs_parameters(sf::st_crs(df))$ud_unit
+    un <- sf::st_crs(df, parameters = TRUE)$ud_unit
     if(is.null(un)) un <- " map units" else un <- units::deparse_unit(un)
     if(getOption('ibis.setupmessages', default = TRUE)) myLog('[Export]','yellow', paste0('Calculating pseudo-absence outside a ', buffer_distance , un,' buffer'))
     # Calculate buffer

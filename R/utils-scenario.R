@@ -280,6 +280,22 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
     return(out)
   }
 
+  # Fix degenerate time dimensions where from/to are NULL.
+  # stars::st_as_stars.SpatRaster creates values-only dimensions (from=NULL,
+  # to=NULL, values=<vector>) when all time values are identical.  This
+  # prevents bracket indexing used below, so restore from/to.
+  d <- stars::st_dimensions(obj)
+  time_pos <- which(names(dim(obj)) == time_band)
+  if (length(time_pos) == 1) {
+    td <- d[[time_pos]]
+    if (is.null(td$from) && !is.null(td$values) && length(td$values) > 0) {
+      td$from <- 1L
+      td$to <- length(td$values)
+      d[[time_pos]] <- td
+      stars::st_dimensions(obj) <- d
+    }
+  }
+
   assertthat::assert_that(
     length(which) <= dim(obj)[time_band]
   )
@@ -292,9 +308,15 @@ stars_to_raster <- function(obj, which = NULL, template = NULL){
   # Output type raster
   out <- list()
   for(tt in which){
-    # Slice to a specific time frame for each
-    o <- obj |> stars:::slice.stars({{time_band}}, tt) |>
-      terra::rast() # Or alternatively rast
+    # Slice to a specific time frame for each (dim-agnostic)
+    nd <- length(dim(obj))
+    time_pos <- which(names(dim(obj)) == time_band)
+    # stars [.stars(x, i, j, ...) needs nd+1 positional args
+    # with the time dimension at bracket position = time_pos + 1
+    parts <- character(nd + 1)
+    for (i in seq_len(nd + 1)) parts[i] <- if (i == time_pos + 1) as.character(tt) else ""
+    o <- eval(parse(text = paste0("obj[", paste(parts, collapse = ", "), ", drop = TRUE]"))) |>
+      terra::rast()
     names(o) <- names(obj)
 
     # Reset times to the correct ones
@@ -437,7 +459,7 @@ raster_to_stars <- function(obj){
 
     # Some hacky stuff since stars is not behaving as intended
     dims <- stars::st_dimensions(o)
-    dims$time <- stars:::create_dimension(values = times[i])
+    dims$time <- structure(list(values = times[i]), class = "dimension")
     o <- stars::st_redimension(o,new_dims = dims)
 
     new_env[[ paste0(names(oo),times[i]) ]] <- o
@@ -534,7 +556,7 @@ summarise_projection <- function(scenario, fun = "mean", relative = TRUE){
   fun <- match.arg(fun, c("mean", "sum"),several.ok = FALSE)
 
   # Convert to scenarios to data.frame
-  df <- stars:::as.data.frame.stars(stars::st_as_stars(scenario)) |> (\(.) subset(., stats::complete.cases(.)))()
+  df <- as.data.frame(stars::st_as_stars(scenario)) |> (\(.) subset(., stats::complete.cases(.)))()
   names(df) <- c("x", "y", "band", "suitability")
   # Add grid cell grouping
   df <- df |> dplyr::group_by(x,y) |> dplyr::mutate(id = dplyr::cur_group_id()) |>
@@ -944,7 +966,7 @@ hack_project_stars <- function(obj, template, use_gdalutils = TRUE){
   out <-  stars::st_set_dimensions(out, xy = c("x","y"))
   assertthat::assert_that(
     length(out) == length(obj),
-    stars:::is_regular_grid(out)
+    all(vapply(stars::st_dimensions(out), function(d) !is.null(d$delta), logical(1)))
   )
   return(out)
 }

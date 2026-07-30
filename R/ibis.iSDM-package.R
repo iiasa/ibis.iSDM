@@ -26,7 +26,7 @@
 ## usethis namespace: end
 NULL
 
-globalVariables(c("background", "band", "bi_class", "bias",
+utils::globalVariables(c("background", "band", "bi_class", "bias",
                   "change", "cid", "cell", "cluster",
                   "data",
                   "form", "form2",
@@ -36,6 +36,10 @@ globalVariables(c("background", "band", "bi_class", "bias",
                   # Cores for parallel processing
                   "cores",
                   "%dofuture%",
+                  # PC variables
+                  "PC1", "PC2",
+                  # Beta coefficients
+                  "Beta",
                   # Global prediction function
                   "predict_boom",
                   "id", "included", "i",

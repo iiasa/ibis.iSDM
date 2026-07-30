@@ -158,7 +158,7 @@ engine_inla <- function(x,
     region.poly$weight <-1
 
     # Security check for projection and if not set, use the one from background
-    if(is.null(mesh$crs))  mesh$crs <- sp::CRS( sp::proj4string(region.poly) )
+    if(is.null(mesh$crs))  mesh$crs <- sf::st_crs(x$background)
 
     # Calculate area
     ar <- suppressWarnings(
@@ -218,7 +218,7 @@ engine_inla <- function(x,
       bdry <- INLA::inla.sp2segment(
         sp = region.poly,
         join = TRUE,
-        crs = INLA::inla.CRS(projargs = sp::proj4string(region.poly))
+        crs = INLA::inla.CRS(projargs = sf::st_crs(region.poly)$proj4string)
       )
     )
     bdry$loc <- INLA::inla.mesh.map(bdry$loc)
@@ -306,17 +306,14 @@ engine_inla <- function(x,
         alpha = 2,
         dims = c(300, 300)
       )
-      # Convert to raster stack
-      out <- c(
-        sp::SpatialPixelsDataFrame( sp::coordinates(out), data = as.data.frame(out),
-                                    proj4string = self$get_data('mesh')$crs )
-      )
+      # Convert to raster stack (terra::rast accepts sp objects directly)
+      out <- terra::rast(out)
 
       terra::plot(out[[c('sd','sd.dev','edge.len')]],
                   col = c("#00204D","#00336F","#39486B","#575C6D","#707173","#8A8779","#A69D75","#C4B56C","#E4CF5B","#FFEA46")
       )
     } else {
-      INLA:::plot.inla.mesh( self$get_data('mesh') )
+      plot( self$get_data('mesh') )
     }
   },overwrite = TRUE)
 

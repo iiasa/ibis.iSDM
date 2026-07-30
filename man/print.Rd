@@ -16,7 +16,6 @@
 \alias{print.Log}
 \alias{print.Id}
 \alias{print,Id-method}
-\alias{print,tbl_df-method}
 \title{Print}
 \usage{
 \method{print}{distribution}(x, ...)
@@ -46,8 +45,6 @@
 \method{print}{Id}(x, ...)
 
 \S4method{print}{Id}(x, ...)
-
-\S4method{print}{tbl_df}(x, ...)
 }
 \arguments{
 \item{x}{Any object created through the package.}

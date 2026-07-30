@@ -61,8 +61,14 @@ engine_scampr <- function(x,
                        maxit = 500,
                        ...) {
 
-  # Check whether package is available
-  check_package('scampr')
+  # Check whether package is available (scampr is GitHub-only)
+  if (!requireNamespace('scampr', quietly = TRUE)) {
+    cli::cli_abort(
+      'Package "scampr" is needed for this engine. Install it from GitHub with:\n',
+      '  remotes::install_github("ElliotDovers/scampr")',
+      call. = FALSE
+    )
+  }
   if(!("scampr" %in% loadedNamespaces()) || ('scampr' %notin% utils::sessionInfo()$otherPkgs) ) {
     try({requireNamespace('scampr');attachNamespace("scampr")},silent = TRUE)
   }

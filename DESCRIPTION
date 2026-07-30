@@ -27,7 +27,8 @@ Description: Model the distribution of species and ecosystems in a suitability
 Language: en-GB
 License: CC BY 4.0
 Encoding: UTF-8
-Additional_repositories: https://inla.r-inla-download.org/R/testing
+Additional_repositories: https://inla.r-inla-download.org/R/testing,
+    https://mc-stan.org/r-packages/
 Imports: 
     R6 (>= 2.5.0),
     Rcpp,
@@ -96,8 +97,6 @@ Suggests:
     testthat (>= 3.0.0),
     tidyr,
     xgboost
-Remotes:
-    ElliotDovers/scampr
 URL: https://iiasa.github.io/ibis.iSDM/, https://github.com/iiasa/ibis.iSDM
 BugReports: https://github.com/iiasa/ibis.iSDM/issues
 Config/testthat/edition: 3

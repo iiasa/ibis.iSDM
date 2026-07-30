@@ -1571,7 +1571,7 @@ methods::setMethod(
           # Get the coefficients
           outc <- dplyr::bind_rows(lapply(out_esm, function(z) z$get_coefficients(exclude_intercept = FALSE)))
           # Aggregate by feature
-          outc <- dplyr::group_by(outc, Feature) %>%
+          outc <- dplyr::group_by(outc, Feature) |>
             # Average all values
             dplyr::summarise(Beta = mean(Beta, na.rm = TRUE), .groups = "drop") |>
             # Named vector
@@ -1770,7 +1770,7 @@ methods::setMethod(
           # Get the coefficients
           outc <- dplyr::bind_rows(lapply(out_esm, function(z) z$get_coefficients(exclude_intercept = FALSE)))
           # Aggregate by feature
-          outc <- dplyr::group_by(outc, Feature) %>%
+          outc <- dplyr::group_by(outc, Feature) |>
             # Average all values
             dplyr::summarise(Beta = mean(Beta, na.rm = TRUE), .groups = "drop") |>
             # Named vector
@@ -1970,7 +1970,7 @@ methods::setMethod(
           # Get the coefficients
           outc <- dplyr::bind_rows(lapply(out_esm, function(z) z$get_coefficients(exclude_intercept = FALSE)))
           # Aggregate by feature
-          outc <- dplyr::group_by(outc, Feature) %>%
+          outc <- dplyr::group_by(outc, Feature) |>
             # Average all values
             dplyr::summarise(Beta = mean(Beta, na.rm = TRUE), .groups = "drop") |>
             # Named vector

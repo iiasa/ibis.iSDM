@@ -36,3 +36,5 @@ CONTRIBUTING.md
 ^revdep$
 ^codecov\.yml$
 .covrignore
+^CRAN-SUBMISSION$
+.Rplots.pdf

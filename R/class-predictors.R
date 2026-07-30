@@ -486,7 +486,7 @@ PredictorDataset <- R6::R6Class(
       } else {
         if(inherits(self$data, "stars")){
           # Assume stars scenario files
-          stars:::plot.stars(self$data, col = ibis_colours[['viridis_cividis']])
+          plot(self$data, col = ibis_colours[['viridis_cividis']])
         } else {
           if(ncol(self$data)>5) cli::cli_alert_info("Printing only the first 5 columns")
           if(ncol(self$data)>5) {

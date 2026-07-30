@@ -549,7 +549,7 @@ methods::setMethod(
       }
 
       # Convert to stars
-      out <- out |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
+      out <- out |> stars::st_as_stars(dims = c(1,2,3), coords = 1:2)
       # Rename dimension names
       out <- out |> stars::st_set_dimensions(names = names(lmat_dim))
       # Rename
@@ -615,7 +615,7 @@ methods::setMethod(
         }
 
         # Convert to stars
-        out_uncertainty <- out_uncertainty |> stars:::st_as_stars.data.frame(dims = c(1,2,3), coords = 1:2)
+        out_uncertainty <- out_uncertainty |> stars::st_as_stars(dims = c(1,2,3), coords = 1:2)
         # Rename dimension names
         out_uncertainty <- out_uncertainty |> stars::st_set_dimensions(names = names(lmat_dim))
         # Rename
@@ -624,7 +624,7 @@ methods::setMethod(
         attr(out_uncertainty, "method") <- uncertainty
         # --- #
         # Combine both ensemble and uncertainty
-        ex <- stars:::c.stars(out, out_uncertainty)
+        ex <- c(out, out_uncertainty)
       } else {
         # Only the output
         ex <- out

@@ -37,6 +37,7 @@ is_comparable_raster <- function(x, y) {
 #'
 #' @keywords internal
 terra_to_raster <- function(input){
+  .Deprecated("terra::rast", msg = "terra_to_raster() is deprecated and will be removed in a future release. It is retained only for steps package compatibility.")
   assertthat::assert_that(
     is.Raster(input)
   )
